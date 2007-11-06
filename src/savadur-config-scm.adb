@@ -1,5 +1,6 @@
 
 with Ada.Strings.Unbounded;
+with Ada.Directories;
 
 with GNAT.Case_Util;
 
@@ -11,23 +12,18 @@ with Unicode.CES;
 
 with Savadur.Scenario;
 with Savadur.Action;
+with Ada.Text_IO;
 
-package body Savadur.Config is
+package body Savadur.Config.SCM is
 
    use Ada;
    use Ada.Strings.Unbounded;
 
    Config_Error : exception;
 
-   type Node_Value is (SCM, SCM_Action, Action, Scenario, Cmd, Project);
+   type Node_Value is (SCM, Name, Action, Cmd);
 
-   subtype Action_Node_Value is Node_Value range SCM_Action .. Action;
-
-   type Attribute is (Id, Mode);
-
-   subtype SCM_Attribute is Attribute range Id .. Id;
-   subtype Action_Attribute is Attribute range Id .. Id;
-   subtype Scenario_Attribute is Attribute;
+   type Attribute is (Id);
 
    function Get_Node_Value (S : String) return Node_Value;
    --  Returns the node value matching the given string or raise Config_Error
@@ -43,9 +39,9 @@ package body Savadur.Config is
       Action          : Savadur.Action.Action;
       Action_Id       : Unbounded_String;
       Scenario        : Savadur.Scenario.Scenario;
-      Scenario_Id     : Unbounded_String;
+      SCM_Id          : Savadur.SCM.U_Id;
       Inside_Scenario : Boolean := False;
-      Current_Project : Project_Config;
+      SCM             : Savadur.SCM.SCM;
    end record;
 
    procedure Start_Element
@@ -92,42 +88,18 @@ package body Savadur.Config is
    begin
 
       case NV is
-         when Scenario =>
-            Handler.Inside_Scenario := False;
-            Handler.Current_Project.Scenari.Insert
-              (Key      => Savadur.Scenario.Id
-                 (To_String (Handler.Scenario_Id)),
-               New_Item => Handler.Scenario);
-            --  Exit scenario
          when Action =>
             if Handler.Action_Id = "" then
                raise Config_Error with " Null action id !";
             end if;
 
-            if not Handler.Inside_Scenario then
-               --  Append this action to actions map
-               Handler.Current_Project.Actions.Insert
-                 (Key      => Savadur.Action.Id
-                    (To_String (Handler.Action_Id)),
-                  New_Item => Handler.Action);
-            else
-               --  Append this action to scenario actions vector
-               Handler.Scenario.Actions.Append
-                 (Savadur.Action.Ref_Action'
-                    (Action_Type => Savadur.Action.Default,
-                     Id          => Savadur.Action.U_Id (Handler.Action_Id)));
-
-            end if;
-         when SCM_Action =>
-            --  Append this action to scenario actions vector
-            Handler.Scenario.Actions.Append
-              (Savadur.Action.Ref_Action'
-                 (Action_Type => Savadur.Action.SCM,
-                  Id          => Savadur.Action.U_Id (Handler.Action_Id)));
-
+            Handler.SCM.Actions.Insert
+              (Key      => Savadur.Action.Id
+                 (To_String (Handler.Action_Id)),
+               New_Item => Handler.Action);
          when Cmd =>
             Handler.Action.Cmd := Savadur.Action.Command (Handler.Value);
-         when SCM | Project =>
+         when SCM | Name =>
             null;
       end case;
 
@@ -164,8 +136,8 @@ package body Savadur.Config is
    begin
       Case_Util.To_Upper (Upper_S);
 
-      for SA in Scenario_Attribute'Range loop
-         if Scenario_Attribute'Image (SA) = Upper_S then
+      for SA in Attribute'Range loop
+         if Attribute'Image (SA) = Upper_S then
             return SA;
          end if;
       end loop;
@@ -177,24 +149,48 @@ package body Savadur.Config is
    -- Parse --
    -----------
 
-   function Parse (Filename : String) return Project_Config is
+   function Parse (SCM_Dir : in String) return Savadur.SCM.Maps.Map is
       Reader : Tree_Reader;
       Source : Input_Sources.File.File_Input;
+      SCM : Savadur.SCM.Maps.Map := Savadur.SCM.Maps.Empty_Map;
+
+      use Ada.Directories;
+      S : Search_Type;
+      D : Directory_Entry_Type;
    begin
-      Reader.Current_Project :=
-        Project_Config'(SCM     => Savadur.SCM.Null_Uid,
-                        Actions => Savadur.Action.Maps.Empty_Map,
-                        Scenari => Savadur.Scenario.Maps.Empty_Map);
+      Ada.Text_IO.Put_Line (SCM_Dir);
+      Start_Search
+        (Search    => S,
+         Directory => SCM_Dir,
+         Pattern   => "*.xml",
+         Filter    => Filter_Type'(Ordinary_File => True,
+                                   Directory     => False,
+                                   Special_File  => False));
 
-      Input_Sources.File.Open
-        (Filename => Filename,
-         Input    => Source);
+      Walk_Directories : while More_Entries (S) loop
+         Get_Next_Entry (S, D);
+         Load_Config : declare
+            Filename : constant String := Full_Name (D);
+         begin
+            Ada.Text_IO.Put_Line (Filename);
+            Reader.SCM :=
+              Savadur.SCM.SCM'(Actions => Savadur.Action.Maps.Empty_Map);
 
-      Parse (Reader, Source);
+            Input_Sources.File.Open
+              (Filename => Filename,
+               Input    => Source);
+            Parse (Reader, Source);
+            Input_Sources.File.Close (Source);
 
-      Input_Sources.File.Close (Source);
+            Savadur.SCM.Maps.Insert
+              (Container => SCM,
+               Key       => Savadur.SCM.Id
+                 (To_String (Unbounded_String (Reader.SCM_Id))),
+               New_Item  => Reader.SCM);
 
-      return Reader.Current_Project;
+         end Load_Config;
+      end loop Walk_Directories;
+      return SCM;
    end Parse;
 
    -------------------
@@ -217,75 +213,28 @@ package body Savadur.Config is
 
    begin
       case NV is
-         when Scenario =>
-            Handler.Inside_Scenario := True;
+         when Name =>
             for J in 0 .. Get_Length (Atts) - 1 loop
                Attr := Get_Attribute (Get_Qname (Atts, J));
-               if Attr not in Scenario_Attribute then
-                  raise Config_Error with " Unknow scenario attribute "
-                    & Get_Qname (Atts, J);
-               end if;
-               case Scenario_Attribute (Attr) is
+               case Attr is
                   when Id =>
-                     Handler.Scenario_Id :=
-                       To_Unbounded_String (Get_Value (Atts, J));
-                  when Mode =>
-                     Handler.Scenario.Mode :=
-                       Savadur.Scenario.Mode
-                         (To_Unbounded_String (Get_Value (Atts, J)));
-               end case;
-            end loop;
-         when SCM =>
-            for J in 0 .. Get_Length (Atts) - 1 loop
-               Attr := Get_Attribute (Get_Qname (Atts, J));
-               if Attr not in SCM_Attribute then
-                  raise Config_Error with " Unknow SCM attribute "
-                    & Get_Qname (Atts, J);
-               end if;
-               case SCM_Attribute (Attr) is
-                  when Id =>
-                     Handler.Current_Project.SCM :=
+                     Handler.SCM_Id :=
                        Savadur.SCM.U_Id
                          (To_Unbounded_String (Get_Value (Atts, J)));
-               end case;
-            end loop;
-         when SCM_Action =>
-
-            --  SCM Action should be only inside scenari
-
-            if not Handler.Inside_Scenario then
-               raise Config_Error with "SCM Action outside scenario";
-            end if;
-
-            for J in 0 .. Get_Length (Atts) - 1 loop
-               Attr := Get_Attribute (Get_Qname (Atts, J));
-               if Attr not in Action_Attribute then
-                  raise Config_Error with " Unknow action attribute "
-                    & Get_Qname (Atts, J);
-               end if;
-               case Action_Attribute (Attr) is
-                  when Id =>
-                     Handler.Action_Id :=
-                       To_Unbounded_String (Get_Value (Atts, J));
                end case;
             end loop;
          when Action =>
             for J in 0 .. Get_Length (Atts) - 1 loop
                Attr := Get_Attribute (Get_Qname (Atts, J));
-               if Attr not in Action_Attribute then
-                  raise Config_Error with " Unknow action attribute "
-                    & Get_Qname (Atts, J);
-               end if;
-               case Action_Attribute (Attr) is
+               case Attribute (Attr) is
                   when Id =>
                      Handler.Action_Id :=
                        To_Unbounded_String (Get_Value (Atts, J));
                end case;
             end loop;
-         when Cmd | Project =>
+         when Cmd | Scm =>
             null;
       end case;
-
    end Start_Element;
 
-end Savadur.Config;
+end Savadur.Config.SCM;
