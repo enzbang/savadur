@@ -1,6 +1,5 @@
 
 with Ada.Strings.Unbounded;
-with Ada.Text_IO;
 
 with GNAT.Case_Util;
 
@@ -91,8 +90,6 @@ package body Savadur.Config is
       pragma Unreferenced (Qname);
       NV : Node_Value := Get_Node_Value (Local_Name);
    begin
-
-      Text_IO.Put_Line (Local_Name);
 
       case NV is
          when Scenario =>
