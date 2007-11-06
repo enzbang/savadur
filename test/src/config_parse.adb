@@ -1,9 +1,15 @@
 with Ada.Strings.Unbounded;
 
 with Savadur.Config.Project;
+with Savadur.Config.SCM;
 with Savadur.Action;
 with Savadur.Scenario;
+with Savadur.SCM;
+
 package body Config_Parse is
+
+   procedure Check_SCM_Config
+     (T : in out AUnit.Test_Cases.Test_Case'Class);
 
    procedure Check_Project_Config
      (T : in out AUnit.Test_Cases.Test_Case'Class);
@@ -40,6 +46,27 @@ package body Config_Parse is
          "Wrong scenari list");
    end Check_Project_Config;
 
+   ----------------------
+   -- Check_SCM_Config --
+   ----------------------
+
+   procedure Check_SCM_Config
+     (T : in out AUnit.Test_Cases.Test_Case'Class)
+   is
+     use Ada.Strings.Unbounded;
+
+      SCM_Map : Savadur.SCM.Maps.Map :=
+                  Savadur.Config.SCM.Parse ("../config/scm");
+   begin
+      Assertions.Assert
+        (Savadur.SCM.Image (SCM_Map) = "* git" & ASCII.Lf
+         & "[" & ASCII.Lf
+         & "init => git-clone $URL $SOURCES_DIR"  & ASCII.Lf
+         & "pull => git-pull"  & ASCII.Lf
+         & "version => git-show-ref -s"  & ASCII.Lf
+         & "]",
+         "Wrong SCM parse");
+   end Check_SCM_Config;
 
    ----------
    -- Name --
@@ -59,6 +86,9 @@ package body Config_Parse is
    begin
       Registration.Register_Routine
         (T, Check_Project_Config'Access, "check project configuration");
+      Registration.Register_Routine
+        (T, Check_SCM_Config'Access, "check scm configuration");
+
    end Register_Tests;
 
 end Config_Parse;
