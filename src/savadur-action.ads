@@ -14,19 +14,22 @@ package Savadur.Action is
    type Command is new Unbounded_String;
    type Kind is (SCM, Default);
 
-   type Action (Action_Type : Kind := Default) is record
+   type Action is record
       Cmd : Command;
    end record;
+
+   function Image (Action : in Savadur.Action.Action) return String;
+   --  Returns action image
 
    type Ref_Action (Action_Type : Kind := Default) is record
       Id : U_Id;
    end record;
 
+   function Image (Action : in Savadur.Action.Ref_Action) return String;
+   --  Returns action image
+
    function Hash (Key : Id) return Containers.Hash_Type;
    -- Renames Strings.Hash
-
-   function Image (Action : in Savadur.Action.Action) return String;
-   --  Returns action image
 
    ----------
    -- Maps --
