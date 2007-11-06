@@ -31,4 +31,7 @@ package Savadur.SCM is
       Hash            => Hash,
       Equivalent_Keys => "=");
 
+   function Image (SCM_Map : Maps.Map) return String;
+   --  Return the SCM_Map image
+
 end Savadur.SCM;
