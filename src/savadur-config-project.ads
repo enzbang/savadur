@@ -1,13 +1,9 @@
 
-with Ada.Strings.Unbounded;
-
 with Savadur.Action;
 with Savadur.Scenario;
 with Savadur.SCM;
 
 package Savadur.Config.Project is
-
-   use Ada.Strings.Unbounded;
 
    type Project_Config is record
       SCM     : Savadur.SCM.U_Id;

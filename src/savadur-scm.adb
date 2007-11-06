@@ -1,10 +1,6 @@
 with Ada.Strings.Hash;
-with Ada.Text_IO;
-with Ada.Strings.Unbounded;
 
 package body Savadur.SCM is
-
-   use Ada.Strings.Unbounded;
 
    ----------
    -- Hash --
@@ -22,7 +18,6 @@ package body Savadur.SCM is
    function Image (SCM_Map : Maps.Map) return String is
       Position : Maps.Cursor := Maps.First (SCM_Map);
       Result  : Unbounded_String;
-      use Ada.Text_IO;
    begin
       while Maps.Has_Element (Position) loop
          Append (Result, "* " & String (Maps.Key (Position)) & ASCII.Lf);

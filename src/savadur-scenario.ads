@@ -21,7 +21,7 @@ package Savadur.Scenario is
    --  Return Scenario image
 
    function Hash (Key : Id) return Containers.Hash_Type;
-   -- Renames Strings.Hash
+   --  Renames Strings.Hash
 
    ----------
    -- Maps --

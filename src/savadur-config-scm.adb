@@ -1,6 +1,7 @@
 
-with Ada.Strings.Unbounded;
+with Ada.Text_IO;
 with Ada.Directories;
+with Ada.Strings.Unbounded;
 
 with GNAT.Case_Util;
 
@@ -10,9 +11,8 @@ with Sax.Attributes;
 with Input_Sources.File;
 with Unicode.CES;
 
-with Savadur.Scenario;
 with Savadur.Action;
-with Ada.Text_IO;
+with Savadur.Scenario;
 
 package body Savadur.Config.SCM is
 
@@ -84,7 +84,7 @@ package body Savadur.Config.SCM is
    is
       pragma Unreferenced (Namespace_URI);
       pragma Unreferenced (Qname);
-      NV : Node_Value := Get_Node_Value (Local_Name);
+      NV : constant Node_Value := Get_Node_Value (Local_Name);
    begin
 
       case NV is
@@ -107,25 +107,6 @@ package body Savadur.Config.SCM is
 
    end End_Element;
 
-   --------------------
-   -- Get_Node_Value --
-   --------------------
-
-   function Get_Node_Value (S : in String) return Node_Value is
-      Upper_S : String := S;
-      use GNAT;
-   begin
-      Case_Util.To_Upper (Upper_S);
-
-      for NV in Node_Value'Range loop
-         if Node_Value'Image (NV) = Upper_S then
-            return NV;
-         end if;
-      end loop;
-
-      raise Config_Error with "Unknown node " & S;
-   end Get_Node_Value;
-
    -------------------
    -- Get_Attribute --
    -------------------
@@ -144,6 +125,25 @@ package body Savadur.Config.SCM is
 
       raise Config_Error with "Unknown node " & S;
    end Get_Attribute;
+
+   --------------------
+   -- Get_Node_Value --
+   --------------------
+
+   function Get_Node_Value (S : in String) return Node_Value is
+      Upper_S : String := S;
+      use GNAT;
+   begin
+      Case_Util.To_Upper (Upper_S);
+
+      for NV in Node_Value'Range loop
+         if Node_Value'Image (NV) = Upper_S then
+            return NV;
+         end if;
+      end loop;
+
+      raise Config_Error with "Unknown node " & S;
+   end Get_Node_Value;
 
    -----------
    -- Parse --
@@ -209,7 +209,7 @@ package body Savadur.Config.SCM is
 
       use Sax.Attributes;
       Attr : Attribute;
-      NV   : Node_Value := Get_Node_Value (Local_Name);
+      NV   : constant Node_Value := Get_Node_Value (Local_Name);
 
    begin
       case NV is
@@ -226,7 +226,7 @@ package body Savadur.Config.SCM is
          when Action =>
             for J in 0 .. Get_Length (Atts) - 1 loop
                Attr := Get_Attribute (Get_Qname (Atts, J));
-               case Attribute (Attr) is
+               case Attr is
                   when Id =>
                      Handler.Action_Id :=
                        To_Unbounded_String (Get_Value (Atts, J));

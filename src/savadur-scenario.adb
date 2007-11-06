@@ -49,5 +49,4 @@ package body Savadur.Scenario is
       return To_String (Result);
    end Image;
 
-
 end Savadur.Scenario;

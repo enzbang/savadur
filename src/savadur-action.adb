@@ -31,7 +31,6 @@ package body Savadur.Action is
         & To_String (Action.Id);
    end Image;
 
-
    -----------
    -- Image --
    -----------

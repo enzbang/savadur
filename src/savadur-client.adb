@@ -36,5 +36,4 @@ begin
    New_Line;
    Put_Line (Savadur.SCM.Image (SCM_Map));
 
-
 end Savadur.Client;

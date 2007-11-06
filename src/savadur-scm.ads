@@ -19,7 +19,7 @@ package Savadur.SCM is
    end record;
 
    function Hash (Key : Id) return Containers.Hash_Type;
-   -- Renames Strings.Hash
+   --  Renames Strings.Hash
 
    ----------
    -- Maps --
