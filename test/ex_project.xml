@@ -1,0 +1,13 @@
+<project>
+  <scm id="git" />
+
+  <action id="make">
+    <cmd>make build</cmd>
+  </action>
+
+  <scenario id="default" mode="on-change">
+    <scm_action id="update" />
+    <action id="make" />
+  </scenario>
+
+</project>
