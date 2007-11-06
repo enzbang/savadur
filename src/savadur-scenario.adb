@@ -18,8 +18,8 @@ package body Savadur.Scenario is
 
    function Image (Scenario : Savadur.Scenario.Scenario) return String is
    begin
-      return " Mode : "
-        & To_String (Unbounded_String (Scenario.Mode))
+      return "Mode : "
+        & To_String (Unbounded_String (Scenario.Mode)) & ASCII.Lf
         & Savadur.Action.Image (Scenario.Actions);
    end Image;
 
@@ -39,9 +39,9 @@ package body Savadur.Scenario is
 
       procedure Image (Position : in Maps.Cursor) is
       begin
-         Append (Result,
-                 String (Maps.Key (Position)) & " => "
-                      & Image (Maps.Element (Position)));
+         Append (Result, "* "
+                 & String (Maps.Key (Position)) & ASCII.LF
+                 & Image (Maps.Element (Position)));
       end Image;
    begin
       Maps.Iterate (Container => Scenari,
