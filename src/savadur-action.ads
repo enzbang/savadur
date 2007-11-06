@@ -10,16 +10,15 @@ package Savadur.Action is
 
    type Id is new String;
    type U_Id is new Unbounded_String;
-   type Command is new Unbounded_String;
-   type Action_Type is (SCM, Default);
 
-   type Action
-     (Action_Type : Savadur.Action.Action_Type := Default) is record
+   type Command is new Unbounded_String;
+   type Kind is (SCM, Default);
+
+   type Action (Action_Type : Kind := Default) is record
       Cmd : Command;
    end record;
 
-   type Ref_Action
-      (Action_Type : Savadur.Action.Action_Type := Default) is record
+   type Ref_Action (Action_Type : Kind := Default) is record
       Id : U_Id;
    end record;
 
