@@ -109,6 +109,11 @@ package body Savadur.Config is
                  (Key      => Savadur.Action.Id
                     (To_String (Handler.Action_Id)),
                   New_Item => Handler.Action);
+            else
+               --  Append this action to scenario actions vector
+               Handler.Scenario.Actions.Append
+                 (Savadur.Action.Id (To_String (Handler.Action_Id)));
+
             end if;
          when SCM_Action =>
             --  Append this action to scenario actions vector
