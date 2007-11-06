@@ -100,6 +100,10 @@ package body Savadur.Config is
                New_Item => Handler.Scenario);
             --  Exit scenario
          when Action =>
+            if Handler.Action_Id = "" then
+               raise Config_Error with " Null action id !";
+            end if;
+
             if not Handler.Inside_Scenario then
                --  Append this action to actions map
                Handler.Current_Project.Actions.Insert
@@ -266,21 +270,18 @@ package body Savadur.Config is
                end case;
             end loop;
          when Action =>
-
-            if Handler.Inside_Scenario then
-               for J in 0 .. Get_Length (Atts) - 1 loop
-                  Attr := Get_Attribute (Get_Qname (Atts, J));
-                  if Attr not in Action_Attribute then
-                     raise Config_Error with " Unknow action attribute "
-                       & Get_Qname (Atts, J);
-                  end if;
-                  case Action_Attribute (Attr) is
-                     when Id =>
-                        Handler.Action_Id :=
-                          To_Unbounded_String (Get_Value (Atts, J));
-                  end case;
-               end loop;
-            end if;
+            for J in 0 .. Get_Length (Atts) - 1 loop
+               Attr := Get_Attribute (Get_Qname (Atts, J));
+               if Attr not in Action_Attribute then
+                  raise Config_Error with " Unknow action attribute "
+                    & Get_Qname (Atts, J);
+               end if;
+               case Action_Attribute (Attr) is
+                  when Id =>
+                     Handler.Action_Id :=
+                       To_Unbounded_String (Get_Value (Atts, J));
+               end case;
+            end loop;
          when Cmd | Project =>
             null;
       end case;
