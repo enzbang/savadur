@@ -37,7 +37,7 @@ package body Savadur.Action is
    -----------
 
    function Image (Map : in Maps.Map) return String is
-      Result : Unbounded_String := To_Unbounded_String ("[ " & ASCII.LF);
+      Result : Unbounded_String := To_Unbounded_String ("[" & ASCII.LF);
 
       procedure Image (Position : in Maps.Cursor);
       --  Adds position image
@@ -64,7 +64,7 @@ package body Savadur.Action is
    -----------
 
    function Image (Vector : in Vectors.Vector) return String is
-      Result : Unbounded_String := To_Unbounded_String ("[ " & ASCII.LF);
+      Result : Unbounded_String := To_Unbounded_String ("[" & ASCII.LF);
 
       procedure Image (Position : in Vectors.Cursor);
       --  Adds position image
