@@ -42,7 +42,8 @@ package body Config_Parse is
    procedure Check_Project_Config
      (T : in out AUnit.Test_Cases.Test_Case'Class)
    is
-     use Ada.Strings.Unbounded;
+      pragma Unreferenced (T);
+      use Ada.Strings.Unbounded;
 
       Project : Savadur.Config.Project.Project_Config :=
                   Savadur.Config.Project.Parse ("ex_project.xml");
@@ -74,7 +75,8 @@ package body Config_Parse is
    procedure Check_SCM_Config
      (T : in out AUnit.Test_Cases.Test_Case'Class)
    is
-     use Ada.Strings.Unbounded;
+      pragma Unreferenced (T);
+      use Ada.Strings.Unbounded;
 
       SCM_Map : Savadur.SCM.Maps.Map :=
                   Savadur.Config.SCM.Parse ("../config/scm");
@@ -93,8 +95,8 @@ package body Config_Parse is
    -- Name --
    ----------
 
-   function Name (T : Test_Case)
-                  return Test_String is
+   function Name (T : Test_Case) return Test_String is
+      pragma Unreferenced (T);
    begin
       return Format ("Parse configuration files and check generated results");
    end Name;
