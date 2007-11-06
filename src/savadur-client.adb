@@ -16,7 +16,7 @@ begin
 
    Put_Line ("Savadur client");
    New_Line;
-   Put_Line ("SCM : " & To_String (Project.SCM));
+   Put_Line ("SCM : " & To_String (Unbounded_String (Project.SCM)));
    New_Line;
    Put_Line ("Action list : ");
    New_Line;
