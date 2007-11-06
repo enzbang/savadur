@@ -96,12 +96,6 @@ package body Savadur.Config is
 
       case NV is
          when Scenario =>
-            Text_IO.Put_Line ("Scenario found : "
-                              & To_String (Handler.Scenario_Id)
-                              & " => "
-                              & To_String
-                                (Unbounded_String (Handler.Scenario.Mode))
-                              & Savadur.Action.Image (Handler.Scenario.Actions));
             Handler.Inside_Scenario := False;
             Handler.Current_Project.Scenari.Insert
               (Key      => Savadur.Scenario.Id

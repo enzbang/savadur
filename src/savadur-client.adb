@@ -4,6 +4,7 @@ with Ada.Strings.Unbounded;
 
 with Savadur.Config;
 with Savadur.Action;
+with Savadur.Scenario;
 
 procedure Savadur.Client is
    Project : Savadur.Config.Project_Config :=
@@ -21,5 +22,8 @@ begin
    New_Line;
    Put_Line (Savadur.Action.Image (Project.Actions));
    New_Line;
-
+   Put_Line ("Scenari : ");
+   New_Line;
+   Put_Line (Savadur.Scenario.Image (Project.Scenari));
+   New_Line;
 end Savadur.Client;

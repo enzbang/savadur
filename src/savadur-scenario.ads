@@ -17,6 +17,9 @@ package Savadur.Scenario is
       Actions : Savadur.Action.Vectors.Vector;
    end record;
 
+   function Image (Scenario : Savadur.Scenario.Scenario) return String;
+   --  Return Scenario image
+
    function Hash (Key : Id) return Containers.Hash_Type;
    -- Renames Strings.Hash
 
@@ -29,5 +32,8 @@ package Savadur.Scenario is
       Element_Type    => Scenario,
       Hash            => Hash,
       Equivalent_Keys => "=");
+
+   function Image (Scenari : Savadur.Scenario.Maps.Map) return String;
+   --  Return Scenario map image
 
 end Savadur.Scenario;
