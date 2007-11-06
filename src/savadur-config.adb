@@ -112,13 +112,18 @@ package body Savadur.Config is
             else
                --  Append this action to scenario actions vector
                Handler.Scenario.Actions.Append
-                 (Savadur.Action.Id (To_String (Handler.Action_Id)));
+                 (Savadur.Action.Ref_Action'
+                    (Action_Type => Savadur.Action.Default,
+                     Id          => Savadur.Action.U_Id (Handler.Action_Id)));
 
             end if;
          when SCM_Action =>
             --  Append this action to scenario actions vector
             Handler.Scenario.Actions.Append
-              (Savadur.Action.Id (To_String (Handler.Action_Id)));
+              (Savadur.Action.Ref_Action'
+                 (Action_Type => Savadur.Action.SCM,
+                  Id          => Savadur.Action.U_Id (Handler.Action_Id)));
+
          when Cmd =>
             Handler.Action.Cmd := Savadur.Action.Command (Handler.Value);
          when SCM | Project =>

@@ -9,12 +9,18 @@ package Savadur.Action is
    use Ada.Strings.Unbounded;
 
    type Id is new String;
+   type U_Id is new Unbounded_String;
    type Command is new Unbounded_String;
    type Action_Type is (SCM, Default);
 
    type Action
      (Action_Type : Savadur.Action.Action_Type := Default) is record
       Cmd : Command;
+   end record;
+
+   type Ref_Action
+      (Action_Type : Savadur.Action.Action_Type := Default) is record
+      Id : U_Id;
    end record;
 
    function Hash (Key : Id) return Containers.Hash_Type;
@@ -44,7 +50,7 @@ package Savadur.Action is
 
    package Vectors is new Ada.Containers.Indefinite_Vectors
      (Index_Type      => Action_Index,
-      Element_Type    => Id);
+      Element_Type    => Ref_Action);
 
    function Image (Vector : Vectors.Vector) return String;
    --  Returns vector image

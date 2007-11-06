@@ -62,9 +62,9 @@ package body Savadur.Action is
       -----------
 
       procedure Image (Position : in Vectors.Cursor) is
+         Element : Ref_Action := Vectors.Element (Position);
       begin
-         Append (Result,
-                 String (Vectors.Element (Position)));
+         Append (Result, To_String (Element.Id));
       end Image;
    begin
       Vectors.Iterate (Container => Vector,
