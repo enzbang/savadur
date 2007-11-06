@@ -1,0 +1,16 @@
+<scm>
+  <name id="git" />
+
+  <action id="init">
+    <cmd>git-clone $URL $SOURCES_DIR</cmd>
+  </action>
+
+  <action id="pull">
+    <cmd>git-pull</cmd>
+  </action>
+
+  <action id="version">
+    <cmd>git-show-ref -s</cmd>
+  </action>
+
+</scm>
