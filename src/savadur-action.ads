@@ -31,6 +31,10 @@ package Savadur.Action is
    type Id is new String;
    type U_Id is new Unbounded_String;
 
+   function "+" (Source : Id) return U_Id;
+
+   function "-" (Source : U_Id) return Id;
+
    type Command is new Unbounded_String;
    type Kind is (SCM, Default);
 

@@ -21,7 +21,29 @@
 
 with Ada.Strings.Hash;
 
+with Savadur.Utils;
+
 package body Savadur.Action is
+
+   use Savadur.Utils;
+
+   ---------
+   -- "+" --
+   ---------
+
+   function "+" (Source : Id) return U_Id is
+   begin
+      return U_Id (+String (Source));
+   end "+";
+
+   ---------
+   -- "-" --
+   ---------
+
+   function "-" (Source : U_Id) return Id is
+   begin
+      return Id (-Unbounded_String (Source));
+   end "-";
 
    ----------
    -- Hash --
