@@ -169,12 +169,12 @@ package body Savadur.Config.SCM is
    -- Parse --
    -----------
 
-   function Parse (SCM_Dir : in String) return Savadur.SCM.Maps.Map is
+   procedure Parse (SCM_Dir : in String) is
+      use Ada.Directories;
+
       Reader : Tree_Reader;
       Source : Input_Sources.File.File_Input;
-      SCM : Savadur.SCM.Maps.Map := Savadur.SCM.Maps.Empty_Map;
 
-      use Ada.Directories;
       S : Search_Type;
       D : Directory_Entry_Type;
    begin
@@ -203,14 +203,13 @@ package body Savadur.Config.SCM is
             Input_Sources.File.Close (Source);
 
             Savadur.SCM.Maps.Insert
-              (Container => SCM,
+              (Container => Configurations,
                Key       => Savadur.SCM.Id
                  (To_String (Unbounded_String (Reader.SCM_Id))),
                New_Item  => Reader.SCM);
 
          end Load_Config;
       end loop Walk_Directories;
-      return SCM;
    end Parse;
 
    -------------------

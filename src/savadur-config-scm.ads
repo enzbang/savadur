@@ -23,7 +23,9 @@ with Savadur.SCM;
 
 package Savadur.Config.SCM is
 
-   function Parse (SCM_Dir : in String) return Savadur.SCM.Maps.Map;
-   --  Returns SCM config map
+   Configurations : Savadur.SCM.Maps.Map;
+
+   procedure Parse (SCM_Dir : in String);
+   --  Fill the SCM configuration map
 
 end Savadur.Config.SCM;
