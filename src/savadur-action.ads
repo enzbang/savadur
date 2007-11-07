@@ -52,12 +52,12 @@ package Savadur.Action is
    function Image (Action : in Savadur.Action.Ref_Action) return String;
    --  Returns action image
 
-   function Hash (Key : Id) return Containers.Hash_Type;
-   --  Renames Strings.Hash
-
    ----------
    -- Maps --
    ----------
+
+   function Hash (Key : Id) return Containers.Hash_Type;
+   --  Renames Strings.Hash
 
    package Maps is new Ada.Containers.Indefinite_Hashed_Maps
      (Key_Type        => Id,
@@ -68,11 +68,11 @@ package Savadur.Action is
    function Image (Map : in Maps.Map) return String;
    --  Returns Map image
 
-   subtype Action_Index is Positive;
-
    -------------
    -- Vectors --
    -------------
+
+   subtype Action_Index is Positive;
 
    package Vectors is new Ada.Containers.Indefinite_Vectors
      (Index_Type      => Action_Index,

@@ -33,7 +33,6 @@ with Unicode.CES;
 
 with Savadur.Utils;
 with Savadur.Action;
-with Savadur.Scenario;
 
 package body Savadur.Config.SCM is
 
@@ -59,12 +58,10 @@ package body Savadur.Config.SCM is
 
    type Tree_Reader is new Sax.Readers.Reader with record
       Value           : Unbounded_String;
+      Id              : Unbounded_String;
       Action          : Savadur.Action.Action;
-      Action_Id       : Unbounded_String;
-      Scenario        : Savadur.Scenario.Scenario;
-      SCM_Id          : Savadur.SCM.U_Id;
-      Inside_Scenario : Boolean := False;
       SCM             : Savadur.SCM.SCM;
+      SCM_Id          : Unbounded_String;
    end record;
 
    procedure Start_Element
@@ -112,12 +109,12 @@ package body Savadur.Config.SCM is
 
       case NV is
          when Action =>
-            if Handler.Action_Id = "" then
+            if -Handler.Id = "" then
                raise Config_Error with " Null action id !";
             end if;
 
             Handler.SCM.Actions.Insert
-              (Key      => Savadur.Action.Id (-Handler.Action_Id),
+              (Key      => Savadur.Action.Id (-Handler.Id),
                New_Item => Handler.Action);
          when Cmd =>
             Handler.Action.Cmd := Savadur.Action.Command (Handler.Value);
@@ -206,8 +203,7 @@ package body Savadur.Config.SCM is
 
             Savadur.SCM.Maps.Insert
               (Container => Configurations,
-               Key       => Savadur.SCM.Id
-                 (To_String (Unbounded_String (Reader.SCM_Id))),
+               Key       => Savadur.SCM.Id (-Reader.SCM_Id),
                New_Item  => Reader.SCM);
 
          end Load_Config;
@@ -239,8 +235,7 @@ package body Savadur.Config.SCM is
                Attr := Get_Attribute (Get_Qname (Atts, J));
                case Attr is
                   when Id =>
-                     Handler.SCM_Id :=
-                       Savadur.SCM.U_Id (+Get_Value (Atts, J));
+                     Handler.SCM_Id := +Get_Value (Atts, J);
                end case;
             end loop;
          when Action =>
@@ -248,7 +243,7 @@ package body Savadur.Config.SCM is
                Attr := Get_Attribute (Get_Qname (Atts, J));
                case Attr is
                   when Id =>
-                     Handler.Action_Id := +Get_Value (Atts, J);
+                     Handler.Id := +Get_Value (Atts, J);
                end case;
             end loop;
          when Cmd | Scm =>
