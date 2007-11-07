@@ -21,13 +21,17 @@
 
 with Ada.Strings.Hash_Case_Insensitive;
 
+with Savadur.Utils;
+
 package body Savadur.Scenario is
+
+   use Savadur.Utils;
 
    ----------
    -- Hash --
    ----------
 
-   function Hash (Key : Id) return Containers.Hash_Type is
+   function Hash (Key : in Id) return Containers.Hash_Type is
    begin
       return Ada.Strings.Hash_Case_Insensitive (String (Key));
    end Hash;
@@ -39,7 +43,7 @@ package body Savadur.Scenario is
    function Image (Scenario : Savadur.Scenario.Scenario) return String is
    begin
       return "Mode : "
-        & To_String (Unbounded_String (Scenario.Mode)) & ASCII.Lf
+        & (-Unbounded_String (Scenario.Mode)) & ASCII.Lf
         & Savadur.Action.Image (Scenario.Actions);
    end Image;
 
@@ -66,7 +70,7 @@ package body Savadur.Scenario is
    begin
       Maps.Iterate (Container => Scenari,
                     Process   => Image'Access);
-      return To_String (Result);
+      return -Result;
    end Image;
 
 end Savadur.Scenario;

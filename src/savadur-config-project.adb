@@ -251,12 +251,10 @@ package body Savadur.Config.Project is
                end if;
                case Scenario_Attribute (Attr) is
                   when Id =>
-                     Handler.Scenario_Id :=
-                       To_Unbounded_String (Get_Value (Atts, J));
+                     Handler.Scenario_Id := +Get_Value (Atts, J);
                   when Mode =>
                      Handler.Scenario.Mode :=
-                       Savadur.Scenario.Mode
-                         (To_Unbounded_String (Get_Value (Atts, J)));
+                       Savadur.Scenario.Mode (+Get_Value (Atts, J));
                end case;
             end loop;
          when SCM =>
@@ -269,8 +267,7 @@ package body Savadur.Config.Project is
                case SCM_Attribute (Attr) is
                   when Id =>
                      Handler.Current_Project.SCM :=
-                       Savadur.SCM.U_Id
-                         (To_Unbounded_String (Get_Value (Atts, J)));
+                       Savadur.SCM.U_Id (+Get_Value (Atts, J));
                end case;
             end loop;
          when SCM_Action =>
@@ -289,8 +286,7 @@ package body Savadur.Config.Project is
                end if;
                case Action_Attribute (Attr) is
                   when Id =>
-                     Handler.Action_Id :=
-                       To_Unbounded_String (Get_Value (Atts, J));
+                     Handler.Action_Id := +Get_Value (Atts, J);
                end case;
             end loop;
          when Action =>
@@ -302,8 +298,7 @@ package body Savadur.Config.Project is
                end if;
                case Action_Attribute (Attr) is
                   when Id =>
-                     Handler.Action_Id :=
-                       To_Unbounded_String (Get_Value (Atts, J));
+                     Handler.Action_Id := +Get_Value (Atts, J);
                end case;
             end loop;
          when Variable =>
@@ -315,8 +310,7 @@ package body Savadur.Config.Project is
                end if;
                case Variable_Attribute (Attr) is
                   when Id =>
-                     Handler.Variable_Id :=
-                       To_Unbounded_String (Get_Value (Atts, J));
+                     Handler.Variable_Id := +Get_Value (Atts, J);
                end case;
             end loop;
          when Cmd | Project =>

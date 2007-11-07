@@ -31,6 +31,7 @@ with Sax.Attributes;
 with Input_Sources.File;
 with Unicode.CES;
 
+with Savadur.Utils;
 with Savadur.Action;
 with Savadur.Scenario;
 
@@ -38,6 +39,8 @@ package body Savadur.Config.SCM is
 
    use Ada;
    use Ada.Strings.Unbounded;
+
+   use Savadur.Utils;
 
    Config_Error : exception;
 
@@ -114,8 +117,7 @@ package body Savadur.Config.SCM is
             end if;
 
             Handler.SCM.Actions.Insert
-              (Key      => Savadur.Action.Id
-                 (To_String (Handler.Action_Id)),
+              (Key      => Savadur.Action.Id (-Handler.Action_Id),
                New_Item => Handler.Action);
          when Cmd =>
             Handler.Action.Cmd := Savadur.Action.Command (Handler.Value);
@@ -238,8 +240,7 @@ package body Savadur.Config.SCM is
                case Attr is
                   when Id =>
                      Handler.SCM_Id :=
-                       Savadur.SCM.U_Id
-                         (To_Unbounded_String (Get_Value (Atts, J)));
+                       Savadur.SCM.U_Id (+Get_Value (Atts, J));
                end case;
             end loop;
          when Action =>
@@ -247,8 +248,7 @@ package body Savadur.Config.SCM is
                Attr := Get_Attribute (Get_Qname (Atts, J));
                case Attr is
                   when Id =>
-                     Handler.Action_Id :=
-                       To_Unbounded_String (Get_Value (Atts, J));
+                     Handler.Action_Id := +Get_Value (Atts, J);
                end case;
             end loop;
          when Cmd | Scm =>

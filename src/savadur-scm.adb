@@ -65,7 +65,7 @@ package body Savadur.SCM is
          Maps.Next (Position);
       end loop;
 
-      return To_String (Result);
+      return -Result;
 
    end Image;
 

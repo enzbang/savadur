@@ -72,10 +72,10 @@ package body Savadur.Build is
       return Boolean
    is
       use GNAT.OS_Lib;
-      Prog_Name       : Unbounded_String;
       Exec_Path       : OS_Lib.String_Access;
-      Result          : Boolean;
       Argument_String : Argument_List_Access;
+      Prog_Name       : Unbounded_String;
+      Result          : Boolean;
       PID             : Process_Id;
    begin
 
@@ -115,8 +115,7 @@ package body Savadur.Build is
       Prog_Name       : out Unbounded_String;
       Argument_String : out OS_Lib.Argument_List_Access)
    is
-      Command_String : constant String :=
-                         To_String (Unbounded_String (Command));
+      Command_String : constant String := -Unbounded_String (Command);
    begin
       for K in Command_String'Range loop
          if Command_String (K) = ' ' then
@@ -184,22 +183,6 @@ package body Savadur.Build is
       Do_Replace : Boolean := False;
       Result     : Unbounded_String;
    begin
-      Ada.Text_IO.Put_Line ("parsing " & Source);
-
-      declare
-         Position : Savadur.Config.Project.Var_Maps.Cursor :=
-                      Project.Variable.First;
-      begin
-         while Savadur.Config.Project.Var_Maps.Has_Element (Position) loop
-            Text_IO.Put_Line (Savadur.Config.Project.
-                                Var_Maps.Element (Position));
-            Text_IO.Put_Line (Savadur.Config.Project.
-                                Var_Maps.Key (Position));
-
-            Savadur.Config.Project.Var_Maps.Next (Position);
-         end loop;
-      end;
-
       for K in Source'Range loop
          if Source (K) = '$' then
             Append (Result, Source (Start .. K - 1));

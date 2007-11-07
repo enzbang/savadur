@@ -60,7 +60,7 @@ package body Savadur.Action is
 
    function Image (Action : in Savadur.Action.Action) return String is
    begin
-      return To_String (Action.Cmd);
+      return -Unbounded_String (Action.Cmd);
    end Image;
 
    -----------
@@ -69,8 +69,7 @@ package body Savadur.Action is
 
    function Image (Action : in Savadur.Action.Ref_Action) return String is
    begin
-      return Kind'Image (Action.Action_Type) & " "
-        & To_String (Action.Id);
+      return Kind'Image (Action.Action_Type) & " " & String (-Action.Id);
    end Image;
 
    -----------
@@ -78,7 +77,7 @@ package body Savadur.Action is
    -----------
 
    function Image (Map : in Maps.Map) return String is
-      Result : Unbounded_String := To_Unbounded_String ("[" & ASCII.LF);
+      Result : Unbounded_String := +"[" & ASCII.LF;
 
       procedure Image (Position : in Maps.Cursor);
       --  Adds position image
@@ -96,8 +95,8 @@ package body Savadur.Action is
    begin
       Maps.Iterate (Container => Map,
                     Process   => Image'Access);
-      Append (Result, To_Unbounded_String ("]"));
-      return To_String (Result);
+      Append (Result, "]");
+      return -Result;
    end Image;
 
    -----------
@@ -105,7 +104,7 @@ package body Savadur.Action is
    -----------
 
    function Image (Vector : in Vectors.Vector) return String is
-      Result : Unbounded_String := To_Unbounded_String ("[" & ASCII.LF);
+      Result : Unbounded_String := +"[" & ASCII.LF;
 
       procedure Image (Position : in Vectors.Cursor);
       --  Adds position image
@@ -122,8 +121,8 @@ package body Savadur.Action is
    begin
       Vectors.Iterate (Container => Vector,
                        Process   => Image'Access);
-      Append (Result, To_Unbounded_String ("]"));
-      return To_String (Result);
+      Append (Result, +"]");
+      return -Result;
    end Image;
 
 end Savadur.Action;
