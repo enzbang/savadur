@@ -67,8 +67,9 @@ package body Savadur.Build is
    -------------
 
    function Execute
-     (Command   : Savadur.Action.Command;
-      Directory : String)
+     (Command      : in Savadur.Action.Command;
+      Directory    : in String;
+      Log_Filename : in String)
       return Boolean
    is
       use GNAT.OS_Lib;
@@ -95,7 +96,7 @@ package body Savadur.Build is
       PID := Non_Blocking_Spawn
         (Program_Name => Exec_Path.all,
          Args         => Argument_String.all,
-         Output_File  => "LOG" & (-Prog_Name),
+         Output_File  => Log_Filename,
          Err_To_Out   => True);
 
       Wait_Process (PID, Result);
@@ -256,7 +257,9 @@ package body Savadur.Build is
                                     Ref_Action => Ref);
             begin
                if Directories.Exists (-Sources_Directory) then
-                  Result := Execute (Cmd, -Sources_Directory);
+                  Result := Execute (Cmd,
+                                     -Sources_Directory,
+                                     "LOG_" & String (-Ref.Id));
                   Next (Position);
                else
                   --  No sources directory. This means that the project has not
@@ -270,7 +273,8 @@ package body Savadur.Build is
                   Result := Execute
                     (Get_Command (Project    => Project,
                                   Ref_Action => Savadur.SCM.SCM_Init),
-                     Directories.Current_Directory);
+                     Directories.Current_Directory,
+                     "LOG_init");
 
                   if not Directories.Exists (-Sources_Directory) then
                      raise Command_Parse_Error with " SCM init failed !";

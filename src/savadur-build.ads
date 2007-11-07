@@ -28,8 +28,9 @@ package Savadur.Build is
    Command_Parse_Error : exception;
 
    function Execute
-     (Command : Savadur.Action.Command;
-      Directory : String)
+     (Command      : in Savadur.Action.Command;
+      Directory    : in String;
+      Log_Filename : in String)
       return Boolean;
    --  Executes a command. Returns False if exit status is not 0
    --  Before command execution, the string beginning with $ are replaced
