@@ -30,6 +30,9 @@ package Savadur.Scenario is
    use Ada.Strings.Unbounded;
 
    type Id is new String;
+
+   Default_Scenario : Id := "default";
+
    type Mode is new Unbounded_String;
 
    type Scenario is record
@@ -41,7 +44,7 @@ package Savadur.Scenario is
    --  Return Scenario image
 
    function Hash (Key : Id) return Containers.Hash_Type;
-   --  Renames Strings.Hash
+   --  Renames Strings.Hash_Case_Insensitive
 
    ----------
    -- Maps --
