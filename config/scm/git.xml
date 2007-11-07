@@ -2,7 +2,7 @@
   <name id="git" />
 
   <action id="init">
-    <cmd>git-clone $URL $SOURCES_DIR</cmd>
+    <cmd>git-clone $url $sources</cmd>
   </action>
 
   <action id="pull">

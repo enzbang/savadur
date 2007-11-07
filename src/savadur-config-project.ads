@@ -19,16 +19,28 @@
 --  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.       --
 ------------------------------------------------------------------------------
 
+with Ada.Containers.Indefinite_Hashed_Maps;
+with Ada.Strings.Hash_Case_Insensitive;
+
 with Savadur.Action;
 with Savadur.Scenario;
 with Savadur.SCM;
 
 package Savadur.Config.Project is
 
+   use Ada;
+
+   package Var_Maps is new Containers.Indefinite_Hashed_Maps
+     (Key_Type        => String,
+      Element_Type    => String,
+      Hash            => Strings.Hash_Case_Insensitive,
+      Equivalent_Keys => "=");
+
    type Project_Config is record
-      SCM     : Savadur.SCM.U_Id;
-      Actions : Savadur.Action.Maps.Map;
-      Scenari : Savadur.Scenario.Maps.Map;
+      SCM      : Savadur.SCM.U_Id;
+      Actions  : Savadur.Action.Maps.Map;
+      Scenari  : Savadur.Scenario.Maps.Map;
+      Variable : Var_Maps.Map;
    end record;
 
    function Parse (Filename : String) return Project_Config;

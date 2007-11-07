@@ -22,6 +22,7 @@
 with GNAT.Case_Util;
 
 with Ada.Strings.Unbounded;
+with Savadur.Utils;
 
 with Sax.Readers;
 with Sax.Attributes;
@@ -32,15 +33,18 @@ with Unicode.CES;
 package body Savadur.Config.Project is
 
    use Ada.Strings.Unbounded;
+   use Savadur.Utils;
 
    Config_Error : exception;
 
-   type Node_Value is (SCM, SCM_Action, Action, Scenario, Cmd, Project);
+   type Node_Value is
+     (SCM, Variable, SCM_Action, Action, Scenario, Cmd, Project);
 
    type Attribute is (Id, Mode);
 
-   subtype SCM_Attribute is Attribute range Id .. Id;
-   subtype Action_Attribute is Attribute range Id .. Id;
+   subtype Variable_Attribute is Attribute range Id .. Id;
+   subtype SCM_Attribute      is Attribute range Id .. Id;
+   subtype Action_Attribute   is Attribute range Id .. Id;
    subtype Scenario_Attribute is Attribute;
 
    function Get_Node_Value (S : String) return Node_Value;
@@ -54,6 +58,7 @@ package body Savadur.Config.Project is
 
    type Tree_Reader is new Sax.Readers.Reader with record
       Value           : Unbounded_String;
+      Variable_Id     : Unbounded_String;
       Action          : Savadur.Action.Action;
       Action_Id       : Unbounded_String;
       Scenario        : Savadur.Scenario.Scenario;
@@ -106,6 +111,10 @@ package body Savadur.Config.Project is
    begin
 
       case NV is
+         when Variable =>
+            Handler.Current_Project.Variable.Insert
+              (Key      => -Handler.Variable_Id,
+               New_Item => -Handler.Value);
          when Scenario =>
             Handler.Inside_Scenario := False;
             Handler.Current_Project.Scenari.Insert
@@ -196,9 +205,10 @@ package body Savadur.Config.Project is
       Source : Input_Sources.File.File_Input;
    begin
       Reader.Current_Project :=
-        Project_Config'(SCM     => Savadur.SCM.Null_Uid,
-                        Actions => Savadur.Action.Maps.Empty_Map,
-                        Scenari => Savadur.Scenario.Maps.Empty_Map);
+        Project_Config'(SCM      => Savadur.SCM.Null_Uid,
+                        Variable => Savadur.Config.Project.Var_Maps.Empty_Map,
+                        Actions  => Savadur.Action.Maps.Empty_Map,
+                        Scenari  => Savadur.Scenario.Maps.Empty_Map);
 
       Input_Sources.File.Open
         (Filename => Filename,
@@ -293,6 +303,19 @@ package body Savadur.Config.Project is
                case Action_Attribute (Attr) is
                   when Id =>
                      Handler.Action_Id :=
+                       To_Unbounded_String (Get_Value (Atts, J));
+               end case;
+            end loop;
+         when Variable =>
+            for J in 0 .. Get_Length (Atts) - 1 loop
+               Attr := Get_Attribute (Get_Qname (Atts, J));
+               if Attr not in Variable_Attribute then
+                  raise Config_Error with " Unknow action attribute "
+                    & Get_Qname (Atts, J);
+               end if;
+               case Variable_Attribute (Attr) is
+                  when Id =>
+                     Handler.Variable_Id :=
                        To_Unbounded_String (Get_Value (Atts, J));
                end case;
             end loop;

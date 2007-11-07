@@ -21,11 +21,7 @@
 
 with Ada.Strings.Hash;
 
-with Savadur.Utils;
-
 package body Savadur.SCM is
-
-   use Savadur.Utils;
 
    ---------
    -- "+" --

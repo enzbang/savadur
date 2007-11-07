@@ -22,12 +22,21 @@
 with Ada.Containers.Indefinite_Hashed_Maps;
 with Ada.Strings.Unbounded;
 
+with Savadur.Utils;
 with Savadur.Action;
 
 package Savadur.SCM is
 
    use Ada;
    use Ada.Strings.Unbounded;
+
+   use Savadur.Utils;
+
+   --  Special actions references
+
+   SCM_Init : Savadur.Action.Ref_Action :=
+     (Action_Type => Savadur.Action.SCM,
+      Id          => Savadur.Action.U_Id (+"init"));
 
    type Id is new String;
    type U_Id is new Unbounded_String;
