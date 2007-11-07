@@ -62,7 +62,7 @@ package body Config_Parse is
         (Savadur.Scenario.Image (Project.Scenari) = "* default" & ASCII.Lf
          & "Mode : on-change" & ASCII.Lf
          & "[" & ASCII.Lf
-         & "SCM update" & ASCII.Lf
+         & "SCM pull" & ASCII.Lf
          & "DEFAULT make" & ASCII.Lf
          & "]",
          "Wrong scenari list");
@@ -77,14 +77,13 @@ package body Config_Parse is
    is
       pragma Unreferenced (T);
       use Ada.Strings.Unbounded;
-
-      SCM_Map : Savadur.SCM.Maps.Map :=
-                  Savadur.Config.SCM.Parse ("../config/scm");
    begin
+      Savadur.Config.SCM.Parse ("../config/scm");
       Assertions.Assert
-        (Savadur.SCM.Image (SCM_Map) = "* git" & ASCII.Lf
+        (Savadur.SCM.Image
+           (Savadur.Config.SCM.Configurations) = "* git" & ASCII.Lf
          & "[" & ASCII.Lf
-         & "init => git-clone $URL $SOURCES_DIR"  & ASCII.Lf
+         & "init => git-clone $url $sources"  & ASCII.Lf
          & "pull => git-pull"  & ASCII.Lf
          & "version => git-show-ref -s"  & ASCII.Lf
          & "]",
