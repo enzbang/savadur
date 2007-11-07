@@ -22,7 +22,7 @@
 --
 --  Usage :
 --
---  savadur-client [-configdir dirname] -project filename -mode modename
+--  savadur-client [-configdir dirname] -project filename -sid scenario_id
 --
 
 with Ada.Text_IO;
@@ -31,7 +31,9 @@ with Ada.Strings.Unbounded;
 
 with GNAT.Command_Line;
 
+with Savadur.Utils;
 with Savadur.Config.Project;
+with Savadur.Build;
 with Savadur.Config.SCM;
 with Savadur.Action;
 with Savadur.Scenario;
@@ -41,11 +43,14 @@ procedure Savadur.Client is
    use Ada.Text_IO;
    use Ada.Strings.Unbounded;
 
+   use Savadur.Utils;
+
    Syntax_Error     : exception;
 
    Project_Filename : Unbounded_String;
    SCM_Dir          : Unbounded_String;
-   Mode             : Unbounded_String := To_Unbounded_String ("Default");
+   Scenario_Id      : Unbounded_String :=
+                        +String (Savadur.Scenario.Default_Scenario);
 
    procedure Usage;
    --  Display Usage
@@ -67,7 +72,7 @@ begin
       raise Syntax_Error;
    else
       loop
-         case GNAT.Command_Line.Getopt ("project: configdir: mode: ") is
+         case GNAT.Command_Line.Getopt ("project: configdir: sid: ") is
             when ASCII.NUL =>
                exit;
 
@@ -93,12 +98,12 @@ begin
                      raise Syntax_Error;
                   end if;
                end;
-            when 'm' =>
+            when 's' =>
                declare
                   Full : constant String := GNAT.Command_Line.Full_Switch;
                begin
-                  if Full = "mode" then
-                     Mode :=
+                  if Full = "sid" then
+                     Scenario_Id :=
                        To_Unbounded_String (GNAT.Command_Line.Parameter);
                   else
                      raise Syntax_Error;
@@ -120,16 +125,16 @@ begin
       raise Syntax_Error;
    end if;
 
+   --  Parse SCM configuration files
+
+   Savadur.Config.SCM.Parse (-SCM_Dir);
+
    declare
       Project : Savadur.Config.Project.Project_Config :=
                   Savadur.Config.Project.Parse (To_String (Project_Filename));
-
-      SCM_Map : Savadur.SCM.Maps.Map :=
-                  Savadur.Config.SCM.Parse (To_String (SCM_Dir));
    begin
 
       Put_Line ("Savadur client");
-      Put_Line ("Ask mode " & To_String (Mode));
       New_Line;
       Put_Line ("SCM : " & To_String (Unbounded_String (Project.SCM)));
       New_Line;
@@ -145,8 +150,17 @@ begin
       New_Line;
       Put_Line ("SCM Found");
       New_Line;
-      Put_Line (Savadur.SCM.Image (SCM_Map));
+      Put_Line (Savadur.SCM.Image (Savadur.Config.SCM.Configurations));
+
+      if Savadur.Build.Run
+        (Project,
+         Savadur.Scenario.Id (To_String (Scenario_Id))) then
+         Put_Line ("Success");
+      else
+         Put_Line ("Failure");
+      end if;
    end;
+
 exception
    when Syntax_Error | GNAT.Command_Line.Invalid_Switch  =>
       Usage;
