@@ -6,7 +6,7 @@
   </action>
 
   <scenario id="default" mode="on-change">
-    <scm_action id="update" />
+    <scm_action id="pull" />
     <action id="make" />
   </scenario>
 
