@@ -274,6 +274,7 @@ package body Savadur.Build is
             begin
                if Directories.Exists (-Sources_Directory) then
                   Result := Execute (Cmd, -Sources_Directory);
+                  Next (Position);
                else
                   --  No sources directory. This means that the project has not
                   --  been initialized.
@@ -287,9 +288,14 @@ package body Savadur.Build is
                     (Get_Command (Project    => Project,
                                   Ref_Action => Savadur.SCM.SCM_Init),
                      Directories.Current_Directory);
+
+                  if not Directories.Exists (-Sources_Directory) then
+                     raise Command_Parse_Error with " SCM init failed !";
+                  end if;
+
+                  --  No Next (Position) to retry the same command
                end if;
             end Execute_Command;
-            Next (Position);
          end loop;
       exception
          when Constraint_Error =>
