@@ -66,4 +66,3 @@ project Savadur_Regtests is
    package Linker renames Shared.Linker;
 
 end Savadur_Regtests;
-

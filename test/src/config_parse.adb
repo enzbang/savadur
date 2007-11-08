@@ -73,7 +73,7 @@ package body Config_Parse is
          & "SCM pull" & ASCII.Lf
          & "DEFAULT make" & ASCII.Lf
          & "]",
-         "Wrong scenari list");
+         "Wrong scenarios list");
    end Check_Project_Config;
 
    ----------------------

@@ -146,7 +146,7 @@ begin
       New_Line;
       Put_Line (Actions.Image (Project.Actions));
       New_Line;
-      Put_Line ("Scenari : ");
+      Put_Line ("Scenarios : ");
       New_Line;
       Put_Line (Scenarios.Image (Project.Scenarios));
       New_Line;
