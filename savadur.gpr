@@ -29,13 +29,13 @@ project Savadur is
    case Shared.Build is
       when "Debug" =>
          for Object_Dir use ".build/debug/savadur/obj";
-         for Exec_Dir use ".build/debug/bin";
+         for Exec_Dir use "bin";
       when "Profile" =>
          for Object_Dir use ".build/profile/savadur/obj";
-         for Exec_Dir use ".build/profile/bin";
+         for Exec_Dir use "bin";
       when "Release" =>
          for Object_Dir use ".build/release/savadur/obj";
-         for Exec_Dir use ".build/release/bin";
+         for Exec_Dir use "bin";
    end case;
 
    ------------

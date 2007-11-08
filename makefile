@@ -36,5 +36,8 @@ build:
 regtests:
 	$(MAKE) -C test regtests $(OPTIONS)
 
+regtests_bootstrap:
+	$(MAKE) -C test regtests_bootstrap $(OPTIONS)
+
 clean:
 	$(GNATCLEAN) -P savadur

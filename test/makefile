@@ -25,7 +25,17 @@ build:
 	$(GNATMAKE) -P savadur_regtests
 
 regtests: build
+	@echo "Harness ..."
 	./harness
 
+regtests_bootstrap:
+	$(MAKE) -C ../ build
+	$(MKDIR) savadur-dir/projects
+	$(CP) ex_project.xml savadur-dir/projects/savadur_bootstrap.xml
+	$(CP) -r ../config/scm savadur-dir/
+	../bin/savadur-client -project savadur_bootstrap \
+	-savadurdir $(PWD)/test/savadur-dir
+
 clean:
+	$(RM) -r savadur-dir
 	$(GNATCLEAN) -P savadur_regtests
