@@ -111,7 +111,9 @@ package body Savadur.Config.Project is
 
       case NV is
          when Variable =>
-            Handler.Current_Project.Variable.Insert
+            --  Overwrite default values
+
+            Handler.Current_Project.Variables.Include
               (Key      => -Handler.Id,
                New_Item => -Handler.Value);
          when Scenario =>
@@ -202,10 +204,10 @@ package body Savadur.Config.Project is
       Source : Input_Sources.File.File_Input;
    begin
       Reader.Current_Project :=
-        Project_Config'(SCM      => Savadur.SCM.Null_Uid,
-                        Variable => Savadur.Config.Project.Var_Maps.Empty_Map,
-                        Actions  => Savadur.Action.Maps.Empty_Map,
-                        Scenari  => Savadur.Scenario.Maps.Empty_Map);
+        Project_Config'(SCM       => Savadur.SCM.Null_Uid,
+                        Actions   => Savadur.Action.Maps.Empty_Map,
+                        Scenari   => Savadur.Scenario.Maps.Empty_Map,
+                        Variables => <>);
 
       Input_Sources.File.Open
         (Filename => Filename,

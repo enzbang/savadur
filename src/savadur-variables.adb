@@ -19,21 +19,19 @@
 --  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.       --
 ------------------------------------------------------------------------------
 
-with Savadur.Action;
-with Savadur.Scenario;
-with Savadur.SCM;
-with Savadur.Variables;
+package body Savadur.Variables is
 
-package Savadur.Config.Project is
+   -------------
+   -- Default --
+   -------------
 
-   type Project_Config is record
-      SCM       : Savadur.SCM.U_Id;
-      Actions   : Savadur.Action.Maps.Map;
-      Scenari   : Savadur.Scenario.Maps.Map;
-      Variables : Savadur.Variables.Maps.Map := Savadur.Variables.Default;
-   end record;
+   function Default return Maps.Map is
+      Default_Map : Maps.Map;
+   begin
+      Default_Map.Insert (Key      => "sources",
+                          New_Item => "sources");
 
-   function Parse (Filename : String) return Project_Config;
-   --  Returns the project configuration read in the given file
+      return Default_Map;
+   end Default;
 
-end Savadur.Config.Project;
+end Savadur.Variables;

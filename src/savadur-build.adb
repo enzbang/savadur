@@ -28,6 +28,7 @@ with GNAT.OS_Lib;
 with Savadur.Utils;
 with Savadur.SCM;
 with Savadur.Config.SCM;
+with Savadur.Variables;
 with Ada.Text_IO;
 
 -------------------
@@ -193,8 +194,8 @@ package body Savadur.Build is
             Query_Project_Variables : declare
                Key : constant String := Source (Start + 1 .. K - 1);
             begin
-               Append (Result, Savadur.Config.Project.
-                                Var_Maps.Element (Project.Variable, Key));
+               Append (Result, Savadur.Variables.Maps.
+                         Element (Project.Variables, Key));
                Start      := K;
                Do_Replace := False;
             end Query_Project_Variables;
@@ -204,7 +205,7 @@ package body Savadur.Build is
       if Do_Replace then
          Append
            (Result,
-            Project.Variable.Element (Source (Start + 1 .. Source'Last)));
+            Project.Variables.Element (Source (Start + 1 .. Source'Last)));
       else
          Append (Result, Source (Start .. Source'Last));
       end if;
@@ -237,7 +238,7 @@ package body Savadur.Build is
       end Get_Selected_Scenario;
 
       Get_Sources_Directory : begin
-         Sources_Directory := +(Project.Variable.Element ("sources"));
+         Sources_Directory := +(Project.Variables.Element ("sources"));
       exception
          when Constraint_Error =>
             raise Command_Parse_Error with " No sources directory !";

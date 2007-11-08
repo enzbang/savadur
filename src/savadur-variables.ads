@@ -19,21 +19,21 @@
 --  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.       --
 ------------------------------------------------------------------------------
 
-with Savadur.Action;
-with Savadur.Scenario;
-with Savadur.SCM;
-with Savadur.Variables;
+with Ada.Strings.Hash_Case_Insensitive;
+with Ada.Containers.Indefinite_Hashed_Maps;
 
-package Savadur.Config.Project is
+package Savadur.Variables is
 
-   type Project_Config is record
-      SCM       : Savadur.SCM.U_Id;
-      Actions   : Savadur.Action.Maps.Map;
-      Scenari   : Savadur.Scenario.Maps.Map;
-      Variables : Savadur.Variables.Maps.Map := Savadur.Variables.Default;
-   end record;
+   use Ada;
 
-   function Parse (Filename : String) return Project_Config;
-   --  Returns the project configuration read in the given file
+   package Maps is new Containers.Indefinite_Hashed_Maps
+     (Key_Type        => String,
+      Element_Type    => String,
+      Hash            => Strings.Hash_Case_Insensitive,
+      Equivalent_Keys => "=");
 
-end Savadur.Config.Project;
+   function Default return Maps.Map;
+   --  Returns a map with default variables set
+   --     - sources is set as "sources"
+
+end Savadur.Variables;
