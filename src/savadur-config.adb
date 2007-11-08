@@ -19,13 +19,48 @@
 --  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.       --
 ------------------------------------------------------------------------------
 
-with Savadur.SCM;
+with Ada.Strings.Unbounded;
+with Ada.Environment_Variables;
 
-package Savadur.Config.SCM is
+with Savadur.Utils;
 
-   Configurations : Savadur.SCM.Maps.Map;
+package body Savadur.Config is
 
-   procedure Parse;
-   --  Fill the SCM configuration map
+   use Ada;
+   use Ada.Strings.Unbounded;
 
-end Savadur.Config.SCM;
+   use Savadur.Utils;
+
+   Directory : Unbounded_String;
+
+   -----------------------
+   -- Savadur_Directory --
+   -----------------------
+
+   function Savadur_Directory return String is
+   begin
+      if Directory /= Null_Unbounded_String then
+         return -Directory;
+      elsif Environment_Variables.Exists ("SAVADUR_DIR") then
+         return Environment_Variables.Value ("SAVADUR_DIR");
+      elsif Environment_Variables.Exists ("HOME") then
+         return Environment_Variables.Value ("HOME");
+      end if;
+
+      --  All tries fail raise exception
+
+      raise Config_Error with "No savadur directory found ! Use --savadur-dir "
+        & "option or set SAVADUR_DIR environment variable";
+
+   end Savadur_Directory;
+
+   ---------------------------
+   -- Set_Savadur_Directory --
+   ---------------------------
+
+   procedure Set_Savadur_Directory (Dir : in String) is
+   begin
+      Directory := +Dir;
+   end Set_Savadur_Directory;
+
+end Savadur.Config;

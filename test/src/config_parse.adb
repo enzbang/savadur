@@ -26,6 +26,7 @@ with Savadur.Config.SCM;
 with Savadur.Action;
 with Savadur.Scenario;
 with Savadur.SCM;
+with Savadur.Config;
 
 package body Config_Parse is
 
@@ -78,7 +79,9 @@ package body Config_Parse is
       pragma Unreferenced (T);
       use Ada.Strings.Unbounded;
    begin
-      Savadur.Config.SCM.Parse ("../config/scm");
+      Savadur.Config.Set_Savadur_Directory ("../config/scm");
+
+      Savadur.Config.SCM.Parse;
       Assertions.Assert
         (Savadur.SCM.Image
            (Savadur.Config.SCM.Configurations) = "* git" & ASCII.Lf

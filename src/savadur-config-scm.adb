@@ -168,7 +168,7 @@ package body Savadur.Config.SCM is
    -- Parse --
    -----------
 
-   procedure Parse (SCM_Dir : in String) is
+   procedure Parse is
       use Ada.Directories;
 
       Reader : Tree_Reader;
@@ -177,10 +177,9 @@ package body Savadur.Config.SCM is
       S : Search_Type;
       D : Directory_Entry_Type;
    begin
-      Ada.Text_IO.Put_Line (SCM_Dir);
       Start_Search
         (Search    => S,
-         Directory => SCM_Dir,
+         Directory => Config.Savadur_Directory,
          Pattern   => "*.xml",
          Filter    => Filter_Type'(Ordinary_File => True,
                                    Directory     => False,

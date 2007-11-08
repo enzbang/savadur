@@ -21,6 +21,18 @@
 
 package Savadur.Config is
 
-   pragma Pure;
+   Config_Error : exception;
+
+   function Savadur_Directory return String;
+   --  Returns Savadur directory or raise Config_Error
+   --  Savadur directory containing :
+   --      projects/
+   --      scm/
+   --      work/
+   --           $(project_name)/
+   --                           log
+
+   procedure Set_Savadur_Directory (Dir : in String);
+   --  Set savadur directory (Overwrite environment variables)
 
 end Savadur.Config;

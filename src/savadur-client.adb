@@ -22,7 +22,7 @@
 --
 --  Usage :
 --
---  savadur-client [-configdir dirname] -project filename -sid scenario_id
+--  savadur-client [ --savadur-dir dirname] -project filename -sid scenario_id
 --
 
 with Ada.Text_IO;
@@ -62,7 +62,7 @@ procedure Savadur.Client is
    procedure Usage is
    begin
       Ada.Text_IO.Put_Line
-        ("usage: savadur-client [-configdir dirname]"
+        ("usage: savadur-client  -savadur-dir dirname"
          & "-project filename - mode modename");
    end Usage;
 
@@ -87,38 +87,23 @@ begin
                      raise Syntax_Error;
                   end if;
                end;
-            when 'c' =>
-               declare
-                  Full : constant String := GNAT.Command_Line.Full_Switch;
-               begin
-                  if Full = "configdir" then
-                     SCM_Dir :=
-                       To_Unbounded_String (GNAT.Command_Line.Parameter);
-                  else
-                     raise Syntax_Error;
-                  end if;
-               end;
             when 's' =>
                declare
                   Full : constant String := GNAT.Command_Line.Full_Switch;
                begin
-                  if Full = "sid" then
+                  if Full = "savadur-dir" then
+                     SCM_Dir :=
+                       To_Unbounded_String (GNAT.Command_Line.Parameter);
+                  elsif  Full = "sid" then
                      Scenario_Id :=
                        To_Unbounded_String (GNAT.Command_Line.Parameter);
-                  else
                      raise Syntax_Error;
                   end if;
                end;
-
             when others =>
                raise Syntax_Error;
          end case;
       end loop;
-   end if;
-
-   if To_String (SCM_Dir) = "" then
-      --  ??? Use a default directory
-      raise Syntax_Error;
    end if;
 
    if To_String (Project_Filename) = "" then
@@ -127,7 +112,7 @@ begin
 
    --  Parse SCM configuration files
 
-   Savadur.Config.SCM.Parse (-SCM_Dir);
+   Savadur.Config.SCM.Parse;
 
    declare
       Project : Savadur.Config.Project.Project_Config :=
