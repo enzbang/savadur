@@ -119,10 +119,15 @@ begin
 
    Savadur.Config.SCM.Parse;
 
-   Get_Project_Filename : begin
-      Project_Filename := +Directories.Compose
+   Get_Project_Filename : declare
+      Project_Directory : constant String := Directories.Compose
         (Containing_Directory => Config.Savadur_Directory,
-         Name                 => -Project_Name);
+         Name                 => "projects");
+   begin
+      Project_Filename := +Directories.Compose
+        (Containing_Directory => Project_Directory,
+         Name                 => -Project_Name,
+         Extension            => "xml");
    exception
       when IO_Exceptions.Name_Error =>
          raise Syntax_Error with "Wrong project name !";
