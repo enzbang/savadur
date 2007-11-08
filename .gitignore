@@ -1,0 +1,6 @@
+*.ali
+*.o
+*~
+test/harness
+.gpsrcs
+.build
