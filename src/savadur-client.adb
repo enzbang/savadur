@@ -22,12 +22,15 @@
 --
 --  Usage :
 --
---  savadur-client [ --savadurdir dirname] -project filename -sid scenario_id
+--  savadur-client [ --savadurdir dirname] -project name -sid scenario_id
 --
 
 with Ada.Text_IO;
+with Ada.IO_Exceptions;
+with Ada.Exceptions;
 with Ada.Command_Line;
 with Ada.Strings.Unbounded;
+with Ada.Directories;
 
 with GNAT.Command_Line;
 
@@ -40,6 +43,8 @@ with Savadur.Scenarios;
 with Savadur.SCM;
 
 procedure Savadur.Client is
+
+   use Ada;
    use Ada.Text_IO;
    use Ada.Strings.Unbounded;
 
@@ -47,6 +52,7 @@ procedure Savadur.Client is
 
    Syntax_Error     : exception;
 
+   Project_Name     : Unbounded_String;
    Project_Filename : Unbounded_String;
    Scenario_Id      : Unbounded_String :=
                         +String (Scenarios.Default_Scenario);
@@ -62,7 +68,7 @@ procedure Savadur.Client is
    begin
       Ada.Text_IO.Put_Line
         ("usage: savadur-client  -savadurdir dirname"
-         & "   -project filename   -mode modename");
+         & "   -project name   -mode modename");
    end Usage;
 
 begin
@@ -80,7 +86,7 @@ begin
                   Full : constant String := GNAT.Command_Line.Full_Switch;
                begin
                   if Full = "project" then
-                     Project_Filename :=
+                     Project_Name :=
                        To_Unbounded_String (GNAT.Command_Line.Parameter);
                   else
                      raise Syntax_Error;
@@ -105,7 +111,7 @@ begin
       end loop;
    end if;
 
-   if To_String (Project_Filename) = "" then
+   if To_String (Project_Name) = "" then
       raise Syntax_Error;
    end if;
 
@@ -113,9 +119,18 @@ begin
 
    Savadur.Config.SCM.Parse;
 
+   Get_Project_Filename : begin
+      Project_Filename := +Directories.Compose
+        (Containing_Directory => Config.Savadur_Directory,
+         Name                 => -Project_Name);
+   exception
+      when IO_Exceptions.Name_Error =>
+         raise Syntax_Error with "Wrong project name !";
+   end Get_Project_Filename;
+
    declare
-      Project : Savadur.Config.Project.Project_Config :=
-                  Savadur.Config.Project.Parse (To_String (Project_Filename));
+      Project : constant Config.Project.Project_Config :=
+                  Config.Project.Parse (-Project_Filename);
    begin
 
       Put_Line ("Savadur client");
@@ -146,7 +161,8 @@ begin
    end;
 
 exception
-   when Syntax_Error | GNAT.Command_Line.Invalid_Switch  =>
+   when E : Syntax_Error | GNAT.Command_Line.Invalid_Switch  =>
+      Text_IO.Put_Line (Exceptions.Exception_Message (E));
       Usage;
       Ada.Command_Line.Set_Exit_Status (Ada.Command_Line.Failure);
 end Savadur.Client;
