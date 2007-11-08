@@ -20,6 +20,7 @@
 ------------------------------------------------------------------------------
 
 with Ada.Text_IO;
+with Ada.IO_Exceptions;
 with Ada.Directories;
 with Ada.Strings.Unbounded;
 
@@ -207,6 +208,9 @@ package body Savadur.Config.SCM is
 
          end Load_Config;
       end loop Walk_Directories;
+   exception
+      when IO_Exceptions.Name_Error =>
+         raise Config_Error with " No SCM Directory ?";
    end Parse;
 
    -------------------
