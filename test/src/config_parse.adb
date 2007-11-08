@@ -86,7 +86,7 @@ package body Config_Parse is
       pragma Unreferenced (T);
       use Ada.Strings.Unbounded;
    begin
-      Savadur.Config.Set_Savadur_Directory ("../config/scm");
+      Savadur.Config.Set_Savadur_Directory ("../config");
 
       Savadur.Config.SCM.Parse;
       Assertions.Assert
