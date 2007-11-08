@@ -20,7 +20,10 @@
 ------------------------------------------------------------------------------
 
 with AUnit;
+with AUnit_Framework;
 with Savadur_Suite;
+
+with Ada.Command_Line;
 
 -------------
 -- Harness --
@@ -28,8 +31,14 @@ with Savadur_Suite;
 
 procedure Harness is
 
-   procedure Run is new AUnit.Test_Runner (Savadur_Suite.Suite);
+   use Ada;
+   use AUnit_Framework;
+
+   function Run is new
+     AUnit.Test_Runner_With_Status (Savadur_Suite.Suite);
 
 begin
-   Run;
+   if Run = Failure then
+         Command_Line.Set_Exit_Status (Command_Line.Failure);
+   end if;
 end Harness;
