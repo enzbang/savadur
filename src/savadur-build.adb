@@ -120,6 +120,7 @@ package body Savadur.Build is
       Prog_Name       : out Unbounded_String;
       Argument_String : out OS_Lib.Argument_List_Access)
    is
+      use GNAT.OS_Lib;
       Command_String : constant String := -Unbounded_String (Command);
    begin
       for K in Command_String'Range loop
@@ -127,11 +128,19 @@ package body Savadur.Build is
             Prog_Name := +Command_String (Command_String'First .. K - 1);
             Argument_String := OS_Lib.Argument_String_To_List
               (Command_String (K + 1 .. Command_String'Last));
-            return;
+            exit;
          end if;
       end loop;
 
-      Prog_Name := +Command_String;
+      if Argument_String = null then
+         Prog_Name := +Command_String;
+         declare
+            Empty_String : constant OS_Lib.String_Access := new String'("");
+         begin
+            Argument_String :=
+              new Argument_List'(1 => Empty_String);
+         end;
+      end if;
    end Get_Arguments;
 
    -----------------
