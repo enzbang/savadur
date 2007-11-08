@@ -19,8 +19,8 @@
 --  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.       --
 ------------------------------------------------------------------------------
 
-with Savadur.Action;
-with Savadur.Scenario;
+with Savadur.Actions;
+with Savadur.Scenarios;
 with Savadur.Config.Project;
 
 package Savadur.Build is
@@ -28,7 +28,7 @@ package Savadur.Build is
    Command_Parse_Error : exception;
 
    function Execute
-     (Command      : in Savadur.Action.Command;
+     (Command      : in Actions.Command;
       Directory    : in String;
       Log_Filename : in String)
       return Boolean;
@@ -37,8 +37,8 @@ package Savadur.Build is
    --  by the correponding entry in project <variable> section
 
    function Run
-     (Project : Savadur.Config.Project.Project_Config;
-      Id      : Savadur.Scenario.Id)
+     (Project : Config.Project.Project_Config;
+      Id      : Scenarios.Id)
       return Boolean;
    --  Run selected scenario from project config
 

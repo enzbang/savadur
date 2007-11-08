@@ -23,8 +23,8 @@ with Ada.Strings.Unbounded;
 
 with Savadur.Config.Project;
 with Savadur.Config.SCM;
-with Savadur.Action;
-with Savadur.Scenario;
+with Savadur.Actions;
+with Savadur.Scenarios;
 with Savadur.SCM;
 with Savadur.Config;
 
@@ -55,12 +55,12 @@ package body Config_Parse is
          "SCM Name error");
 
       Assertions.Assert
-        (Savadur.Action.Image (Project.Actions) = "[" & ASCII.Lf
+        (Savadur.Actions.Image (Project.Actions) = "[" & ASCII.Lf
            & "make => make build" & ASCII.Lf & "]",
          "Wrong action list");
 
       Assertions.Assert
-        (Savadur.Scenario.Image (Project.Scenari) = "* default" & ASCII.Lf
+        (Savadur.Scenarios.Image (Project.Scenarios) = "* default" & ASCII.Lf
          & "Mode : on-change" & ASCII.Lf
          & "[" & ASCII.Lf
          & "SCM pull" & ASCII.Lf

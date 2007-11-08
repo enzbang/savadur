@@ -23,7 +23,7 @@ with Ada.Strings.Hash;
 
 with Savadur.Utils;
 
-package body Savadur.Action is
+package body Savadur.Actions is
 
    use Savadur.Utils;
 
@@ -58,7 +58,7 @@ package body Savadur.Action is
    -- Image --
    -----------
 
-   function Image (Action : in Savadur.Action.Action) return String is
+   function Image (Action : in Actions.Action) return String is
    begin
       return -Unbounded_String (Action.Cmd);
    end Image;
@@ -67,7 +67,7 @@ package body Savadur.Action is
    -- Image --
    -----------
 
-   function Image (Action : in Savadur.Action.Ref_Action) return String is
+   function Image (Action : in Ref_Action) return String is
    begin
       return Kind'Image (Action.Action_Type) & " " & String (-Action.Id);
    end Image;
@@ -125,4 +125,4 @@ package body Savadur.Action is
       return -Result;
    end Image;
 
-end Savadur.Action;
+end Savadur.Actions;

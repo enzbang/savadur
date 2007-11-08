@@ -35,8 +35,8 @@ with Savadur.Utils;
 with Savadur.Config.Project;
 with Savadur.Build;
 with Savadur.Config.SCM;
-with Savadur.Action;
-with Savadur.Scenario;
+with Savadur.Actions;
+with Savadur.Scenarios;
 with Savadur.SCM;
 
 procedure Savadur.Client is
@@ -48,9 +48,8 @@ procedure Savadur.Client is
    Syntax_Error     : exception;
 
    Project_Filename : Unbounded_String;
-   SCM_Dir          : Unbounded_String;
    Scenario_Id      : Unbounded_String :=
-                        +String (Savadur.Scenario.Default_Scenario);
+                        +String (Scenarios.Default_Scenario);
 
    procedure Usage;
    --  Display Usage
@@ -92,8 +91,8 @@ begin
                   Full : constant String := GNAT.Command_Line.Full_Switch;
                begin
                   if Full = "savadur-dir" then
-                     SCM_Dir :=
-                       To_Unbounded_String (GNAT.Command_Line.Parameter);
+                     Config.Set_Savadur_Directory
+                       (GNAT.Command_Line.Parameter);
                   elsif  Full = "sid" then
                      Scenario_Id :=
                        To_Unbounded_String (GNAT.Command_Line.Parameter);
@@ -125,11 +124,11 @@ begin
       New_Line;
       Put_Line ("Action list : ");
       New_Line;
-      Put_Line (Savadur.Action.Image (Project.Actions));
+      Put_Line (Actions.Image (Project.Actions));
       New_Line;
       Put_Line ("Scenari : ");
       New_Line;
-      Put_Line (Savadur.Scenario.Image (Project.Scenari));
+      Put_Line (Scenarios.Image (Project.Scenarios));
       New_Line;
       New_Line;
       New_Line;
@@ -139,7 +138,7 @@ begin
 
       if Savadur.Build.Run
         (Project,
-         Savadur.Scenario.Id (To_String (Scenario_Id))) then
+         Scenarios.Id (To_String (Scenario_Id))) then
          Put_Line ("Success");
       else
          Put_Line ("Failure");

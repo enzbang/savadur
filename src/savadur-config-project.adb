@@ -59,8 +59,8 @@ package body Savadur.Config.Project is
    type Tree_Reader is new Sax.Readers.Reader with record
       Value           : Unbounded_String;
       Id              : Unbounded_String;
-      Action          : Savadur.Action.Action;
-      Scenario        : Savadur.Scenario.Scenario;
+      Action          : Actions.Action;
+      Scenario        : Scenarios.Scenario;
       Scenario_Id     : Unbounded_String;
       Inside_Scenario : Boolean := False;
       Current_Project : Project_Config;
@@ -118,8 +118,8 @@ package body Savadur.Config.Project is
                New_Item => -Handler.Value);
          when Scenario =>
             Handler.Inside_Scenario := False;
-            Handler.Current_Project.Scenari.Insert
-              (Key      => Savadur.Scenario.Id (-Handler.Scenario_Id),
+            Handler.Current_Project.Scenarios.Insert
+              (Key      => Savadur.Scenarios.Id (-Handler.Scenario_Id),
                New_Item => Handler.Scenario);
             --  Exit scenario
          when Action =>
@@ -130,25 +130,25 @@ package body Savadur.Config.Project is
             if not Handler.Inside_Scenario then
                --  Append this action to actions map
                Handler.Current_Project.Actions.Insert
-                 (Key      => Savadur.Action.Id (-Handler.Id),
+                 (Key      => Actions.Id (-Handler.Id),
                   New_Item => Handler.Action);
             else
                --  Append this action to scenario actions vector
                Handler.Scenario.Actions.Append
-                 (Savadur.Action.Ref_Action'
-                    (Action_Type => Savadur.Action.Default,
-                     Id          => Savadur.Action.U_Id (Handler.Id)));
+                 (Actions.Ref_Action'
+                    (Action_Type => Actions.Default,
+                     Id          => Actions.U_Id (Handler.Id)));
 
             end if;
          when SCM_Action =>
             --  Append this action to scenario actions vector
             Handler.Scenario.Actions.Append
-              (Savadur.Action.Ref_Action'
-                 (Action_Type => Savadur.Action.SCM,
-                  Id          => Savadur.Action.U_Id (Handler.Id)));
+              (Actions.Ref_Action'
+                 (Action_Type => Actions.SCM,
+                  Id          => Actions.U_Id (Handler.Id)));
 
          when Cmd =>
-            Handler.Action.Cmd := Savadur.Action.Command (Handler.Value);
+            Handler.Action.Cmd := Actions.Command (Handler.Value);
          when SCM | Project =>
             null;
       end case;
@@ -205,8 +205,8 @@ package body Savadur.Config.Project is
    begin
       Reader.Current_Project :=
         Project_Config'(SCM_Id    => Savadur.SCM.Null_Uid,
-                        Actions   => Savadur.Action.Maps.Empty_Map,
-                        Scenari   => Savadur.Scenario.Maps.Empty_Map,
+                        Actions   => Actions.Maps.Empty_Map,
+                        Scenarios => Scenarios.Maps.Empty_Map,
                         Variables => <>);
 
       Input_Sources.File.Open
@@ -253,7 +253,7 @@ package body Savadur.Config.Project is
                      Handler.Scenario_Id := +Get_Value (Atts, J);
                   when Mode =>
                      Handler.Scenario.Mode :=
-                       Savadur.Scenario.Mode (+Get_Value (Atts, J));
+                       Scenarios.Mode (+Get_Value (Atts, J));
                end case;
             end loop;
          when SCM =>

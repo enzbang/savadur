@@ -19,8 +19,8 @@
 --  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.       --
 ------------------------------------------------------------------------------
 
-with Savadur.Action;
-with Savadur.Scenario;
+with Savadur.Actions;
+with Savadur.Scenarios;
 with Savadur.SCM;
 with Savadur.Variables;
 
@@ -28,8 +28,8 @@ package Savadur.Config.Project is
 
    type Project_Config is record
       SCM_Id    : Savadur.SCM.U_Id;
-      Actions   : Savadur.Action.Maps.Map;
-      Scenari   : Savadur.Scenario.Maps.Map;
+      Actions   : Savadur.Actions.Maps.Map;
+      Scenarios : Savadur.Scenarios.Maps.Map;
       Variables : Savadur.Variables.Maps.Map := Savadur.Variables.Default;
    end record;
 

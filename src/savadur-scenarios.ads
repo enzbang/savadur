@@ -22,9 +22,9 @@
 with Ada.Strings.Unbounded;
 with Ada.Containers.Indefinite_Hashed_Maps;
 
-with Savadur.Action;
+with Savadur.Actions;
 
-package Savadur.Scenario is
+package Savadur.Scenarios is
 
    use Ada;
    use Ada.Strings.Unbounded;
@@ -36,11 +36,11 @@ package Savadur.Scenario is
    type Mode is new Unbounded_String;
 
    type Scenario is record
-      Mode    : Savadur.Scenario.Mode;
-      Actions : Savadur.Action.Vectors.Vector;
+      Mode    : Scenarios.Mode;
+      Actions : Savadur.Actions.Vectors.Vector;
    end record;
 
-   function Image (Scenario : Savadur.Scenario.Scenario) return String;
+   function Image (Scenario : Scenarios.Scenario) return String;
    --  Return Scenario image
 
    function Hash (Key : Id) return Containers.Hash_Type;
@@ -56,7 +56,7 @@ package Savadur.Scenario is
       Hash            => Hash,
       Equivalent_Keys => "=");
 
-   function Image (Scenari : Savadur.Scenario.Maps.Map) return String;
+   function Image (Scenarios : Maps.Map) return String;
    --  Return Scenario map image
 
-end Savadur.Scenario;
+end Savadur.Scenarios;

@@ -45,21 +45,21 @@ package body Savadur.Build is
    use Savadur.Utils;
 
    procedure Get_Arguments
-     (Command         : in Savadur.Action.Command;
+     (Command         : in Actions.Command;
       Prog_Name       : out Unbounded_String;
       Argument_String : out OS_Lib.Argument_List_Access);
    --  Returns the programme name and the argument list
 
    function Get_Command
-     (Project    : Savadur.Config.Project.Project_Config;
-      Ref_Action : Savadur.Action.Ref_Action)
-     return Savadur.Action.Command;
+     (Project    : Config.Project.Project_Config;
+      Ref_Action : Actions.Ref_Action)
+     return Actions.Command;
    --  Returns the command matching the ref_action
 
    function Parse
-     (Project : Savadur.Config.Project.Project_Config;
-      Cmd     : Savadur.Action.Command)
-     return Savadur.Action.Command;
+     (Project : Config.Project.Project_Config;
+      Cmd     : Actions.Command)
+     return Actions.Command;
    --  Replace strings beginning with $
    --  by the correponding entry in project <variable> section
 
@@ -68,7 +68,7 @@ package body Savadur.Build is
    -------------
 
    function Execute
-     (Command      : in Savadur.Action.Command;
+     (Command      : in Actions.Command;
       Directory    : in String;
       Log_Filename : in String)
       return Boolean
@@ -113,7 +113,7 @@ package body Savadur.Build is
    -------------------
 
    procedure Get_Arguments
-     (Command         : in Savadur.Action.Command;
+     (Command         : in Actions.Command;
       Prog_Name       : out Unbounded_String;
       Argument_String : out OS_Lib.Argument_List_Access)
    is
@@ -136,16 +136,16 @@ package body Savadur.Build is
    -----------------
 
    function Get_Command
-     (Project    : Savadur.Config.Project.Project_Config;
-      Ref_Action : Savadur.Action.Ref_Action)
-      return Savadur.Action.Command
+     (Project    : Config.Project.Project_Config;
+      Ref_Action : Actions.Ref_Action)
+      return Actions.Command
    is
-      use Savadur.Action;
+      use Savadur.Actions;
       Action_Id  : constant Id := -Ref_Action.Id;
-      Get_Action : Savadur.Action.Action;
+      Get_Action : Action;
    begin
 
-      if Ref_Action.Action_Type = Savadur.Action.SCM then
+      if Ref_Action.Action_Type = Actions.SCM then
          --  Search the action in the SCM list
 
          declare
@@ -155,8 +155,8 @@ package body Savadur.Build is
                Key       => -Project.SCM_Id);
          begin
 
-            Ada.Text_IO.Put_Line (Savadur.Action.Image (SCM_Used.Actions));
-            Get_Action := Savadur.Action.Maps.Element
+            Ada.Text_IO.Put_Line (Image (SCM_Used.Actions));
+            Get_Action := Actions.Maps.Element
               (Container => SCM_Used.Actions,
                Key       => Action_Id);
 
@@ -176,9 +176,9 @@ package body Savadur.Build is
    -----------
 
    function Parse
-     (Project : Savadur.Config.Project.Project_Config;
-      Cmd     : Savadur.Action.Command)
-      return Savadur.Action.Command
+     (Project : Config.Project.Project_Config;
+      Cmd     : Actions.Command)
+      return Actions.Command
    is
       Source     : constant String := -Unbounded_String (Cmd);
       Start      : Positive := Source'First;
@@ -210,7 +210,7 @@ package body Savadur.Build is
          Append (Result, Source (Start .. Source'Last));
       end if;
 
-      return Savadur.Action.Command (Result);
+      return Actions.Command (Result);
    exception
       when E : others => Text_IO.Put_Line (Exception_Information (E));
          raise;
@@ -221,16 +221,16 @@ package body Savadur.Build is
    ---------
 
    function Run
-     (Project : Savadur.Config.Project.Project_Config;
-      Id      : Savadur.Scenario.Id)
+     (Project : Config.Project.Project_Config;
+      Id      : Scenarios.Id)
       return Boolean
    is
-      Selected_Scenario : Savadur.Scenario.Scenario;
+      Selected_Scenario : Scenarios.Scenario;
       Sources_Directory : Unbounded_String;
       Result            : Boolean := True;
    begin
       Get_Selected_Scenario : begin
-         Selected_Scenario := Project.Scenari.Element (Key => Id);
+         Selected_Scenario := Project.Scenarios.Element (Key => Id);
       exception
          when Constraint_Error =>
             raise Command_Parse_Error with " Scenario "
@@ -245,15 +245,15 @@ package body Savadur.Build is
       end Get_Sources_Directory;
 
       For_All_Ref_Actions : declare
-         use Savadur.Action;
-         use Savadur.Action.Vectors;
+         use Savadur.Actions;
+         use Savadur.Actions.Vectors;
          Position : Cursor := Selected_Scenario.Actions.First;
       begin
          while Has_Element (Position) loop
 
             Execute_Command : declare
                Ref : Ref_Action := Element (Position);
-               Cmd : Savadur.Action.Command :=
+               Cmd : Command    :=
                        Get_Command (Project    => Project,
                                     Ref_Action => Ref);
             begin

@@ -23,7 +23,7 @@ with Ada.Strings.Unbounded;
 with Ada.Containers.Indefinite_Hashed_Maps;
 with Ada.Containers.Indefinite_Vectors;
 
-package Savadur.Action is
+package Savadur.Actions is
 
    use Ada;
    use Ada.Strings.Unbounded;
@@ -42,14 +42,14 @@ package Savadur.Action is
       Cmd : Command;
    end record;
 
-   function Image (Action : in Savadur.Action.Action) return String;
+   function Image (Action : in Actions.Action) return String;
    --  Returns action image
 
    type Ref_Action (Action_Type : Kind := Default) is record
       Id : U_Id;
    end record;
 
-   function Image (Action : in Savadur.Action.Ref_Action) return String;
+   function Image (Action : in Ref_Action) return String;
    --  Returns action image
 
    ----------
@@ -81,4 +81,4 @@ package Savadur.Action is
    function Image (Vector : Vectors.Vector) return String;
    --  Returns vector image
 
-end Savadur.Action;
+end Savadur.Actions;

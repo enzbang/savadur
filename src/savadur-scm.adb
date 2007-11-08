@@ -61,7 +61,7 @@ package body Savadur.SCM is
       while Maps.Has_Element (Position) loop
          Append (Result, "* " & String (Maps.Key (Position)) & ASCII.Lf);
          Append (Result,
-                 Savadur.Action.Image (Maps.Element (Position).Actions));
+                 Actions.Image (Maps.Element (Position).Actions));
          Maps.Next (Position);
       end loop;
 

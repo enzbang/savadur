@@ -23,7 +23,7 @@ with Ada.Strings.Hash_Case_Insensitive;
 
 with Savadur.Utils;
 
-package body Savadur.Scenario is
+package body Savadur.Scenarios is
 
    use Savadur.Utils;
 
@@ -40,18 +40,18 @@ package body Savadur.Scenario is
    -- Image --
    -----------
 
-   function Image (Scenario : Savadur.Scenario.Scenario) return String is
+   function Image (Scenario : Scenarios.Scenario) return String is
    begin
       return "Mode : "
         & (-Unbounded_String (Scenario.Mode)) & ASCII.Lf
-        & Savadur.Action.Image (Scenario.Actions);
+        & Savadur.Actions.Image (Scenario.Actions);
    end Image;
 
    -----------
    -- Image --
    -----------
 
-   function Image (Scenari : in Maps.Map) return String is
+   function Image (Scenarios : in Maps.Map) return String is
       Result : Unbounded_String;
 
       procedure Image (Position : in Maps.Cursor);
@@ -68,9 +68,9 @@ package body Savadur.Scenario is
                  & Image (Maps.Element (Position)));
       end Image;
    begin
-      Maps.Iterate (Container => Scenari,
+      Maps.Iterate (Container => Scenarios,
                     Process   => Image'Access);
       return -Result;
    end Image;
 
-end Savadur.Scenario;
+end Savadur.Scenarios;

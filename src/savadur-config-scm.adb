@@ -32,7 +32,7 @@ with Input_Sources.File;
 with Unicode.CES;
 
 with Savadur.Utils;
-with Savadur.Action;
+with Savadur.Actions;
 
 package body Savadur.Config.SCM is
 
@@ -59,7 +59,7 @@ package body Savadur.Config.SCM is
    type Tree_Reader is new Sax.Readers.Reader with record
       Value           : Unbounded_String;
       Id              : Unbounded_String;
-      Action          : Savadur.Action.Action;
+      Action          : Actions.Action;
       SCM             : Savadur.SCM.SCM;
       SCM_Id          : Unbounded_String;
    end record;
@@ -114,10 +114,10 @@ package body Savadur.Config.SCM is
             end if;
 
             Handler.SCM.Actions.Insert
-              (Key      => Savadur.Action.Id (-Handler.Id),
+              (Key      => Actions.Id (-Handler.Id),
                New_Item => Handler.Action);
          when Cmd =>
-            Handler.Action.Cmd := Savadur.Action.Command (Handler.Value);
+            Handler.Action.Cmd := Actions.Command (Handler.Value);
          when SCM | Name =>
             null;
       end case;
@@ -192,7 +192,7 @@ package body Savadur.Config.SCM is
          begin
             Ada.Text_IO.Put_Line (Filename);
             Reader.SCM :=
-              Savadur.SCM.SCM'(Actions => Savadur.Action.Maps.Empty_Map);
+              Savadur.SCM.SCM'(Actions => Actions.Maps.Empty_Map);
 
             Input_Sources.File.Open
               (Filename => Filename,
