@@ -21,7 +21,6 @@
 
 with GNAT.Case_Util;
 
-with Ada.Strings.Unbounded;
 with Savadur.Utils;
 
 with Sax.Readers;
@@ -32,19 +31,19 @@ with Unicode.CES;
 
 package body Savadur.Config.Project is
 
-   use Ada.Strings.Unbounded;
    use Savadur.Utils;
 
    Config_Error : exception;
 
    type Node_Value is
-     (SCM, Variable, SCM_Action, Action, Scenario, Cmd, Project);
+     (SCM, Variable, SCM_Action, Action, Scenario, Cmd, Project, Name);
 
    type Attribute is (Id, Mode);
 
    subtype Variable_Attribute is Attribute range Id .. Id;
    subtype SCM_Attribute      is Attribute range Id .. Id;
    subtype Action_Attribute   is Attribute range Id .. Id;
+   subtype Name_Attribute is Attribute range Id .. Id;
    subtype Scenario_Attribute is Attribute;
 
    function Get_Node_Value (S : String) return Node_Value;
@@ -149,7 +148,7 @@ package body Savadur.Config.Project is
 
          when Cmd =>
             Handler.Action.Cmd := Actions.Command (Handler.Value);
-         when SCM | Project =>
+         when SCM | Project | Name =>
             null;
       end case;
 
@@ -203,12 +202,6 @@ package body Savadur.Config.Project is
       Reader : Tree_Reader;
       Source : Input_Sources.File.File_Input;
    begin
-      Reader.Current_Project :=
-        Project_Config'(SCM_Id    => Savadur.SCM.Null_Uid,
-                        Actions   => Actions.Maps.Empty_Map,
-                        Scenarios => Scenarios.Maps.Empty_Map,
-                        Variables => <>);
-
       Input_Sources.File.Open
         (Filename => Filename,
          Input    => Source);
@@ -267,6 +260,19 @@ package body Savadur.Config.Project is
                   when Id =>
                      Handler.Current_Project.SCM_Id :=
                        Savadur.SCM.U_Id (+Get_Value (Atts, J));
+               end case;
+            end loop;
+         when Name =>
+            for J in 0 .. Get_Length (Atts) - 1 loop
+               Attr := Get_Attribute (Get_Qname (Atts, J));
+               if Attr not in Name_Attribute then
+                  raise Config_Error with " Unknow Name attribute "
+                    & Get_Qname (Atts, J);
+               end if;
+               case Name_Attribute (Attr) is
+                  when Id =>
+                     Handler.Current_Project.Project_Id :=
+                       Project_Id (+Get_Value (Atts, J));
                end case;
             end loop;
          when SCM_Action =>

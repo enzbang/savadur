@@ -19,6 +19,8 @@
 --  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.       --
 ------------------------------------------------------------------------------
 
+with Ada.Strings.Unbounded;
+
 with Savadur.Actions;
 with Savadur.Scenarios;
 with Savadur.SCM;
@@ -26,11 +28,16 @@ with Savadur.Variables;
 
 package Savadur.Config.Project is
 
+   use Ada.Strings.Unbounded;
+
+   type Project_Id is new Unbounded_String;
+
    type Project_Config is record
-      SCM_Id    : Savadur.SCM.U_Id;
-      Actions   : Savadur.Actions.Maps.Map;
-      Scenarios : Savadur.Scenarios.Maps.Map;
-      Variables : Savadur.Variables.Maps.Map := Savadur.Variables.Default;
+      Project_Id : Project.Project_Id;
+      SCM_Id     : Savadur.SCM.U_Id;
+      Actions    : Savadur.Actions.Maps.Map;
+      Scenarios  : Savadur.Scenarios.Maps.Map;
+      Variables  : Savadur.Variables.Maps.Map := Savadur.Variables.Default;
    end record;
 
    function Parse (Filename : String) return Project_Config;

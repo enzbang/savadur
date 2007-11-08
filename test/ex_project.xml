@@ -1,4 +1,6 @@
 <project>
+  <name id="ex_project" />
+
   <scm id="git" />
 
   <variable id="url">http://repo.or.cz/r/morzhol.git</variable>

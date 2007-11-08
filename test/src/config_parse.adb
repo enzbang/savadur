@@ -21,6 +21,7 @@
 
 with Ada.Strings.Unbounded;
 
+with Savadur.Utils;
 with Savadur.Config.Project;
 with Savadur.Config.SCM;
 with Savadur.Actions;
@@ -29,6 +30,8 @@ with Savadur.SCM;
 with Savadur.Config;
 
 package body Config_Parse is
+
+   use Savadur.Utils;
 
    procedure Check_SCM_Config
      (T : in out AUnit.Test_Cases.Test_Case'Class);
@@ -51,7 +54,11 @@ package body Config_Parse is
    begin
 
       Assertions.Assert
-        (To_String (Unbounded_String (Project.SCM_Id)) = "git",
+        (-Unbounded_String (Project.Project_Id) = "ex_project",
+         "Project Name error");
+
+      Assertions.Assert
+        (-Unbounded_String (Project.SCM_Id) = "git",
          "SCM Name error");
 
       Assertions.Assert
