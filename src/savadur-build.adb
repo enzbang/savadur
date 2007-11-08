@@ -152,7 +152,7 @@ package body Savadur.Build is
             use Savadur.SCM;
             SCM_Used : Savadur.SCM.SCM := Savadur.SCM.Maps.Element
               (Container => Savadur.Config.SCM.Configurations,
-               Key       => -Project.SCM);
+               Key       => -Project.SCM_Id);
          begin
 
             Ada.Text_IO.Put_Line (Savadur.Action.Image (SCM_Used.Actions));

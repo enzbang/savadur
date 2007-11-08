@@ -204,7 +204,7 @@ package body Savadur.Config.Project is
       Source : Input_Sources.File.File_Input;
    begin
       Reader.Current_Project :=
-        Project_Config'(SCM       => Savadur.SCM.Null_Uid,
+        Project_Config'(SCM_Id    => Savadur.SCM.Null_Uid,
                         Actions   => Savadur.Action.Maps.Empty_Map,
                         Scenari   => Savadur.Scenario.Maps.Empty_Map,
                         Variables => <>);
@@ -265,7 +265,7 @@ package body Savadur.Config.Project is
                end if;
                case SCM_Attribute (Attr) is
                   when Id =>
-                     Handler.Current_Project.SCM :=
+                     Handler.Current_Project.SCM_Id :=
                        Savadur.SCM.U_Id (+Get_Value (Atts, J));
                end case;
             end loop;

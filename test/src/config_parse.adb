@@ -51,7 +51,7 @@ package body Config_Parse is
    begin
 
       Assertions.Assert
-        (To_String (Unbounded_String (Project.SCM)) = "git",
+        (To_String (Unbounded_String (Project.SCM_Id)) = "git",
          "SCM Name error");
 
       Assertions.Assert
