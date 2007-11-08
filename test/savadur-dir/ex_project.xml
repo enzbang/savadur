@@ -3,8 +3,7 @@
 
   <scm id="git" />
 
-  <variable id="url">http://repo.or.cz/r/morzhol.git</variable>
-  <variable id="sources">/tmp/ex_sources</variable>
+  <variable id="url">../../../</variable>
 
   <action id="make">
     <cmd>make build</cmd>

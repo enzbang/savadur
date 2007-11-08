@@ -22,7 +22,7 @@
 --
 --  Usage :
 --
---  savadur-client [ --savadur-dir dirname] -project filename -sid scenario_id
+--  savadur-client [ --savadurdir dirname] -project filename -sid scenario_id
 --
 
 with Ada.Text_IO;
@@ -61,8 +61,8 @@ procedure Savadur.Client is
    procedure Usage is
    begin
       Ada.Text_IO.Put_Line
-        ("usage: savadur-client  -savadur-dir dirname"
-         & "-project filename - mode modename");
+        ("usage: savadur-client  -savadurdir dirname"
+         & "   -project filename   -mode modename");
    end Usage;
 
 begin
@@ -71,7 +71,7 @@ begin
       raise Syntax_Error;
    else
       loop
-         case GNAT.Command_Line.Getopt ("project: configdir: sid: ") is
+         case GNAT.Command_Line.Getopt ("project: savadurdir: sid: ") is
             when ASCII.NUL =>
                exit;
 
@@ -90,7 +90,7 @@ begin
                declare
                   Full : constant String := GNAT.Command_Line.Full_Switch;
                begin
-                  if Full = "savadur-dir" then
+                  if Full = "savadurdir" then
                      Config.Set_Savadur_Directory
                        (GNAT.Command_Line.Parameter);
                   elsif  Full = "sid" then

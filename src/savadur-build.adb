@@ -106,6 +106,9 @@ package body Savadur.Build is
       Free (Exec_Path);
 
       return Result;
+   exception
+      when E : others => Text_IO.Put_Line (Exception_Information (E));
+         raise;
    end Execute;
 
    -------------------
@@ -227,6 +230,9 @@ package body Savadur.Build is
    is
       Selected_Scenario : Scenarios.Scenario;
       Sources_Directory : Unbounded_String;
+      Work_Directory    : Unbounded_String;
+      Project_Directory : Unbounded_String;
+      Log_Directory     : Unbounded_String;
       Result            : Boolean := True;
    begin
       Get_Selected_Scenario : begin
@@ -237,8 +243,30 @@ package body Savadur.Build is
               & String (Id) & " not found";
       end Get_Selected_Scenario;
 
+      Work_Directory := +Directories.Compose
+        (Containing_Directory => Config.Savadur_Directory,
+         Name                 => "work");
+
+      if not Directories.Exists (Name => -Work_Directory) then
+         Directories.Create_Path (New_Directory => -Work_Directory);
+      end if;
+
+      Project_Directory := +Directories.Compose
+        (Containing_Directory => -Work_Directory,
+         Name                 => -Unbounded_String (Project.Project_Id));
+
+      Log_Directory := +Directories.Compose
+        (Containing_Directory => -Project_Directory,
+         Name                 => "log");
+
+      if not Directories.Exists (Name => -Log_Directory) then
+         Directories.Create_Path (New_Directory => -Log_Directory);
+      end if;
+
       Get_Sources_Directory : begin
-         Sources_Directory := +(Project.Variables.Element ("sources"));
+         Sources_Directory := +Directories.Compose
+           (Containing_Directory => -Project_Directory,
+            Name                 => Project.Variables.Element ("sources"));
       exception
          when Constraint_Error =>
             raise Command_Parse_Error with " No sources directory !";
@@ -252,15 +280,18 @@ package body Savadur.Build is
          while Has_Element (Position) loop
 
             Execute_Command : declare
-               Ref : Ref_Action := Element (Position);
-               Cmd : Command    :=
+               Ref      : constant Ref_Action := Element (Position);
+               Log_File : constant String     := Directories.Compose
+                 (Containing_Directory => -Log_Directory,
+                  Name                 => "LOG_" & String (-Ref.Id));
+               Cmd      : constant Command    :=
                        Get_Command (Project    => Project,
                                     Ref_Action => Ref);
             begin
                if Directories.Exists (-Sources_Directory) then
-                  Result := Execute (Cmd,
-                                     -Sources_Directory,
-                                     "LOG_" & String (-Ref.Id));
+                  Result := Execute (Command      => Cmd,
+                                     Directory    => -Sources_Directory,
+                                     Log_Filename => Log_File);
                   Next (Position);
                else
                   --  No sources directory. This means that the project has not
@@ -269,13 +300,16 @@ package body Savadur.Build is
                   --  Call SCM init from current directory
 
                   Ada.Text_IO.Put_Line
-                    ("Create directory" & (-Sources_Directory));
+                    ("Create directory : " & (-Sources_Directory));
 
                   Result := Execute
-                    (Get_Command (Project    => Project,
-                                  Ref_Action => Savadur.SCM.SCM_Init),
-                     Directories.Current_Directory,
-                     "LOG_init");
+                    (Command => Get_Command
+                       (Project    => Project,
+                        Ref_Action => Savadur.SCM.SCM_Init),
+                     Directory => -Project_Directory,
+                     Log_Filename => Directories.Compose
+                       (Containing_Directory => -Log_Directory,
+                        Name                 => "LOG_init"));
 
                   if not Directories.Exists (-Sources_Directory) then
                      raise Command_Parse_Error with " SCM init failed !";
