@@ -19,6 +19,8 @@
 --  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.       --
 ------------------------------------------------------------------------------
 
+with Ada.Directories;
+
 with GNAT.Case_Util;
 
 with Savadur.Utils;
@@ -30,6 +32,8 @@ with Input_Sources.File;
 with Unicode.CES;
 
 package body Savadur.Config.Project is
+
+   use Ada;
 
    use Savadur.Utils;
 
@@ -202,6 +206,10 @@ package body Savadur.Config.Project is
       Reader : Tree_Reader;
       Source : Input_Sources.File.File_Input;
    begin
+      if not Directories.Exists (Name => Filename) then
+         raise Config_Error with "No Project at path :" & Filename;
+      end if;
+
       Input_Sources.File.Open
         (Filename => Filename,
          Input    => Source);
