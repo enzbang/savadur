@@ -26,6 +26,7 @@ with Savadur.Config.Project;
 with Savadur.Config.SCM;
 with Savadur.Actions;
 with Savadur.Scenarios;
+with Savadur.Variables;
 with Savadur.SCM;
 with Savadur.Config;
 
@@ -67,6 +68,13 @@ package body Config_Parse is
          & "regtests => make regtests" & ASCII.Lf
          & "]",
          "Wrong action list");
+
+      Assertions.Assert
+        (Savadur.Variables.Image (Project.Variables) =  "[" & ASCII.Lf
+         & "url : ../../../../" & ASCII.Lf
+         & "sources : sources"  & ASCII.Lf
+         & "]",
+         "Wrong variable list");
 
       Assertions.Assert
         (Savadur.Scenarios.Image (Project.Scenarios) = "* default" & ASCII.Lf
