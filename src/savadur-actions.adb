@@ -60,7 +60,8 @@ package body Savadur.Actions is
 
    function Image (Action : in Actions.Action) return String is
    begin
-      return -Unbounded_String (Action.Cmd);
+      return -Unbounded_String (Action.Cmd) & " " & " result type : "
+        & Result_Type'Image (Action.Result);
    end Image;
 
    -----------
@@ -68,8 +69,15 @@ package body Savadur.Actions is
    -----------
 
    function Image (Action : in Ref_Action) return String is
+      Result : Unbounded_String :=
+                 +Kind'Image (Action.Action_Type)
+                 & " " & String (-Action.Id);
    begin
-      return Kind'Image (Action.Action_Type) & " " & String (-Action.Id);
+      if Action.Value /= Null_Unbounded_String then
+         Append (Result,
+                 " wanted value=" & (-Action.Value));
+      end if;
+      return -Result;
    end Image;
 
    -----------

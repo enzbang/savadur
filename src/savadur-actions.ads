@@ -36,18 +36,33 @@ package Savadur.Actions is
    function "-" (Source : U_Id) return Id;
 
    type Command is new Unbounded_String;
+
    type Kind is (SCM, Default);
 
+   type Result_Type is (Exit_Status, Value);
+
    type Action is record
-      Cmd : Command;
+      Cmd    : Command;
+      Result : Result_Type := Exit_Status;
    end record;
+
+   Null_Action : Action :=
+                   Action'(Cmd    => Command (Null_Unbounded_String),
+                           Result => <>);
 
    function Image (Action : in Actions.Action) return String;
    --  Returns action image
 
-   type Ref_Action (Action_Type : Kind := Default) is record
-      Id : U_Id;
+   type Ref_Action is record
+      Id          : U_Id;
+      Action_Type : Kind             := Default;
+      Value       : Unbounded_String := Null_Unbounded_String;
    end record;
+
+   Null_Ref_Action : Ref_Action :=
+                       Ref_Action'(Id          => U_Id (Null_Unbounded_String),
+                                   Action_Type => <>,
+                                   Value       => <>);
 
    function Image (Action : in Ref_Action) return String;
    --  Returns action image

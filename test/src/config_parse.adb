@@ -64,8 +64,8 @@ package body Config_Parse is
 
       Assertions.Assert
         (Savadur.Actions.Image (Project.Actions) = "[" & ASCII.Lf
-         & "make => make build" & ASCII.Lf
-         & "regtests => make regtests" & ASCII.Lf
+         & "make => make build  result type : EXIT_STATUS" & ASCII.Lf
+         & "regtests => make regtests  result type : EXIT_STATUS" & ASCII.Lf
          & "]",
          "Wrong action list");
 
@@ -103,9 +103,10 @@ package body Config_Parse is
         (Savadur.SCM.Image
            (Savadur.Config.SCM.Configurations) = "* git" & ASCII.Lf
          & "[" & ASCII.Lf
-         & "init => git-clone $url $sources"  & ASCII.Lf
-         & "pull => git-pull"  & ASCII.Lf
-         & "version => git-show-ref -s"  & ASCII.Lf
+         & "init => git-clone $url $sources  result type : EXIT_STATUS"
+         & ASCII.Lf
+         & "pull => git-pull  result type : EXIT_STATUS"  & ASCII.Lf
+         & "version => git-show-ref -s  result type : EXIT_STATUS"  & ASCII.Lf
          & "]",
          "Wrong SCM parse");
    end Check_SCM_Config;

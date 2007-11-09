@@ -42,7 +42,7 @@ package body Savadur.Config.Project is
    type Node_Value is
      (SCM, Variable, SCM_Action, Action, Scenario, Cmd, Project, Name);
 
-   type Attribute is (Id, Check, Value);
+   type Attribute is (Id, Check, Value, Result);
 
    type XML_Attribute is array (Attribute) of Boolean;
 
@@ -52,12 +52,14 @@ package body Savadur.Config.Project is
                    Variable   =>  (Id     => True,
                                    Value  => True,
                                    others => False),
-                   SCM_Action => (Id    => True,
-                                  Check => True,
-                                  Value => True),
-                   Action     => (Id    => True,
-                                  Check => True,
-                                  Value => True),
+                   SCM_Action => (Id     => True,
+                                  Check  => True,
+                                  Value  => True,
+                                  others => False),
+                   Action     => (Id     => True,
+                                  Check  => True,
+                                  Value  => True,
+                                  others => False),
                    Scenario   => (Id     => True,
                                   others => False),
                    Cmd        => (others => False),
@@ -135,12 +137,19 @@ package body Savadur.Config.Project is
             Handler.Current_Project.Variables.Include
               (Key      => -Handler.Id,
                New_Item => -Handler.Value);
+
+            Handler.Id    := +"";
+            Handler.Value := +"";
          when Scenario =>
             Handler.Inside_Scenario := False;
             Handler.Current_Project.Scenarios.Insert
               (Key      => Savadur.Scenarios.Id (-Handler.Scenario_Id),
                New_Item => Handler.Scenario);
             --  Exit scenario
+
+            --  Reset Handler scenario
+            Handler.Scenario_Id := +"";
+            Handler.Scenario    := Scenarios.Null_Scenario;
          when Action =>
             if -Handler.Id = "" then
                raise Config_Error with " Null action id !";
@@ -149,23 +158,33 @@ package body Savadur.Config.Project is
             if not Handler.Inside_Scenario then
                --  Append this action to actions map
                Handler.Current_Project.Actions.Insert
-                 (Key      => Actions.Id (-Handler.Id),
-                  New_Item => Handler.Action);
+                 (Key         => Actions.Id (-Handler.Id),
+                  New_Item    => Handler.Action);
+
+               --  Reset Handler Action
+               Handler.Action := Actions.Null_Action;
+               Handler.Id     := +"";
             else
                --  Append this action to scenario actions vector
                Handler.Scenario.Actions.Append
                  (Actions.Ref_Action'
                     (Action_Type => Actions.Default,
-                     Id          => Actions.U_Id (Handler.Id)));
+                     Id          => Actions.U_Id (Handler.Id),
+                     Value       => Handler.Value));
 
+               Handler.Value := +"";
+               Handler.Id    := +"";
             end if;
          when SCM_Action =>
             --  Append this action to scenario actions vector
             Handler.Scenario.Actions.Append
               (Actions.Ref_Action'
                  (Action_Type => Actions.SCM,
-                  Id          => Actions.U_Id (Handler.Id)));
+                  Id          => Actions.U_Id (Handler.Id),
+                  Value       => Handler.Value));
 
+            Handler.Value := +"";
+            Handler.Id    := +"";
          when Cmd =>
             Handler.Action.Cmd := Actions.Command (Handler.Content_Value);
          when SCM | Project | Name =>
@@ -295,6 +314,30 @@ package body Savadur.Config.Project is
             case NV is
                when Variable =>
                   Handler.Value := +Get_Value (Atts, J);
+               when Action | SCM_Action =>
+                  if not Handler.Inside_Scenario then
+                     raise Config_Error with "Unknow attribute "
+                       & Node_Value'Image (NV) & "." & Get_Qname (Atts, J);
+                  end if;
+                  Handler.Value := +Get_Value (Atts, J);
+               when others => null;
+            end case;
+         elsif Attr = Result then
+            case NV is
+               when Action | SCM_Action =>
+                  if Handler.Inside_Scenario then
+                     raise Config_Error with "Unknow attribute "
+                       & Node_Value'Image (NV) & "." & Get_Qname (Atts, J);
+                  end if;
+                  Get_Action_Result_Type : begin
+                     Handler.Action.Result :=
+                       Actions.Result_Type'Value (Get_Value (Atts, J));
+                  exception
+                     when Constraint_Error =>
+                        raise Config_Error with "Unknow attribute value "
+                          & Node_Value'Image (NV) & "." & Get_Qname (Atts, J)
+                          & " value = " & Get_Value (Atts, J);
+                  end Get_Action_Result_Type;
                when others => null;
             end case;
          else

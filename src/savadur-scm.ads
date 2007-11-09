@@ -36,7 +36,8 @@ package Savadur.SCM is
 
    SCM_Init : Actions.Ref_Action :=
      (Action_Type => Actions.SCM,
-      Id          => Actions.U_Id (+"init"));
+      Id          => Actions.U_Id (+"init"),
+      Value       => <>);
 
    type Id is new String;
    type U_Id is new Unbounded_String;

@@ -35,6 +35,9 @@ package Savadur.Scenarios is
       Actions : Savadur.Actions.Vectors.Vector;
    end record;
 
+   Null_Scenario : Scenario :=
+                     Scenario'(Actions => Actions.Vectors.Empty_Vector);
+
    function Image (Scenario : Scenarios.Scenario) return String;
    --  Return Scenario image
 
