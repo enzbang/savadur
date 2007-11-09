@@ -103,12 +103,27 @@ package body Savadur.Build is
              Return_Code  => Return_Code,
              Err_To_Out   => True);
 
+      if not Result then
+         --  Command failed to execute
+         --  Do not read the return code
+         return False;
+      end if;
+
       Check_Return_Value : begin
-         if Exec_Action.Result = Actions.Exit_Status
-           and then Check_Value /= ""
-           and then Return_Code = Integer'Value (Check_Value)
-         then
-            Result := True;
+         if Exec_Action.Result = Actions.Exit_Status then
+
+            declare
+               V : Integer := 0;
+            begin
+
+               --  If no check_value is specified. Use 0
+
+               if Check_Value /= "" then
+                  V := Integer'Value (Check_Value);
+               end if;
+
+               Result := Return_Code = V;
+            end;
          end if;
       exception
          when Constraint_Error =>
@@ -319,6 +334,11 @@ package body Savadur.Build is
                                      Check_Value  => -Ref.Value,
                                      Directory    => -Sources_Directory,
                                      Log_Filename => Log_File);
+
+                  if not Result then
+                     --  Stop on failure by default
+                     exit;
+                  end if;
                   Next (Position);
                else
                   --  No sources directory. This means that the project has not
