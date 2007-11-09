@@ -2,7 +2,7 @@
   <name id="ex_project" />
   <scm id="git" />
 
-  <variable id="url">../../../../</variable>
+  <variable id="url" value="../../../../" />
 
   <action id="make">
     <cmd>make build</cmd>

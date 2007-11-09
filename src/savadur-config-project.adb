@@ -77,6 +77,7 @@ package body Savadur.Config.Project is
    type Tree_Reader is new Sax.Readers.Reader with record
       Content_Value   : Unbounded_String;
       Id              : Unbounded_String;
+      Value           : Unbounded_String;
       Action          : Actions.Action;
       Scenario        : Scenarios.Scenario;
       Scenario_Id     : Unbounded_String;
@@ -133,7 +134,7 @@ package body Savadur.Config.Project is
 
             Handler.Current_Project.Variables.Include
               (Key      => -Handler.Id,
-               New_Item => -Handler.Content_Value);
+               New_Item => -Handler.Value);
          when Scenario =>
             Handler.Inside_Scenario := False;
             Handler.Current_Project.Scenarios.Insert
@@ -288,6 +289,12 @@ package body Savadur.Config.Project is
                   Handler.Current_Project.Project_Id :=
                     Project_Id (+Get_Value (Atts, J));
 
+               when others => null;
+            end case;
+         elsif Attr = Value then
+            case NV is
+               when Variable =>
+                  Handler.Value := +Get_Value (Atts, J);
                when others => null;
             end case;
          else
