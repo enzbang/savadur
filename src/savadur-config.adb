@@ -21,6 +21,7 @@
 
 with Ada.Strings.Unbounded;
 with Ada.Environment_Variables;
+with Ada.Directories;
 
 with Savadur.Utils;
 
@@ -44,7 +45,9 @@ package body Savadur.Config is
       elsif Environment_Variables.Exists ("SAVADUR_DIR") then
          return Environment_Variables.Value ("SAVADUR_DIR");
       elsif Environment_Variables.Exists ("HOME") then
-         return Environment_Variables.Value ("HOME");
+         return Directories.Compose
+           (Containing_Directory => Environment_Variables.Value ("HOME"),
+            Name                 => ".savadur");
       end if;
 
       --  All tries fail raise exception
