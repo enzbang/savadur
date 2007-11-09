@@ -19,7 +19,13 @@
 --  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.       --
 ------------------------------------------------------------------------------
 
+with Ada.Strings.Unbounded;
+with Savadur.Utils;
+
 package body Savadur.Variables is
+
+   use Ada.Strings.Unbounded;
+   use Savadur.Utils;
 
    -------------
    -- Default --
@@ -33,5 +39,21 @@ package body Savadur.Variables is
 
       return Default_Map;
    end Default;
+
+   -----------
+   -- Image --
+   -----------
+
+   function Image (Map : in Maps.Map) return String is
+      Position : Maps.Cursor := Maps.First (Map);
+      Result   : Unbounded_String := +"[" & ASCII.Lf;
+   begin
+      while Maps.Has_Element (Position) loop
+         Append (Result, Maps.Key (Position) & " : "
+                 & Maps.Element (Position) & ASCII.Lf);
+         Maps.Next (Position);
+      end loop;
+      return -Result & "]";
+   end Image;
 
 end Savadur.Variables;

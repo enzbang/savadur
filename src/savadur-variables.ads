@@ -36,4 +36,7 @@ package Savadur.Variables is
    --  Returns a map with default variables set
    --     - sources is set as "sources"
 
+   function Image (Map : in Maps.Map) return String;
+   --  Returns map image
+
 end Savadur.Variables;
