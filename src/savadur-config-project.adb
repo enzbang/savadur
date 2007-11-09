@@ -75,7 +75,7 @@ package body Savadur.Config.Project is
    --  SAX overloaded routines to parse the incoming XML stream.
 
    type Tree_Reader is new Sax.Readers.Reader with record
-      Value           : Unbounded_String;
+      Content_Value   : Unbounded_String;
       Id              : Unbounded_String;
       Action          : Actions.Action;
       Scenario        : Scenarios.Scenario;
@@ -109,7 +109,7 @@ package body Savadur.Config.Project is
      (Handler : in out Tree_Reader;
       Ch      : in     Unicode.CES.Byte_Sequence) is
    begin
-      Append (Handler.Value, To_Unbounded_String (Ch));
+      Append (Handler.Content_Value, To_Unbounded_String (Ch));
    end Characters;
 
    -----------------
@@ -133,7 +133,7 @@ package body Savadur.Config.Project is
 
             Handler.Current_Project.Variables.Include
               (Key      => -Handler.Id,
-               New_Item => -Handler.Value);
+               New_Item => -Handler.Content_Value);
          when Scenario =>
             Handler.Inside_Scenario := False;
             Handler.Current_Project.Scenarios.Insert
@@ -166,12 +166,12 @@ package body Savadur.Config.Project is
                   Id          => Actions.U_Id (Handler.Id)));
 
          when Cmd =>
-            Handler.Action.Cmd := Actions.Command (Handler.Value);
+            Handler.Action.Cmd := Actions.Command (Handler.Content_Value);
          when SCM | Project | Name =>
             null;
       end case;
 
-      Handler.Value := Null_Unbounded_String;
+      Handler.Content_Value := Null_Unbounded_String;
 
    end End_Element;
 
