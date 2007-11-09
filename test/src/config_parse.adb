@@ -28,7 +28,8 @@ with Savadur.Actions;
 with Savadur.Scenarios;
 with Savadur.Variables;
 with Savadur.SCM;
-with Savadur.Config;
+with Savadur.Environment_Variables;
+with Savadur.Config.Environment_Variables;
 
 package body Config_Parse is
 
@@ -39,6 +40,35 @@ package body Config_Parse is
 
    procedure Check_Project_Config
      (T : in out AUnit.Test_Cases.Test_Case'Class);
+
+   procedure Check_Env_Var_Config
+     (T : in out AUnit.Test_Cases.Test_Case'Class);
+
+   --------------------------
+   -- Check_Env_Var_Config --
+   --------------------------
+
+   procedure Check_Env_Var_Config
+     (T : in out AUnit.Test_Cases.Test_Case'Class)
+   is
+      pragma Unreferenced (T);
+      use Ada.Strings.Unbounded;
+
+      Env_Var : Savadur.Environment_Variables.Maps.Map :=
+                  Savadur.Config.
+                    Environment_Variables.Parse ("ex_project_env.xml");
+   begin
+      Assertions.Assert
+        (Savadur.Environment_Variables.Image (Env_Var) =  "[" & ASCII.Lf
+         & "LD_LIBRARY_PATH : value = /opt/lib" & ASCII.Lf
+         & "   action is REPLACE" & ASCII.Lf
+         &  "PATH : value = /usr/bin" & ASCII.Lf
+         & "   action is APPEND" & ASCII.Lf
+         & "SAVADUR_DIR : value =" & ASCII.Lf
+         & "   action is CLEAR"
+         & "]",
+         "Wrong variable list");
+   end Check_Env_Var_Config;
 
    --------------------------
    -- Check_Project_Config --
@@ -131,6 +161,8 @@ package body Config_Parse is
         (T, Check_Project_Config'Access, "check project configuration");
       Registration.Register_Routine
         (T, Check_SCM_Config'Access, "check scm configuration");
+      Registration.Register_Routine
+        (T, Check_Env_Var_Config'Access, "check env var configuration");
 
    end Register_Tests;
 
