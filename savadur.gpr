@@ -19,6 +19,7 @@
 --  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.       --
 ------------------------------------------------------------------------------
 
+with "aws";
 with "xmlada";
 with "shared.gpr";
 
@@ -29,13 +30,20 @@ project Savadur is
    case Shared.Build is
       when "Debug" =>
          for Object_Dir use ".build/debug/savadur/obj";
-         for Exec_Dir use "bin";
+         for Exec_Dir use ".build/debug/bin";
       when "Profile" =>
          for Object_Dir use ".build/profile/savadur/obj";
-         for Exec_Dir use "bin";
+         for Exec_Dir use ".build/profile/bin";
       when "Release" =>
          for Object_Dir use ".build/release/savadur/obj";
-         for Exec_Dir use "bin";
+         for Exec_Dir use ".build/release/bin";
+   end case;
+
+   case Shared.In_Test is
+      when "TRUE" =>
+         for Exec_Dir use "test/bin";
+      when "FALSE" =>
+         null;
    end case;
 
    ------------

@@ -29,11 +29,11 @@ regtests: build
 	./harness
 
 regtests_bootstrap:
-	$(MAKE) -C ../ build
+	$(MAKE) -C ../ build IN_TEST=TRUE
 	$(MKDIR) savadur-dir/projects
 	$(CP) ex_project.xml savadur-dir/projects/savadur_bootstrap.xml
 	$(CP) -r ../config/scm savadur-dir/
-	../bin/savadur-client -project savadur_bootstrap \
+	./bin/savadur-client -project savadur_bootstrap \
 	-savadurdir $(PWD)/test/savadur-dir
 
 clean:

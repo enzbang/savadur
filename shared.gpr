@@ -30,6 +30,9 @@ project Shared is
    type OS_Type is ("UNIX", "Windows_NT");
    OS : OS_Type := external ("OS", "UNIX");
 
+   type In_Test_Kind is ("TRUE", "FALSE");
+   In_Test : In_Test_Kind := external ("IN_TEST", "FALSE");
+
    -------------
    -- Builder --
    -------------
