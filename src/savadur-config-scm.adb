@@ -56,21 +56,22 @@ package body Savadur.Config.SCM is
                    Action     => (Id => True),
                    Name       => (Id => True));
 
-   function Get_Node_Value (S : String) return Node_Value;
+   function Get_Node_Value (S : in String) return Node_Value;
+
    --  Returns the node value matching the given string or raise Config_Error
 
-   function Get_Attribute (S : String) return Attribute;
-   --  Returns the attributed value matching the given string or raise
-   --  Config_Error
+   function Get_Attribute (S : in String) return Attribute;
+   --  Returns the attribute value matching the given string or raise
+   --  Config_Error.
 
    --  SAX overloaded routines to parse the incoming XML stream.
 
    type Tree_Reader is new Sax.Readers.Reader with record
-      Value           : Unbounded_String;
-      Id              : Unbounded_String;
-      Action          : Actions.Action;
-      SCM             : Savadur.SCM.SCM;
-      SCM_Id          : Unbounded_String;
+      Value  : Unbounded_String;
+      Id     : Unbounded_String;
+      Action : Actions.Action;
+      SCM    : Savadur.SCM.SCM;
+      SCM_Id : Unbounded_String;
    end record;
 
    procedure Start_Element
@@ -115,7 +116,6 @@ package body Savadur.Config.SCM is
       pragma Unreferenced (Qname);
       NV : constant Node_Value := Get_Node_Value (Local_Name);
    begin
-
       case NV is
          when Action =>
             if -Handler.Id = "" then
@@ -132,16 +132,15 @@ package body Savadur.Config.SCM is
       end case;
 
       Handler.Value := Null_Unbounded_String;
-
    end End_Element;
 
    -------------------
    -- Get_Attribute --
    -------------------
 
-   function Get_Attribute (S : String) return Attribute is
-      Upper_S : String := S;
+   function Get_Attribute (S : in String) return Attribute is
       use GNAT;
+      Upper_S : String := S;
    begin
       Case_Util.To_Upper (Upper_S);
 
@@ -159,8 +158,8 @@ package body Savadur.Config.SCM is
    --------------------
 
    function Get_Node_Value (S : in String) return Node_Value is
-      Upper_S : String := S;
       use GNAT;
+      Upper_S : String := S;
    begin
       Case_Util.To_Upper (Upper_S);
 
@@ -199,7 +198,7 @@ package body Savadur.Config.SCM is
          Load_Config : declare
             Filename : constant String := Full_Name (D);
          begin
-            Ada.Text_IO.Put_Line (Filename);
+            Text_IO.Put_Line (Filename);
             Reader.SCM :=
               Savadur.SCM.SCM'(Actions => Actions.Maps.Empty_Map);
 
@@ -240,12 +239,12 @@ package body Savadur.Config.SCM is
       NV   : constant Node_Value := Get_Node_Value (Local_Name);
 
    begin
-
       for J in 0 .. Get_Length (Atts) - 1 loop
          Attr := Get_Attribute (Get_Qname (Atts, J));
          if not XML_Schema (NV) (Attr) then
             raise Config_Error with "Unknow attribute "
-            & Node_Value'Image (NV) & "." & Get_Qname (Atts, J);
+              & Node_Value'Image (NV) & "." & Get_Qname (Atts, J);
+
          elsif Attr = Id then
             case NV is
                when Action =>
@@ -254,6 +253,7 @@ package body Savadur.Config.SCM is
                      Handler.SCM_Id := +Get_Value (Atts, J);
                when SCM | Cmd => null;
             end case;
+
          else
             raise Config_Error with "Internal error for "
               & Node_Value'Image (NV) & " with " & Get_Qname (Atts, J);
