@@ -28,6 +28,8 @@ GENERAL_OPTIONS = CP="$(CP)" MKDIR="$(MKDIR)" RM="$(RM)" \
 
 OPTIONS = MODE="$(MODE)" $(GENERAL_OPTIONS)
 
+BIN_DIR=".build/$(shell echo $(MODE) | tr [[:upper:]] [[:lower:]])/bin"
+
 all: build
 
 build:
@@ -41,3 +43,13 @@ regtests_bootstrap:
 
 clean:
 	$(GNATCLEAN) -P savadur
+
+
+install:
+	@$(MKDIR) $(INSTALL)/example
+	@$(CP) -r config/scm $(INSTALL)/scm
+	@$(CP) test/ex_project.xml $(INSTALL)/example/
+	@cp $(BIN_DIR)/savadur-client $(INSTALL)
+	@echo savadur is installed in $(INSTALL)
+
+
