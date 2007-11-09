@@ -22,6 +22,7 @@
 with Savadur.Actions;
 with Savadur.Scenarios;
 with Savadur.Config.Project;
+with Savadur.Environment_Variables;
 
 package Savadur.Build is
 
@@ -39,6 +40,7 @@ package Savadur.Build is
 
    function Run
      (Project : Config.Project.Project_Config;
+      Env_Var : Environment_Variables.Maps.Map;
       Id      : Scenarios.Id)
       return Boolean;
    --  Run selected scenario from project config

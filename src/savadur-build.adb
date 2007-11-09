@@ -251,6 +251,7 @@ package body Savadur.Build is
 
    function Run
      (Project : Config.Project.Project_Config;
+      Env_Var : Environment_Variables.Maps.Map;
       Id      : Scenarios.Id)
       return Boolean
    is
@@ -297,6 +298,10 @@ package body Savadur.Build is
          when Constraint_Error =>
             raise Command_Parse_Error with " No sources directory !";
       end Get_Sources_Directory;
+
+      --  Set environment variable for this project
+
+      Savadur.Environment_Variables.Set_Environment (Env_Var);
 
       For_All_Ref_Actions : declare
          use Savadur.Actions;

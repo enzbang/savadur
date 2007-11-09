@@ -38,9 +38,11 @@ with Savadur.Utils;
 with Savadur.Config.Project;
 with Savadur.Build;
 with Savadur.Config.SCM;
+with Savadur.Config.Environment_Variables;
 with Savadur.Actions;
 with Savadur.Scenarios;
 with Savadur.SCM;
+with Savadur.Environment_Variables;
 
 procedure Savadur.Client is
 
@@ -50,12 +52,13 @@ procedure Savadur.Client is
 
    use Savadur.Utils;
 
-   Syntax_Error     : exception;
+   Syntax_Error         : exception;
 
-   Project_Name     : Unbounded_String;
-   Project_Filename : Unbounded_String;
-   Scenario_Id      : Unbounded_String :=
-                        +String (Scenarios.Default_Scenario);
+   Project_Name         : Unbounded_String;
+   Project_Filename     : Unbounded_String;
+   Project_Env_Filename : Unbounded_String;
+   Scenario_Id          : Unbounded_String :=
+                            +String (Scenarios.Default_Scenario);
 
    procedure Usage;
    --  Display Usage
@@ -123,9 +126,17 @@ begin
       Project_Directory : constant String := Directories.Compose
         (Containing_Directory => Config.Savadur_Directory,
          Name                 => "projects");
+      Env_Var_Directory : constant String := Directories.Compose
+        (Containing_Directory => Config.Savadur_Directory,
+         Name                 => "env");
    begin
       Project_Filename := +Directories.Compose
         (Containing_Directory => Project_Directory,
+         Name                 => -Project_Name,
+         Extension            => "xml");
+
+      Project_Env_Filename := +Directories.Compose
+        (Containing_Directory => Env_Var_Directory,
          Name                 => -Project_Name,
          Extension            => "xml");
    exception
@@ -136,6 +147,7 @@ begin
    declare
       Project : constant Config.Project.Project_Config :=
                   Config.Project.Parse (-Project_Filename);
+      Env_Var : Environment_Variables.Maps.Map;
    begin
 
       Put_Line ("Savadur client");
@@ -156,9 +168,16 @@ begin
       New_Line;
       Put_Line (Savadur.SCM.Image (Savadur.Config.SCM.Configurations));
 
+      if Directories.Exists (-Project_Env_Filename) then
+         Env_Var := Savadur.Config.Environment_Variables.Parse
+           (Filename => -Project_Env_Filename);
+      end if;
+
       if Savadur.Build.Run
-        (Project,
-         Scenarios.Id (To_String (Scenario_Id))) then
+        (Project => Project,
+         Env_Var => Env_Var,
+         Id      => Scenarios.Id (To_String (Scenario_Id)))
+      then
          Put_Line ("Success");
       else
          Put_Line ("Failure");

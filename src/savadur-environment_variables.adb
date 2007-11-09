@@ -19,6 +19,8 @@
 --  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.       --
 ------------------------------------------------------------------------------
 
+with Ada.Environment_Variables;
+
 with Savadur.Utils;
 
 package body Savadur.Environment_Variables is
@@ -55,9 +57,31 @@ package body Savadur.Environment_Variables is
    -- Set_Environment --
    ---------------------
 
-   procedure Set_Environment is
+   procedure Set_Environment (Map : in Maps.Map) is
+      Position : Maps.Cursor := Map.First;
    begin
-      null;
+      while Maps.Has_Element (Position) loop
+         declare
+            V : constant Var    := Maps.Element (Position);
+            N : constant String := Maps.Key (Position);
+         begin
+            case V.Action is
+               when Replace =>
+                  Ada.Environment_Variables.Set (N, -V.Value);
+               when Append  =>
+                  if Ada.Environment_Variables.Exists (N) then
+                     Ada.Environment_Variables.Set
+                       (N,
+                        -V.Value & ":" & Ada.Environment_Variables.Value (N));
+                  else
+                     Ada.Environment_Variables.Set (N, -V.Value);
+                  end if;
+               when Clear =>
+                  Ada.Environment_Variables.Clear (N);
+            end case;
+            Maps.Next (Position);
+         end;
+      end loop;
    end Set_Environment;
 
 end Savadur.Environment_Variables;

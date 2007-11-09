@@ -252,7 +252,6 @@ package body Savadur.Config.Project is
       Parse (Reader, Source);
 
       Input_Sources.File.Close (Source);
-
       return Reader.Current_Project;
    end Parse;
 
