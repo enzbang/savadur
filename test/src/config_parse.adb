@@ -59,13 +59,13 @@ package body Config_Parse is
                     Environment_Variables.Parse ("ex_project_env.xml");
    begin
       Assertions.Assert
-        (Savadur.Environment_Variables.Image (Env_Var) =  "[" & ASCII.Lf
-         & "LD_LIBRARY_PATH : value = /opt/lib" & ASCII.Lf
-         & "   action is REPLACE" & ASCII.Lf
-         &  "PATH : value = /usr/bin" & ASCII.Lf
-         & "   action is APPEND" & ASCII.Lf
-         & "SAVADUR_DIR : value =" & ASCII.Lf
-         & "   action is CLEAR"
+        (Savadur.Environment_Variables.Image (Env_Var) =  "[" & ASCII.LF
+         & "LD_LIBRARY_PATH : value = /opt/lib" & ASCII.LF
+         & "   action is REPLACE" & ASCII.LF
+         & "PATH : value = /usr/bin" & ASCII.LF
+         & "   action is APPEND" & ASCII.LF
+         & "SAVADUR_DIR : value = " & ASCII.LF
+         & "   action is CLEAR" & ASCII.LF
          & "]",
          "Wrong variable list");
    end Check_Env_Var_Config;
