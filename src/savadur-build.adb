@@ -103,10 +103,9 @@ package body Savadur.Build is
              Return_Code  => Return_Code,
              Err_To_Out   => True);
 
-      Result := False;
-
       Check_Return_Value : begin
          if Exec_Action.Result = Actions.Exit_Status
+           and then Check_Value /= ""
            and then Return_Code = Integer'Value (Check_Value)
          then
             Result := True;
