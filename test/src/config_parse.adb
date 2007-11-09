@@ -63,15 +63,17 @@ package body Config_Parse is
 
       Assertions.Assert
         (Savadur.Actions.Image (Project.Actions) = "[" & ASCII.Lf
-           & "make => make build" & ASCII.Lf & "]",
+         & "make => make build" & ASCII.Lf
+         & "regtests => make regtests" & ASCII.Lf
+         & "]",
          "Wrong action list");
 
       Assertions.Assert
         (Savadur.Scenarios.Image (Project.Scenarios) = "* default" & ASCII.Lf
-         & "Mode : on-change" & ASCII.Lf
          & "[" & ASCII.Lf
          & "SCM pull" & ASCII.Lf
          & "DEFAULT make" & ASCII.Lf
+         & "DEFAULT regtests" & ASCII.Lf
          & "]",
          "Wrong scenarios list");
    end Check_Project_Config;

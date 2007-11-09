@@ -19,7 +19,6 @@
 --  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.       --
 ------------------------------------------------------------------------------
 
-with Ada.Strings.Unbounded;
 with Ada.Containers.Indefinite_Hashed_Maps;
 
 with Savadur.Actions;
@@ -27,16 +26,12 @@ with Savadur.Actions;
 package Savadur.Scenarios is
 
    use Ada;
-   use Ada.Strings.Unbounded;
 
    type Id is new String;
 
    Default_Scenario : Id := "default";
 
-   type Mode is new Unbounded_String;
-
    type Scenario is record
-      Mode    : Scenarios.Mode;
       Actions : Savadur.Actions.Vectors.Vector;
    end record;
 

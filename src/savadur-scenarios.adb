@@ -20,10 +20,13 @@
 ------------------------------------------------------------------------------
 
 with Ada.Strings.Hash_Case_Insensitive;
+with Ada.Strings.Unbounded;
 
 with Savadur.Utils;
 
 package body Savadur.Scenarios is
+
+   use Ada.Strings.Unbounded;
 
    use Savadur.Utils;
 
@@ -42,9 +45,7 @@ package body Savadur.Scenarios is
 
    function Image (Scenario : Scenarios.Scenario) return String is
    begin
-      return "Mode : "
-        & (-Unbounded_String (Scenario.Mode)) & ASCII.Lf
-        & Savadur.Actions.Image (Scenario.Actions);
+      return Savadur.Actions.Image (Scenario.Actions);
    end Image;
 
    -----------

@@ -12,7 +12,7 @@
     <cmd>make regtests</cmd>
   </action>
 
-  <scenario id="default" mode="on-change">
+  <scenario id="default">
     <scm_action id="pull" />
     <action id="make" />
     <action id="regtests" />

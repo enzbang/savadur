@@ -48,6 +48,14 @@ package body Savadur.Config.SCM is
 
    type Attribute is (Id);
 
+   type XML_Attribute is array (Attribute) of Boolean;
+
+   XML_Schema : constant array (Node_Value) of XML_Attribute :=
+                  (SCM        => (Id => False),
+                   Cmd        => (Id => False),
+                   Action     => (Id => True),
+                   Name       => (Id => True));
+
    function Get_Node_Value (S : String) return Node_Value;
    --  Returns the node value matching the given string or raise Config_Error
 
@@ -232,26 +240,25 @@ package body Savadur.Config.SCM is
       NV   : constant Node_Value := Get_Node_Value (Local_Name);
 
    begin
-      case NV is
-         when Name =>
-            for J in 0 .. Get_Length (Atts) - 1 loop
-               Attr := Get_Attribute (Get_Qname (Atts, J));
-               case Attr is
-                  when Id =>
+
+      for J in 0 .. Get_Length (Atts) - 1 loop
+         Attr := Get_Attribute (Get_Qname (Atts, J));
+         if not XML_Schema (NV) (Attr) then
+            raise Config_Error with "Unknow attribute "
+            & Node_Value'Image (NV) & "." & Get_Qname (Atts, J);
+         elsif Attr = Id then
+            case NV is
+               when Action =>
+                  Handler.Id := +Get_Value (Atts, J);
+               when Name =>
                      Handler.SCM_Id := +Get_Value (Atts, J);
-               end case;
-            end loop;
-         when Action =>
-            for J in 0 .. Get_Length (Atts) - 1 loop
-               Attr := Get_Attribute (Get_Qname (Atts, J));
-               case Attr is
-                  when Id =>
-                     Handler.Id := +Get_Value (Atts, J);
-               end case;
-            end loop;
-         when Cmd | Scm =>
-            null;
-      end case;
+               when SCM | Cmd => null;
+            end case;
+         else
+            raise Config_Error with "Internal error for "
+              & Node_Value'Image (NV) & " with " & Get_Qname (Atts, J);
+         end if;
+      end loop;
    end Start_Element;
 
 end Savadur.Config.SCM;

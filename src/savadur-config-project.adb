@@ -42,13 +42,28 @@ package body Savadur.Config.Project is
    type Node_Value is
      (SCM, Variable, SCM_Action, Action, Scenario, Cmd, Project, Name);
 
-   type Attribute is (Id, Mode);
+   type Attribute is (Id, Check, Value);
 
-   subtype Variable_Attribute is Attribute range Id .. Id;
-   subtype SCM_Attribute      is Attribute range Id .. Id;
-   subtype Action_Attribute   is Attribute range Id .. Id;
-   subtype Name_Attribute is Attribute range Id .. Id;
-   subtype Scenario_Attribute is Attribute;
+   type XML_Attribute is array (Attribute) of Boolean;
+
+   XML_Schema : constant array (Node_Value) of XML_Attribute :=
+                  (SCM        =>  (Id     => True,
+                                   others => False),
+                   Variable   =>  (Id     => True,
+                                   Value  => True,
+                                   others => False),
+                   SCM_Action => (Id    => True,
+                                  Check => True,
+                                  Value => True),
+                   Action     => (Id    => True,
+                                  Check => True,
+                                  Value => True),
+                   Scenario   => (Id     => True,
+                                  others => False),
+                   Cmd        => (others => False),
+                   Project    => (others => False),
+                   Name       => (Id     => True,
+                                  others => False));
 
    function Get_Node_Value (S : String) return Node_Value;
    --  Returns the node value matching the given string or raise Config_Error
@@ -240,96 +255,46 @@ package body Savadur.Config.Project is
       NV   : constant Node_Value := Get_Node_Value (Local_Name);
 
    begin
+
+      --  Set global state
+
       case NV is
          when Scenario =>
             Handler.Inside_Scenario := True;
-            for J in 0 .. Get_Length (Atts) - 1 loop
-               Attr := Get_Attribute (Get_Qname (Atts, J));
-               if Attr not in Scenario_Attribute then
-                  raise Config_Error with " Unknow scenario attribute "
-                    & Get_Qname (Atts, J);
-               end if;
-               case Scenario_Attribute (Attr) is
-                  when Id =>
-                     Handler.Scenario_Id := +Get_Value (Atts, J);
-                  when Mode =>
-                     Handler.Scenario.Mode :=
-                       Scenarios.Mode (+Get_Value (Atts, J));
-               end case;
-            end loop;
-         when SCM =>
-            for J in 0 .. Get_Length (Atts) - 1 loop
-               Attr := Get_Attribute (Get_Qname (Atts, J));
-               if Attr not in SCM_Attribute then
-                  raise Config_Error with " Unknow SCM attribute "
-                    & Get_Qname (Atts, J);
-               end if;
-               case SCM_Attribute (Attr) is
-                  when Id =>
-                     Handler.Current_Project.SCM_Id :=
-                       Savadur.SCM.U_Id (+Get_Value (Atts, J));
-               end case;
-            end loop;
-         when Name =>
-            for J in 0 .. Get_Length (Atts) - 1 loop
-               Attr := Get_Attribute (Get_Qname (Atts, J));
-               if Attr not in Name_Attribute then
-                  raise Config_Error with " Unknow Name attribute "
-                    & Get_Qname (Atts, J);
-               end if;
-               case Name_Attribute (Attr) is
-                  when Id =>
-                     Handler.Current_Project.Project_Id :=
-                       Project_Id (+Get_Value (Atts, J));
-               end case;
-            end loop;
          when SCM_Action =>
-
             --  SCM Action should be only inside scenari
 
             if not Handler.Inside_Scenario then
                raise Config_Error with "SCM Action outside scenario";
             end if;
-
-            for J in 0 .. Get_Length (Atts) - 1 loop
-               Attr := Get_Attribute (Get_Qname (Atts, J));
-               if Attr not in Action_Attribute then
-                  raise Config_Error with " Unknow action attribute "
-                    & Get_Qname (Atts, J);
-               end if;
-               case Action_Attribute (Attr) is
-                  when Id =>
-                     Handler.Id := +Get_Value (Atts, J);
-               end case;
-            end loop;
-         when Action =>
-            for J in 0 .. Get_Length (Atts) - 1 loop
-               Attr := Get_Attribute (Get_Qname (Atts, J));
-               if Attr not in Action_Attribute then
-                  raise Config_Error with " Unknow action attribute "
-                    & Get_Qname (Atts, J);
-               end if;
-               case Action_Attribute (Attr) is
-                  when Id =>
-                     Handler.Id := +Get_Value (Atts, J);
-               end case;
-            end loop;
-         when Variable =>
-            for J in 0 .. Get_Length (Atts) - 1 loop
-               Attr := Get_Attribute (Get_Qname (Atts, J));
-               if Attr not in Variable_Attribute then
-                  raise Config_Error with " Unknow action attribute "
-                    & Get_Qname (Atts, J);
-               end if;
-               case Variable_Attribute (Attr) is
-                  when Id =>
-                     Handler.Id := +Get_Value (Atts, J);
-               end case;
-            end loop;
-         when Cmd | Project =>
-            null;
+         when others => null;
       end case;
 
+      for J in 0 .. Get_Length (Atts) - 1 loop
+         Attr := Get_Attribute (Get_Qname (Atts, J));
+         if not XML_Schema (NV) (Attr) then
+            raise Config_Error with "Unknow attribute "
+            & Node_Value'Image (NV) & "." & Get_Qname (Atts, J);
+         elsif Attr = Id then
+            case NV is
+               when Scenario =>
+                  Handler.Scenario_Id := +Get_Value (Atts, J);
+               when SCM =>
+                  Handler.Current_Project.SCM_Id :=
+                    Savadur.SCM.U_Id (+Get_Value (Atts, J));
+               when Variable | Action | SCM_Action =>
+                  Handler.Id := +Get_Value (Atts, J);
+               when Name =>
+                  Handler.Current_Project.Project_Id :=
+                    Project_Id (+Get_Value (Atts, J));
+
+               when others => null;
+            end case;
+         else
+            raise Config_Error with "Internal error for "
+              & Node_Value'Image (NV) & " with " & Get_Qname (Atts, J);
+         end if;
+      end loop;
    end Start_Element;
 
 end Savadur.Config.Project;
