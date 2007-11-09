@@ -191,12 +191,7 @@ package body Savadur.Build is
 
       if Argument_String = null then
          Prog_Name := +Command_String;
-         declare
-            Empty_String : constant OS_Lib.String_Access := new String'("");
-         begin
-            Argument_String :=
-              new Argument_List'(1 => Empty_String);
-         end;
+         Argument_String := OS_Lib.Argument_String_To_List ("");
       end if;
    end Get_Arguments;
 
