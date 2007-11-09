@@ -50,11 +50,11 @@ package body Savadur.Build is
       Argument_String : out OS_Lib.Argument_List_Access);
    --  Returns the programme name and the argument list
 
-   function Get_Command
+   function Get_Action
      (Project    : Config.Project.Project_Config;
       Ref_Action : Actions.Ref_Action)
-     return Actions.Command;
-   --  Returns the command matching the ref_action
+      return Actions.Action;
+   --  Returns the action to execute matching the ref_action
 
    function Parse
      (Project : Config.Project.Project_Config;
@@ -68,20 +68,22 @@ package body Savadur.Build is
    -------------
 
    function Execute
-     (Command      : in Actions.Command;
-      Directory    : in String;
-      Log_Filename : in String)
+     (Exec_Action   : in Actions.Action;
+      Check_Value   : in String;
+      Directory     : in String;
+      Log_Filename  : in String)
       return Boolean
    is
       use GNAT.OS_Lib;
+      use type Actions.Result_Type;
       Exec_Path       : OS_Lib.String_Access;
       Argument_String : Argument_List_Access;
       Prog_Name       : Unbounded_String;
       Result          : Boolean;
-      PID             : Process_Id;
+      Return_Code     : Integer;
    begin
 
-      Get_Arguments (Command, Prog_Name, Argument_String);
+      Get_Arguments (Exec_Action.Cmd, Prog_Name, Argument_String);
 
       --  Chdir to the requested base directory
 
@@ -94,13 +96,26 @@ package body Savadur.Build is
            & " on this system";
       end if;
 
-      PID := Non_Blocking_Spawn
-        (Program_Name => Exec_Path.all,
-         Args         => Argument_String.all,
-         Output_File  => Log_Filename,
-         Err_To_Out   => True);
+      Spawn (Program_Name => Exec_Path.all,
+             Args         => Argument_String.all,
+             Output_File  => Log_Filename,
+             Success      => Result,
+             Return_Code  => Return_Code,
+             Err_To_Out   => True);
 
-      Wait_Process (PID, Result);
+      Result := False;
+
+      Check_Return_Value : begin
+         if Exec_Action.Result = Actions.Exit_Status
+           and then Return_Code = Integer'Value (Check_Value)
+         then
+            Result := True;
+         end if;
+      exception
+         when Constraint_Error =>
+            raise Command_Parse_Error with "Value " & Check_Value
+              & " is not an exit status";
+      end Check_Return_Value;
 
       Free (Argument_String);
       Free (Exec_Path);
@@ -110,6 +125,49 @@ package body Savadur.Build is
       when E : others => Text_IO.Put_Line (Exception_Information (E));
          raise;
    end Execute;
+
+   ----------------
+   -- Get_Action --
+   ----------------
+
+   function Get_Action
+     (Project    : Config.Project.Project_Config;
+      Ref_Action : Actions.Ref_Action)
+      return Actions.Action
+   is
+      use Savadur.Actions;
+      Action_Id  : constant Id := -Ref_Action.Id;
+      Get_Action : Action;
+   begin
+
+      if Ref_Action.Action_Type = Actions.SCM then
+         --  Search the action in the SCM list
+
+         declare
+            use Savadur.SCM;
+            SCM_Used : Savadur.SCM.SCM := Savadur.SCM.Maps.Element
+              (Container => Savadur.Config.SCM.Configurations,
+               Key       => -Project.SCM_Id);
+         begin
+
+            Ada.Text_IO.Put_Line (Image (SCM_Used.Actions));
+            Get_Action := Actions.Maps.Element
+              (Container => SCM_Used.Actions,
+               Key       => Action_Id);
+
+         end;
+      else
+         --  Search in project action
+
+         Get_Action := Maps.Element (Container => Project.Actions,
+                                     Key       => Action_Id);
+      end if;
+
+      --  Parse command
+      Get_Action.Cmd := Parse (Project, Get_Action.Cmd);
+
+      return Get_Action;
+   end Get_Action;
 
    -------------------
    -- Get_Arguments --
@@ -142,46 +200,6 @@ package body Savadur.Build is
          end;
       end if;
    end Get_Arguments;
-
-   -----------------
-   -- Get_Command --
-   -----------------
-
-   function Get_Command
-     (Project    : Config.Project.Project_Config;
-      Ref_Action : Actions.Ref_Action)
-      return Actions.Command
-   is
-      use Savadur.Actions;
-      Action_Id  : constant Id := -Ref_Action.Id;
-      Get_Action : Action;
-   begin
-
-      if Ref_Action.Action_Type = Actions.SCM then
-         --  Search the action in the SCM list
-
-         declare
-            use Savadur.SCM;
-            SCM_Used : Savadur.SCM.SCM := Savadur.SCM.Maps.Element
-              (Container => Savadur.Config.SCM.Configurations,
-               Key       => -Project.SCM_Id);
-         begin
-
-            Ada.Text_IO.Put_Line (Image (SCM_Used.Actions));
-            Get_Action := Actions.Maps.Element
-              (Container => SCM_Used.Actions,
-               Key       => Action_Id);
-
-         end;
-      else
-         --  Search in project action
-
-         Get_Action := Maps.Element (Container => Project.Actions,
-                                     Key       => Action_Id);
-      end if;
-
-      return Parse (Project, Get_Action.Cmd);
-   end Get_Command;
 
    -----------
    -- Parse --
@@ -289,16 +307,17 @@ package body Savadur.Build is
          while Has_Element (Position) loop
 
             Execute_Command : declare
-               Ref      : constant Ref_Action := Element (Position);
-               Log_File : constant String     := Directories.Compose
+               Ref         : constant Ref_Action := Element (Position);
+               Log_File    : constant String     := Directories.Compose
                  (Containing_Directory => -Log_Directory,
                   Name                 => "LOG_" & String (-Ref.Id));
-               Cmd      : constant Command    :=
-                       Get_Command (Project    => Project,
-                                    Ref_Action => Ref);
+               Exec_Action : constant Action    :=
+                               Get_Action (Project    => Project,
+                                           Ref_Action => Ref);
             begin
                if Directories.Exists (-Sources_Directory) then
-                  Result := Execute (Command      => Cmd,
+                  Result := Execute (Exec_Action  => Exec_Action,
+                                     Check_Value  => -Ref.Value,
                                      Directory    => -Sources_Directory,
                                      Log_Filename => Log_File);
                   Next (Position);
@@ -312,11 +331,12 @@ package body Savadur.Build is
                     ("Create directory : " & (-Sources_Directory));
 
                   Result := Execute
-                    (Command => Get_Command
+                    (Exec_Action   => Get_Action
                        (Project    => Project,
                         Ref_Action => Savadur.SCM.SCM_Init),
-                     Directory => -Project_Directory,
-                     Log_Filename => Directories.Compose
+                     Check_Value   => "0",
+                     Directory     => -Project_Directory,
+                     Log_Filename  => Directories.Compose
                        (Containing_Directory => -Log_Directory,
                         Name                 => "LOG_init"));
 
