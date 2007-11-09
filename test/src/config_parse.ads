@@ -32,8 +32,7 @@ package Config_Parse is
    procedure Register_Tests (T : in out Test_Case);
    --  Register routines to be run
 
-   function Name (T : Test_Case)
-                  return Test_String;
+   function Name (T : in Test_Case) return Test_String;
    --  Returns name identifying the test case
 
 end Config_Parse;
