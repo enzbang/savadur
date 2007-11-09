@@ -19,56 +19,13 @@
 --  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.       --
 ------------------------------------------------------------------------------
 
-with "aws";
-with "xmlada";
-with "shared.gpr";
+with Savadur.Servers;
 
-project Savadur is
+package Savadur.Config.Server is
 
-   for Source_Dirs use ("src");
-   for Main use ("savadur-client.adb", "savadur-server.adb");
+   Configurations : Savadur.Servers.Maps.Map;
 
-   case Shared.Build is
-      when "Debug" =>
-         for Object_Dir use ".build/debug/savadur/obj";
-         for Exec_Dir use ".build/debug/bin";
-      when "Profile" =>
-         for Object_Dir use ".build/profile/savadur/obj";
-         for Exec_Dir use ".build/profile/bin";
-      when "Release" =>
-         for Object_Dir use ".build/release/savadur/obj";
-         for Exec_Dir use ".build/release/bin";
-   end case;
+   procedure Parse;
+   --  Fill the server configuration map
 
-   case Shared.In_Test is
-      when "TRUE" =>
-         for Exec_Dir use "test/bin";
-      when "FALSE" =>
-         null;
-   end case;
-
-   ------------
-   -- Binder --
-   ------------
-
-   package Binder renames Shared.Binder;
-
-   --------------
-   -- Compiler --
-   --------------
-
-   package Compiler renames Shared.Compiler;
-
-   -------------
-   -- Builder --
-   -------------
-
-   package Builder renames Shared.Builder;
-
-   ------------
-   -- Linker --
-   ------------
-
-   package Linker renames Shared.Linker;
-
-end Savadur;
+end Savadur.Config.Server;

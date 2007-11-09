@@ -2,7 +2,7 @@
 --                                Savadur                                   --
 --                                                                          --
 --                           Copyright (C) 2007                             --
---                            Olivier Ramonat                               --
+--                      Pascal Obry - Olivier Ramonat                       --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
 --  it under the terms of the GNU General Public License as published by    --
@@ -25,13 +25,16 @@ with Ada.Directories;
 with Savadur.Utils;
 with Savadur.Config.Project;
 with Savadur.Config.SCM;
+with Savadur.Config.Server;
 with Savadur.Actions;
+with Savadur.Config;
 with Savadur.Scenarios;
 with Savadur.Variables;
 with Savadur.SCM;
 with Savadur.Environment_Variables;
 with Savadur.Config.Environment_Variables;
 with Savadur.Notifications;
+with Savadur.Servers;
 
 with Utils;
 with Savadur.Config; use Savadur.Config;
@@ -50,6 +53,9 @@ package body Config_Parse is
      (T : in out AUnit.Test_Cases.Test_Case'Class);
 
    procedure Check_Env_Var_Config
+     (T : in out AUnit.Test_Cases.Test_Case'Class);
+
+   procedure Check_Server_Config
      (T : in out AUnit.Test_Cases.Test_Case'Class);
 
    --------------------------
@@ -144,7 +150,6 @@ package body Config_Parse is
              & "]"),
          "Wrong notifications list" &
          Savadur.Notifications.Image (Project.Notifications));
-
    end Check_Project_Config;
 
    ----------------------
@@ -171,11 +176,42 @@ package body Config_Parse is
          "Wrong SCM parse");
    end Check_SCM_Config;
 
+   -------------------------
+   -- Check_Server_Config --
+   -------------------------
+
+   procedure Check_Server_Config
+     (T : in out AUnit.Test_Cases.Test_Case'Class)
+   is
+      pragma Unreferenced (T);
+      use Ada.Strings.Unbounded;
+   begin
+      Savadur.Config.Set_Savadur_Directory ("config");
+
+      Savadur.Config.Server.Parse;
+      Assertions.Assert
+        (Savadur.Servers.Image
+           (Savadur.Config.Server.Configurations) =
+           "* a_fast_server" & ASCII.LF
+         & "[" & ASCII.LF
+         & "Name => a_fast_server"  & ASCII.LF
+         & "URL => localhost"  & ASCII.LF
+         & "]" & ASCII.LF
+         & "* myserver" & ASCII.LF
+         & "[" & ASCII.LF
+         & "Name => myserver"  & ASCII.LF
+         & "URL => http://www.myserver.net/" & ASCII.LF
+         & "]" & ASCII.LF,
+         "Wrong Servers parse, expected : " & ASCII.LF
+         & ''' & Savadur.Servers.Image
+           (Savadur.Config.Server.Configurations) & ''');
+   end Check_Server_Config;
+
    ----------
    -- Name --
    ----------
 
-   function Name (T : Test_Case) return Test_String is
+   function Name (T : in Test_Case) return Test_String is
       pragma Unreferenced (T);
    begin
       return Format ("Parse configuration files and check generated results");
@@ -193,6 +229,8 @@ package body Config_Parse is
         (T, Check_SCM_Config'Access, "check scm configuration");
       Registration.Register_Routine
         (T, Check_Env_Var_Config'Access, "check env var configuration");
+      Registration.Register_Routine
+        (T, Check_Server_Config'Access, "check server configuration");
    end Register_Tests;
 
    -----------------

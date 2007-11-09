@@ -19,56 +19,45 @@
 --  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.       --
 ------------------------------------------------------------------------------
 
-with "aws";
-with "xmlada";
-with "shared.gpr";
+with Ada.Strings.Hash;
 
-project Savadur is
+with Savadur.Utils;
 
-   for Source_Dirs use ("src");
-   for Main use ("savadur-client.adb", "savadur-server.adb");
+package body Savadur.Servers is
 
-   case Shared.Build is
-      when "Debug" =>
-         for Object_Dir use ".build/debug/savadur/obj";
-         for Exec_Dir use ".build/debug/bin";
-      when "Profile" =>
-         for Object_Dir use ".build/profile/savadur/obj";
-         for Exec_Dir use ".build/profile/bin";
-      when "Release" =>
-         for Object_Dir use ".build/release/savadur/obj";
-         for Exec_Dir use ".build/release/bin";
-   end case;
+   use Savadur.Utils;
 
-   case Shared.In_Test is
-      when "TRUE" =>
-         for Exec_Dir use "test/bin";
-      when "FALSE" =>
-         null;
-   end case;
+   ----------
+   -- Hash --
+   ----------
 
-   ------------
-   -- Binder --
-   ------------
+   function Hash (Key : in Id) return Containers.Hash_Type is
+   begin
+      return Strings.Hash (String (Key));
+   end Hash;
 
-   package Binder renames Shared.Binder;
+   -----------
+   -- Image --
+   -----------
 
-   --------------
-   -- Compiler --
-   --------------
+   function Image (Servers_Map : in Maps.Map) return String is
+      Position : Maps.Cursor := Maps.First (Servers_Map);
+      Result   : Unbounded_String;
+   begin
+      while Maps.Has_Element (Position) loop
+         Append (Result, "* " & String (Maps.Key (Position)) & ASCII.LF);
+         Append (Result, "[" & ASCII.LF);
+         Append
+           (Result,
+            "Name => " & To_String (Maps.Element (Position).Name) & ASCII.LF);
+         Append
+           (Result, "URL => " &
+            To_String (Maps.Element (Position).URL) & ASCII.LF);
+         Append (Result, "]" & ASCII.LF);
+         Maps.Next (Position);
+      end loop;
 
-   package Compiler renames Shared.Compiler;
+      return -Result;
+   end Image;
 
-   -------------
-   -- Builder --
-   -------------
-
-   package Builder renames Shared.Builder;
-
-   ------------
-   -- Linker --
-   ------------
-
-   package Linker renames Shared.Linker;
-
-end Savadur;
+end Savadur.Servers;

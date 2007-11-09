@@ -1,0 +1,4 @@
+<server>
+   <name value="myserver"/>
+   <location url="http://www.myserver.net/"/>
+</server>

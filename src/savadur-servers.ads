@@ -19,56 +19,42 @@
 --  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.       --
 ------------------------------------------------------------------------------
 
-with "aws";
-with "xmlada";
-with "shared.gpr";
+with Ada.Containers.Indefinite_Hashed_Maps;
+with Ada.Strings.Unbounded;
 
-project Savadur is
+package Savadur.Servers is
 
-   for Source_Dirs use ("src");
-   for Main use ("savadur-client.adb", "savadur-server.adb");
+   use Ada;
+   use Ada.Strings.Unbounded;
 
-   case Shared.Build is
-      when "Debug" =>
-         for Object_Dir use ".build/debug/savadur/obj";
-         for Exec_Dir use ".build/debug/bin";
-      when "Profile" =>
-         for Object_Dir use ".build/profile/savadur/obj";
-         for Exec_Dir use ".build/profile/bin";
-      when "Release" =>
-         for Object_Dir use ".build/release/savadur/obj";
-         for Exec_Dir use ".build/release/bin";
-   end case;
+   type Id is new String;
 
-   case Shared.In_Test is
-      when "TRUE" =>
-         for Exec_Dir use "test/bin";
-      when "FALSE" =>
-         null;
-   end case;
+   type Server is record
+      Name : Unbounded_String;
+      URL  : Unbounded_String;
+   end record;
 
-   ------------
-   -- Binder --
-   ------------
+   function Hash (Key : in Id) return Containers.Hash_Type;
+   --  Renames Strings.Hash
 
-   package Binder renames Shared.Binder;
+   Emtpy_Server : constant Server;
 
-   --------------
-   -- Compiler --
-   --------------
+   ----------
+   -- Maps --
+   ----------
 
-   package Compiler renames Shared.Compiler;
+   package Maps is new Ada.Containers.Indefinite_Hashed_Maps
+     (Key_Type        => Id,
+      Element_Type    => Server,
+      Hash            => Hash,
+      Equivalent_Keys => "=");
 
-   -------------
-   -- Builder --
-   -------------
+   function Image (Servers_Map : in Maps.Map) return String;
+   --  Return the Servers_Map image
 
-   package Builder renames Shared.Builder;
+private
 
-   ------------
-   -- Linker --
-   ------------
+   Emtpy_Server : constant Server :=
+                    (Null_Unbounded_String, Null_Unbounded_String);
 
-   package Linker renames Shared.Linker;
-
-end Savadur;
+end Savadur.Servers;
