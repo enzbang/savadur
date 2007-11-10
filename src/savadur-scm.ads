@@ -19,7 +19,7 @@
 --  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.       --
 ------------------------------------------------------------------------------
 
-with Ada.Containers.Indefinite_Hashed_Maps;
+with Ada.Containers.Indefinite_Hashed_Sets;
 with Ada.Strings.Unbounded;
 
 with Savadur.Utils;
@@ -44,23 +44,37 @@ package Savadur.SCM is
    package Id_Utils is new Generic_Utils (Id);
 
    type SCM is record
-      Actions : Savadur.Actions.Maps.Map;
+      Id      : Savadur.SCM.Id;
+      Actions : Savadur.Actions.Sets.Set;
    end record;
 
-   function Hash (Key : Id) return Containers.Hash_Type;
+   function Image (SCM : Savadur.SCM.SCM) return String;
+   --  Returns SCM Image
+
+   ----------
+   -- Sets --
+   ----------
+
+   function Hash (Key : SCM) return Containers.Hash_Type;
    --  Renames Strings.Hash
 
-   ----------
-   -- Maps --
-   ----------
+   package Sets is new Ada.Containers.Indefinite_Hashed_Sets
+     (Element_Type        => SCM,
+      Hash                => Hash,
+      Equivalent_Elements => "=");
 
-   package Maps is new Ada.Containers.Indefinite_Hashed_Maps
+   function Key (Element : in SCM) return Id;
+   --  Return SCM id
+
+   function Hash (Key : Id) return Containers.Hash_Type;
+
+   package Keys is new Sets.Generic_Keys
      (Key_Type        => Id,
-      Element_Type    => SCM,
+      Key             => Key,
       Hash            => Hash,
       Equivalent_Keys => "=");
 
-   function Image (SCM_Map : Maps.Map) return String;
-   --  Return the SCM_Map image
+   function Image (Set : Sets.Set) return String;
+   --  Return the SCM set image
 
 end Savadur.SCM;

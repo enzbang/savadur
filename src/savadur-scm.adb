@@ -27,6 +27,15 @@ package body Savadur.SCM is
    -- Hash --
    ----------
 
+   function Hash (Key : SCM) return Containers.Hash_Type is
+   begin
+      return Hash (Key.Id);
+   end Hash;
+
+   ----------
+   -- Hash --
+   ----------
+
    function Hash (Key : Id) return Containers.Hash_Type is
    begin
       return Ada.Strings.Hash (To_String (Key));
@@ -36,19 +45,35 @@ package body Savadur.SCM is
    -- Image --
    -----------
 
-   function Image (SCM_Map : Maps.Map) return String is
-      Position : Maps.Cursor := Maps.First (SCM_Map);
+   function Image (SCM : Savadur.SCM.SCM) return String is
+   begin
+      return To_String (SCM.Id) & ASCII.LF
+        & Actions.Image (SCM.Actions);
+   end Image;
+
+   -----------
+   -- Image --
+   -----------
+
+   function Image (Set : Sets.Set) return String is
+      Position : Sets.Cursor := Sets.First (Set);
       Result  : Unbounded_String;
    begin
-      while Maps.Has_Element (Position) loop
-         Append (Result, "* " & To_String (Maps.Key (Position)) & ASCII.Lf);
-         Append (Result,
-                 Actions.Image (Maps.Element (Position).Actions));
-         Maps.Next (Position);
+      while Sets.Has_Element (Position) loop
+         Append (Result, "* " & Image (Sets.Element (Position)));
+         Sets.Next (Position);
       end loop;
 
       return -Result;
-
    end Image;
+
+   ---------
+   -- Key --
+   ---------
+
+   function Key (Element : in SCM) return Id is
+   begin
+      return Element.Id;
+   end Key;
 
 end Savadur.SCM;

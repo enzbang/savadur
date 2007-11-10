@@ -23,7 +23,7 @@ with Savadur.SCM;
 
 package Savadur.Config.SCM is
 
-   Configurations : Savadur.SCM.Maps.Map;
+   Configurations : Savadur.SCM.Sets.Set;
 
    procedure Parse;
    --  Fill the SCM configuration map

@@ -48,6 +48,8 @@ package Savadur.Utils is
       function "-" (S : in Source) return String
                     renames To_String;
 
+      function Value (Img : in String) return Source;
+
    end Generic_Utils;
 
 end Savadur.Utils;

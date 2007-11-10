@@ -27,19 +27,28 @@ package body Savadur.Actions is
    -- Hash --
    ----------
 
+   function Hash (Key : Action) return Containers.Hash_Type is
+   begin
+      return Hash (Key.Id);
+   end Hash;
+
+   ----------
+   -- Hash --
+   ----------
+
    function Hash (Key : Id) return Containers.Hash_Type is
    begin
       return Ada.Strings.Hash (To_String (Key));
    end Hash;
-
    -----------
    -- Image --
    -----------
 
    function Image (Action : in Actions.Action) return String is
    begin
-      return To_String (Action.Cmd) & " " & " result type : "
-        & Result_Type'Image (Action.Result);
+      return To_String (Action.Id) & " => "
+        & To_String (Action.Cmd) & " " & " result type : "
+        & Result_Type'Image (Action.Result) & ASCII.LF;
    end Image;
 
    -----------
@@ -62,24 +71,23 @@ package body Savadur.Actions is
    -- Image --
    -----------
 
-   function Image (Map : in Maps.Map) return String is
+   function Image (Set : in Sets.Set) return String is
       Result : Unbounded_String := +"[" & ASCII.LF;
 
-      procedure Image (Position : in Maps.Cursor);
+      procedure Image (Position : in Sets.Cursor);
       --  Adds position image
 
       -----------
       -- Image --
       -----------
 
-      procedure Image (Position : in Maps.Cursor) is
+      procedure Image (Position : in Sets.Cursor) is
       begin
          Append (Result,
-                 To_String (Maps.Key (Position)) & " => "
-                      & Image (Maps.Element (Position)) & ASCII.LF);
+                 Image (Sets.Element (Position)));
       end Image;
    begin
-      Maps.Iterate (Container => Map,
+      Sets.Iterate (Container => Set,
                     Process   => Image'Access);
       Append (Result, "]");
       return -Result;
@@ -110,5 +118,14 @@ package body Savadur.Actions is
       Append (Result, +"]");
       return -Result;
    end Image;
+
+   ---------
+   -- Key --
+   ---------
+
+   function Key (Element : in Action) return Id is
+   begin
+      return Element.Id;
+   end Key;
 
 end Savadur.Actions;

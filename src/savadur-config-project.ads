@@ -38,9 +38,9 @@ package Savadur.Config.Project is
    type Project_Config is record
       Project_Id : Project.Project_Id;
       SCM_Id     : Savadur.SCM.Id;
-      Actions    : Savadur.Actions.Maps.Map;
-      Scenarios  : Savadur.Scenarios.Maps.Map;
-      Variables  : Savadur.Variables.Maps.Map := Savadur.Variables.Default;
+      Actions    : Savadur.Actions.Sets.Set;
+      Scenarios  : Savadur.Scenarios.Sets.Set;
+      Variables  : Savadur.Variables.Sets.Set := Savadur.Variables.Default;
    end record;
 
    function Parse (Filename : String) return Project_Config;

@@ -76,11 +76,10 @@ package body Savadur.Config.Project is
 
    type Tree_Reader is new Sax.Readers.Reader with record
       Content_Value   : Unbounded_String;
-      Id              : Unbounded_String;
-      Value           : Unbounded_String;
+      Var             : Variables.Variable;
       Action          : Actions.Action;
+      Ref_Action      : Actions.Ref_Action;
       Scenario        : Scenarios.Scenario;
-      Scenario_Id     : Unbounded_String;
       Inside_Scenario : Boolean := False;
       Current_Project : Project_Config;
    end record;
@@ -133,56 +132,36 @@ package body Savadur.Config.Project is
             --  Overwrite default values
 
             Handler.Current_Project.Variables.Include
-              (Key      => -Handler.Id,
-               New_Item => -Handler.Value);
+              (New_Item => Handler.Var);
 
-            Handler.Id    := +"";
-            Handler.Value := +"";
          when Scenario =>
             Handler.Inside_Scenario := False;
             Handler.Current_Project.Scenarios.Insert
-              (Key      => Savadur.Scenarios.Id (Handler.Scenario_Id),
-               New_Item => Handler.Scenario);
+              (New_Item => Handler.Scenario);
             --  Exit scenario
 
             --  Reset Handler scenario
-            Handler.Scenario_Id := +"";
             Handler.Scenario    := Scenarios.Null_Scenario;
          when Action =>
-            if -Handler.Id = "" then
-               raise Config_Error with " Null action id !";
-            end if;
-
             if not Handler.Inside_Scenario then
                --  Append this action to actions map
                Handler.Current_Project.Actions.Insert
-                 (Key         => Actions.Id (Handler.Id),
-                  New_Item    => Handler.Action);
+                 (New_Item    => Handler.Action);
 
                --  Reset Handler Action
                Handler.Action := Actions.Null_Action;
-               Handler.Id     := +"";
             else
                --  Append this action to scenario actions vector
-               Handler.Scenario.Actions.Append
-                 (Actions.Ref_Action'
-                    (Action_Type => Actions.Default,
-                     Id          => Actions.Id (Handler.Id),
-                     Value       => Handler.Value));
+               Handler.Scenario.Actions.Append (Handler.Ref_Action);
 
-               Handler.Value := +"";
-               Handler.Id    := +"";
+               Handler.Ref_Action := Actions.Null_Ref_Action;
             end if;
          when SCM_Action =>
             --  Append this action to scenario actions vector
-            Handler.Scenario.Actions.Append
-              (Actions.Ref_Action'
-                 (Action_Type => Actions.SCM,
-                  Id          => Actions.Id (Handler.Id),
-                  Value       => Handler.Value));
 
-            Handler.Value := +"";
-            Handler.Id    := +"";
+            Handler.Scenario.Actions.Append (Handler.Ref_Action);
+
+            Handler.Ref_Action := Actions.Null_Ref_Action;
          when Cmd =>
             Handler.Action.Cmd := Actions.Command (Handler.Content_Value);
          when SCM | Project | Name =>
@@ -295,12 +274,34 @@ package body Savadur.Config.Project is
          elsif Attr = Id then
             case NV is
                when Scenario =>
-                  Handler.Scenario_Id := +Get_Value (Atts, J);
+                  Handler.Scenario.Id :=
+                    Scenarios.Id_Utils.Value (Get_Value (Atts, J));
+
                when SCM =>
                   Handler.Current_Project.SCM_Id :=
-                    Savadur.SCM.Id (+Get_Value (Atts, J));
-               when Variable | Action | SCM_Action =>
-                  Handler.Id := +Get_Value (Atts, J);
+                    Savadur.SCM.Id_Utils.Value (Get_Value (Atts, J));
+
+               when Variable =>
+                  Handler.Var.Name :=
+                    Savadur.Variables.Name_Utils.Value (Get_Value (Atts, J));
+
+               when Action | SCM_Action =>
+                  if NV = Action and then not Handler.Inside_Scenario then
+                     Handler.Action.Id :=
+                       Savadur.Actions.Id_Utils.Value (Get_Value (Atts, J));
+                  else
+                     Handler.Ref_Action.Id :=
+                       Savadur.Actions.Id_Utils.Value (Get_Value (Atts, J));
+
+                     --  Set the ref action type
+
+                     if NV = Action then
+                        Handler.Ref_Action.Action_Type := Actions.Default;
+                     else
+                        Handler.Ref_Action.Action_Type := Actions.SCM;
+                     end if;
+                  end if;
+
                when Name =>
                   Handler.Current_Project.Project_Id :=
                     Project_Id (+Get_Value (Atts, J));
@@ -310,13 +311,15 @@ package body Savadur.Config.Project is
          elsif Attr = Value then
             case NV is
                when Variable =>
-                  Handler.Value := +Get_Value (Atts, J);
+                  Handler.Var.Value := +Get_Value (Atts, J);
+
                when Action | SCM_Action =>
                   if not Handler.Inside_Scenario then
                      raise Config_Error with "Unknow attribute "
                        & Node_Value'Image (NV) & "." & Get_Qname (Atts, J);
                   end if;
-                  Handler.Value := +Get_Value (Atts, J);
+                  Handler.Ref_Action.Value := +Get_Value (Atts, J);
+
                when others => null;
             end case;
          elsif Attr = Result then
@@ -335,6 +338,7 @@ package body Savadur.Config.Project is
                           & Node_Value'Image (NV) & "." & Get_Qname (Atts, J)
                           & " value = " & Get_Value (Atts, J);
                   end Get_Action_Result_Type;
+
                when others => null;
             end case;
          else

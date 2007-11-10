@@ -27,7 +27,16 @@ package body Savadur.Scenarios is
    -- Hash --
    ----------
 
-   function Hash (Key : in Id) return Containers.Hash_Type is
+   function Hash (Key : in Scenario) return Containers.Hash_Type is
+   begin
+      return Hash (Key.Id);
+   end Hash;
+
+   ----------
+   -- Hash --
+   ----------
+
+   function Hash (Key : Id) return Containers.Hash_Type is
    begin
       return Ada.Strings.Hash_Case_Insensitive (To_String (Key));
    end Hash;
@@ -38,33 +47,41 @@ package body Savadur.Scenarios is
 
    function Image (Scenario : Scenarios.Scenario) return String is
    begin
-      return Savadur.Actions.Image (Scenario.Actions);
+      return "* " & To_String (Scenario.Id)
+        & ASCII.LF & Savadur.Actions.Image (Scenario.Actions);
    end Image;
 
    -----------
    -- Image --
    -----------
 
-   function Image (Scenarios : in Maps.Map) return String is
+   function Image (Scenarios : in Sets.Set) return String is
       Result : Unbounded_String;
 
-      procedure Image (Position : in Maps.Cursor);
+      procedure Image (Position : in Sets.Cursor);
       --  Adds position image
 
       -----------
       -- Image --
       -----------
 
-      procedure Image (Position : in Maps.Cursor) is
+      procedure Image (Position : in Sets.Cursor) is
       begin
-         Append (Result, "* "
-                 & To_String (Maps.Key (Position)) & ASCII.LF
-                 & Image (Maps.Element (Position)));
+         Append (Result, Image (Sets.Element (Position)));
       end Image;
    begin
-      Maps.Iterate (Container => Scenarios,
+      Sets.Iterate (Container => Scenarios,
                     Process   => Image'Access);
       return -Result;
    end Image;
+
+   ---------
+   -- Key --
+   ---------
+
+   function Key (Element : in Scenario) return Id is
+   begin
+      return Element.Id;
+   end Key;
 
 end Savadur.Scenarios;

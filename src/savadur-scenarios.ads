@@ -19,7 +19,7 @@
 --  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.       --
 ------------------------------------------------------------------------------
 
-with Ada.Containers.Indefinite_Hashed_Maps;
+with Ada.Containers.Indefinite_Hashed_Sets;
 with Ada.Strings.Unbounded;
 
 with Savadur.Actions;
@@ -39,29 +39,41 @@ package Savadur.Scenarios is
    Default_Scenario : Id := Id (+"default");
 
    type Scenario is record
+      Id      : Scenarios.Id;
       Actions : Savadur.Actions.Vectors.Vector;
    end record;
 
    Null_Scenario : Scenario :=
-                     Scenario'(Actions => Actions.Vectors.Empty_Vector);
+                     Scenario'(Id      => Id_Utils.Nil,
+                               Actions => Actions.Vectors.Empty_Vector);
 
    function Image (Scenario : Scenarios.Scenario) return String;
    --  Return Scenario image
-
-   function Hash (Key : Id) return Containers.Hash_Type;
-   --  Renames Strings.Hash_Case_Insensitive
 
    ----------
    -- Maps --
    ----------
 
-   package Maps is new Ada.Containers.Indefinite_Hashed_Maps
+   function Hash (Key : Scenario) return Containers.Hash_Type;
+   --  Use scenario.Id hash (Strings.Hash_Case_Insensitive)
+
+   package Sets is new Ada.Containers.Indefinite_Hashed_Sets
+     (Element_Type        => Scenario,
+      Hash                => Hash,
+      Equivalent_Elements => "=");
+
+   function Key (Element : in Scenario) return Id;
+   --  Return scenario id
+
+   function Hash (Key : Id) return Containers.Hash_Type;
+
+   package Keys is new Sets.Generic_Keys
      (Key_Type        => Id,
-      Element_Type    => Scenario,
+      Key             => Key,
       Hash            => Hash,
       Equivalent_Keys => "=");
 
-   function Image (Scenarios : Maps.Map) return String;
+   function Image (Scenarios : Sets.Set) return String;
    --  Return Scenario map image
 
 end Savadur.Scenarios;

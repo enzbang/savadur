@@ -32,15 +32,12 @@ with Sax.Attributes;
 with Input_Sources.File;
 with Unicode.CES;
 
-with Savadur.Utils;
 with Savadur.Actions;
 
 package body Savadur.Config.SCM is
 
    use Ada;
    use Ada.Strings.Unbounded;
-
-   use Savadur.Utils;
 
    Config_Error : exception;
 
@@ -67,11 +64,9 @@ package body Savadur.Config.SCM is
    --  SAX overloaded routines to parse the incoming XML stream.
 
    type Tree_Reader is new Sax.Readers.Reader with record
-      Value  : Unbounded_String;
-      Id     : Unbounded_String;
-      Action : Actions.Action;
-      SCM    : Savadur.SCM.SCM;
-      SCM_Id : Unbounded_String;
+      Content_Value : Unbounded_String;
+      Action        : Actions.Action;
+      SCM           : Savadur.SCM.SCM;
    end record;
 
    procedure Start_Element
@@ -99,7 +94,7 @@ package body Savadur.Config.SCM is
      (Handler : in out Tree_Reader;
       Ch      : in     Unicode.CES.Byte_Sequence) is
    begin
-      Append (Handler.Value, To_Unbounded_String (Ch));
+      Append (Handler.Content_Value, To_Unbounded_String (Ch));
    end Characters;
 
    -----------------
@@ -118,20 +113,15 @@ package body Savadur.Config.SCM is
    begin
       case NV is
          when Action =>
-            if -Handler.Id = "" then
-               raise Config_Error with " Null action id !";
-            end if;
-
             Handler.SCM.Actions.Insert
-              (Key      => Actions.Id (Handler.Id),
-               New_Item => Handler.Action);
+              (New_Item => Handler.Action);
          when Cmd =>
-            Handler.Action.Cmd := Actions.Command (Handler.Value);
+            Handler.Action.Cmd := Actions.Command (Handler.Content_Value);
          when SCM | Name =>
             null;
       end case;
 
-      Handler.Value := Null_Unbounded_String;
+      Handler.Content_Value := Null_Unbounded_String;
    end End_Element;
 
    -------------------
@@ -200,17 +190,18 @@ package body Savadur.Config.SCM is
          begin
             Text_IO.Put_Line (Filename);
             Reader.SCM :=
-              Savadur.SCM.SCM'(Actions => Actions.Maps.Empty_Map);
+              Savadur.SCM.SCM'(Id      => Savadur.SCM.Id_Utils.Nil,
+                               Actions => Actions.Sets.Empty_Set);
 
             Input_Sources.File.Open
               (Filename => Filename,
                Input    => Source);
+
             Parse (Reader, Source);
             Input_Sources.File.Close (Source);
 
-            Savadur.SCM.Maps.Insert
+            Savadur.SCM.Sets.Insert
               (Container => Configurations,
-               Key       => Savadur.SCM.Id (Reader.SCM_Id),
                New_Item  => Reader.SCM);
 
          end Load_Config;
@@ -248,9 +239,11 @@ package body Savadur.Config.SCM is
          elsif Attr = Id then
             case NV is
                when Action =>
-                  Handler.Id := +Get_Value (Atts, J);
+                  Handler.Action.Id :=
+                    Actions.Id_Utils.Value (Get_Value (Atts, J));
                when Name =>
-                     Handler.SCM_Id := +Get_Value (Atts, J);
+                  Handler.SCM.Id :=
+                    Savadur.SCM.Id_Utils.Value (Get_Value (Atts, J));
                when SCM | Cmd => null;
             end case;
 

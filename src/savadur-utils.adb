@@ -45,6 +45,15 @@ package body Savadur.Utils is
          return Unbounded_String (S);
       end To_Unbounded_String;
 
+      -----------
+      -- Value --
+      -----------
+
+      function Value (Img : in String) return Source is
+      begin
+         return Source (Ada.Strings.Unbounded.To_Unbounded_String (Img));
+      end Value;
+
    end Generic_Utils;
 
 end Savadur.Utils;

@@ -150,7 +150,7 @@ package body Savadur.Build is
       return Actions.Action
    is
       use Savadur.Actions;
-      Action_Id  : constant Id := -Ref_Action.Id;
+      Action_Id  : constant Id := Ref_Action.Id;
       Get_Action : Action;
    begin
 
@@ -159,13 +159,13 @@ package body Savadur.Build is
 
          declare
             use Savadur.SCM;
-            SCM_Used : Savadur.SCM.SCM := Savadur.SCM.Maps.Element
+            SCM_Used : Savadur.SCM.SCM := Savadur.SCM.Keys.Element
               (Container => Savadur.Config.SCM.Configurations,
-               Key       => -Project.SCM_Id);
+               Key       => Project.SCM_Id);
          begin
 
             Ada.Text_IO.Put_Line (Image (SCM_Used.Actions));
-            Get_Action := Actions.Maps.Element
+            Get_Action := Actions.Keys.Element
               (Container => SCM_Used.Actions,
                Key       => Action_Id);
 
@@ -173,7 +173,7 @@ package body Savadur.Build is
       else
          --  Search in project action
 
-         Get_Action := Maps.Element (Container => Project.Actions,
+         Get_Action := Keys.Element (Container => Project.Actions,
                                      Key       => Action_Id);
       end if;
 
@@ -231,10 +231,16 @@ package body Savadur.Build is
             Do_Replace := True;
          elsif Do_Replace and then Source (K) = ' ' then
             Query_Project_Variables : declare
-               Key : constant String := Source (Start + 1 .. K - 1);
+               Key  : constant String := Source (Start + 1 .. K - 1);
+               Var  : constant Savadur.Variables.Variable :=
+                        Savadur.Variables.Keys.Element
+                          (Container => Project.Variables,
+                           Key       => Savadur.Variables.
+                             Name_Utils.Value (Key));
             begin
-               Append (Result, Savadur.Variables.Maps.
-                         Element (Project.Variables, Key));
+               Append (Result,
+                       To_String (Var.Value));
+
                Start      := K;
                Do_Replace := False;
             end Query_Project_Variables;
@@ -242,9 +248,18 @@ package body Savadur.Build is
       end loop;
 
       if Do_Replace then
-         Append
-           (Result,
-            Project.Variables.Element (Source (Start + 1 .. Source'Last)));
+         declare
+            Key  : constant String := Source (Start + 1 .. Source'Last);
+            Var  : constant Savadur.Variables.Variable :=
+                     Savadur.Variables.Keys.Element
+                       (Container => Project.Variables,
+                        Key       => Savadur.Variables.
+                          Name_Utils.Value (Key));
+         begin
+            Append (Result,
+                    To_String (Var.Value));
+         end;
+
       else
          Append (Result, Source (Start .. Source'Last));
       end if;
@@ -273,11 +288,13 @@ package body Savadur.Build is
       Result            : Boolean := True;
    begin
       Get_Selected_Scenario : begin
-         Selected_Scenario := Project.Scenarios.Element (Key => Id);
+         Selected_Scenario := Savadur.Scenarios.Keys.Element
+           (Container => Project.Scenarios,
+            Key       => Id);
       exception
          when Constraint_Error =>
             raise Command_Parse_Error with " Scenario "
-              & String (Id) & " not found";
+              & Savadur.Scenarios.Id_Utils.To_String (Id) & " not found";
       end Get_Selected_Scenario;
 
       Work_Directory := +Directories.Compose
@@ -300,10 +317,16 @@ package body Savadur.Build is
          Directories.Create_Path (New_Directory => -Log_Directory);
       end if;
 
-      Get_Sources_Directory : begin
+      Get_Sources_Directory : declare
+         Var : Savadur.Variables.Variable;
+      begin
+         Var := Savadur.Variables.Keys.Element
+           (Container => Project.Variables,
+            Key        => Savadur.Variables.Name_Utils.Value ("sources"));
+
          Sources_Directory := +Directories.Compose
            (Containing_Directory => -Project_Directory,
-            Name                 => Project.Variables.Element ("sources"));
+            Name                 => To_String (Var.Value));
       exception
          when Constraint_Error =>
             raise Command_Parse_Error with " No sources directory !";
@@ -324,7 +347,7 @@ package body Savadur.Build is
                Ref         : constant Ref_Action := Element (Position);
                Log_File    : constant String     := Directories.Compose
                  (Containing_Directory => -Log_Directory,
-                  Name                 => "LOG_" & String (-Ref.Id));
+                  Name                 => "LOG_" & To_String (Ref.Id));
                Exec_Action : constant Action    :=
                                Get_Action (Project    => Project,
                                            Ref_Action => Ref);
@@ -371,7 +394,7 @@ package body Savadur.Build is
          when Constraint_Error =>
             if Has_Element (Position) then
                raise Command_Parse_Error with " Command "
-                 & String (-Element (Position).Id) & " not found";
+                 & To_String (Element (Position).Id) & " not found";
             else
                raise Command_Parse_Error with " Command not found";
             end if;

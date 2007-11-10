@@ -19,24 +19,55 @@
 --  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.       --
 ------------------------------------------------------------------------------
 
-with Ada.Strings.Hash_Case_Insensitive;
-with Ada.Containers.Indefinite_Hashed_Maps;
+with Ada.Strings.Unbounded;
+with Ada.Containers.Indefinite_Hashed_Sets;
+
+with Savadur.Utils;
 
 package Savadur.Variables is
 
    use Ada;
+   use Ada.Strings.Unbounded;
 
-   package Maps is new Containers.Indefinite_Hashed_Maps
-     (Key_Type        => String,
-      Element_Type    => String,
-      Hash            => Strings.Hash_Case_Insensitive,
+   type Name is new Unbounded_String;
+
+   package Name_Utils is new Savadur.Utils.Generic_Utils (Name);
+
+   type Variable is record
+      Name  : Variables.Name;
+      Value : Unbounded_String;
+   end record;
+
+   function Image (Var : in Variable) return String;
+   --  Returns var image
+
+   ----------
+   -- Sets --
+   ----------
+
+   function Hash (Key : in Variable) return Containers.Hash_Type;
+
+   package Sets is new Containers.Indefinite_Hashed_Sets
+     (Element_Type        => Variable,
+      Hash                => Hash,
+      Equivalent_Elements => "=");
+
+   function Key (Element : in Variable) return Name;
+   --  Return variable name
+
+   function Hash (Key : Name) return Containers.Hash_Type;
+
+   package Keys is new Sets.Generic_Keys
+     (Key_Type        => Name,
+      Key             => Key,
+      Hash            => Hash,
       Equivalent_Keys => "=");
 
-   function Default return Maps.Map;
-   --  Returns a map with default variables set
+   function Default return Sets.Set;
+   --  Returns a set with default variables set
    --     - sources is set as "sources"
 
-   function Image (Map : in Maps.Map) return String;
+   function Image (Set : in Sets.Set) return String;
    --  Returns map image
 
 end Savadur.Variables;

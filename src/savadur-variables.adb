@@ -19,41 +19,76 @@
 --  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.       --
 ------------------------------------------------------------------------------
 
-with Ada.Strings.Unbounded;
-with Savadur.Utils;
+with Ada.Strings.Hash_Case_Insensitive;
 
 package body Savadur.Variables is
 
-   use Ada.Strings.Unbounded;
    use Savadur.Utils;
 
    -------------
    -- Default --
    -------------
 
-   function Default return Maps.Map is
-      Default_Map : Maps.Map;
+   function Default return Sets.Set is
+      Default_Set : Sets.Set;
    begin
-      Default_Map.Insert (Key      => "sources",
-                          New_Item => "sources");
+      Default_Set.Insert
+        (New_Item =>
+           Variable'(Name => Name_Utils.Value ("sources"),
+                     Value => To_Unbounded_String ("sources")));
 
-      return Default_Map;
+      return Default_Set;
    end Default;
+
+   ----------
+   -- Hash --
+   ----------
+
+   function Hash (Key : in Variable) return Containers.Hash_Type is
+   begin
+      return Hash (Key.Name);
+   end Hash;
+
+   ----------
+   -- Hash --
+   ----------
+
+   function Hash (Key : Name) return Containers.Hash_Type is
+   begin
+      return Strings.Hash_Case_Insensitive (To_String (Key));
+   end Hash;
 
    -----------
    -- Image --
    -----------
 
-   function Image (Map : in Maps.Map) return String is
-      Position : Maps.Cursor := Maps.First (Map);
+   function Image (Var : in Variable) return String is
+   begin
+      return To_String (Var.Name) & " : " & To_String (Var.Value) & ASCII.LF;
+   end Image;
+
+   -----------
+   -- Image --
+   -----------
+
+   function Image (Set : in Sets.Set) return String is
+      Position : Sets.Cursor := Set.First;
       Result   : Unbounded_String := +"[" & ASCII.Lf;
    begin
-      while Maps.Has_Element (Position) loop
-         Append (Result, Maps.Key (Position) & " : "
-                 & Maps.Element (Position) & ASCII.Lf);
-         Maps.Next (Position);
+      while Sets.Has_Element (Position) loop
+         Append (Result, Image (Sets.Element (Position)));
+         Sets.Next (Position);
       end loop;
       return -Result & "]";
    end Image;
+
+   ---------
+   -- Key --
+   ---------
+
+   function Key (Element : in Variable) return Name is
+   begin
+      return Element.Name;
+   end Key;
 
 end Savadur.Variables;

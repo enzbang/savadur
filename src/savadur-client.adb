@@ -57,8 +57,8 @@ procedure Savadur.Client is
    Project_Name         : Unbounded_String;
    Project_Filename     : Unbounded_String;
    Project_Env_Filename : Unbounded_String;
-   Scenario_Id          : Unbounded_String :=
-                            +String (Scenarios.Default_Scenario);
+   Scenario_Id          : Unbounded_String
+     := Scenarios.Id_Utils.To_Unbounded_String (Scenarios.Default_Scenario);
 
    procedure Usage;
    --  Display Usage
@@ -176,7 +176,7 @@ begin
       if Savadur.Build.Run
         (Project => Project,
          Env_Var => Env_Var,
-         Id      => Scenarios.Id (To_String (Scenario_Id)))
+         Id      => Scenarios.Id (Scenario_Id))
       then
          Put_Line ("Success");
       else

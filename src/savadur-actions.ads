@@ -20,7 +20,7 @@
 ------------------------------------------------------------------------------
 
 with Ada.Strings.Unbounded;
-with Ada.Containers.Indefinite_Hashed_Maps;
+with Ada.Containers.Indefinite_Hashed_Sets;
 with Ada.Containers.Indefinite_Vectors;
 
 with Savadur.Utils;
@@ -43,12 +43,14 @@ package Savadur.Actions is
    type Result_Type is (Exit_Status, Value);
 
    type Action is record
+      Id     : Actions.Id;
       Cmd    : Command;
       Result : Result_Type := Exit_Status;
    end record;
 
    Null_Action : Action :=
-                   Action'(Cmd    => Command_Utils.Nil,
+                   Action'(Id     => Id_Utils.Nil,
+                           Cmd    => Command_Utils.Nil,
                            Result => <>);
 
    function Image (Action : in Actions.Action) return String;
@@ -69,19 +71,29 @@ package Savadur.Actions is
    --  Returns action image
 
    ----------
-   -- Maps --
+   -- Sets --
    ----------
 
-   function Hash (Key : Id) return Containers.Hash_Type;
+   function Hash (Key : Action) return Containers.Hash_Type;
    --  Renames Strings.Hash
 
-   package Maps is new Ada.Containers.Indefinite_Hashed_Maps
+   package Sets is new Ada.Containers.Indefinite_Hashed_Sets
+     (Element_Type        => Action,
+      Hash                => Hash,
+      Equivalent_Elements => "=");
+
+   function Key (Element : in Action) return Id;
+   --  Return SCM id
+
+   function Hash (Key : Id) return Containers.Hash_Type;
+
+   package Keys is new Sets.Generic_Keys
      (Key_Type        => Id,
-      Element_Type    => Action,
+      Key             => Key,
       Hash            => Hash,
       Equivalent_Keys => "=");
 
-   function Image (Map : in Maps.Map) return String;
+   function Image (Set : in Sets.Set) return String;
    --  Returns Map image
 
    -------------
