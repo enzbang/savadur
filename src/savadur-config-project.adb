@@ -23,8 +23,6 @@ with Ada.Directories;
 
 with GNAT.Case_Util;
 
-with Savadur.Utils;
-
 with Sax.Readers;
 with Sax.Attributes;
 
@@ -143,7 +141,7 @@ package body Savadur.Config.Project is
          when Scenario =>
             Handler.Inside_Scenario := False;
             Handler.Current_Project.Scenarios.Insert
-              (Key      => Savadur.Scenarios.Id (-Handler.Scenario_Id),
+              (Key      => Savadur.Scenarios.Id (Handler.Scenario_Id),
                New_Item => Handler.Scenario);
             --  Exit scenario
 
@@ -158,7 +156,7 @@ package body Savadur.Config.Project is
             if not Handler.Inside_Scenario then
                --  Append this action to actions map
                Handler.Current_Project.Actions.Insert
-                 (Key         => Actions.Id (-Handler.Id),
+                 (Key         => Actions.Id (Handler.Id),
                   New_Item    => Handler.Action);
 
                --  Reset Handler Action
@@ -169,7 +167,7 @@ package body Savadur.Config.Project is
                Handler.Scenario.Actions.Append
                  (Actions.Ref_Action'
                     (Action_Type => Actions.Default,
-                     Id          => Actions.U_Id (Handler.Id),
+                     Id          => Actions.Id (Handler.Id),
                      Value       => Handler.Value));
 
                Handler.Value := +"";
@@ -180,7 +178,7 @@ package body Savadur.Config.Project is
             Handler.Scenario.Actions.Append
               (Actions.Ref_Action'
                  (Action_Type => Actions.SCM,
-                  Id          => Actions.U_Id (Handler.Id),
+                  Id          => Actions.Id (Handler.Id),
                   Value       => Handler.Value));
 
             Handler.Value := +"";
@@ -300,7 +298,7 @@ package body Savadur.Config.Project is
                   Handler.Scenario_Id := +Get_Value (Atts, J);
                when SCM =>
                   Handler.Current_Project.SCM_Id :=
-                    Savadur.SCM.U_Id (+Get_Value (Atts, J));
+                    Savadur.SCM.Id (+Get_Value (Atts, J));
                when Variable | Action | SCM_Action =>
                   Handler.Id := +Get_Value (Atts, J);
                when Name =>

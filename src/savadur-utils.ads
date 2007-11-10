@@ -32,4 +32,22 @@ package Savadur.Utils is
    function "-" (Source : in Unbounded_String) return String
                  renames To_String;
 
+   generic
+      type Source is new Unbounded_String;
+   package Generic_Utils is
+
+      Nil : Source := Source (Null_Unbounded_String);
+
+      function To_Unbounded_String (S : in Source) return Unbounded_String;
+
+      function "+" (S : in Source) return Unbounded_String
+                    renames To_Unbounded_String;
+
+      function To_String (S : in Source) return String;
+
+      function "-" (S : in Source) return String
+                    renames To_String;
+
+   end Generic_Utils;
+
 end Savadur.Utils;

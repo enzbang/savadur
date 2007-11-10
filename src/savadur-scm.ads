@@ -36,17 +36,12 @@ package Savadur.SCM is
 
    SCM_Init : Actions.Ref_Action :=
      (Action_Type => Actions.SCM,
-      Id          => Actions.U_Id (+"init"),
+      Id          => Actions.Id (+"init"),
       Value       => <>);
 
-   type Id is new String;
-   type U_Id is new Unbounded_String;
+   type Id is new Unbounded_String;
 
-   function "+" (Source : Id) return U_Id;
-
-   function "-" (Source : U_Id) return Id;
-
-   Null_Uid : U_Id := U_Id (Null_Unbounded_String);
+   package Id_Utils is new Generic_Utils (Id);
 
    type SCM is record
       Actions : Savadur.Actions.Maps.Map;

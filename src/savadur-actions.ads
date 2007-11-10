@@ -23,19 +23,20 @@ with Ada.Strings.Unbounded;
 with Ada.Containers.Indefinite_Hashed_Maps;
 with Ada.Containers.Indefinite_Vectors;
 
+with Savadur.Utils;
+
 package Savadur.Actions is
 
    use Ada;
    use Ada.Strings.Unbounded;
 
-   type Id is new String;
-   type U_Id is new Unbounded_String;
+   use Savadur.Utils;
 
-   function "+" (Source : Id) return U_Id;
-
-   function "-" (Source : U_Id) return Id;
+   type Id is new Unbounded_String;
+   package Id_Utils is new Generic_Utils (Id);
 
    type Command is new Unbounded_String;
+   package Command_Utils is new Generic_Utils (Command);
 
    type Kind is (SCM, Default);
 
@@ -47,20 +48,20 @@ package Savadur.Actions is
    end record;
 
    Null_Action : Action :=
-                   Action'(Cmd    => Command (Null_Unbounded_String),
+                   Action'(Cmd    => Command_Utils.Nil,
                            Result => <>);
 
    function Image (Action : in Actions.Action) return String;
    --  Returns action image
 
    type Ref_Action is record
-      Id          : U_Id;
+      Id          : Actions.Id;
       Action_Type : Kind             := Default;
       Value       : Unbounded_String := Null_Unbounded_String;
    end record;
 
    Null_Ref_Action : Ref_Action :=
-                       Ref_Action'(Id          => U_Id (Null_Unbounded_String),
+                       Ref_Action'(Id          => Id_Utils.Nil,
                                    Action_Type => <>,
                                    Value       => <>);
 

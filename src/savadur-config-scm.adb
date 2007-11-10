@@ -123,7 +123,7 @@ package body Savadur.Config.SCM is
             end if;
 
             Handler.SCM.Actions.Insert
-              (Key      => Actions.Id (-Handler.Id),
+              (Key      => Actions.Id (Handler.Id),
                New_Item => Handler.Action);
          when Cmd =>
             Handler.Action.Cmd := Actions.Command (Handler.Value);
@@ -210,7 +210,7 @@ package body Savadur.Config.SCM is
 
             Savadur.SCM.Maps.Insert
               (Container => Configurations,
-               Key       => Savadur.SCM.Id (-Reader.SCM_Id),
+               Key       => Savadur.SCM.Id (Reader.SCM_Id),
                New_Item  => Reader.SCM);
 
          end Load_Config;

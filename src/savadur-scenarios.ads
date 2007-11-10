@@ -20,16 +20,23 @@
 ------------------------------------------------------------------------------
 
 with Ada.Containers.Indefinite_Hashed_Maps;
+with Ada.Strings.Unbounded;
 
 with Savadur.Actions;
+with Savadur.Utils;
 
 package Savadur.Scenarios is
 
    use Ada;
+   use Ada.Strings.Unbounded;
 
-   type Id is new String;
+   use Savadur.Utils;
 
-   Default_Scenario : Id := "default";
+   type Id is new Unbounded_String;
+
+   package Id_Utils is new Generic_Utils (Id);
+
+   Default_Scenario : Id := Id (+"default");
 
    type Scenario is record
       Actions : Savadur.Actions.Vectors.Vector;

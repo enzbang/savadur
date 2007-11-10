@@ -25,6 +25,7 @@ with Savadur.Actions;
 with Savadur.Scenarios;
 with Savadur.SCM;
 with Savadur.Variables;
+with Savadur.Utils;
 
 package Savadur.Config.Project is
 
@@ -32,9 +33,11 @@ package Savadur.Config.Project is
 
    type Project_Id is new Unbounded_String;
 
+   package Project_Id_Utils is new Savadur.Utils.Generic_Utils (Project_Id);
+
    type Project_Config is record
       Project_Id : Project.Project_Id;
-      SCM_Id     : Savadur.SCM.U_Id;
+      SCM_Id     : Savadur.SCM.Id;
       Actions    : Savadur.Actions.Maps.Map;
       Scenarios  : Savadur.Scenarios.Maps.Map;
       Variables  : Savadur.Variables.Maps.Map := Savadur.Variables.Default;

@@ -23,31 +23,13 @@ with Ada.Strings.Hash;
 
 package body Savadur.SCM is
 
-   ---------
-   -- "+" --
-   ---------
-
-   function "+" (Source : Id) return U_Id is
-   begin
-      return U_Id (+String (Source));
-   end "+";
-
-   ---------
-   -- "-" --
-   ---------
-
-   function "-" (Source : U_Id) return Id is
-   begin
-      return Id (-Unbounded_String (Source));
-   end "-";
-
    ----------
    -- Hash --
    ----------
 
    function Hash (Key : Id) return Containers.Hash_Type is
    begin
-      return Ada.Strings.Hash (String (Key));
+      return Ada.Strings.Hash (To_String (Key));
    end Hash;
 
    -----------
@@ -59,7 +41,7 @@ package body Savadur.SCM is
       Result  : Unbounded_String;
    begin
       while Maps.Has_Element (Position) loop
-         Append (Result, "* " & String (Maps.Key (Position)) & ASCII.Lf);
+         Append (Result, "* " & To_String (Maps.Key (Position)) & ASCII.Lf);
          Append (Result,
                  Actions.Image (Maps.Element (Position).Actions));
          Maps.Next (Position);

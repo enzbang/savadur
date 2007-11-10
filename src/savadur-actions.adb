@@ -21,29 +21,7 @@
 
 with Ada.Strings.Hash;
 
-with Savadur.Utils;
-
 package body Savadur.Actions is
-
-   use Savadur.Utils;
-
-   ---------
-   -- "+" --
-   ---------
-
-   function "+" (Source : Id) return U_Id is
-   begin
-      return U_Id (+String (Source));
-   end "+";
-
-   ---------
-   -- "-" --
-   ---------
-
-   function "-" (Source : U_Id) return Id is
-   begin
-      return Id (-Unbounded_String (Source));
-   end "-";
 
    ----------
    -- Hash --
@@ -51,7 +29,7 @@ package body Savadur.Actions is
 
    function Hash (Key : Id) return Containers.Hash_Type is
    begin
-      return Ada.Strings.Hash (String (Key));
+      return Ada.Strings.Hash (To_String (Key));
    end Hash;
 
    -----------
@@ -60,7 +38,7 @@ package body Savadur.Actions is
 
    function Image (Action : in Actions.Action) return String is
    begin
-      return -Unbounded_String (Action.Cmd) & " " & " result type : "
+      return To_String (Action.Cmd) & " " & " result type : "
         & Result_Type'Image (Action.Result);
    end Image;
 
@@ -71,7 +49,7 @@ package body Savadur.Actions is
    function Image (Action : in Ref_Action) return String is
       Result : Unbounded_String :=
                  +Kind'Image (Action.Action_Type)
-                 & " " & String (-Action.Id);
+                 & " " & To_String (Action.Id);
    begin
       if Action.Value /= Null_Unbounded_String then
          Append (Result,
@@ -97,7 +75,7 @@ package body Savadur.Actions is
       procedure Image (Position : in Maps.Cursor) is
       begin
          Append (Result,
-                 String (Maps.Key (Position)) & " => "
+                 To_String (Maps.Key (Position)) & " => "
                       & Image (Maps.Element (Position)) & ASCII.LF);
       end Image;
    begin

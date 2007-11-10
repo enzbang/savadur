@@ -19,52 +19,32 @@
 --  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.       --
 ------------------------------------------------------------------------------
 
-with Ada.Strings.Hash_Case_Insensitive;
+package body Savadur.Utils is
 
-package body Savadur.Scenarios is
+   -------------
+   -- Convert --
+   -------------
 
-   ----------
-   -- Hash --
-   ----------
+   package body Generic_Utils is
 
-   function Hash (Key : in Id) return Containers.Hash_Type is
-   begin
-      return Ada.Strings.Hash_Case_Insensitive (To_String (Key));
-   end Hash;
+      ---------------
+      -- To_String --
+      ---------------
 
-   -----------
-   -- Image --
-   -----------
-
-   function Image (Scenario : Scenarios.Scenario) return String is
-   begin
-      return Savadur.Actions.Image (Scenario.Actions);
-   end Image;
-
-   -----------
-   -- Image --
-   -----------
-
-   function Image (Scenarios : in Maps.Map) return String is
-      Result : Unbounded_String;
-
-      procedure Image (Position : in Maps.Cursor);
-      --  Adds position image
-
-      -----------
-      -- Image --
-      -----------
-
-      procedure Image (Position : in Maps.Cursor) is
+      function To_String (S : in Source) return String is
       begin
-         Append (Result, "* "
-                 & To_String (Maps.Key (Position)) & ASCII.LF
-                 & Image (Maps.Element (Position)));
-      end Image;
-   begin
-      Maps.Iterate (Container => Scenarios,
-                    Process   => Image'Access);
-      return -Result;
-   end Image;
+         return To_String (+S);
+      end To_String;
 
-end Savadur.Scenarios;
+      -------------------------
+      -- To_Unbounded_String --
+      -------------------------
+
+      function To_Unbounded_String (S : in Source) return Unbounded_String is
+      begin
+         return Unbounded_String (S);
+      end To_Unbounded_String;
+
+   end Generic_Utils;
+
+end Savadur.Utils;
