@@ -73,13 +73,13 @@ procedure Savadur.Client is
 
    procedure Usage is
    begin
-      Logs.Write ("usage : savadur-client [OPTIONS] -project name"
-                  & " -sid scenario_id");
+      Logs.Write ("usage : savadur-client [OPTIONS] -p|-project name"
+                  & " -s|-sid scenario_id");
       Logs.Write ("OPTIONS :");
-      Logs.Write ("    -savadurdir dirname : set savadur directory");
+      Logs.Write ("    --savadurdir dirname : set savadur directory");
       Logs.Write ("          ($SAVADUR_DIR or $HOME/.savadur by default)");
-      Logs.Write ("    -verbose");
-      Logs.Write ("    -very_verbose");
+      Logs.Write ("    -V|-verbose");
+      Logs.Write ("    -VV|-very_verbose");
    end Usage;
 
 begin
@@ -90,7 +90,7 @@ begin
       Getopt : begin
          loop
             case GNAT.Command_Line.Getopt
-              ("verbose very_verbose project: savadurdir: sid: ") is
+              ("V verbose VV very_verbose p: project: savadurdir: s: sid: ") is
                when ASCII.NUL =>
                   exit;
 
@@ -98,7 +98,7 @@ begin
                   declare
                      Full : constant String := GNAT.Command_Line.Full_Switch;
                   begin
-                     if Full = "project" then
+                     if Full = "project" or else Full = "p" then
                         Project_Name :=
                           To_Unbounded_String (GNAT.Command_Line.Parameter);
                      end if;
@@ -111,19 +111,19 @@ begin
                      if Full = "savadurdir" then
                         Config.Set_Savadur_Directory
                           (GNAT.Command_Line.Parameter);
-                     elsif  Full = "sid" then
+                     elsif  Full = "sid" or else Full = "s" then
                         Scenario_Id :=
                           To_Unbounded_String (GNAT.Command_Line.Parameter);
                      end if;
                   end;
 
-               when 'v' =>
+               when 'v' | 'V' =>
                   declare
                      Full : constant String := GNAT.Command_Line.Full_Switch;
                   begin
-                     if Full = "verbose" then
+                     if Full = "verbose" or else Full = "V"  then
                         Logs.Set (Kind => Logs.Verbose, Activated => True);
-                     elsif Full = "very_verbose" then
+                     elsif Full = "very_verbose" or else Full = "VV" then
                         Logs.Set (Kind      => Logs.Verbose,
                                   Activated => True);
                         Logs.Set (Kind      => Logs.Very_Verbose,
