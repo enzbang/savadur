@@ -80,6 +80,116 @@ package body Savadur.Build is
    --  will be set to the status code returned by the operating system.
    --  Otherwise, Return_Code is undefined.
 
+   function Check
+     (Project : Config.Project.Project_Config;
+      Exec_Action  : in Actions.Action;
+      Ref          : in Actions.Ref_Action;
+      Return_Code  : in Integer;
+      Log_File     : in String)
+      return Boolean;
+
+   -----------
+   -- Check --
+   -----------
+
+   function Check
+     (Project : Config.Project.Project_Config;
+      Exec_Action  : in Actions.Action;
+      Ref          : in Actions.Ref_Action;
+      Return_Code  : in Integer;
+      Log_File     : in String)
+     return Boolean
+   is
+      use type Actions.Result_Type;
+      State_Directory   : constant String :=
+                            Config.Project.Project_State_Directory
+                              (Project.Project_Id);
+
+      Result : Boolean := True;
+   begin
+      if Exec_Action.Result = Actions.Exit_Status then
+         if Ref.Value /= "" then
+            Result := Return_Code = Integer'Value (-Ref.Value);
+         else
+            Result := Return_Code = 0;
+         end if;
+      end if;
+
+      if Ref.Require_Change then
+         declare
+            State_Filename   : constant String
+              := Directories.Compose
+                (Containing_Directory => State_Directory,
+                 Name                 =>
+                   Actions.Id_Utils.To_String (Ref.Id));
+            State_File       : Text_IO.File_Type;
+            Last_Exit_Status : Integer;
+         begin
+            if Exec_Action.Result = Actions.Exit_Status then
+
+               --  Check with last state
+
+               if Directories.Exists (State_Filename) then
+                  Text_IO.Open (File => State_File,
+                                Name => State_Filename,
+                                Mode => Text_IO.Out_File);
+
+                  Integer_Text_IO.Get (File  => State_File,
+                                       Item  => Last_Exit_Status);
+
+                  if Last_Exit_Status = Return_Code then
+                     --  No changes. Report error
+                     Result := False;
+                     Logs.Write (Content => Actions.Id_Utils.To_String (Ref.Id)
+                                   & " has no changes",
+                                 Kind    => Logs.Verbose);
+                  end if;
+
+                  Text_IO.Reset (File => State_File);
+               else
+                  Text_IO.Create (File => State_File,
+                                  Name => State_Filename);
+               end if;
+
+               --  Write new state
+
+               Integer_Text_IO.Put (File => State_File,
+                                    Item => Return_Code);
+               Text_IO.Close (State_File);
+            else
+               --  ??? Filter this result
+
+               if Directories.Exists (State_Filename)
+                 and then Content (Log_File) = Content (State_Filename)
+               then
+                  --  No changes. Report error
+
+                  Result := False;
+                  Logs.Write (Content => Actions.Id_Utils.To_String (Ref.Id)
+                              & " has no changes " & State_Filename,
+                              Kind    => Logs.Verbose);
+               end if;
+
+               --  Write new state
+
+               Directories.Copy_File (Log_File, State_Filename);
+            end if;
+         end;
+      end if;
+      if not Result then
+         Logs.Write
+           (Actions.Command_Utils.To_String (Exec_Action.Cmd) & " failed");
+      else
+         Logs.Write ("... success", Logs.Verbose);
+      end if;
+
+      return Result;
+   exception
+      when Constraint_Error =>
+         raise Command_Parse_Error with "Value " & (-Ref.Value)
+           & " is not an exit status";
+   end Check;
+
    -------------
    -- Execute --
    -------------
@@ -283,9 +393,6 @@ package body Savadur.Build is
       Selected_Scenario : Scenarios.Scenario;
       Sources_Directory : constant String :=
                             Config.Project.Project_Sources_Directory (Project);
-      State_Directory   : constant String :=
-                            Config.Project.Project_Log_Directory
-                              (Project.Project_Id);
       Log_Directory     : constant String :=
                             Config.Project.Project_Log_Directory
                               (Project.Project_Id);
@@ -332,41 +439,27 @@ package body Savadur.Build is
                            Result       => Result);
 
                   if not Result then
-                     Success := False;
-                  end if;
-
-                  if Ref.Require_Change then
-                     if Exec_Action.Result = Actions.Exit_Status then
-                        declare
-                           State_Filename : constant String
-                             := Directories.Compose
-                               (Containing_Directory => State_Directory,
-                                Name                 => To_String (Ref.Id));
-                           State_File : Text_IO.File_Type;
-                        begin
-                           Text_IO.Create (File => State_File,
-                                           Name => State_Filename);
-
-                           Integer_Text_IO.Put (File => State_File,
-                                                Item => Return_Code);
-                           Text_IO.Close (State_File);
-                        end;
-                     else
-                        --  ??? Filter this result
-
-                        declare
-                           State_Filename : constant String
-                             := Directories.Compose
-                               (Containing_Directory => State_Directory,
-                                Name                 => To_String (Ref.Id));
-                        begin
-                           Directories.Copy_File (Log_File, State_Filename);
-                        end;
-                     end if;
-                  end if;
-                  if not Result then
-                     --  Stop on failure by default
+                     Success := False; --  Exit with error
                      exit;
+                  end if;
+
+                  Success := Check (Project     => Project,
+                                    Exec_Action => Exec_Action,
+                                    Ref         => Ref,
+                                    Return_Code => Return_Code,
+                                    Log_File    => Log_File);
+
+                  if not Success then
+
+                     case Ref.On_Error is
+                        when Quit =>
+                           Success := True;
+                           exit;
+                        when Error =>
+                           exit;
+                        when Continue =>
+                           null;
+                     end case;
                   end if;
                   Next (Position);
                else
