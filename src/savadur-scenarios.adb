@@ -36,7 +36,7 @@ package body Savadur.Scenarios is
    -- Hash --
    ----------
 
-   function Hash (Key : Id) return Containers.Hash_Type is
+   function Hash (Key : in Id) return Containers.Hash_Type is
    begin
       return Ada.Strings.Hash_Case_Insensitive (To_String (Key));
    end Hash;
@@ -45,7 +45,7 @@ package body Savadur.Scenarios is
    -- Image --
    -----------
 
-   function Image (Scenario : Scenarios.Scenario) return String is
+   function Image (Scenario : in Scenarios.Scenario) return String is
    begin
       return "* " & To_String (Scenario.Id)
         & ASCII.LF & Savadur.Actions.Image (Scenario.Actions);

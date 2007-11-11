@@ -39,19 +39,23 @@ package body Savadur.Config.SCM is
    use Ada;
    use Ada.Strings.Unbounded;
 
-   Config_Error : exception;
-
    type Node_Value is (SCM, Name, Action, Cmd);
 
    type Attribute is (Id, Result);
 
    type XML_Attribute is array (Attribute) of Boolean;
 
-   XML_Schema : constant array (Node_Value) of XML_Attribute :=
-                  (SCM        => (Id => False, others => False),
-                   Cmd        => (Id => False, others => False),
-                   Action     => (Id => True, Result => True),
-                   Name       => (Id => True, others => False));
+   type XML_Schema is array (Node_Value) of XML_Attribute;
+
+   Schema : constant XML_Schema :=
+              XML_Schema'(SCM    => XML_Attribute'(Id => False,
+                                                   others => False),
+                          Cmd    => XML_Attribute'(Id     => False,
+                                                   others => False),
+                          Action => XML_Attribute'(Id     => True,
+                                                   Result => True),
+                          Name   => XML_Attribute'(Id     => True,
+                                                   others => False));
 
    function Get_Node_Value (S : in String) return Node_Value;
 
@@ -177,7 +181,9 @@ package body Savadur.Config.SCM is
    begin
       Start_Search
         (Search    => S,
-         Directory => Directories.Compose (Config.Savadur_Directory, "scm"),
+         Directory => Directories.Compose
+           (Containing_Directory => Config.Savadur_Directory,
+            Name                 => "scm"),
          Pattern   => "*.xml",
          Filter    => Filter_Type'(Ordinary_File => True,
                                    Directory     => False,
@@ -234,7 +240,7 @@ package body Savadur.Config.SCM is
    begin
       for J in 0 .. Get_Length (Atts) - 1 loop
          Attr := Get_Attribute (Get_Qname (Atts, J));
-         if not XML_Schema (NV) (Attr) then
+         if not Schema (NV) (Attr) then
             raise Config_Error with "Unknow attribute "
               & Node_Value'Image (NV) & "." & Get_Qname (Atts, J);
          end if;

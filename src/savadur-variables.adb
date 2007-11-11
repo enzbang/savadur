@@ -53,7 +53,7 @@ package body Savadur.Variables is
    -- Hash --
    ----------
 
-   function Hash (Key : Name) return Containers.Hash_Type is
+   function Hash (Key : in Name) return Containers.Hash_Type is
    begin
       return Strings.Hash_Case_Insensitive (To_String (Key));
    end Hash;

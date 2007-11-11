@@ -44,6 +44,8 @@ regtests_bootstrap:
 clean:
 	$(GNATCLEAN) -P savadur
 
+check:
+	$(GNATCHECK) -dd -Psavadur -rules -from=savadur.check
 
 install:
 	@$(MKDIR) $(INSTALL)/example

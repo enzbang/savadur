@@ -31,9 +31,11 @@ package Savadur.Config.Project is
 
    use Ada.Strings.Unbounded;
 
+   Config_Error : exception;
+
    type Project_Id is new Unbounded_String;
 
-   package Project_Id_Utils is new Savadur.Utils.Generic_Utils (Project_Id);
+   package Project_Id_Utils is new Utils.Generic_Utils (Source => Project_Id);
 
    type Project_Config is record
       Project_Id : Project.Project_Id;

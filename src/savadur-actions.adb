@@ -27,7 +27,7 @@ package body Savadur.Actions is
    -- Hash --
    ----------
 
-   function Hash (Key : Action) return Containers.Hash_Type is
+   function Hash (Key : in Action) return Containers.Hash_Type is
    begin
       return Hash (Key.Id);
    end Hash;
@@ -36,7 +36,7 @@ package body Savadur.Actions is
    -- Hash --
    ----------
 
-   function Hash (Key : Id) return Containers.Hash_Type is
+   function Hash (Key : in Id) return Containers.Hash_Type is
    begin
       return Ada.Strings.Hash (To_String (Key));
    end Hash;
@@ -61,8 +61,7 @@ package body Savadur.Actions is
                  & " " & To_String (Action.Id);
    begin
       if Action.Value /= Null_Unbounded_String then
-         Append (Result,
-                 " wanted value=" & (-Action.Value));
+         Append (Result, " wanted value=" & (-Action.Value));
       end if;
 
       if Action.Require_Change then

@@ -42,33 +42,35 @@ package body Savadur.Config.Project is
 
    type XML_Attribute is array (Attribute) of Boolean;
 
-   XML_Schema : constant array (Node_Value) of XML_Attribute :=
-                  (SCM        =>  (Id     => True,
-                                   others => False),
-                   Variable   =>  (Id     => True,
-                                   Value  => True,
-                                   others => False),
-                   SCM_Action => (Id             => True,
-                                  Value          => True,
-                                  Require_Change => True,
-                                  On_Error       => True,
-                                  others         => False),
-                   Action     => (Id             => True,
-                                  Value          => True,
-                                  Require_Change => True,
-                                  On_Error       => True,
-                                  others         => False),
-                   Scenario   => (Id     => True,
-                                  others => False),
-                   Cmd        => (others => False),
-                   Project    => (others => False),
-                   Name       => (Id     => True,
-                                  others => False));
+   type XML_Schema is array (Node_Value) of XML_Attribute;
 
-   function Get_Node_Value (S : String) return Node_Value;
+   Schema : constant XML_Schema
+     := XML_Schema'(SCM        =>  XML_Attribute'(Id     => True,
+                                                  others => False),
+                    Variable   =>  XML_Attribute'(Id     => True,
+                                                  Value  => True,
+                                                  others => False),
+                    SCM_Action => XML_Attribute'(Id             => True,
+                                                 Value          => True,
+                                                 Require_Change => True,
+                                                 On_Error       => True,
+                                                 others         => False),
+                    Action     => XML_Attribute'(Id             => True,
+                                                 Value          => True,
+                                                 Require_Change => True,
+                                                 On_Error       => True,
+                                                 others         => False),
+                    Scenario   => XML_Attribute'(Id     => True,
+                                                 others => False),
+                    Cmd        => XML_Attribute'(others => False),
+                    Project    => XML_Attribute'(others => False),
+                    Name       => XML_Attribute'(Id     => True,
+                                                 others => False));
+
+   function Get_Node_Value (S : in String) return Node_Value;
    --  Returns the node value matching the given string or raise Config_Error
 
-   function Get_Attribute (S : String) return Attribute;
+   function Get_Attribute (S : in String) return Attribute;
    --  Returns the attributed value matching the given string or raise
    --  Config_Error
 
@@ -176,7 +178,7 @@ package body Savadur.Config.Project is
    -- Get_Attribute --
    -------------------
 
-   function Get_Attribute (S : String) return Attribute is
+   function Get_Attribute (S : in String) return Attribute is
       Upper_S : String := S;
       use GNAT;
    begin
@@ -214,7 +216,7 @@ package body Savadur.Config.Project is
    -- Parse --
    -----------
 
-   function Parse (Filename : String) return Project_Config is
+   function Parse (Filename : in String) return Project_Config is
       Reader : Tree_Reader;
       Source : Input_Sources.File.File_Input;
    begin
@@ -328,6 +330,141 @@ package body Savadur.Config.Project is
       Attr : Attribute;
       NV   : constant Node_Value := Get_Node_Value (Local_Name);
 
+      procedure Get_Attribute_Value (Position : in Natural);
+      --  Get attribute value
+
+      -------------------------
+      -- Get_Attribute_Value --
+      -------------------------
+
+      procedure Get_Attribute_Value (Position : in Natural) is
+      begin
+         case Attr is
+            when Id =>
+               case NV is
+                  when Scenario =>
+                     Handler.Scenario.Id :=
+                       Scenarios.Id_Utils.Value (Get_Value (Atts, Position));
+
+                  when SCM =>
+                     Handler.Current_Project.SCM_Id :=
+                       Savadur.SCM.Id_Utils.Value (Get_Value (Atts, Position));
+
+                  when Variable =>
+                     Handler.Var.Name :=
+                       Variables.Name_Utils.Value (Get_Value (Atts, Position));
+
+                  when Action | SCM_Action =>
+                     if NV = Action and then not Handler.Inside_Scenario then
+                        Handler.Action.Id :=
+                          Actions.Id_Utils.Value (Get_Value (Atts, Position));
+                     else
+                        Handler.Ref_Action.Id :=
+                          Actions.Id_Utils.Value (Get_Value (Atts, Position));
+
+                        --  Set the ref action type
+
+                        if NV = Action then
+                           Handler.Ref_Action.Action_Type := Actions.Default;
+                        else
+                           Handler.Ref_Action.Action_Type := Actions.SCM;
+                        end if;
+                     end if;
+
+                  when Name =>
+                     Handler.Current_Project.Project_Id :=
+                       Project_Id (+Get_Value (Atts, Position));
+
+                  when others => null;
+               end case;
+
+            when Value =>
+               case NV is
+                  when Variable =>
+                     Handler.Var.Value := +Get_Value (Atts, Position);
+
+                  when Action | SCM_Action =>
+                     if not Handler.Inside_Scenario then
+                        raise Config_Error with "Unknow attribute "
+                          & Node_Value'Image (NV) & "."
+                          & Get_Qname (Atts, Position);
+                     end if;
+                     Handler.Ref_Action.Value := +Get_Value (Atts, Position);
+
+                  when others => null;
+               end case;
+
+            when Result =>
+               case NV is
+                  when Action | SCM_Action =>
+                     if Handler.Inside_Scenario then
+                        raise Config_Error with "Unknow attribute "
+                          & Node_Value'Image (NV) & "."
+                          & Get_Qname (Atts, Position);
+                     end if;
+                     Get_Action_Result_Type : begin
+                        Handler.Action.Result :=
+                          Actions.Result_Type'Value
+                            (Get_Value (Atts, Position));
+                     exception
+                        when Constraint_Error =>
+                           raise Config_Error with "Unknow attribute value "
+                             & Node_Value'Image (NV) & "."
+                             & Get_Qname (Atts, Position)
+                             & " value = " & Get_Value (Atts, Position);
+                     end Get_Action_Result_Type;
+
+                  when others => null;
+               end case;
+
+            when Require_Change =>
+               case NV is
+                  when Action | SCM_Action =>
+                     if not Handler.Inside_Scenario then
+                        raise Config_Error with "Unknow attribute "
+                          & Node_Value'Image (NV) & "."
+                          & Get_Qname (Atts, Position);
+                     end if;
+
+                     Get_Require_Change_Value : begin
+                        Handler.Ref_Action.Require_Change :=
+                          Boolean'Value (Get_Value (Atts, Position));
+                     exception
+                        when Constraint_Error =>
+                           raise Config_Error with "Unknow attribute value "
+                             & Node_Value'Image (NV) & "."
+                             & Get_Qname (Atts, Position)
+                             & " value = " & Get_Value (Atts, Position);
+                     end Get_Require_Change_Value;
+
+                  when others => null;
+               end case;
+
+            when On_Error =>
+               case NV is
+                  when Action | SCM_Action =>
+                     if not Handler.Inside_Scenario then
+                        raise Config_Error with "Unknow attribute "
+                          & Node_Value'Image (NV) & "."
+                          & Get_Qname (Atts, Position);
+                     end if;
+
+                     Get_On_Error_Value : begin
+                        Handler.Ref_Action.On_Error :=
+                          Actions.On_Error_Hook'Value
+                            (Get_Value (Atts, Position));
+                     exception
+                        when Constraint_Error =>
+                           raise Config_Error with "Unknow attribute value "
+                             & Node_Value'Image (NV) & "."
+                             & Get_Qname (Atts, Position)
+                             & " value = " & Get_Value (Atts, Position);
+                     end Get_On_Error_Value;
+
+                  when others => null;
+               end case;
+         end case;
+      end Get_Attribute_Value;
    begin
 
       --  Set global state
@@ -349,132 +486,12 @@ package body Savadur.Config.Project is
 
          --  Check if attribute is valid
 
-         if not XML_Schema (NV) (Attr) then
+         if not Schema (NV) (Attr) then
             raise Config_Error with "Unknow attribute "
               & Node_Value'Image (NV) & "." & Get_Qname (Atts, J);
          end if;
 
-         --  Get attribute value
-
-         case Attr is
-            when Id =>
-               case NV is
-                  when Scenario =>
-                     Handler.Scenario.Id :=
-                       Scenarios.Id_Utils.Value (Get_Value (Atts, J));
-
-                  when SCM =>
-                     Handler.Current_Project.SCM_Id :=
-                       Savadur.SCM.Id_Utils.Value (Get_Value (Atts, J));
-
-                  when Variable =>
-                     Handler.Var.Name :=
-                       Variables.Name_Utils.Value (Get_Value (Atts, J));
-
-                  when Action | SCM_Action =>
-                     if NV = Action and then not Handler.Inside_Scenario then
-                        Handler.Action.Id :=
-                          Actions.Id_Utils.Value (Get_Value (Atts, J));
-                     else
-                        Handler.Ref_Action.Id :=
-                          Actions.Id_Utils.Value (Get_Value (Atts, J));
-
-                        --  Set the ref action type
-
-                        if NV = Action then
-                           Handler.Ref_Action.Action_Type := Actions.Default;
-                        else
-                           Handler.Ref_Action.Action_Type := Actions.SCM;
-                        end if;
-                     end if;
-
-                  when Name =>
-                     Handler.Current_Project.Project_Id :=
-                       Project_Id (+Get_Value (Atts, J));
-
-                  when others => null;
-               end case;
-
-            when Value =>
-               case NV is
-                  when Variable =>
-                     Handler.Var.Value := +Get_Value (Atts, J);
-
-                  when Action | SCM_Action =>
-                     if not Handler.Inside_Scenario then
-                        raise Config_Error with "Unknow attribute "
-                          & Node_Value'Image (NV) & "." & Get_Qname (Atts, J);
-                     end if;
-                     Handler.Ref_Action.Value := +Get_Value (Atts, J);
-
-                  when others => null;
-               end case;
-
-            when Result =>
-               case NV is
-                  when Action | SCM_Action =>
-                     if Handler.Inside_Scenario then
-                        raise Config_Error with "Unknow attribute "
-                          & Node_Value'Image (NV) & "." & Get_Qname (Atts, J);
-                     end if;
-                     Get_Action_Result_Type : begin
-                        Handler.Action.Result :=
-                          Actions.Result_Type'Value (Get_Value (Atts, J));
-                     exception
-                        when Constraint_Error =>
-                           raise Config_Error with "Unknow attribute value "
-                             & Node_Value'Image (NV) & "."
-                             & Get_Qname (Atts, J)
-                             & " value = " & Get_Value (Atts, J);
-                     end Get_Action_Result_Type;
-
-                  when others => null;
-               end case;
-
-            when Require_Change =>
-               case NV is
-                  when Action | SCM_Action =>
-                     if not Handler.Inside_Scenario then
-                        raise Config_Error with "Unknow attribute "
-                          & Node_Value'Image (NV) & "." & Get_Qname (Atts, J);
-                     end if;
-
-                     Get_Require_Change_Value : begin
-                        Handler.Ref_Action.Require_Change :=
-                          Boolean'Value (Get_Value (Atts, J));
-                     exception
-                        when Constraint_Error =>
-                           raise Config_Error with "Unknow attribute value "
-                             & Node_Value'Image (NV) & "."
-                             & Get_Qname (Atts, J)
-                             & " value = " & Get_Value (Atts, J);
-                     end Get_Require_Change_Value;
-
-                  when others => null;
-               end case;
-
-            when On_Error =>
-               case NV is
-                  when Action | SCM_Action =>
-                     if not Handler.Inside_Scenario then
-                        raise Config_Error with "Unknow attribute "
-                          & Node_Value'Image (NV) & "." & Get_Qname (Atts, J);
-                     end if;
-
-                     Get_On_Error_Value : begin
-                        Handler.Ref_Action.On_Error :=
-                          Actions.On_Error_Hook'Value (Get_Value (Atts, J));
-                     exception
-                        when Constraint_Error =>
-                           raise Config_Error with "Unknow attribute value "
-                             & Node_Value'Image (NV) & "."
-                             & Get_Qname (Atts, J)
-                             & " value = " & Get_Value (Atts, J);
-                     end Get_On_Error_Value;
-
-                  when others => null;
-               end case;
-         end case;
+         Get_Attribute_Value (J);
       end loop;
    end Start_Element;
 

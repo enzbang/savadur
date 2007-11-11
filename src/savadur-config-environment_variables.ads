@@ -23,6 +23,8 @@ with Savadur.Environment_Variables;
 
 package Savadur.Config.Environment_Variables is
 
+   Config_Error : exception;
+
    function Parse
      (Filename : in String) return Savadur.Environment_Variables.Maps.Map;
    --  Returns the project configuration read in the given file

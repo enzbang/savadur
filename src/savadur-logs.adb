@@ -1,5 +1,5 @@
 ------------------------------------------------------------------------------
---                              Vision2Pixels                               --
+--                                  Savadur                                 --
 --                                                                          --
 --                           Copyright (C) 2007                             --
 --                      Pascal Obry - Olivier Ramonat                       --
@@ -27,9 +27,12 @@ package body Savadur.Logs is
 
    use Ada;
 
-   Is_Activated : array (Log_Level) of Boolean := (Verbose      => False,
-                                                   Very_Verbose => False,
-                                                   others       => True);
+   type Logs_Activated is array (Log_Level) of Boolean;
+
+   Is_Activated : Logs_Activated :=
+                    Logs_Activated'(Verbose      => False,
+                                    Very_Verbose => False,
+                                    others       => True);
 
    Log          : Text_IO.File_Type;
    Log_Use_File : Boolean := False;
@@ -98,7 +101,9 @@ package body Savadur.Logs is
 
    procedure Set_File (Filename : in String) is
    begin
-      Text_IO.Create (Log, Text_IO.Append_File, Name => Filename);
+      Text_IO.Create (File => Log,
+                      Mode => Text_IO.Append_File,
+                      Name => Filename);
       Log_Use_File := True;
    end Set_File;
 

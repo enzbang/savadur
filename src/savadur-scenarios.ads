@@ -34,27 +34,27 @@ package Savadur.Scenarios is
 
    type Id is new Unbounded_String;
 
-   package Id_Utils is new Generic_Utils (Id);
+   package Id_Utils is new Generic_Utils (Source => Id);
 
-   Default_Scenario : Id := Id (+"default");
+   Default_Scenario : constant Id := Id (+"default");
 
    type Scenario is record
       Id      : Scenarios.Id;
       Actions : Savadur.Actions.Vectors.Vector;
    end record;
 
-   Null_Scenario : Scenario :=
+   Null_Scenario : constant Scenario :=
                      Scenario'(Id      => Id_Utils.Nil,
                                Actions => Actions.Vectors.Empty_Vector);
 
-   function Image (Scenario : Scenarios.Scenario) return String;
+   function Image (Scenario : in Scenarios.Scenario) return String;
    --  Return Scenario image
 
    ----------
    -- Maps --
    ----------
 
-   function Hash (Key : Scenario) return Containers.Hash_Type;
+   function Hash (Key : in Scenario) return Containers.Hash_Type;
    --  Use scenario.Id hash (Strings.Hash_Case_Insensitive)
 
    package Sets is new Ada.Containers.Indefinite_Hashed_Sets
@@ -65,7 +65,7 @@ package Savadur.Scenarios is
    function Key (Element : in Scenario) return Id;
    --  Return scenario id
 
-   function Hash (Key : Id) return Containers.Hash_Type;
+   function Hash (Key : in Id) return Containers.Hash_Type;
 
    package Keys is new Sets.Generic_Keys
      (Key_Type        => Id,
@@ -73,7 +73,7 @@ package Savadur.Scenarios is
       Hash            => Hash,
       Equivalent_Keys => "=");
 
-   function Image (Scenarios : Sets.Set) return String;
+   function Image (Scenarios : in Sets.Set) return String;
    --  Return Scenario map image
 
 end Savadur.Scenarios;

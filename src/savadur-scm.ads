@@ -35,29 +35,29 @@ package Savadur.SCM is
    --  Special actions references
 
    SCM_Init : Actions.Ref_Action :=
-                (Action_Type    => Actions.SCM,
-                 Id             => Actions.Id (+"init"),
-                 Value          => <>,
-                 Require_Change => <>,
-                 On_Error       => <>);
+                Actions.Ref_Action'(Action_Type    => Actions.SCM,
+                                    Id             => Actions.Id (+"init"),
+                                    Value          => <>,
+                                    Require_Change => <>,
+                                    On_Error       => <>);
 
    type Id is new Unbounded_String;
 
-   package Id_Utils is new Generic_Utils (Id);
+   package Id_Utils is new Generic_Utils (Source => Id);
 
    type SCM is record
       Id      : Savadur.SCM.Id;
       Actions : Savadur.Actions.Sets.Set;
    end record;
 
-   function Image (SCM : Savadur.SCM.SCM) return String;
+   function Image (SCM : in Savadur.SCM.SCM) return String;
    --  Returns SCM Image
 
    ----------
    -- Sets --
    ----------
 
-   function Hash (Key : SCM) return Containers.Hash_Type;
+   function Hash (Key : in SCM) return Containers.Hash_Type;
    --  Renames Strings.Hash
 
    package Sets is new Ada.Containers.Indefinite_Hashed_Sets
@@ -68,7 +68,7 @@ package Savadur.SCM is
    function Key (Element : in SCM) return Id;
    --  Return SCM id
 
-   function Hash (Key : Id) return Containers.Hash_Type;
+   function Hash (Key : in Id) return Containers.Hash_Type;
 
    package Keys is new Sets.Generic_Keys
      (Key_Type        => Id,
@@ -76,7 +76,7 @@ package Savadur.SCM is
       Hash            => Hash,
       Equivalent_Keys => "=");
 
-   function Image (Set : Sets.Set) return String;
+   function Image (Set : in Sets.Set) return String;
    --  Return the SCM set image
 
 end Savadur.SCM;

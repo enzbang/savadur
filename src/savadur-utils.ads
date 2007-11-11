@@ -36,7 +36,7 @@ package Savadur.Utils is
       type Source is new Unbounded_String;
    package Generic_Utils is
 
-      Nil : Source := Source (Null_Unbounded_String);
+      Nil : constant Source := Source (Null_Unbounded_String);
 
       function To_Unbounded_String (S : in Source) return Unbounded_String;
 

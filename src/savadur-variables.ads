@@ -31,7 +31,7 @@ package Savadur.Variables is
 
    type Name is new Unbounded_String;
 
-   package Name_Utils is new Savadur.Utils.Generic_Utils (Name);
+   package Name_Utils is new Utils.Generic_Utils (Source => Name);
 
    type Variable is record
       Name  : Variables.Name;
@@ -55,7 +55,7 @@ package Savadur.Variables is
    function Key (Element : in Variable) return Name;
    --  Return variable name
 
-   function Hash (Key : Name) return Containers.Hash_Type;
+   function Hash (Key : in Name) return Containers.Hash_Type;
 
    package Keys is new Sets.Generic_Keys
      (Key_Type        => Name,

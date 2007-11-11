@@ -33,10 +33,10 @@ package Savadur.Actions is
    use Savadur.Utils;
 
    type Id is new Unbounded_String;
-   package Id_Utils is new Generic_Utils (Id);
+   package Id_Utils is new Generic_Utils (Source => Id);
 
    type Command is new Unbounded_String;
-   package Command_Utils is new Generic_Utils (Command);
+   package Command_Utils is new Generic_Utils (Source => Command);
 
    type Kind is (SCM, Default);
 
@@ -48,7 +48,7 @@ package Savadur.Actions is
       Result : Result_Type := Exit_Status;
    end record;
 
-   Null_Action : Action :=
+   Null_Action : constant Action :=
                    Action'(Id     => Id_Utils.Nil,
                            Cmd    => Command_Utils.Nil,
                            Result => <>);
@@ -66,7 +66,7 @@ package Savadur.Actions is
       On_Error       : On_Error_Hook    := Error;
    end record;
 
-   Null_Ref_Action : Ref_Action :=
+   Null_Ref_Action : constant Ref_Action :=
                        Ref_Action'(Id             => Id_Utils.Nil,
                                    Action_Type    => <>,
                                    Value          => <>,
@@ -80,7 +80,7 @@ package Savadur.Actions is
    -- Sets --
    ----------
 
-   function Hash (Key : Action) return Containers.Hash_Type;
+   function Hash (Key : in Action) return Containers.Hash_Type;
    --  Renames Strings.Hash
 
    package Sets is new Ada.Containers.Indefinite_Hashed_Sets
@@ -91,7 +91,7 @@ package Savadur.Actions is
    function Key (Element : in Action) return Id;
    --  Return SCM id
 
-   function Hash (Key : Id) return Containers.Hash_Type;
+   function Hash (Key : in Id) return Containers.Hash_Type;
 
    package Keys is new Sets.Generic_Keys
      (Key_Type        => Id,
@@ -109,10 +109,10 @@ package Savadur.Actions is
    subtype Action_Index is Positive;
 
    package Vectors is new Ada.Containers.Indefinite_Vectors
-     (Index_Type      => Action_Index,
-      Element_Type    => Ref_Action);
+     (Index_Type   => Action_Index,
+      Element_Type => Ref_Action);
 
-   function Image (Vector : Vectors.Vector) return String;
+   function Image (Vector : in Vectors.Vector) return String;
    --  Returns vector image
 
 end Savadur.Actions;

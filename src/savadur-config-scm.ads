@@ -23,6 +23,8 @@ with Savadur.SCM;
 
 package Savadur.Config.SCM is
 
+   Config_Error : exception;
+
    Configurations : Savadur.SCM.Sets.Set;
 
    procedure Parse;

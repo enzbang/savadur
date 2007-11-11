@@ -64,19 +64,29 @@ procedure Savadur.Client is
    Scenario_Id          : Unbounded_String
      := Scenarios.Id_Utils.To_Unbounded_String (Scenarios.Default_Scenario);
 
-   procedure Usage;
+   procedure Usage (Error_Message : in String := "");
    --  Display Usage
 
    -----------
    -- Usage --
    -----------
 
-   procedure Usage is
+   procedure Usage (Error_Message : in String := "") is
    begin
+
+      --  Display error message if not null
+
+      if Error_Message /= "" then
+         Logs.Write (Content => Error_Message, Kind => Logs.Error);
+
+         --  Set exit status to Failure
+         Command_Line.Set_Exit_Status (Command_Line.Failure);
+      end if;
+
       Logs.Write ("usage : savadur-client [OPTIONS] -p|-project name"
                   & " -s|-sid scenario_id");
       Logs.Write ("OPTIONS :");
-      Logs.Write ("    --savadurdir dirname : set savadur directory");
+      Logs.Write ("    -savadurdir dirname : set savadur directory");
       Logs.Write ("          ($SAVADUR_DIR or $HOME/.savadur by default)");
       Logs.Write ("    -V|-verbose");
       Logs.Write ("    -VV|-very_verbose");
@@ -84,67 +94,70 @@ procedure Savadur.Client is
 
 begin
 
-   if Ada.Command_Line.Argument_Count = 0 then
-      raise Syntax_Error with "no argument ?";
-   else
-      Getopt : begin
-         loop
-            case GNAT.Command_Line.Getopt
-              ("V verbose VV very_verbose p: project: savadurdir: s: sid: ") is
-               when ASCII.NUL =>
-                  exit;
-
-               when 'p' =>
-                  declare
-                     Full : constant String := GNAT.Command_Line.Full_Switch;
-                  begin
-                     if Full = "project" or else Full = "p" then
-                        Project_Name :=
-                          To_Unbounded_String (GNAT.Command_Line.Parameter);
-                     end if;
-                  end;
-
-               when 's' =>
-                  declare
-                     Full : constant String := GNAT.Command_Line.Full_Switch;
-                  begin
-                     if Full = "savadurdir" then
-                        Config.Set_Savadur_Directory
-                          (GNAT.Command_Line.Parameter);
-                     elsif  Full = "sid" or else Full = "s" then
-                        Scenario_Id :=
-                          To_Unbounded_String (GNAT.Command_Line.Parameter);
-                     end if;
-                  end;
-
-               when 'v' | 'V' =>
-                  declare
-                     Full : constant String := GNAT.Command_Line.Full_Switch;
-                  begin
-                     if Full = "verbose" or else Full = "V"  then
-                        Logs.Set (Kind => Logs.Verbose, Activated => True);
-                     elsif Full = "very_verbose" or else Full = "VV" then
-                        Logs.Set (Kind      => Logs.Verbose,
-                                  Activated => True);
-                        Logs.Set (Kind      => Logs.Very_Verbose,
-                                  Activated => True);
-                     end if;
-                  end;
-
-               when others =>
-                  raise Syntax_Error with "unknown syntax";
-            end case;
-         end loop;
-      exception
-         when GNAT.Command_Line.Invalid_Section
-            | GNAT.Command_Line.Invalid_Switch
-            | GNAT.Command_Line.Invalid_Parameter =>
-            raise Syntax_Error with "unknown syntax";
-      end Getopt;
+   if Command_Line.Argument_Count = 0 then
+      Usage (Error_Message => "no argument ?");
+      return;
    end if;
 
+   Parse_Opt : begin
+      Interate_On_Opt : loop
+         case GNAT.Command_Line.Getopt
+              ("V verbose VV very_verbose p: project: savadurdir: s: sid: ") is
+            when ASCII.NUL =>
+               exit Interate_On_Opt;
+
+            when 'p' =>
+               Complete_P : declare
+                  Full : constant String := GNAT.Command_Line.Full_Switch;
+               begin
+                  if Full = "project" or else Full = "p" then
+                     Project_Name :=
+                       To_Unbounded_String (GNAT.Command_Line.Parameter);
+                  end if;
+               end Complete_P;
+
+            when 's' =>
+               Complete_S : declare
+                  Full : constant String := GNAT.Command_Line.Full_Switch;
+               begin
+                  if Full = "savadurdir" then
+                     Config.Set_Savadur_Directory
+                       (GNAT.Command_Line.Parameter);
+                  elsif  Full = "sid" or else Full = "s" then
+                     Scenario_Id :=
+                       To_Unbounded_String (GNAT.Command_Line.Parameter);
+                  end if;
+               end Complete_S;
+
+            when 'v' | 'V' =>
+               Complete_V : declare
+                  Full : constant String := GNAT.Command_Line.Full_Switch;
+               begin
+                  if Full = "verbose" or else Full = "V"  then
+                     Logs.Set (Kind => Logs.Verbose, Activated => True);
+                  elsif Full = "very_verbose" or else Full = "VV" then
+                     Logs.Set (Kind      => Logs.Verbose,
+                               Activated => True);
+                     Logs.Set (Kind      => Logs.Very_Verbose,
+                               Activated => True);
+                  end if;
+               end Complete_V;
+
+            when others =>
+               Usage (Error_Message => "unknown syntax");
+               return;
+         end case;
+      end loop Interate_On_Opt;
+   exception
+      when GNAT.Command_Line.Invalid_Section
+         | GNAT.Command_Line.Invalid_Switch
+         | GNAT.Command_Line.Invalid_Parameter =>
+         raise Syntax_Error with "unknown syntax";
+   end Parse_Opt;
+
    if To_String (Project_Name) = "" then
-      raise Syntax_Error with "no project name";
+      Usage (Error_Message => "no project name");
+      return;
    end if;
 
    --  Parse SCM configuration files
@@ -173,26 +186,31 @@ begin
          raise Syntax_Error with "Wrong project name !";
    end Get_Project_Filename;
 
-   declare
+   Run_Project : declare
       Project : constant Config.Project.Project_Config :=
                   Config.Project.Parse (-Project_Filename);
       Env_Var : Environment_Variables.Maps.Map;
    begin
 
-      Logs.Write ("Savadur client" & ASCII.LF, Logs.Verbose);
-      Logs.Write ("SCM : " & ASCII.LF
+      Logs.Write (Content => "Savadur client" & ASCII.LF,
+                  Kind    => Logs.Verbose);
+
+      Logs.Write (Content => "SCM : " & ASCII.LF
                   & To_String (Unbounded_String (Project.SCM_Id)) & ASCII.LF,
-                  Logs.Very_Verbose);
-      Logs.Write ("Action list : " & ASCII.LF
+                  Kind    => Logs.Very_Verbose);
+
+      Logs.Write (Content => "Action list : " & ASCII.LF
                   & Actions.Image (Project.Actions) & ASCII.LF,
-                  Logs.Very_Verbose);
-      Logs.Write ("Scenarios : " & ASCII.LF
+                  Kind    => Logs.Very_Verbose);
+
+      Logs.Write (Content => "Scenarios : " & ASCII.LF
                   & Scenarios.Image (Project.Scenarios) & ASCII.LF,
-                  Logs.Very_Verbose);
-      Logs.Write ("SCM Found" & ASCII.LF
+                  Kind    => Logs.Very_Verbose);
+
+      Logs.Write (Content => "SCM Found" & ASCII.LF
                   & Savadur.SCM.Image (Savadur.Config.SCM.Configurations)
                   & ASCII.LF,
-                  Logs.Very_Verbose);
+                  Kind    => Logs.Very_Verbose);
 
       if Directories.Exists (-Project_Env_Filename) then
          Env_Var := Savadur.Config.Environment_Variables.Parse
@@ -208,11 +226,12 @@ begin
       else
          Logs.Write ("Failure");
       end if;
-   end;
+   end Run_Project;
 
 exception
-   when E : Syntax_Error | Savadur.Config.Config_Error  =>
-      Logs.Write (Exceptions.Exception_Message (E), Logs.Error);
-      Usage;
-      Ada.Command_Line.Set_Exit_Status (Ada.Command_Line.Failure);
+   when E : Syntax_Error
+      | Savadur.Config.Config_Error
+      | Savadur.Config.Project.Config_Error
+      | Savadur.Config.Environment_Variables.Config_Error =>
+      Usage (Error_Message => Exceptions.Exception_Message (E));
 end Savadur.Client;

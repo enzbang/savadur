@@ -54,14 +54,14 @@ package body Savadur.Build is
    --  Returns the programme name and the argument list
 
    function Get_Action
-     (Project    : Config.Project.Project_Config;
-      Ref_Action : Actions.Ref_Action)
+     (Project    : in Config.Project.Project_Config;
+      Ref_Action : in Actions.Ref_Action)
       return Actions.Action;
    --  Returns the action to execute matching the ref_action
 
    function Parse
-     (Project : Config.Project.Project_Config;
-      Cmd     : Actions.Command)
+     (Project : in Config.Project.Project_Config;
+      Cmd     : in Actions.Command)
      return Actions.Command;
    --  Replace strings beginning with $
    --  by the correponding entry in project <variable> section
@@ -81,7 +81,7 @@ package body Savadur.Build is
    --  Otherwise, Return_Code is undefined.
 
    function Check
-     (Project : Config.Project.Project_Config;
+     (Project      : in Config.Project.Project_Config;
       Exec_Action  : in Actions.Action;
       Ref          : in Actions.Ref_Action;
       Return_Code  : in Integer;
@@ -93,7 +93,7 @@ package body Savadur.Build is
    -----------
 
    function Check
-     (Project : Config.Project.Project_Config;
+     (Project      : in Config.Project.Project_Config;
       Exec_Action  : in Actions.Action;
       Ref          : in Actions.Ref_Action;
       Return_Code  : in Integer;
@@ -116,7 +116,7 @@ package body Savadur.Build is
       end if;
 
       if Ref.Require_Change then
-         declare
+         Check_Last_State : declare
             State_Filename   : constant String
               := Directories.Compose
                 (Containing_Directory => State_Directory,
@@ -174,13 +174,14 @@ package body Savadur.Build is
 
                Directories.Copy_File (Log_File, State_Filename);
             end if;
-         end;
+         end Check_Last_State;
       end if;
       if not Result then
          Logs.Write
            (Actions.Command_Utils.To_String (Exec_Action.Cmd) & " failed");
       else
-         Logs.Write ("... success", Logs.Verbose);
+         Logs.Write (Content => "... success",
+                     Kind    => Logs.Verbose);
       end if;
 
       return Result;
@@ -208,9 +209,10 @@ package body Savadur.Build is
       Prog_Name       : Unbounded_String;
    begin
 
-      Logs.Write ("Execute "
-                  & Actions.Command_Utils.To_String (Exec_Action.Cmd),
-                  Logs.Verbose);
+      Logs.Write
+        (Content => "Execute "
+         & Actions.Command_Utils.To_String (Exec_Action.Cmd),
+         Kind    => Logs.Verbose);
 
       Get_Arguments (Exec_Action.Cmd, Prog_Name, Argument_String);
 
@@ -235,18 +237,14 @@ package body Savadur.Build is
       if not Result then
          --  Command failed to execute
          --  Do not read the return code
-         Logs.Write ("Can not execute "
-                     & Actions.Command_Utils.To_String (Exec_Action.Cmd),
-                     Logs.Error);
+         Logs.Write
+           (Content => "Can not execute "
+            & Actions.Command_Utils.To_String (Exec_Action.Cmd),
+            Kind    => Logs.Error);
       else
          Free (Argument_String);
          Free (Exec_Path);
       end if;
-   exception
-      when E : others => Logs.Write
-           (Content => Exception_Information (E),
-            Kind    => Logs.Error);
-         raise;
    end Execute;
 
    ----------------
@@ -254,8 +252,8 @@ package body Savadur.Build is
    ----------------
 
    function Get_Action
-     (Project    : Config.Project.Project_Config;
-      Ref_Action : Actions.Ref_Action)
+     (Project    : in Config.Project.Project_Config;
+      Ref_Action : in Actions.Ref_Action)
       return Actions.Action
    is
       use Savadur.Actions;
@@ -266,7 +264,7 @@ package body Savadur.Build is
       if Ref_Action.Action_Type = Actions.SCM then
          --  Search the action in the SCM list
 
-         declare
+         Search_Action : declare
             use Savadur.SCM;
             SCM_Used : Savadur.SCM.SCM := Savadur.SCM.Keys.Element
               (Container => Savadur.Config.SCM.Configurations,
@@ -277,7 +275,7 @@ package body Savadur.Build is
               (Container => SCM_Used.Actions,
                Key       => Action_Id);
 
-         end;
+         end Search_Action;
       else
          --  Search in project action
 
@@ -303,14 +301,14 @@ package body Savadur.Build is
       use GNAT.OS_Lib;
       Command_String : constant String := -Unbounded_String (Command);
    begin
-      for K in Command_String'Range loop
+      Extract_Program_Name : for K in Command_String'Range loop
          if Command_String (K) = ' ' then
             Prog_Name := +Command_String (Command_String'First .. K - 1);
             Argument_String := OS_Lib.Argument_String_To_List
               (Command_String (K + 1 .. Command_String'Last));
-            exit;
+            exit Extract_Program_Name;
          end if;
-      end loop;
+      end loop Extract_Program_Name;
 
       if Argument_String = null then
          Prog_Name := +Command_String;
@@ -323,8 +321,8 @@ package body Savadur.Build is
    -----------
 
    function Parse
-     (Project : Config.Project.Project_Config;
-      Cmd     : Actions.Command)
+     (Project : in Config.Project.Project_Config;
+      Cmd     : in Actions.Command)
       return Actions.Command
    is
       Source     : constant String := -Unbounded_String (Cmd);
@@ -356,7 +354,7 @@ package body Savadur.Build is
       end loop;
 
       if Do_Replace then
-         declare
+         Replace_Var : declare
             Key  : constant String := Source (Start + 1 .. Source'Last);
             Var  : constant Savadur.Variables.Variable :=
                      Savadur.Variables.Keys.Element
@@ -366,7 +364,7 @@ package body Savadur.Build is
          begin
             Append (Result,
                     To_String (Var.Value));
-         end;
+         end Replace_Var;
 
       else
          Append (Result, Source (Start .. Source'Last));
@@ -385,9 +383,9 @@ package body Savadur.Build is
    ---------
 
    function Run
-     (Project : Config.Project.Project_Config;
-      Env_Var : Environment_Variables.Maps.Map;
-      Id      : Scenarios.Id)
+     (Project : in Config.Project.Project_Config;
+      Env_Var : in Environment_Variables.Maps.Map;
+      Id      : in Scenarios.Id)
       return Boolean
    is
       Selected_Scenario : Scenarios.Scenario;
@@ -417,7 +415,7 @@ package body Savadur.Build is
          use Savadur.Actions.Vectors;
          Position : Cursor := Selected_Scenario.Actions.First;
       begin
-         while Has_Element (Position) loop
+         Run_Actions : while Has_Element (Position) loop
 
             Execute_Command : declare
                Ref         : constant Ref_Action := Element (Position);
@@ -440,7 +438,7 @@ package body Savadur.Build is
 
                   if not Result then
                      Success := False; --  Exit with error
-                     exit;
+                     exit Run_Actions;
                   end if;
 
                   Success := Check (Project     => Project,
@@ -454,9 +452,9 @@ package body Savadur.Build is
                      case Ref.On_Error is
                         when Quit =>
                            Success := True;
-                           exit;
+                           exit Run_Actions;
                         when Error =>
-                           exit;
+                           exit Run_Actions;
                         when Continue =>
                            null;
                      end case;
@@ -493,7 +491,7 @@ package body Savadur.Build is
                   --  No Next (Position) to retry the same command
                end if;
             end Execute_Command;
-         end loop;
+         end loop Run_Actions;
       exception
          when Constraint_Error =>
             if Has_Element (Position) then

@@ -38,21 +38,21 @@ package body Savadur.Config.Environment_Variables is
 
    use Savadur.Utils;
 
-   Config_Error : exception;
-
    type Node_Value is (Environment_Variables, Project, Var);
 
    type Attribute is (Name, Value, Mode);
 
    type XML_Attribute is array (Attribute) of Boolean;
 
-   XML_Schema : constant array (Node_Value) of XML_Attribute :=
-                  (Environment_Variables => (others => False),
-                   Project               => (Name   => True,
-                                             others => False),
-                   Var                   => (Name   => True,
-                                             Value  => True,
-                                             Mode   => True));
+   type XML_Schema is array (Node_Value) of XML_Attribute;
+
+   Schema : constant XML_Schema
+     := XML_Schema'(Environment_Variables => XML_Attribute'(others => False),
+                    Project               => XML_Attribute'(Name   => True,
+                                                            others => False),
+                    Var                   => XML_Attribute'(Name   => True,
+                                                            Value  => True,
+                                                            Mode   => True));
 
    function Get_Node_Value (S : in String) return Node_Value;
 
@@ -161,7 +161,7 @@ package body Savadur.Config.Environment_Variables is
             begin
                for J in 0 .. Get_Length (Atts) - 1 loop
                   Attr := Get_Attribute (Get_Qname (Atts, J));
-                  if not XML_Schema (NV) (Attr) then
+                  if not Schema (NV) (Attr) then
                      raise Config_Error with "Unknow attribute "
                        & Node_Value'Image (NV) & "." & Get_Qname (Atts, J);
                   end if;

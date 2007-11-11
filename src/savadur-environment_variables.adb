@@ -61,7 +61,7 @@ package body Savadur.Environment_Variables is
       Position : Maps.Cursor := Map.First;
    begin
       while Maps.Has_Element (Position) loop
-         declare
+         Set_Var : declare
             V : constant Var    := Maps.Element (Position);
             N : constant String := Maps.Key (Position);
          begin
@@ -80,7 +80,7 @@ package body Savadur.Environment_Variables is
                   Ada.Environment_Variables.Clear (N);
             end case;
             Maps.Next (Position);
-         end;
+         end Set_Var;
       end loop;
    end Set_Environment;
 
