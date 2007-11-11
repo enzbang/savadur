@@ -21,7 +21,7 @@
 
 package Savadur.Logs is
 
-   type Log_Level is (Information, Warnings, Error, Verbose);
+   type Log_Level is (Information, Warnings, Error, Verbose, Very_Verbose);
 
    procedure Set_File (Filename : in String);
    --  Set log file (default to stdout)

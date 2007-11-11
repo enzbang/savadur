@@ -28,6 +28,7 @@
 --       -savadurdir dirname : Set savadur directory
 --                             ($SAVADUR_DIR or $HOME / .savadur by default)
 --       -verbose
+--       -very_verbose
 
 with Ada.IO_Exceptions;
 with Ada.Exceptions;
@@ -78,6 +79,7 @@ procedure Savadur.Client is
       Logs.Write ("    -savadurdir dirname : set savadur directory");
       Logs.Write ("          ($SAVADUR_DIR or $HOME/.savadur by default)");
       Logs.Write ("    -verbose");
+      Logs.Write ("    -very_verbose");
    end Usage;
 
 begin
@@ -88,7 +90,7 @@ begin
       Getopt : begin
          loop
             case GNAT.Command_Line.Getopt
-              ("verbose project: savadurdir: sid: ") is
+              ("verbose very_verbose project: savadurdir: sid: ") is
                when ASCII.NUL =>
                   exit;
 
@@ -121,6 +123,11 @@ begin
                   begin
                      if Full = "verbose" then
                         Logs.Set (Kind => Logs.Verbose, Activated => True);
+                     elsif Full = "very_verbose" then
+                        Logs.Set (Kind      => Logs.Verbose,
+                                  Activated => True);
+                        Logs.Set (Kind      => Logs.Very_Verbose,
+                                  Activated => True);
                      end if;
                   end;
 
@@ -175,17 +182,17 @@ begin
       Logs.Write ("Savadur client" & ASCII.LF, Logs.Verbose);
       Logs.Write ("SCM : " & ASCII.LF
                   & To_String (Unbounded_String (Project.SCM_Id)) & ASCII.LF,
-                  Logs.Verbose);
+                  Logs.Very_Verbose);
       Logs.Write ("Action list : " & ASCII.LF
                   & Actions.Image (Project.Actions) & ASCII.LF,
-                  Logs.Verbose);
+                  Logs.Very_Verbose);
       Logs.Write ("Scenarios : " & ASCII.LF
                   & Scenarios.Image (Project.Scenarios) & ASCII.LF,
-                  Logs.Verbose);
+                  Logs.Very_Verbose);
       Logs.Write ("SCM Found" & ASCII.LF
                   & Savadur.SCM.Image (Savadur.Config.SCM.Configurations)
                   & ASCII.LF,
-                  Logs.Verbose);
+                  Logs.Very_Verbose);
 
       if Directories.Exists (-Project_Env_Filename) then
          Env_Var := Savadur.Config.Environment_Variables.Parse

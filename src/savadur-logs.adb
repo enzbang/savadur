@@ -27,8 +27,9 @@ package body Savadur.Logs is
 
    use Ada;
 
-   Is_Activated : array (Log_Level) of Boolean := (Verbose => False,
-                                                   others  => True);
+   Is_Activated : array (Log_Level) of Boolean := (Verbose      => False,
+                                                   Very_Verbose => False,
+                                                   others       => True);
 
    Log          : Text_IO.File_Type;
    Log_Use_File : Boolean := False;
