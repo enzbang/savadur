@@ -43,15 +43,15 @@ package body Savadur.Config.SCM is
 
    type Node_Value is (SCM, Name, Action, Cmd);
 
-   type Attribute is (Id);
+   type Attribute is (Id, Result);
 
    type XML_Attribute is array (Attribute) of Boolean;
 
    XML_Schema : constant array (Node_Value) of XML_Attribute :=
-                  (SCM        => (Id => False),
-                   Cmd        => (Id => False),
-                   Action     => (Id => True),
-                   Name       => (Id => True));
+                  (SCM        => (Id => False, others => False),
+                   Cmd        => (Id => False, others => False),
+                   Action     => (Id => True, Result => True),
+                   Name       => (Id => True, others => False));
 
    function Get_Node_Value (S : in String) return Node_Value;
 
@@ -237,22 +237,29 @@ package body Savadur.Config.SCM is
          if not XML_Schema (NV) (Attr) then
             raise Config_Error with "Unknow attribute "
               & Node_Value'Image (NV) & "." & Get_Qname (Atts, J);
-
-         elsif Attr = Id then
-            case NV is
-               when Action =>
-                  Handler.Action.Id :=
-                    Actions.Id_Utils.Value (Get_Value (Atts, J));
-               when Name =>
-                  Handler.SCM.Id :=
-                    Savadur.SCM.Id_Utils.Value (Get_Value (Atts, J));
-               when SCM | Cmd => null;
-            end case;
-
-         else
-            raise Config_Error with "Internal error for "
-              & Node_Value'Image (NV) & " with " & Get_Qname (Atts, J);
          end if;
+
+         case Attr is
+            when Id =>
+               case NV is
+                  when Action =>
+                     Handler.Action.Id :=
+                       Actions.Id_Utils.Value (Get_Value (Atts, J));
+                  when Name =>
+                     Handler.SCM.Id :=
+                       Savadur.SCM.Id_Utils.Value (Get_Value (Atts, J));
+                  when SCM | Cmd => null;
+               end case;
+
+            when Result =>
+               case NV is
+                  when Action =>
+                     Handler.Action.Result :=
+                       Actions.Result_Type'Value (Get_Value (Atts, J));
+
+                  when others => null;
+               end case;
+         end case;
       end loop;
    end Start_Element;
 

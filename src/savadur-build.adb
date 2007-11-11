@@ -22,12 +22,15 @@
 with Ada.Strings.Unbounded;
 with Ada.Directories;
 with Ada.Exceptions;
+with Ada.Integer_Text_IO;
+with Ada.Text_IO;
 
 with GNAT.OS_Lib;
 
 with Savadur.Utils;
 with Savadur.SCM;
 with Savadur.Config.SCM;
+with Savadur.Actions;
 with Savadur.Variables;
 with Savadur.Logs;
 
@@ -63,24 +66,36 @@ package body Savadur.Build is
    --  Replace strings beginning with $
    --  by the correponding entry in project <variable> section
 
+   procedure Execute
+     (Exec_Action  : in Actions.Action;
+      Directory    : in String;
+      Log_Filename : in String;
+      Return_Code  : out Integer;
+      Result       : out Boolean);
+   --  Executes a command defined by Exec_Action.Cmd
+   --  Before command execution, the string beginning with $ are replaced
+   --  by the correponding entry in project <variable> section
+   --  Success is set to True if the command is executed and its output
+   --  successfully written to the file. If Success is True, then Return_Code
+   --  will be set to the status code returned by the operating system.
+   --  Otherwise, Return_Code is undefined.
+
    -------------
    -- Execute --
    -------------
 
-   function Execute
-     (Exec_Action   : in Actions.Action;
-      Check_Value   : in String;
-      Directory     : in String;
-      Log_Filename  : in String)
-      return Boolean
+   procedure Execute
+     (Exec_Action  : in Actions.Action;
+      Directory    : in String;
+      Log_Filename : in String;
+      Return_Code  : out Integer;
+      Result       : out Boolean)
    is
       use GNAT.OS_Lib;
       use type Actions.Result_Type;
       Exec_Path       : OS_Lib.String_Access;
       Argument_String : Argument_List_Access;
       Prog_Name       : Unbounded_String;
-      Result          : Boolean;
-      Return_Code     : Integer;
    begin
 
       Logs.Write ("Execute "
@@ -113,42 +128,10 @@ package body Savadur.Build is
          Logs.Write ("Can not execute "
                      & Actions.Command_Utils.To_String (Exec_Action.Cmd),
                      Logs.Error);
-         return False;
-      end if;
-
-      Check_Return_Value : begin
-         if Exec_Action.Result = Actions.Exit_Status then
-
-            declare
-               V : Integer := 0;
-            begin
-
-               --  If no check_value is specified. Use 0
-
-               if Check_Value /= "" then
-                  V := Integer'Value (Check_Value);
-               end if;
-
-               Result := Return_Code = V;
-            end;
-         end if;
-      exception
-         when Constraint_Error =>
-            raise Command_Parse_Error with "Value " & Check_Value
-              & " is not an exit status";
-      end Check_Return_Value;
-
-      Free (Argument_String);
-      Free (Exec_Path);
-
-      if not Result then
-         Logs.Write
-           (Actions.Command_Utils.To_String (Exec_Action.Cmd) & " failed");
       else
-         Logs.Write ("... success", Logs.Verbose);
+         Free (Argument_String);
+         Free (Exec_Path);
       end if;
-
-      return Result;
    exception
       when E : others => Logs.Write
            (Content => Exception_Information (E),
@@ -301,8 +284,9 @@ package body Savadur.Build is
       Sources_Directory : Unbounded_String;
       Work_Directory    : Unbounded_String;
       Project_Directory : Unbounded_String;
+      State_Directory   : Unbounded_String;
       Log_Directory     : Unbounded_String;
-      Result            : Boolean := True;
+      Success           : Boolean := True;
    begin
       Get_Selected_Scenario : begin
          Selected_Scenario := Savadur.Scenarios.Keys.Element
@@ -332,6 +316,14 @@ package body Savadur.Build is
 
       if not Directories.Exists (Name => -Log_Directory) then
          Directories.Create_Path (New_Directory => -Log_Directory);
+      end if;
+
+      State_Directory := +Directories.Compose
+        (Containing_Directory => -Project_Directory,
+         Name                 => "state");
+
+      if not Directories.Exists (Name => -State_Directory) then
+         Directories.Create_Path (New_Directory => -State_Directory);
       end if;
 
       Get_Sources_Directory : declare
@@ -368,13 +360,50 @@ package body Savadur.Build is
                Exec_Action : constant Action    :=
                                Get_Action (Project    => Project,
                                            Ref_Action => Ref);
+               Return_Code : Integer;
+               Result      : Boolean;
             begin
                if Directories.Exists (-Sources_Directory) then
-                  Result := Execute (Exec_Action  => Exec_Action,
-                                     Check_Value  => -Ref.Value,
-                                     Directory    => -Sources_Directory,
-                                     Log_Filename => Log_File);
 
+                  Execute (Exec_Action  => Exec_Action,
+                           Directory    => -Sources_Directory,
+                           Log_Filename => Log_File,
+                           Return_Code  => Return_Code,
+                           Result       => Result);
+
+                  if not Result then
+                     Success := False;
+                  end if;
+
+                  if Ref.Require_Change then
+                     if Exec_Action.Result = Actions.Exit_Status then
+                        declare
+                           State_Filename : constant String
+                             := Directories.Compose
+                               (Containing_Directory => -State_Directory,
+                                Name                 => To_String (Ref.Id));
+                           State_File : Text_IO.File_Type;
+                        begin
+                           Text_IO.Create (File => State_File,
+                                           Name => State_Filename);
+
+                           Integer_Text_IO.Put (File => State_File,
+                                                Item => Return_Code);
+                           Text_IO.Close (State_File);
+                        end;
+                     else
+                        --  ??? Filter this result
+
+                        declare
+                           State_Filename : constant String
+                             := Directories.Compose
+                               (Containing_Directory => -State_Directory,
+                                Name                 => To_String (Ref.Id));
+                        begin
+                           Directories.Copy_File (Log_File, State_Filename);
+                        end;
+                     end if;
+                  end if;
                   if not Result then
                      --  Stop on failure by default
                      exit;
@@ -390,17 +419,20 @@ package body Savadur.Build is
                     (Content => "Create directory : " & (-Sources_Directory),
                      Kind    => Logs.Error);
 
-                  Result := Execute
+                  Execute
                     (Exec_Action   => Get_Action
                        (Project    => Project,
                         Ref_Action => Savadur.SCM.SCM_Init),
-                     Check_Value   => "0",
                      Directory     => -Project_Directory,
                      Log_Filename  => Directories.Compose
                        (Containing_Directory => -Log_Directory,
-                        Name                 => "LOG_init"));
+                        Name                 => "LOG_init"),
+                     Return_Code   => Return_Code,
+                     Result        => Result);
 
-                  if not Directories.Exists (-Sources_Directory) then
+                  if not Result or else Return_Code /= 0
+                    or else Directories.Exists (-Sources_Directory)
+                  then
                      raise Command_Parse_Error with " SCM init failed !";
                   end if;
 
@@ -417,7 +449,7 @@ package body Savadur.Build is
                raise Command_Parse_Error with " Command not found";
             end if;
       end For_All_Ref_Actions;
-      return Result;
+      return Success;
    end Run;
 
 end Savadur.Build;

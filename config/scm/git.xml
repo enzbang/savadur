@@ -29,7 +29,7 @@
     <cmd>git-pull</cmd>
   </action>
 
-  <action id="version">
+  <action id="version" result="value">
     <cmd>git-show-ref -s</cmd>
   </action>
 
