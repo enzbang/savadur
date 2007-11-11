@@ -28,6 +28,7 @@ package Savadur.Config is
    --  Savadur directory containing :
    --      projects/
    --      scm/
+   --      env/
    --      work/
    --           $(project_name)/
    --                           log
