@@ -281,11 +281,14 @@ package body Savadur.Build is
       return Boolean
    is
       Selected_Scenario : Scenarios.Scenario;
-      Sources_Directory : Unbounded_String;
-      Work_Directory    : Unbounded_String;
-      Project_Directory : Unbounded_String;
-      State_Directory   : Unbounded_String;
-      Log_Directory     : Unbounded_String;
+      Sources_Directory : constant String :=
+                            Config.Project.Project_Sources_Directory (Project);
+      State_Directory   : constant String :=
+                            Config.Project.Project_Log_Directory
+                              (Project.Project_Id);
+      Log_Directory     : constant String :=
+                            Config.Project.Project_Log_Directory
+                              (Project.Project_Id);
       Success           : Boolean := True;
    begin
       Get_Selected_Scenario : begin
@@ -297,49 +300,6 @@ package body Savadur.Build is
             raise Command_Parse_Error with " Scenario "
               & Savadur.Scenarios.Id_Utils.To_String (Id) & " not found";
       end Get_Selected_Scenario;
-
-      Work_Directory := +Directories.Compose
-        (Containing_Directory => Config.Savadur_Directory,
-         Name                 => "work");
-
-      if not Directories.Exists (Name => -Work_Directory) then
-         Directories.Create_Path (New_Directory => -Work_Directory);
-      end if;
-
-      Project_Directory := +Directories.Compose
-        (Containing_Directory => -Work_Directory,
-         Name                 => -Unbounded_String (Project.Project_Id));
-
-      Log_Directory := +Directories.Compose
-        (Containing_Directory => -Project_Directory,
-         Name                 => "log");
-
-      if not Directories.Exists (Name => -Log_Directory) then
-         Directories.Create_Path (New_Directory => -Log_Directory);
-      end if;
-
-      State_Directory := +Directories.Compose
-        (Containing_Directory => -Project_Directory,
-         Name                 => "state");
-
-      if not Directories.Exists (Name => -State_Directory) then
-         Directories.Create_Path (New_Directory => -State_Directory);
-      end if;
-
-      Get_Sources_Directory : declare
-         Var : Savadur.Variables.Variable;
-      begin
-         Var := Savadur.Variables.Keys.Element
-           (Container => Project.Variables,
-            Key        => Savadur.Variables.Name_Utils.Value ("sources"));
-
-         Sources_Directory := +Directories.Compose
-           (Containing_Directory => -Project_Directory,
-            Name                 => To_String (Var.Value));
-      exception
-         when Constraint_Error =>
-            raise Command_Parse_Error with " No sources directory !";
-      end Get_Sources_Directory;
 
       --  Set environment variable for this project
 
@@ -355,18 +315,18 @@ package body Savadur.Build is
             Execute_Command : declare
                Ref         : constant Ref_Action := Element (Position);
                Log_File    : constant String     := Directories.Compose
-                 (Containing_Directory => -Log_Directory,
-                  Name                 => "LOG_" & To_String (Ref.Id));
+                 (Containing_Directory => Log_Directory,
+                  Name                 => To_String (Ref.Id));
                Exec_Action : constant Action    :=
                                Get_Action (Project    => Project,
                                            Ref_Action => Ref);
                Return_Code : Integer;
                Result      : Boolean;
             begin
-               if Directories.Exists (-Sources_Directory) then
+               if Directories.Exists (Sources_Directory) then
 
                   Execute (Exec_Action  => Exec_Action,
-                           Directory    => -Sources_Directory,
+                           Directory    => Sources_Directory,
                            Log_Filename => Log_File,
                            Return_Code  => Return_Code,
                            Result       => Result);
@@ -380,7 +340,7 @@ package body Savadur.Build is
                         declare
                            State_Filename : constant String
                              := Directories.Compose
-                               (Containing_Directory => -State_Directory,
+                               (Containing_Directory => State_Directory,
                                 Name                 => To_String (Ref.Id));
                            State_File : Text_IO.File_Type;
                         begin
@@ -397,7 +357,7 @@ package body Savadur.Build is
                         declare
                            State_Filename : constant String
                              := Directories.Compose
-                               (Containing_Directory => -State_Directory,
+                               (Containing_Directory => State_Directory,
                                 Name                 => To_String (Ref.Id));
                         begin
                            Directories.Copy_File (Log_File, State_Filename);
@@ -416,22 +376,23 @@ package body Savadur.Build is
                   --  Call SCM init from current directory
 
                   Logs.Write
-                    (Content => "Create directory : " & (-Sources_Directory),
+                    (Content => "Create directory : " & Sources_Directory,
                      Kind    => Logs.Error);
 
                   Execute
                     (Exec_Action   => Get_Action
                        (Project    => Project,
                         Ref_Action => Savadur.SCM.SCM_Init),
-                     Directory     => -Project_Directory,
+                     Directory     => Config.Project.Project_Directory
+                       (Project.Project_Id),
                      Log_Filename  => Directories.Compose
-                       (Containing_Directory => -Log_Directory,
-                        Name                 => "LOG_init"),
+                       (Containing_Directory => Log_Directory,
+                        Name                 => "init"),
                      Return_Code   => Return_Code,
                      Result        => Result);
 
                   if not Result or else Return_Code /= 0
-                    or else Directories.Exists (-Sources_Directory)
+                    or else Directories.Exists (Sources_Directory)
                   then
                      raise Command_Parse_Error with " SCM init failed !";
                   end if;

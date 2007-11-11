@@ -43,7 +43,23 @@ package Savadur.Config.Project is
       Variables  : Savadur.Variables.Sets.Set := Savadur.Variables.Default;
    end record;
 
-   function Parse (Filename : String) return Project_Config;
+   function Parse (Filename : in String) return Project_Config;
    --  Returns the project configuration read in the given file
+
+   function Project_Directory
+     (Project_Id : in Project.Project_Id) return String;
+   --  Returns project directory (or create it if does not exist)
+
+   function Project_Log_Directory
+     (Project_Id : in Project.Project_Id) return String;
+   --  Returns project log directory (or create it if does not exist)
+
+   function Project_State_Directory
+     (Project_Id : in Project.Project_Id) return String;
+   --  Returns project state directory (or create it if does not exist)
+
+   function Project_Sources_Directory
+     (Project : in Project_Config) return String;
+   --  Returns project sources directory (do *not* create it if does not exist)
 
 end Savadur.Config.Project;
