@@ -83,6 +83,10 @@ package body Savadur.Build is
       Return_Code     : Integer;
    begin
 
+      Logs.Write ("Execute "
+                  & Actions.Command_Utils.To_String (Exec_Action.Cmd),
+                  Logs.Verbose);
+
       Get_Arguments (Exec_Action.Cmd, Prog_Name, Argument_String);
 
       --  Chdir to the requested base directory
@@ -106,6 +110,9 @@ package body Savadur.Build is
       if not Result then
          --  Command failed to execute
          --  Do not read the return code
+         Logs.Write ("Can not execute "
+                     & Actions.Command_Utils.To_String (Exec_Action.Cmd),
+                     Logs.Error);
          return False;
       end if;
 
@@ -133,6 +140,13 @@ package body Savadur.Build is
 
       Free (Argument_String);
       Free (Exec_Path);
+
+      if not Result then
+         Logs.Write
+           (Actions.Command_Utils.To_String (Exec_Action.Cmd) & " failed");
+      else
+         Logs.Write ("... success", Logs.Verbose);
+      end if;
 
       return Result;
    exception
