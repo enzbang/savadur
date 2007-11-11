@@ -22,8 +22,12 @@
 --
 --  Usage :
 --
---  savadur-client [ --savadurdir dirname] -project name -sid scenario_id
+--  savadur-client [OPTIONS] -project name -sid scenario_id
 --
+--  OPTIONS :
+--       -savadurdir dirname : Set savadur directory
+--                             ($SAVADUR_DIR or $HOME / .savadur by default)
+--       -verbose
 
 with Ada.IO_Exceptions;
 with Ada.Exceptions;
@@ -68,52 +72,72 @@ procedure Savadur.Client is
 
    procedure Usage is
    begin
-      Logs.Write ("usage: savadur-client  -savadurdir dirname"
-                  & "   -project name   -mode modename");
+      Logs.Write ("usage : savadur-client [OPTIONS] -project name"
+                  & " -sid scenario_id");
+      Logs.Write ("OPTIONS :");
+      Logs.Write ("    -savadurdir dirname : set savadur directory");
+      Logs.Write ("          ($SAVADUR_DIR or $HOME/.savadur by default)");
+      Logs.Write ("    -verbose");
    end Usage;
 
 begin
 
    if Ada.Command_Line.Argument_Count = 0 then
-      raise Syntax_Error;
+      raise Syntax_Error with "no argument ?";
    else
-      loop
-         case GNAT.Command_Line.Getopt ("project: savadurdir: sid: ") is
-            when ASCII.NUL =>
-               exit;
+      Getopt : begin
+         loop
+            case GNAT.Command_Line.Getopt
+              ("verbose project: savadurdir: sid: ") is
+               when ASCII.NUL =>
+                  exit;
 
-            when 'p' =>
-               declare
-                  Full : constant String := GNAT.Command_Line.Full_Switch;
-               begin
-                  if Full = "project" then
-                     Project_Name :=
-                       To_Unbounded_String (GNAT.Command_Line.Parameter);
-                  else
-                     raise Syntax_Error;
-                  end if;
-               end;
-            when 's' =>
-               declare
-                  Full : constant String := GNAT.Command_Line.Full_Switch;
-               begin
-                  if Full = "savadurdir" then
-                     Config.Set_Savadur_Directory
-                       (GNAT.Command_Line.Parameter);
-                  elsif  Full = "sid" then
-                     Scenario_Id :=
-                       To_Unbounded_String (GNAT.Command_Line.Parameter);
-                     raise Syntax_Error;
-                  end if;
-               end;
-            when others =>
-               raise Syntax_Error;
-         end case;
-      end loop;
+               when 'p' =>
+                  declare
+                     Full : constant String := GNAT.Command_Line.Full_Switch;
+                  begin
+                     if Full = "project" then
+                        Project_Name :=
+                          To_Unbounded_String (GNAT.Command_Line.Parameter);
+                     end if;
+                  end;
+
+               when 's' =>
+                  declare
+                     Full : constant String := GNAT.Command_Line.Full_Switch;
+                  begin
+                     if Full = "savadurdir" then
+                        Config.Set_Savadur_Directory
+                          (GNAT.Command_Line.Parameter);
+                     elsif  Full = "sid" then
+                        Scenario_Id :=
+                          To_Unbounded_String (GNAT.Command_Line.Parameter);
+                     end if;
+                  end;
+
+               when 'v' =>
+                  declare
+                     Full : constant String := GNAT.Command_Line.Full_Switch;
+                  begin
+                     if Full = "verbose" then
+                        Logs.Set (Kind => Logs.Verbose, Activated => True);
+                     end if;
+                  end;
+
+               when others =>
+                  raise Syntax_Error with "unknown syntax";
+            end case;
+         end loop;
+      exception
+         when GNAT.Command_Line.Invalid_Section
+            | GNAT.Command_Line.Invalid_Switch
+            | GNAT.Command_Line.Invalid_Parameter =>
+            raise Syntax_Error with "unknown syntax";
+      end Getopt;
    end if;
 
    if To_String (Project_Name) = "" then
-      raise Syntax_Error;
+      raise Syntax_Error with "no project name";
    end if;
 
    --  Parse SCM configuration files
@@ -180,9 +204,7 @@ begin
    end;
 
 exception
-   when E : Syntax_Error
-      | Savadur.Config.Config_Error
-      | GNAT.Command_Line.Invalid_Switch  =>
+   when E : Syntax_Error | Savadur.Config.Config_Error  =>
       Logs.Write (Exceptions.Exception_Message (E), Logs.Error);
       Usage;
       Ada.Command_Line.Set_Exit_Status (Ada.Command_Line.Failure);
