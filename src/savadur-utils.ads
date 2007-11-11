@@ -52,4 +52,7 @@ package Savadur.Utils is
 
    end Generic_Utils;
 
+   function Content (Filename : in String) return String;
+   --  Returns a file content
+
 end Savadur.Utils;
