@@ -185,7 +185,9 @@ begin
    end;
 
 exception
-   when E : Syntax_Error | GNAT.Command_Line.Invalid_Switch  =>
+   when E : Syntax_Error
+      | Savadur.Config.Config_Error
+      | GNAT.Command_Line.Invalid_Switch  =>
       Text_IO.Put_Line (Exceptions.Exception_Message (E));
       Usage;
       Ada.Command_Line.Set_Exit_Status (Ada.Command_Line.Failure);

@@ -35,8 +35,6 @@ package body Savadur.Config.Project is
 
    use Savadur.Utils;
 
-   Config_Error : exception;
-
    type Node_Value is
      (SCM, Variable, SCM_Action, Action, Scenario, Cmd, Project, Name);
 
