@@ -19,7 +19,6 @@
 --  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.       --
 ------------------------------------------------------------------------------
 
-with Ada.Text_IO;
 with Ada.IO_Exceptions;
 with Ada.Directories;
 with Ada.Strings.Unbounded;
@@ -33,6 +32,7 @@ with Input_Sources.File;
 with Unicode.CES;
 
 with Savadur.Actions;
+with Savadur.Logs;
 
 package body Savadur.Config.SCM is
 
@@ -188,7 +188,9 @@ package body Savadur.Config.SCM is
          Load_Config : declare
             Filename : constant String := Full_Name (D);
          begin
-            Text_IO.Put_Line (Filename);
+            Logs.Write (Content => "Read SCM config file : " & Filename,
+                        Kind    => Logs.Verbose);
+
             Reader.SCM :=
               Savadur.SCM.SCM'(Id      => Savadur.SCM.Id_Utils.Nil,
                                Actions => Actions.Sets.Empty_Set);

@@ -25,7 +25,6 @@
 --  savadur-client [ --savadurdir dirname] -project name -sid scenario_id
 --
 
-with Ada.Text_IO;
 with Ada.IO_Exceptions;
 with Ada.Exceptions;
 with Ada.Command_Line;
@@ -42,12 +41,12 @@ with Savadur.Config.Environment_Variables;
 with Savadur.Actions;
 with Savadur.Scenarios;
 with Savadur.SCM;
+with Savadur.Logs;
 with Savadur.Environment_Variables;
 
 procedure Savadur.Client is
 
    use Ada;
-   use Ada.Text_IO;
    use Ada.Strings.Unbounded;
 
    use Savadur.Utils;
@@ -69,9 +68,8 @@ procedure Savadur.Client is
 
    procedure Usage is
    begin
-      Ada.Text_IO.Put_Line
-        ("usage: savadur-client  -savadurdir dirname"
-         & "   -project name   -mode modename");
+      Logs.Write ("usage: savadur-client  -savadurdir dirname"
+                  & "   -project name   -mode modename");
    end Usage;
 
 begin
@@ -150,23 +148,20 @@ begin
       Env_Var : Environment_Variables.Maps.Map;
    begin
 
-      Put_Line ("Savadur client");
-      New_Line;
-      Put_Line ("SCM : " & To_String (Unbounded_String (Project.SCM_Id)));
-      New_Line;
-      Put_Line ("Action list : ");
-      New_Line;
-      Put_Line (Actions.Image (Project.Actions));
-      New_Line;
-      Put_Line ("Scenarios : ");
-      New_Line;
-      Put_Line (Scenarios.Image (Project.Scenarios));
-      New_Line;
-      New_Line;
-      New_Line;
-      Put_Line ("SCM Found");
-      New_Line;
-      Put_Line (Savadur.SCM.Image (Savadur.Config.SCM.Configurations));
+      Logs.Write ("Savadur client" & ASCII.LF, Logs.Verbose);
+      Logs.Write ("SCM : " & ASCII.LF
+                  & To_String (Unbounded_String (Project.SCM_Id)) & ASCII.LF,
+                  Logs.Verbose);
+      Logs.Write ("Action list : " & ASCII.LF
+                  & Actions.Image (Project.Actions) & ASCII.LF,
+                  Logs.Verbose);
+      Logs.Write ("Scenarios : " & ASCII.LF
+                  & Scenarios.Image (Project.Scenarios) & ASCII.LF,
+                  Logs.Verbose);
+      Logs.Write ("SCM Found" & ASCII.LF
+                  & Savadur.SCM.Image (Savadur.Config.SCM.Configurations)
+                  & ASCII.LF,
+                  Logs.Verbose);
 
       if Directories.Exists (-Project_Env_Filename) then
          Env_Var := Savadur.Config.Environment_Variables.Parse
@@ -178,9 +173,9 @@ begin
          Env_Var => Env_Var,
          Id      => Scenarios.Id (Scenario_Id))
       then
-         Put_Line ("Success");
+         Logs.Write ("Success");
       else
-         Put_Line ("Failure");
+         Logs.Write ("Failure");
       end if;
    end;
 
@@ -188,7 +183,7 @@ exception
    when E : Syntax_Error
       | Savadur.Config.Config_Error
       | GNAT.Command_Line.Invalid_Switch  =>
-      Text_IO.Put_Line (Exceptions.Exception_Message (E));
+      Logs.Write (Exceptions.Exception_Message (E), Logs.Error);
       Usage;
       Ada.Command_Line.Set_Exit_Status (Ada.Command_Line.Failure);
 end Savadur.Client;

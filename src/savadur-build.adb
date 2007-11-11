@@ -29,7 +29,7 @@ with Savadur.Utils;
 with Savadur.SCM;
 with Savadur.Config.SCM;
 with Savadur.Variables;
-with Ada.Text_IO;
+with Savadur.Logs;
 
 -------------------
 -- Savadur.Build --
@@ -136,7 +136,9 @@ package body Savadur.Build is
 
       return Result;
    exception
-      when E : others => Text_IO.Put_Line (Exception_Information (E));
+      when E : others => Logs.Write
+           (Content => Exception_Information (E),
+            Kind    => Logs.Error);
          raise;
    end Execute;
 
@@ -164,7 +166,6 @@ package body Savadur.Build is
                Key       => Project.SCM_Id);
          begin
 
-            Ada.Text_IO.Put_Line (Image (SCM_Used.Actions));
             Get_Action := Actions.Keys.Element
               (Container => SCM_Used.Actions,
                Key       => Action_Id);
@@ -266,7 +267,9 @@ package body Savadur.Build is
 
       return Actions.Command (Result);
    exception
-      when E : others => Text_IO.Put_Line (Exception_Information (E));
+      when E : others => Logs.Write
+           (Content => Exception_Information (E),
+            Kind    => Logs.Error);
          raise;
    end Parse;
 
@@ -369,8 +372,9 @@ package body Savadur.Build is
                   --  The sources directory has to be created by the SCM
                   --  Call SCM init from current directory
 
-                  Ada.Text_IO.Put_Line
-                    ("Create directory : " & (-Sources_Directory));
+                  Logs.Write
+                    (Content => "Create directory : " & (-Sources_Directory),
+                     Kind    => Logs.Error);
 
                   Result := Execute
                     (Exec_Action   => Get_Action
