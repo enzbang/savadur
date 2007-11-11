@@ -109,6 +109,8 @@ package body Config_Parse is
       Assertions.Assert
         (Savadur.Scenarios.Image (Project.Scenarios) = "* default" & ASCII.Lf
          & "[" & ASCII.Lf
+         & "SCM version require_change on error = QUIT"
+         & ASCII.Lf
          & "SCM pull" & ASCII.Lf
          & "DEFAULT make" & ASCII.Lf
          & "DEFAULT regtests" & ASCII.Lf
@@ -136,7 +138,7 @@ package body Config_Parse is
          & "init => git-clone $url $sources  result type : EXIT_STATUS"
          & ASCII.Lf
          & "pull => git-pull  result type : EXIT_STATUS"  & ASCII.Lf
-         & "version => git-show-ref -s  result type : EXIT_STATUS"  & ASCII.Lf
+         & "version => git-show-ref -s  result type : VALUE"  & ASCII.Lf
          & "]",
          "Wrong SCM parse");
    end Check_SCM_Config;

@@ -64,6 +64,15 @@ package body Savadur.Actions is
          Append (Result,
                  " wanted value=" & (-Action.Value));
       end if;
+
+      if Action.Require_Change then
+         Append (Result, " require_change");
+      end if;
+
+      if Action.On_Error /= Error then
+         Append (Result,
+                 " on error = " & On_Error_Hook'Image (Action.On_Error));
+      end if;
       return -Result;
    end Image;
 

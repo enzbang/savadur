@@ -56,16 +56,22 @@ package Savadur.Actions is
    function Image (Action : in Actions.Action) return String;
    --  Returns action image
 
+   type On_Error_Hook is (Quit, Continue, Error);
+
    type Ref_Action is record
-      Id          : Actions.Id;
-      Action_Type : Kind             := Default;
-      Value       : Unbounded_String := Null_Unbounded_String;
+      Id             : Actions.Id;
+      Action_Type    : Kind             := Default;
+      Value          : Unbounded_String := Null_Unbounded_String;
+      Require_Change : Boolean          := False;
+      On_Error       : On_Error_Hook    := Error;
    end record;
 
    Null_Ref_Action : Ref_Action :=
-                       Ref_Action'(Id          => Id_Utils.Nil,
-                                   Action_Type => <>,
-                                   Value       => <>);
+                       Ref_Action'(Id             => Id_Utils.Nil,
+                                   Action_Type    => <>,
+                                   Value          => <>,
+                                   Require_Change => <>,
+                                   On_Error       => <>);
 
    function Image (Action : in Ref_Action) return String;
    --  Returns action image
