@@ -28,6 +28,8 @@ with Sax.Attributes;
 
 with Input_Sources.File;
 with Unicode.CES;
+with Ada.Text_IO;
+with Ada.Exceptions; use Ada.Exceptions;
 
 package body Savadur.Config.Project is
 
@@ -36,7 +38,10 @@ package body Savadur.Config.Project is
    use Savadur.Utils;
 
    type Node_Value is
-     (SCM, Variable, SCM_Action, Action, Scenario, Cmd, Project, Name);
+     (SCM, Variable, SCM_Action,
+      Action, Scenario, Cmd,
+      Notifications, On_Failure, On_Success,
+      Project, Name);
 
    type Attribute is (Id, Value, Result, Require_Change, On_Error);
 
@@ -45,27 +50,30 @@ package body Savadur.Config.Project is
    type XML_Schema is array (Node_Value) of XML_Attribute;
 
    Schema : constant XML_Schema
-     := XML_Schema'(SCM        =>  XML_Attribute'(Id     => True,
-                                                  others => False),
-                    Variable   =>  XML_Attribute'(Id     => True,
-                                                  Value  => True,
-                                                  others => False),
-                    SCM_Action => XML_Attribute'(Id             => True,
-                                                 Value          => True,
-                                                 Require_Change => True,
-                                                 On_Error       => True,
-                                                 others         => False),
-                    Action     => XML_Attribute'(Id             => True,
-                                                 Value          => True,
-                                                 Require_Change => True,
-                                                 On_Error       => True,
-                                                 others         => False),
-                    Scenario   => XML_Attribute'(Id     => True,
-                                                 others => False),
-                    Cmd        => XML_Attribute'(others => False),
-                    Project    => XML_Attribute'(others => False),
-                    Name       => XML_Attribute'(Id     => True,
-                                                 others => False));
+     := XML_Schema'(SCM           =>  XML_Attribute'(Id     => True,
+                                                     others => False),
+                    Variable      =>  XML_Attribute'(Id     => True,
+                                                     Value  => True,
+                                                     others => False),
+                    SCM_Action    => XML_Attribute'(Id             => True,
+                                                    Value          => True,
+                                                    Require_Change => True,
+                                                    On_Error       => True,
+                                                    others         => False),
+                    Action        => XML_Attribute'(Id             => True,
+                                                    Value          => True,
+                                                    Require_Change => True,
+                                                    On_Error       => True,
+                                                    others         => False),
+                    Scenario      => XML_Attribute'(Id     => True,
+                                                    others => False),
+                    Cmd           => XML_Attribute'(others => False),
+                    Project       => XML_Attribute'(others => False),
+                    Notifications => XML_Attribute'(others => False),
+                    On_Failure    => XML_Attribute'(others => False),
+                    On_Success    => XML_Attribute'(others => False),
+                    Name          => XML_Attribute'(Id     => True,
+                                                    others => False));
 
    function Get_Node_Value (S : in String) return Node_Value;
    --  Returns the node value matching the given string or raise Config_Error
@@ -77,13 +85,14 @@ package body Savadur.Config.Project is
    --  SAX overloaded routines to parse the incoming XML stream.
 
    type Tree_Reader is new Sax.Readers.Reader with record
-      Content_Value   : Unbounded_String;
-      Var             : Variables.Variable;
-      Action          : Actions.Action;
-      Ref_Action      : Actions.Ref_Action;
-      Scenario        : Scenarios.Scenario;
-      Inside_Scenario : Boolean := False;
-      Current_Project : Project_Config;
+      Content_Value        : Unbounded_String;
+      Var                  : Variables.Variable;
+      Action               : Actions.Action;
+      Ref_Action           : Actions.Ref_Action;
+      Scenario             : Scenarios.Scenario;
+      Inside_Scenario      : Boolean := False;
+      Inside_Notifications : Boolean := False;
+      Current_Project      : Project_Config;
    end record;
 
    procedure Start_Element
@@ -144,19 +153,33 @@ package body Savadur.Config.Project is
 
             --  Reset Handler scenario
             Handler.Scenario    := Scenarios.Null_Scenario;
+
+         when Notifications =>
+            Handler.Inside_Notifications := False;
+
+         when On_Failure =>
+            Handler.Current_Project.Notifications.On_Failure.Append
+              (New_Item => Handler.Ref_Action);
+
+         when On_Success =>
+            Handler.Current_Project.Notifications.On_Success.Append
+              (New_Item => Handler.Ref_Action);
+
          when Action =>
-            if not Handler.Inside_Scenario then
-               --  Append this action to actions map
-               Handler.Current_Project.Actions.Insert
-                 (New_Item    => Handler.Action);
+            if not Handler.Inside_Notifications then
+               if not Handler.Inside_Scenario then
+                  --  Append this action to actions map
+                  Handler.Current_Project.Actions.Insert
+                    (New_Item    => Handler.Action);
 
-               --  Reset Handler Action
-               Handler.Action := Actions.Null_Action;
-            else
-               --  Append this action to scenario actions vector
-               Handler.Scenario.Actions.Append (Handler.Ref_Action);
+                  --  Reset Handler Action
+                  Handler.Action := Actions.Null_Action;
+               else
+                  --  Append this action to scenario actions vector
+                  Handler.Scenario.Actions.Append (Handler.Ref_Action);
 
-               Handler.Ref_Action := Actions.Null_Ref_Action;
+                  Handler.Ref_Action := Actions.Null_Ref_Action;
+               end if;
             end if;
          when SCM_Action =>
             --  Append this action to scenario actions vector
@@ -164,8 +187,10 @@ package body Savadur.Config.Project is
             Handler.Scenario.Actions.Append (Handler.Ref_Action);
 
             Handler.Ref_Action := Actions.Null_Ref_Action;
+
          when Cmd =>
             Handler.Action.Cmd := Actions.Command (Handler.Content_Value);
+
          when SCM | Project | Name =>
             null;
       end case;
@@ -355,7 +380,10 @@ package body Savadur.Config.Project is
                        Variables.Name_Utils.Value (Get_Value (Atts, Position));
 
                   when Action | SCM_Action =>
-                     if NV = Action and then not Handler.Inside_Scenario then
+                     if NV = Action
+                       and then not Handler.Inside_Scenario
+                       and then not Handler.Inside_Notifications
+                     then
                         Handler.Action.Id :=
                           Actions.Id_Utils.Value (Get_Value (Atts, Position));
                      else
@@ -472,6 +500,10 @@ package body Savadur.Config.Project is
       case NV is
          when Scenario =>
             Handler.Inside_Scenario := True;
+
+         when Notifications =>
+            Handler.Inside_Notifications := True;
+
          when SCM_Action =>
             --  SCM Action should be only inside scenari
 
@@ -493,6 +525,9 @@ package body Savadur.Config.Project is
 
          Get_Attribute_Value (J);
       end loop;
+
+   exception
+         when E : others => Ada.Text_IO.Put_Line (Exception_Information (E));
    end Start_Element;
 
 end Savadur.Config.Project;

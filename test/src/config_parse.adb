@@ -30,6 +30,7 @@ with Savadur.Variables;
 with Savadur.SCM;
 with Savadur.Environment_Variables;
 with Savadur.Config.Environment_Variables;
+with Savadur.Notifications;
 
 with Utils;
 
@@ -98,10 +99,14 @@ package body Config_Parse is
       Assertions.Assert
         (Utils.Strip (Savadur.Actions.Image (Project.Actions)) =
            Utils.Strip ("["
-         & "make => make build  result type : EXIT_STATUS"
-         & "regtests => make regtests  result type : EXIT_STATUS"
-         & "]"),
-         "Wrong action list");
+             & "mail => /hooks/send-mail $project_name $failed_action"
+             & "  result type : EXIT_STATUS"
+             & "make => make build  result type : EXIT_STATUS"
+             & "jabber => /hooks/send-xmpp $project_name"
+             & "  result type : EXIT_STATUS"
+             & "regtests => make regtests  result type : EXIT_STATUS"
+             & "]"),
+         "Wrong action list" & Savadur.Actions.Image (Project.Actions));
 
       Assertions.Assert
         (Utils.Strip (Savadur.Variables.Image (Project.Variables)) =
@@ -121,6 +126,19 @@ package body Config_Parse is
          & "DEFAULT regtests"
          & "]"),
          "Wrong scenarios list");
+
+      Assertions.Assert
+        (Utils.Strip (Savadur.Notifications.Image (Project.Notifications)) =
+           Utils.Strip ("Notification :"
+             & "On Success = ["
+             & "DEFAULT jabber"
+             & "]"
+             & "On Failure = ["
+             & "DEFAULT mail"
+             & "]"),
+         "Wrong notifications list" &
+         Savadur.Notifications.Image (Project.Notifications));
+
    end Check_Project_Config;
 
    ----------------------

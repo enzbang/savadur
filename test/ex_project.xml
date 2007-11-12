@@ -12,6 +12,14 @@
     <cmd>make regtests</cmd>
   </action>
 
+  <action id="mail">
+    <cmd>/hooks/send-mail $project_name $failed_action</cmd>
+  </action>
+
+  <action id="jabber">
+    <cmd>/hooks/send-xmpp $project_name</cmd>
+  </action>
+
   <scenario id="default">
     <scm_action id="version" require_change="true" on_error="quit" />
     <scm_action id="pull" />
@@ -19,4 +27,12 @@
     <action id="regtests" />
   </scenario>
 
+  <notifications>
+    <on_failure>
+      <action id="mail" />
+    </on_failure>
+    <on_success>
+      <action id="jabber" />
+    </on_success>
+  </notifications>
 </project>
