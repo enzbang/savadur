@@ -19,42 +19,13 @@
 --  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.       --
 ------------------------------------------------------------------------------
 
-with Savadur.Scenarios;
 with Savadur.Config.Project;
-with Savadur.Environment_Variables;
 
-private with Savadur.Actions;
+private package Savadur.Build.Notification is
 
-package Savadur.Build is
-
-   Command_Parse_Error : exception;
-
-   function Run
+   procedure Notify
      (Project : access Config.Project.Project_Config;
-      Env_Var : in Environment_Variables.Maps.Map;
-      Id      : in Scenarios.Id)
-      return Boolean;
-   --  Run selected scenario from project config
+      Success : in     Boolean);
+   --  Run notify hooks
 
-private
-
-   procedure Execute
-     (Exec_Action  : in Actions.Action;
-      Directory    : in String;
-      Log_Filename : in String;
-      Return_Code  : out Integer;
-      Result       : out Boolean);
-   --  Executes a command defined by Exec_Action.Cmd
-   --  Before command execution, the string beginning with $ are replaced
-   --  by the correponding entry in project <variable> section
-   --  Success is set to True if the command is executed and its output
-   --  successfully written to the file. If Success is True, then Return_Code
-   --  will be set to the status code returned by the operating system.
-   --  Otherwise, Return_Code is undefined.
-
-   function Get_Action
-     (Project    : in Config.Project.Project_Config;
-      Ref_Action : in Actions.Ref_Action)
-      return Actions.Action;
-   --  Returns the action to execute matching the ref_action
-end Savadur.Build;
+end Savadur.Build.Notification;

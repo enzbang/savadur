@@ -30,9 +30,9 @@ with GNAT.OS_Lib;
 with Savadur.Utils;
 with Savadur.SCM;
 with Savadur.Config.SCM;
-with Savadur.Actions;
 with Savadur.Variables;
 with Savadur.Logs;
+with Savadur.Build.Notification;
 
 -------------------
 -- Savadur.Build --
@@ -53,32 +53,12 @@ package body Savadur.Build is
       Argument_String : out OS_Lib.Argument_List_Access);
    --  Returns the programme name and the argument list
 
-   function Get_Action
-     (Project    : in Config.Project.Project_Config;
-      Ref_Action : in Actions.Ref_Action)
-      return Actions.Action;
-   --  Returns the action to execute matching the ref_action
-
    function Parse
      (Project : in Config.Project.Project_Config;
       Cmd     : in Actions.Command)
      return Actions.Command;
    --  Replace strings beginning with $
    --  by the correponding entry in project <variable> section
-
-   procedure Execute
-     (Exec_Action  : in Actions.Action;
-      Directory    : in String;
-      Log_Filename : in String;
-      Return_Code  : out Integer;
-      Result       : out Boolean);
-   --  Executes a command defined by Exec_Action.Cmd
-   --  Before command execution, the string beginning with $ are replaced
-   --  by the correponding entry in project <variable> section
-   --  Success is set to True if the command is executed and its output
-   --  successfully written to the file. If Success is True, then Return_Code
-   --  will be set to the status code returned by the operating system.
-   --  Otherwise, Return_Code is undefined.
 
    function Check
      (Project      : in Config.Project.Project_Config;
@@ -430,18 +410,17 @@ package body Savadur.Build is
    begin
 
       For_All_Ref_Actions : declare
-         use Savadur.Actions;
          use Savadur.Actions.Vectors;
          Position : Cursor := Selected_Scenario.Actions.First;
       begin
          Run_Actions : while Has_Element (Position) loop
 
             Execute_Command : declare
-               Ref         : constant Ref_Action := Element (Position);
+               Ref         : constant Actions.Ref_Action := Element (Position);
                Log_File    : constant String     := Directories.Compose
                  (Containing_Directory => Log_Directory,
-                  Name                 => To_String (Ref.Id));
-               Exec_Action : constant Action    :=
+                  Name                 => Actions.To_String (Ref.Id));
+               Exec_Action : constant Actions.Action :=
                                Get_Action (Project    => Project.all,
                                            Ref_Action => Ref);
                Return_Code : Integer;
@@ -469,12 +448,12 @@ package body Savadur.Build is
                   if not Success then
 
                      case Ref.On_Error is
-                        when Quit =>
+                        when Actions.Quit =>
                            Success := True;
                            exit Run_Actions;
-                        when Error =>
+                        when Actions.Error =>
                            exit Run_Actions;
-                        when Continue =>
+                        when Actions.Continue =>
                            null;
                      end case;
                   end if;
@@ -515,7 +494,7 @@ package body Savadur.Build is
          when Constraint_Error =>
             if Has_Element (Position) then
                raise Command_Parse_Error with " Command "
-                 & To_String (Element (Position).Id) & " not found";
+                 & Actions.To_String (Element (Position).Id) & " not found";
             else
                raise Command_Parse_Error with " Command not found";
             end if;
@@ -523,55 +502,7 @@ package body Savadur.Build is
 
       --  Execute notifications hooks
 
-      if Success then
-         for K in 1 .. Project.Notifications.On_Success.Length loop
-            declare
-               Ref         : constant Actions.Ref_Action :=
-                               Project.Notifications.On_Success.Element
-                                 (Integer (K));
-               Exec_Action : constant Actions.Action := Get_Action
-                 (Project    => Project.all,
-                  Ref_Action => Ref);
-
-               Log_File    : constant String := Directories.Compose
-                 (Containing_Directory => Log_Directory,
-                  Name                 => "on_success_"
-                  & Actions.Id_Utils.To_String (Ref.Id));
-               Return_Code : Integer;
-               Result      : Boolean;
-            begin
-               Execute (Exec_Action => Exec_Action,
-                        Directory   => Config.Savadur_Directory,
-                        Log_Filename  => Log_File,
-                        Return_Code   => Return_Code,
-                        Result        => Result);
-            end;
-         end loop;
-      else
-         for K in 1 .. Project.Notifications.On_Failure.Length loop
-            declare
-               Ref         : constant Actions.Ref_Action :=
-                               Project.Notifications.On_Failure.Element
-                                 (Integer (K));
-               Exec_Action : constant Actions.Action := Get_Action
-                 (Project    => Project.all,
-                  Ref_Action => Ref);
-
-               Log_File    : constant String := Directories.Compose
-                 (Containing_Directory => Log_Directory,
-                  Name                 => "on_failure_"
-                  & Actions.Id_Utils.To_String (Ref.Id));
-               Return_Code : Integer;
-               Result      : Boolean;
-            begin
-               Execute (Exec_Action => Exec_Action,
-                        Directory   => Config.Savadur_Directory,
-                        Log_Filename  => Log_File,
-                        Return_Code   => Return_Code,
-                        Result        => Result);
-            end;
-         end loop;
-      end if;
+      Build.Notification.Notify (Project, Success);
 
       return Success;
    end Run;
