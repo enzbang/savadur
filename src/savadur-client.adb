@@ -187,7 +187,7 @@ begin
    end Get_Project_Filename;
 
    Run_Project : declare
-      Project : constant Config.Project.Project_Config :=
+      Project : aliased Config.Project.Project_Config :=
                   Config.Project.Parse (-Project_Filename);
       Env_Var : Environment_Variables.Maps.Map;
    begin
@@ -218,7 +218,7 @@ begin
       end if;
 
       if Savadur.Build.Run
-        (Project => Project,
+        (Project => Project'Access,
          Env_Var => Env_Var,
          Id      => Scenarios.Id (Scenario_Id))
       then

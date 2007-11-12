@@ -22,6 +22,7 @@
 with Ada.Strings.Unbounded;
 with Ada.Containers.Indefinite_Hashed_Sets;
 
+limited with Savadur.Config.Project;
 with Savadur.Utils;
 
 package Savadur.Variables is
@@ -63,9 +64,10 @@ package Savadur.Variables is
       Hash            => Hash,
       Equivalent_Keys => "=");
 
-   function Default return Sets.Set;
-   --  Returns a set with default variables set
+   procedure Default (Project : access Config.Project.Project_Config);
+   --  Set default variables :
    --     - sources is set as "sources"
+   --     - project_dir
 
    function Image (Set : in Sets.Set) return String;
    --  Returns map image

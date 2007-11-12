@@ -383,14 +383,15 @@ package body Savadur.Build is
    ---------
 
    function Run
-     (Project : in Config.Project.Project_Config;
+     (Project : access Config.Project.Project_Config;
       Env_Var : in Environment_Variables.Maps.Map;
       Id      : in Scenarios.Id)
       return Boolean
    is
       Selected_Scenario : Scenarios.Scenario;
       Sources_Directory : constant String :=
-                            Config.Project.Project_Sources_Directory (Project);
+                            Config.Project.Project_Sources_Directory
+                              (Project.all);
       Log_Directory     : constant String :=
                             Config.Project.Project_Log_Directory
                               (Project.Project_Id);
@@ -405,6 +406,10 @@ package body Savadur.Build is
             raise Command_Parse_Error with " Scenario "
               & Savadur.Scenarios.Id_Utils.To_String (Id) & " not found";
       end Get_Selected_Scenario;
+
+      --  Get default variable
+
+      Savadur.Variables.Default (Project => Project);
 
       --  Set environment variable for this project
 
@@ -423,7 +428,7 @@ package body Savadur.Build is
                  (Containing_Directory => Log_Directory,
                   Name                 => To_String (Ref.Id));
                Exec_Action : constant Action    :=
-                               Get_Action (Project    => Project,
+                               Get_Action (Project    => Project.all,
                                            Ref_Action => Ref);
                Return_Code : Integer;
                Result      : Boolean;
@@ -441,7 +446,7 @@ package body Savadur.Build is
                      exit Run_Actions;
                   end if;
 
-                  Success := Check (Project     => Project,
+                  Success := Check (Project     => Project.all,
                                     Exec_Action => Exec_Action,
                                     Ref         => Ref,
                                     Return_Code => Return_Code,
@@ -472,7 +477,7 @@ package body Savadur.Build is
 
                   Execute
                     (Exec_Action   => Get_Action
-                       (Project    => Project,
+                       (Project    => Project.all,
                         Ref_Action => Savadur.SCM.SCM_Init),
                      Directory     => Config.Project.Project_Directory
                        (Project.Project_Id),
@@ -483,7 +488,7 @@ package body Savadur.Build is
                      Result        => Result);
 
                   if not Result or else Return_Code /= 0
-                    or else Directories.Exists (Sources_Directory)
+                    or else not Directories.Exists (Sources_Directory)
                   then
                      raise Command_Parse_Error with " SCM init failed !";
                   end if;
@@ -511,7 +516,7 @@ package body Savadur.Build is
                                Project.Notifications.On_Success.Element
                                  (Integer (K));
                Exec_Action : constant Actions.Action := Get_Action
-                 (Project    => Project,
+                 (Project    => Project.all,
                   Ref_Action => Ref);
 
                Log_File    : constant String := Directories.Compose
@@ -535,7 +540,7 @@ package body Savadur.Build is
                                Project.Notifications.On_Failure.Element
                                  (Integer (K));
                Exec_Action : constant Actions.Action := Get_Action
-                 (Project    => Project,
+                 (Project    => Project.all,
                   Ref_Action => Ref);
 
                Log_File    : constant String := Directories.Compose

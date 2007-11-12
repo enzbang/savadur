@@ -44,7 +44,7 @@ package Savadur.Config.Project is
       Actions       : Savadur.Actions.Sets.Set;
       Scenarios     : Savadur.Scenarios.Sets.Set;
       Notifications : Savadur.Notifications.Hooks;
-      Variables     : Savadur.Variables.Sets.Set := Savadur.Variables.Default;
+      Variables     : Savadur.Variables.Sets.Set;
    end record;
 
    function Parse (Filename : in String) return Project_Config;

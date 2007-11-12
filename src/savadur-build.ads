@@ -28,7 +28,7 @@ package Savadur.Build is
    Command_Parse_Error : exception;
 
    function Run
-     (Project : in Config.Project.Project_Config;
+     (Project : access Config.Project.Project_Config;
       Env_Var : in Environment_Variables.Maps.Map;
       Id      : in Scenarios.Id)
       return Boolean;
