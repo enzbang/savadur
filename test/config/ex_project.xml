@@ -2,7 +2,7 @@
   <name id="ex_project" />
   <scm id="git" />
 
-  <variable id="url">../../../../</variable>
+  <variable id="url" value="../../../../" />
 
   <action id="make">
     <cmd>make build</cmd>
@@ -12,7 +12,8 @@
     <cmd>make regtests</cmd>
   </action>
 
-  <scenario id="default" mode="on-change">
+  <scenario id="default">
+    <scm_action id="version" require_change="true" on_error="quit" />
     <scm_action id="pull" />
     <action id="make" />
     <action id="regtests" />
