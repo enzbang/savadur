@@ -501,6 +501,59 @@ package body Savadur.Build is
                raise Command_Parse_Error with " Command not found";
             end if;
       end For_All_Ref_Actions;
+
+      --  Execute notifications hooks
+
+      if Success then
+         for K in 1 .. Project.Notifications.On_Success.Length loop
+            declare
+               Ref         : constant Actions.Ref_Action :=
+                               Project.Notifications.On_Success.Element
+                                 (Integer (K));
+               Exec_Action : constant Actions.Action := Get_Action
+                 (Project    => Project,
+                  Ref_Action => Ref);
+
+               Log_File    : constant String := Directories.Compose
+                 (Containing_Directory => Log_Directory,
+                  Name                 => "on_success_"
+                  & Actions.Id_Utils.To_String (Ref.Id));
+               Return_Code : Integer;
+               Result      : Boolean;
+            begin
+               Execute (Exec_Action => Exec_Action,
+                        Directory   => Config.Savadur_Directory,
+                        Log_Filename  => Log_File,
+                        Return_Code   => Return_Code,
+                        Result        => Result);
+            end;
+         end loop;
+      else
+         for K in 1 .. Project.Notifications.On_Failure.Length loop
+            declare
+               Ref         : constant Actions.Ref_Action :=
+                               Project.Notifications.On_Failure.Element
+                                 (Integer (K));
+               Exec_Action : constant Actions.Action := Get_Action
+                 (Project    => Project,
+                  Ref_Action => Ref);
+
+               Log_File    : constant String := Directories.Compose
+                 (Containing_Directory => Log_Directory,
+                  Name                 => "on_failure_"
+                  & Actions.Id_Utils.To_String (Ref.Id));
+               Return_Code : Integer;
+               Result      : Boolean;
+            begin
+               Execute (Exec_Action => Exec_Action,
+                        Directory   => Config.Savadur_Directory,
+                        Log_Filename  => Log_File,
+                        Return_Code   => Return_Code,
+                        Result        => Result);
+            end;
+         end loop;
+      end if;
+
       return Success;
    end Run;
 
