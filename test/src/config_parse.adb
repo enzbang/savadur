@@ -31,6 +31,8 @@ with Savadur.SCM;
 with Savadur.Environment_Variables;
 with Savadur.Config.Environment_Variables;
 
+with Utils;
+
 package body Config_Parse is
 
    use Savadur.Utils;
@@ -59,14 +61,15 @@ package body Config_Parse is
                     Environment_Variables.Parse ("ex_project_env.xml");
    begin
       Assertions.Assert
-        (Savadur.Environment_Variables.Image (Env_Var) =  "[" & ASCII.LF
-         & "LD_LIBRARY_PATH : value = /opt/lib" & ASCII.LF
-         & "   action is REPLACE" & ASCII.LF
-         & "PATH : value = /usr/bin" & ASCII.LF
-         & "   action is APPEND" & ASCII.LF
-         & "SAVADUR_DIR : value = " & ASCII.LF
-         & "   action is CLEAR" & ASCII.LF
-         & "]",
+        (Utils.Strip (Savadur.Environment_Variables.Image (Env_Var)) =
+           Utils.Strip ("["
+         & "LD_LIBRARY_PATH : value = /opt/lib"
+         & "action is REPLACE"
+         & "PATH : value = /usr/bin"
+         & "action is APPEND"
+         & "SAVADUR_DIR : value = "
+         & "action is CLEAR"
+         & "]"),
          "Wrong variable list");
    end Check_Env_Var_Config;
 
@@ -93,28 +96,30 @@ package body Config_Parse is
          "SCM Name error");
 
       Assertions.Assert
-        (Savadur.Actions.Image (Project.Actions) = "[" & ASCII.Lf
-         & "make => make build  result type : EXIT_STATUS" & ASCII.Lf
-         & "regtests => make regtests  result type : EXIT_STATUS" & ASCII.Lf
-         & "]",
+        (Utils.Strip (Savadur.Actions.Image (Project.Actions)) =
+           Utils.Strip ("["
+         & "make => make build  result type : EXIT_STATUS"
+         & "regtests => make regtests  result type : EXIT_STATUS"
+         & "]"),
          "Wrong action list");
 
       Assertions.Assert
-        (Savadur.Variables.Image (Project.Variables) =  "[" & ASCII.Lf
-         & "url : ../../../../" & ASCII.Lf
-         & "sources : sources"  & ASCII.Lf
-         & "]",
+        (Utils.Strip (Savadur.Variables.Image (Project.Variables)) =
+           Utils.Strip ("["
+         & "url : ../../../../"
+         & "sources : sources"
+         & "]"),
          "Wrong variable list");
 
       Assertions.Assert
-        (Savadur.Scenarios.Image (Project.Scenarios) = "* default" & ASCII.Lf
-         & "[" & ASCII.Lf
+        (Utils.Strip (Savadur.Scenarios.Image (Project.Scenarios)) =
+           Utils.Strip ("* default"
+         & "["
          & "SCM version require_change on error = QUIT"
-         & ASCII.Lf
-         & "SCM pull" & ASCII.Lf
-         & "DEFAULT make" & ASCII.Lf
-         & "DEFAULT regtests" & ASCII.Lf
-         & "]",
+         & "SCM pull"
+         & "DEFAULT make"
+         & "DEFAULT regtests"
+         & "]"),
          "Wrong scenarios list");
    end Check_Project_Config;
 
@@ -132,15 +137,15 @@ package body Config_Parse is
 
       Savadur.Config.SCM.Parse;
       Assertions.Assert
-        (Savadur.SCM.Image
-           (Savadur.Config.SCM.Configurations) = "* git" & ASCII.Lf
-         & "[" & ASCII.Lf
+        (Utils.Strip (Savadur.SCM.Image
+         (Savadur.Config.SCM.Configurations)) =
+           Utils.Strip ("* git"
+         & "["
          & "init => git-clone $url $sources  result type : EXIT_STATUS"
-         & ASCII.Lf
-         & "pull => git-pull  result type : EXIT_STATUS"  & ASCII.Lf
+         & "pull => git-pull  result type : EXIT_STATUS"
          & "version => git-show-ref -s refs/heads/master  "
-         & "result type : VALUE"  & ASCII.LF
-         & "]",
+         & "result type : VALUE"
+         & "]"),
          "Wrong SCM parse");
    end Check_SCM_Config;
 
