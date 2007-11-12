@@ -61,7 +61,7 @@ package body Savadur.Build is
    --  by the correponding entry in project <variable> section
 
    function Check
-     (Project      : in Config.Project.Project_Config;
+     (Project      : access Config.Project.Project_Config;
       Exec_Action  : in Actions.Action;
       Ref          : in Actions.Ref_Action;
       Return_Code  : in Integer;
@@ -73,7 +73,7 @@ package body Savadur.Build is
    -----------
 
    function Check
-     (Project      : in Config.Project.Project_Config;
+     (Project      : access Config.Project.Project_Config;
       Exec_Action  : in Actions.Action;
       Ref          : in Actions.Ref_Action;
       Return_Code  : in Integer;
@@ -82,8 +82,7 @@ package body Savadur.Build is
    is
       use type Actions.Result_Type;
       State_Directory   : constant String :=
-                            Config.Project.Project_State_Directory
-                              (Project.Project_Id);
+                            Config.Project.Project_State_Directory (Project);
 
       Result : Boolean := True;
    begin
@@ -401,11 +400,9 @@ package body Savadur.Build is
       Selected_Scenario : constant Savadur.Scenarios.Scenario := Init;
 
       Sources_Directory : constant String :=
-                            Config.Project.Project_Sources_Directory
-                              (Project.all);
+                            Config.Project.Project_Sources_Directory (Project);
       Log_Directory     : constant String :=
-                            Config.Project.Project_Log_Directory
-                              (Project.Project_Id);
+                            Config.Project.Project_Log_Directory (Project);
       Success           : Boolean := True;
    begin
 
@@ -439,7 +436,7 @@ package body Savadur.Build is
                      exit Run_Actions;
                   end if;
 
-                  Success := Check (Project     => Project.all,
+                  Success := Check (Project     => Project,
                                     Exec_Action => Exec_Action,
                                     Ref         => Ref,
                                     Return_Code => Return_Code,
@@ -472,8 +469,8 @@ package body Savadur.Build is
                     (Exec_Action   => Get_Action
                        (Project    => Project.all,
                         Ref_Action => Savadur.SCM.SCM_Init),
-                     Directory     => Config.Project.Project_Directory
-                       (Project.Project_Id),
+                     Directory     =>
+                       Config.Project.Project_Directory (Project),
                      Log_Filename  => Directories.Compose
                        (Containing_Directory => Log_Directory,
                         Name                 => "init"),

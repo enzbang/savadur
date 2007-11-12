@@ -40,8 +40,7 @@ package body Savadur.Variables is
       Project.Variables.Insert
         (New_Item =>
            Variable'(Name => Name_Utils.Value ("project_dir"),
-                     Value => +Config.Project.Project_Directory
-                       (Project.Project_Id)));
+                     Value => +Config.Project.Project_Directory (Project)));
    end Default;
 
    ----------

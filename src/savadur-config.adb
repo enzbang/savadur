@@ -66,4 +66,20 @@ package body Savadur.Config is
       Directory := +Dir;
    end Set_Savadur_Directory;
 
+   --------------------
+   -- Work_Directory --
+   --------------------
+
+   function Work_Directory return String is
+      Work_Dir : constant String := Directories.Compose
+        (Containing_Directory => Savadur_Directory,
+         Name                 => "work");
+   begin
+      if not Directories.Exists (Name => Work_Dir) then
+         Directories.Create_Path (New_Directory => Work_Dir);
+      end if;
+
+      return Work_Dir;
+   end Work_Directory;
+
 end Savadur.Config;

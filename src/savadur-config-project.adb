@@ -264,22 +264,22 @@ package body Savadur.Config.Project is
    -----------------------
 
    function Project_Directory
-     (Project_Id : in Config.Project.Project_Id)
+     (Project : access Project_Config)
       return String
    is
-      Work_Directory : Unbounded_String;
    begin
-      Work_Directory := +Directories.Compose
-        (Containing_Directory => Config.Savadur_Directory,
-         Name                 => "work");
-
-      if not Directories.Exists (Name => -Work_Directory) then
-         Directories.Create_Path (New_Directory => -Work_Directory);
+      if Project.Directories.Project_Directory = +"" then
+         Project.Directories.Project_Directory := +Directories.Compose
+           (Containing_Directory => Work_Directory,
+            Name                 => -Unbounded_String (Project.Project_Id));
+         if not Directories.Exists
+           (Name => -Project.Directories.Project_Directory)
+         then
+            Directories.Create_Path
+              (New_Directory => -Project.Directories.Project_Directory);
+         end if;
       end if;
-
-      return Directories.Compose
-        (Containing_Directory => -Work_Directory,
-         Name                 => -Unbounded_String (Project_Id));
+      return -Project.Directories.Project_Directory;
    end Project_Directory;
 
    ---------------------------
@@ -287,18 +287,21 @@ package body Savadur.Config.Project is
    ---------------------------
 
    function Project_Log_Directory
-     (Project_Id : in Config.Project.Project_Id)
+     (Project : access Config.Project.Project_Config)
       return String
    is
-      Log_Dir : constant String :=
-                  Directories.Compose
-                    (Containing_Directory => Project_Directory (Project_Id),
-                     Name                 => "log");
    begin
-      if not Directories.Exists (Name => Log_Dir) then
-         Directories.Create_Path (New_Directory => Log_Dir);
+      if Project.Directories.Project_Log_Directory = +"" then
+         Project.Directories.Project_Log_Directory := +Directories.Compose
+           (Containing_Directory => Project_Directory (Project),
+            Name                 => "log");
+         if not Directories.Exists
+           (Name => -Project.Directories.Project_Log_Directory) then
+            Directories.Create_Path
+              (New_Directory => -Project.Directories.Project_Log_Directory);
+         end if;
       end if;
-      return Log_Dir;
+      return -Project.Directories.Project_Log_Directory;
    end Project_Log_Directory;
 
    -------------------------------
@@ -306,16 +309,26 @@ package body Savadur.Config.Project is
    -------------------------------
 
    function Project_Sources_Directory
-     (Project : in Project_Config) return String
+     (Project : access Project_Config) return String
    is
-      Var : Savadur.Variables.Variable :=
-              Savadur.Variables.Keys.Element
-                (Container => Project.Variables,
-                 Key        => Savadur.Variables.Name_Utils.Value ("sources"));
    begin
-      return Directories.Compose
-        (Containing_Directory => Project_Directory (Project.Project_Id),
-         Name                 => To_String (Var.Value));
+
+      if Project.Directories.Project_Sources_Directory = +"" then
+         declare
+            Var : Savadur.Variables.Variable :=
+                    Savadur.Variables.Keys.Element
+                      (Container => Project.Variables,
+                       Key        => Savadur.Variables.Name_Utils.Value
+                         (Img => "sources"));
+         begin
+            Project.Directories.Project_Sources_Directory :=
+              +Directories.Compose
+                (Containing_Directory => Project_Directory (Project),
+                 Name                 => To_String (Var.Value));
+         end;
+      end if;
+
+      return -Project.Directories.Project_Sources_Directory;
    end Project_Sources_Directory;
 
    -----------------------------
@@ -323,18 +336,22 @@ package body Savadur.Config.Project is
    -----------------------------
 
    function Project_State_Directory
-     (Project_Id : in Config.Project.Project_Id)
+     (Project : access Config.Project.Project_Config)
       return String
    is
-      State_Dir : constant String :=
-                  Directories.Compose
-                    (Containing_Directory => Project_Directory (Project_Id),
-                     Name                 => "state");
    begin
-      if not Directories.Exists (Name => State_Dir) then
-         Directories.Create_Path (New_Directory => State_Dir);
+      if Project.Directories.Project_State_Directory = +"" then
+         Project.Directories.Project_State_Directory :=
+           +Directories.Compose
+             (Containing_Directory => Project_Directory (Project),
+            Name                 => "state");
+         if not Directories.Exists
+           (Name => -Project.Directories.Project_State_Directory) then
+            Directories.Create_Path
+              (New_Directory => -Project.Directories.Project_State_Directory);
+         end if;
       end if;
-      return State_Dir;
+      return -Project.Directories.Project_State_Directory;
    end Project_State_Directory;
 
    -------------------

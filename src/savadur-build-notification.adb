@@ -36,8 +36,7 @@ package body Savadur.Build.Notification is
       Success : in     Boolean)
    is
       Log_Directory : constant String :=
-                        Config.Project.Project_Log_Directory
-                          (Project.Project_Id);
+                        Config.Project.Project_Log_Directory (Project);
 
    begin
       if Success then
