@@ -23,7 +23,7 @@ with Savadur.Servers;
 
 package Savadur.Config.Server is
 
-   Configurations : Savadur.Servers.Maps.Map;
+   Configurations : Savadur.Servers.Sets.Set;
 
    procedure Parse;
    --  Fill the server configuration map

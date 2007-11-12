@@ -31,33 +31,44 @@ package body Savadur.Servers is
    -- Hash --
    ----------
 
-   function Hash (Key : in Id) return Containers.Hash_Type is
+   function Hash (Server : in Servers.Server) return Containers.Hash_Type is
    begin
-      return Strings.Hash (String (Key));
+      return Strings.Hash (To_String (Server.Name));
    end Hash;
 
    -----------
    -- Image --
    -----------
 
-   function Image (Servers_Map : in Maps.Map) return String is
-      Position : Maps.Cursor := Maps.First (Servers_Map);
+   function Image (Servers_Set : in Sets.Set) return String is
+      Position : Sets.Cursor := Sets.First (Servers_Set);
       Result   : Unbounded_String;
    begin
-      while Maps.Has_Element (Position) loop
-         Append (Result, "* " & String (Maps.Key (Position)) & ASCII.LF);
+      while Sets.Has_Element (Position) loop
+         Append
+           (Result, "* "
+            & To_String (Sets.Element (Position).Name) & ASCII.LF);
          Append (Result, "[" & ASCII.LF);
          Append
            (Result,
-            "Name => " & To_String (Maps.Element (Position).Name) & ASCII.LF);
+            "Name => " & To_String (Sets.Element (Position).Name) & ASCII.LF);
          Append
            (Result, "URL => " &
-            To_String (Maps.Element (Position).URL) & ASCII.LF);
+            To_String (Sets.Element (Position).URL) & ASCII.LF);
          Append (Result, "]" & ASCII.LF);
-         Maps.Next (Position);
+         Sets.Next (Position);
       end loop;
 
       return -Result;
    end Image;
+
+   ---------------
+   -- Key_Equal --
+   ---------------
+
+   function Key_Equal (S1, S2 : in Server) return Boolean is
+   begin
+      return S1.Name = S2.Name;
+   end Key_Equal;
 
 end Savadur.Servers;

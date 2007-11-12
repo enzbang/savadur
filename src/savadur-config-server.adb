@@ -131,9 +131,8 @@ package body Savadur.Config.Server is
             Parse (Reader, Source);
             Input_Sources.File.Close (Source);
 
-            Savadur.Servers.Maps.Insert
+            Savadur.Servers.Sets.Insert
               (Container => Configurations,
-               Key       => Savadur.Servers.Id (-Reader.Server.Name),
                New_Item  => Reader.Server);
          end Load_Config;
       end loop Walk_Directories;

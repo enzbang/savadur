@@ -19,7 +19,7 @@
 --  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.       --
 ------------------------------------------------------------------------------
 
-with Ada.Containers.Indefinite_Hashed_Maps;
+with Ada.Containers.Indefinite_Hashed_Sets;
 with Ada.Strings.Unbounded;
 
 package Savadur.Servers is
@@ -27,29 +27,28 @@ package Savadur.Servers is
    use Ada;
    use Ada.Strings.Unbounded;
 
-   type Id is new String;
-
    type Server is record
       Name : Unbounded_String;
       URL  : Unbounded_String;
    end record;
 
-   function Hash (Key : in Id) return Containers.Hash_Type;
+   function Hash (Server : in Servers.Server) return Containers.Hash_Type;
    --  Renames Strings.Hash
+
+   function Key_Equal (S1, S2 : in Server) return Boolean;
 
    Emtpy_Server : constant Server;
 
    ----------
-   -- Maps --
+   -- Sets --
    ----------
 
-   package Maps is new Ada.Containers.Indefinite_Hashed_Maps
-     (Key_Type        => Id,
-      Element_Type    => Server,
-      Hash            => Hash,
-      Equivalent_Keys => "=");
+   package Sets is new Ada.Containers.Indefinite_Hashed_Sets
+     (Element_Type        => Server,
+      Hash                => Hash,
+      Equivalent_Elements => Key_Equal);
 
-   function Image (Servers_Map : in Maps.Map) return String;
+   function Image (Servers_Set : in Sets.Set) return String;
    --  Return the Servers_Map image
 
 private
