@@ -188,7 +188,7 @@ begin
 
    Run_Project : declare
       Project : aliased Config.Project.Project_Config :=
-                  Config.Project.Parse (-Project_Filename);
+                  Config.Project.Parse (-Project_Filename, -Project_Name);
       Env_Var : Environment_Variables.Maps.Map;
    begin
 

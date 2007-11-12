@@ -381,10 +381,6 @@ package body Savadur.Build is
            (Container => Project.Scenarios,
             Key       => Id);
 
-         --  Get default variable
-
-         Savadur.Variables.Default (Project => Project);
-
          --  Set environment variable for this project
 
          Savadur.Environment_Variables.Set_Environment (Env_Var);

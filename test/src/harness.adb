@@ -19,11 +19,14 @@
 --  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.       --
 ------------------------------------------------------------------------------
 
+with Ada.Command_Line;
+with Ada.Directories;
+
 with AUnit;
 with AUnit_Framework;
 with Savadur_Suite;
 
-with Ada.Command_Line;
+with Savadur.Config;
 
 -------------
 -- Harness --
@@ -38,6 +41,9 @@ procedure Harness is
      AUnit.Test_Runner_With_Status (Savadur_Suite.Suite);
 
 begin
+
+   Savadur.Config.Set_Savadur_Directory (Ada.Directories.Current_Directory);
+
    if Run = Failure then
          Command_Line.Set_Exit_Status (Command_Line.Failure);
    end if;

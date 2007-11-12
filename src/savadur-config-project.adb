@@ -92,7 +92,7 @@ package body Savadur.Config.Project is
       Scenario             : Scenarios.Scenario;
       Inside_Scenario      : Boolean := False;
       Inside_Notifications : Boolean := False;
-      Current_Project      : Project_Config;
+      Current_Project      : aliased Project_Config;
    end record;
 
    procedure Start_Element
@@ -241,13 +241,21 @@ package body Savadur.Config.Project is
    -- Parse --
    -----------
 
-   function Parse (Filename : in String) return Project_Config is
+   function Parse
+     (Filename : in String; Project_Name : in String) return Project_Config is
       Reader : Tree_Reader;
       Source : Input_Sources.File.File_Input;
    begin
       if not Directories.Exists (Name => Filename) then
          raise Config_Error with "No Project at path :" & Filename;
       end if;
+
+      Reader.Current_Project.Project_Id :=
+        Config.Project.Project_Id_Utils.Value (Project_Name);
+
+      --  Get default variable;
+
+      Savadur.Variables.Default (Reader.Current_Project'Access);
 
       Input_Sources.File.Open
         (Filename => Filename,

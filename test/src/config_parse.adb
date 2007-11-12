@@ -20,6 +20,7 @@
 ------------------------------------------------------------------------------
 
 with Ada.Strings.Unbounded;
+with Ada.Directories;
 
 with Savadur.Utils;
 with Savadur.Config.Project;
@@ -33,9 +34,11 @@ with Savadur.Config.Environment_Variables;
 with Savadur.Notifications;
 
 with Utils;
+with Savadur.Config; use Savadur.Config;
 
 package body Config_Parse is
 
+   use Ada;
    use Savadur.Utils;
 
    procedure Check_SCM_Config
@@ -85,9 +88,9 @@ package body Config_Parse is
       use Ada.Strings.Unbounded;
 
       Project : Savadur.Config.Project.Project_Config :=
-                  Savadur.Config.Project.Parse ("ex_project.xml");
+                  Savadur.Config.Project.Parse ("ex_project.xml",
+                                                "ex_project");
    begin
-
       Assertions.Assert
         (-Unbounded_String (Project.Project_Id) = "ex_project",
          "Project Name error");
@@ -106,14 +109,18 @@ package body Config_Parse is
              & "  result type : EXIT_STATUS"
              & "regtests => make regtests  result type : EXIT_STATUS"
              & "]"),
-         "Wrong action list" & Savadur.Actions.Image (Project.Actions));
+         "Wrong action list");
 
       Assertions.Assert
         (Utils.Strip (Savadur.Variables.Image (Project.Variables)) =
            Utils.Strip ("["
-         & "url : ../../../../"
-         & "sources : sources"
-         & "]"),
+             & "project_dir : "
+             & Directories.Compose
+               (Containing_Directory => Savadur.Config.Work_Directory,
+                Name                 => "ex_project")
+             & "url : ../../../../"
+             & "sources : sources"
+             & "]"),
          "Wrong variable list");
 
       Assertions.Assert

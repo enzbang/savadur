@@ -50,7 +50,8 @@ package Savadur.Config.Project is
       Directories   : Project_Directories;
    end record;
 
-   function Parse (Filename : in String) return Project_Config;
+   function Parse
+     (Filename : in String; Project_Name : in String) return Project_Config;
    --  Returns the project configuration read in the given file
 
    function Project_Directory
