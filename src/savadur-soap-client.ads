@@ -19,56 +19,35 @@
 --  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.       --
 ------------------------------------------------------------------------------
 
-with "aws";
-with "xmlada";
-with "shared.gpr";
+with Ada.Strings.Unbounded;
 
-project Savadur is
+package Savadur.SOAP.Client is
 
-   for Source_Dirs use ("src", "soap");
-   for Main use ("savadur-client.adb", "savadur-server.adb");
+   use Ada.Strings.Unbounded;
 
-   case Shared.Build is
-      when "Debug" =>
-         for Object_Dir use ".build/debug/savadur/obj";
-         for Exec_Dir use ".build/debug/bin";
-      when "Profile" =>
-         for Object_Dir use ".build/profile/savadur/obj";
-         for Exec_Dir use ".build/profile/bin";
-      when "Release" =>
-         for Object_Dir use ".build/release/savadur/obj";
-         for Exec_Dir use ".build/release/bin";
-   end case;
+   type Metadata is record
+      OS : Unbounded_String;
+   end record;
 
-   case Shared.In_Test is
-      when "TRUE" =>
-         for Exec_Dir use "test/bin";
-      when "FALSE" =>
-         null;
-   end case;
+   procedure Register
+     (Key               : in String;
+      Data              : in Metadata;
+      Callback_Endpoint : in String);
+   --  Register a new client whose id is Key and with the given metadata. The
+   --  endpoint is the SOAP callback for the server to reach the client.
 
-   ------------
-   -- Binder --
-   ------------
+   type Returned_Status is (Success, Failure);
 
-   package Binder renames Shared.Binder;
+   type Project is new String;
 
-   --------------
-   -- Compiler --
-   --------------
+   procedure Status
+     (Key      : in String;
+      Ref      : in Project;
+      Scenario : in String;
+      Action   : in String;
+      Result   : in String;
+      Status   : in Returned_Status);
+   --  Status is called by the client to register status of each action in the
+   --  given scenario.
 
-   package Compiler renames Shared.Compiler;
-
-   -------------
-   -- Builder --
-   -------------
-
-   package Builder renames Shared.Builder;
-
-   ------------
-   -- Linker --
-   ------------
-
-   package Linker renames Shared.Linker;
-
-end Savadur;
+end Savadur.SOAP.Client;

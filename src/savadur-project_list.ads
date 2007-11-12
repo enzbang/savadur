@@ -19,56 +19,52 @@
 --  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.       --
 ------------------------------------------------------------------------------
 
-with "aws";
-with "xmlada";
-with "shared.gpr";
+with Ada.Containers.Indefinite_Hashed_Maps;
+with Ada.Containers.Indefinite_Vectors;
+with Ada.Strings.Hash_Case_Insensitive;
+with Ada.Strings.Unbounded;
 
-project Savadur is
+package Savadur.Project_List is
 
-   for Source_Dirs use ("src", "soap");
-   for Main use ("savadur-client.adb", "savadur-server.adb");
+   use Ada;
+   use Ada.Strings.Unbounded;
 
-   case Shared.Build is
-      when "Debug" =>
-         for Object_Dir use ".build/debug/savadur/obj";
-         for Exec_Dir use ".build/debug/bin";
-      when "Profile" =>
-         for Object_Dir use ".build/profile/savadur/obj";
-         for Exec_Dir use ".build/profile/bin";
-      when "Release" =>
-         for Object_Dir use ".build/release/savadur/obj";
-         for Exec_Dir use ".build/release/bin";
-   end case;
+   --  Client set
 
-   case Shared.In_Test is
-      when "TRUE" =>
-         for Exec_Dir use "test/bin";
-      when "FALSE" =>
-         null;
-   end case;
+   type Client is record
+      Key       : Unbounded_String;
+      Activated : Boolean := True;
+   end record;
 
-   ------------
-   -- Binder --
-   ------------
+   package Clients is new Containers.Indefinite_Vectors
+     (Index_Type      => Positive,
+      Element_Type    => Client);
 
-   package Binder renames Shared.Binder;
+   --  For each scenario
 
-   --------------
-   -- Compiler --
-   --------------
+   package Scenarios is new Containers.Indefinite_Hashed_Maps
+     (Key_Type        => String,
+      Element_Type    => Clients.Vector,
+      Hash            => Strings.Hash_Case_Insensitive,
+      Equivalent_Keys => "=",
+      "="             => Clients."=");
 
-   package Compiler renames Shared.Compiler;
+   --  For each projects
 
-   -------------
-   -- Builder --
-   -------------
+   package Projects is new Containers.Indefinite_Hashed_Maps
+     (Key_Type        => String,
+      Element_Type    => Scenarios.Map,
+      Hash            => Strings.Hash_Case_Insensitive,
+      Equivalent_Keys => "=",
+      "="             => Scenarios."=");
 
-   package Builder renames Shared.Builder;
+   procedure Register_Client
+     (Project  : in String;
+      Scenario : in String;
+      Client   : in String);
+   --  Register a new client which handle the given project/scenario
 
-   ------------
-   -- Linker --
-   ------------
+   function Get_Clients (Project, Scenario : in String) return Clients.Vector;
+   --  Returns the list of clients which can handle the give project/scenario
 
-   package Linker renames Shared.Linker;
-
-end Savadur;
+end Savadur.Project_List;

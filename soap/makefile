@@ -19,58 +19,16 @@
 ##  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.       ##
 ##############################################################################
 
-include mk.config
 
-GENERAL_OPTIONS = CP="$(CP)" MKDIR="$(MKDIR)" RM="$(RM)" \
-	GNATMAKE="$(GNATMAKE)" GNATCLEAN="$(GNATCLEAN)" \
-	GNATCHECK="$(GNATCHECK)" GNATCHOP="$(GNATCHOP)" \
-	EXEEXT="$(EXEEXT)" DIFF="$(DIFF)" ADA2WSDL="$(ADA2WSDL)" \
-	WSDL2AWS="$(WSDL2AWS)"
+setup: client.wsdl server.wsdl
 
-OPTIONS = MODE="$(MODE)" $(GENERAL_OPTIONS)
+client.wsdl: ../src/savadur-soap-client.ads
+	$(ADA2WSDL) -q -f -I../src savadur-soap-client.ads -o client.wsdl
+	$(WSDL2AWS) -q -f -cb -spec Savadur.SOAP.Client client.wsdl
 
-BIN_DIR=".build/$(shell echo $(MODE) | tr [[:upper:]] [[:lower:]])/bin"
-
-VERSION     = $(shell git describe --abbrev=0 2>/dev/null)
-VERSION_ALL = $(shell git describe 2>/dev/null)
-
-all: build
-
-# If git is not present then use the version.ads provided in distrib
-ifneq ("$(VERSION)", "")
-	sed -e 's,\$$VERSION\$$,$(VERSION),g' \
-	-e 's,\$$VERSION_ALL\$$,$(VERSION_ALL),g' \
-	src/savadur-version.tads > src/savadur-version.ads
-endif
-
-build: setup
-	$(GNATMAKE) -XPRJ_BUILD=$(MODE) -P savadur
-
-setup:
-	$(MAKE) -C soap setup $(OPTIONS)
-
-regtests:
-	$(MAKE) -C test regtests $(OPTIONS)
-
-regtests_bootstrap:
-	$(MAKE) -C test regtests_bootstrap $(OPTIONS)
+server.wsdl: ../src/savadur-soap-server.ads
+	$(ADA2WSDL) -q -f -I../src savadur-soap-server.ads -o server.wsdl
+	$(WSDL2AWS) -q -f -cb -spec Savadur.SOAP.Server server.wsdl
 
 clean:
-	$(GNATCLEAN) -P savadur
-	make -C test clean $(OPTIONS)
-	$(MAKE) -C soap clean
-
-check:
-	$(GNATCHECK) -dd -Psavadur -rules -from=savadur.check
-
-install:
-	@$(MKDIR) $(INSTALL)/example
-	@$(CP) -r config/scm $(INSTALL)/scm
-	@$(CP) test/ex_project.xml $(INSTALL)/example/
-	@cp $(BIN_DIR)/savadur-client $(INSTALL)
-	@echo savadur is installed in $(INSTALL)
-
-distrib: setup
-	git archive --prefix=savadur/ HEAD > savadur.tar
-	tar -C ../ -r --file=savadur.tar savadur/src/savadur-version.ads
-	gzip -f savadur.tar
+	$(RM) -f client.wsdl server.wsdl
