@@ -138,7 +138,8 @@ package body Config_Parse is
          & "init => git-clone $url $sources  result type : EXIT_STATUS"
          & ASCII.Lf
          & "pull => git-pull  result type : EXIT_STATUS"  & ASCII.Lf
-         & "version => git-show-ref -s  result type : VALUE"  & ASCII.Lf
+         & "version => git-show-ref -s refs/heads/master  "
+         & "result type : VALUE"  & ASCII.LF
          & "]",
          "Wrong SCM parse");
    end Check_SCM_Config;

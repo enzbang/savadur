@@ -30,7 +30,7 @@
   </action>
 
   <action id="version" result="value">
-    <cmd>git show-ref -s refs/heads/master</cmd>
+    <cmd>git-show-ref -s refs/heads/master</cmd>
   </action>
 
 </scm>
