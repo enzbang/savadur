@@ -388,7 +388,38 @@ package body Savadur.Build is
       Id      : in Scenarios.Id)
       return Boolean
    is
-      Selected_Scenario : Scenarios.Scenario;
+
+      function Init return Savadur.Scenarios.Scenario;
+
+      ----------
+      -- Init --
+      ----------
+
+      function Init return Savadur.Scenarios.Scenario is
+         Selected_Scenario : Savadur.Scenarios.Scenario;
+      begin
+         Selected_Scenario := Savadur.Scenarios.Keys.Element
+           (Container => Project.Scenarios,
+            Key       => Id);
+
+         --  Get default variable
+
+         Savadur.Variables.Default (Project => Project);
+
+         --  Set environment variable for this project
+
+         Savadur.Environment_Variables.Set_Environment (Env_Var);
+
+         return Selected_Scenario;
+
+      exception
+         when Constraint_Error =>
+            raise Command_Parse_Error with " Scenario "
+              & Savadur.Scenarios.Id_Utils.To_String (Id) & " not found";
+      end Init;
+
+      Selected_Scenario : constant Savadur.Scenarios.Scenario := Init;
+
       Sources_Directory : constant String :=
                             Config.Project.Project_Sources_Directory
                               (Project.all);
@@ -397,23 +428,6 @@ package body Savadur.Build is
                               (Project.Project_Id);
       Success           : Boolean := True;
    begin
-      Get_Selected_Scenario : begin
-         Selected_Scenario := Savadur.Scenarios.Keys.Element
-           (Container => Project.Scenarios,
-            Key       => Id);
-      exception
-         when Constraint_Error =>
-            raise Command_Parse_Error with " Scenario "
-              & Savadur.Scenarios.Id_Utils.To_String (Id) & " not found";
-      end Get_Selected_Scenario;
-
-      --  Get default variable
-
-      Savadur.Variables.Default (Project => Project);
-
-      --  Set environment variable for this project
-
-      Savadur.Environment_Variables.Set_Environment (Env_Var);
 
       For_All_Ref_Actions : declare
          use Savadur.Actions;
