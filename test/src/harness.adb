@@ -27,6 +27,7 @@ with AUnit_Framework;
 with Savadur_Suite;
 
 with Savadur.Config;
+with Ada.Text_IO;
 
 -------------
 -- Harness --
@@ -42,7 +43,12 @@ procedure Harness is
 
 begin
 
-   Savadur.Config.Set_Savadur_Directory (Ada.Directories.Current_Directory);
+   Savadur.Config.Set_Savadur_Directory
+     (Directories.Compose
+        (Containing_Directory => Directories.Current_Directory,
+         Name                 => "test-dir"));
+
+   Ada.Text_IO.Put_Line (Directories.Current_Directory);
 
    if Run = Failure then
          Command_Line.Set_Exit_Status (Command_Line.Failure);

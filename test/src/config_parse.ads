@@ -35,4 +35,6 @@ package Config_Parse is
    function Name (T : in Test_Case) return Test_String;
    --  Returns name identifying the test case
 
+   procedure Set_Up_Case (Test : in out Test_Case);
+
 end Config_Parse;

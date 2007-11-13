@@ -43,6 +43,7 @@ regtests_bootstrap:
 
 clean:
 	$(GNATCLEAN) -P savadur
+	make -C test clean $(OPTIONS)
 
 check:
 	$(GNATCHECK) -dd -Psavadur -rules -from=savadur.check

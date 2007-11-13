@@ -41,6 +41,8 @@ package body Config_Parse is
    use Ada;
    use Savadur.Utils;
 
+   Project : aliased Savadur.Config.Project.Project_Config;
+
    procedure Check_SCM_Config
      (T : in out AUnit.Test_Cases.Test_Case'Class);
 
@@ -62,7 +64,7 @@ package body Config_Parse is
 
       Env_Var : Savadur.Environment_Variables.Maps.Map :=
                   Savadur.Config.
-                    Environment_Variables.Parse ("ex_project_env.xml");
+                    Environment_Variables.Parse (Project'Access);
    begin
       Assertions.Assert
         (Utils.Strip (Savadur.Environment_Variables.Image (Env_Var)) =
@@ -86,13 +88,9 @@ package body Config_Parse is
    is
       pragma Unreferenced (T);
       use Ada.Strings.Unbounded;
-
-      Project : Savadur.Config.Project.Project_Config :=
-                  Savadur.Config.Project.Parse (Project_Name => "ex_project",
-                                                Filename => "ex_project.xml");
    begin
       Assertions.Assert
-        (-Unbounded_String (Project.Project_Id) = "ex_project",
+        (-Unbounded_String (Project.Project_Id) = "regtests",
          "Project Name error");
 
       Assertions.Assert
@@ -114,11 +112,11 @@ package body Config_Parse is
       Assertions.Assert
         (Utils.Strip (Savadur.Variables.Image (Project.Variables)) =
            Utils.Strip ("["
-             & "project_name : ex_project"
+             & "project_name : regtests"
              & "project_dir : "
              & Directories.Compose
                (Containing_Directory => Savadur.Config.Work_Directory,
-                Name                 => "ex_project")
+                Name                 => "regtests")
              & "url : ../../../../"
              & "sources : sources"
              & "]"),
@@ -159,8 +157,6 @@ package body Config_Parse is
       pragma Unreferenced (T);
       use Ada.Strings.Unbounded;
    begin
-      Savadur.Config.Set_Savadur_Directory ("../config");
-
       Savadur.Config.SCM.Parse;
       Assertions.Assert
         (Utils.Strip (Savadur.SCM.Image
@@ -197,7 +193,16 @@ package body Config_Parse is
         (T, Check_SCM_Config'Access, "check scm configuration");
       Registration.Register_Routine
         (T, Check_Env_Var_Config'Access, "check env var configuration");
-
    end Register_Tests;
+
+   -----------------
+   -- Set_Up_Case --
+   -----------------
+
+   procedure Set_Up_Case (Test : in out Test_Case) is
+      pragma Unreferenced (Test);
+   begin
+      Project := Savadur.Config.Project.Parse (Project_Name => "regtests");
+   end Set_Up_Case;
 
 end Config_Parse;

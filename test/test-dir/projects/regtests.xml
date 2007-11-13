@@ -1,5 +1,5 @@
 <project>
-  <name id="ex_project" />
+  <name id="regtests" />
   <scm id="git" />
 
   <variable id="url" value="../../../../" />
