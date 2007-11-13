@@ -1,0 +1,38 @@
+<project>
+  <name id="savadur" />
+  <scm id="git" />
+
+  <variable id="url" value="git://repo.or.cz/savadur.git" />
+
+  <action id="make">
+    <cmd>make build</cmd>
+  </action>
+
+  <action id="regtests">
+    <cmd>make regtestsh</cmd>
+  </action>
+
+  <action id="jabber_error">
+    <cmd>./hooks/send-xmpp $project_name $failed_action</cmd>
+  </action>
+
+  <action id="jabber_success">
+    <cmd>./hooks/send-xmpp $project_name</cmd>
+  </action>
+
+  <scenario id="default">
+    <scm_action id="pull" />
+    <scm_action id="version" require_change="true" on_error="quit" />
+    <action id="make" />
+    <action id="regtests" />
+  </scenario>
+
+  <notifications>
+    <on_failure>
+      <action id="jabber_error" />
+    </on_failure>
+    <on_success>
+      <action id="jabber_success" />
+    </on_success>
+  </notifications>
+</project>

@@ -1,0 +1,40 @@
+#!/bin/sh
+
+# Require :
+# - sendxmpp         a commandline XMPP (jabber) utility
+
+# Configuration
+# Add an action in your project file
+#
+# <action id="jabber_error">
+#   <cmd>./hooks/send-xmpp $project_name $failed_action</cmd>
+# </action>
+#
+# <action id="jabber_success">
+#   <cmd>./hooks/send-xmpp $project_name</cmd>
+# </action>
+#
+# Then reference these actions in notification section :
+#
+#   <notifications>
+#    <on_failure>
+#      <action id="jabber_error" />
+#    </on_failure>
+#    <on_success>
+#      <action id="jabber_success" />
+#    </on_success>
+#  </notifications>
+#
+# Add a ’~/.sendxmpprc’ file with the necessary data for your xmpp-account :
+# user@server password componentname
+
+NAME=$1
+ERROR_ON=$2
+XMPP_TO=user@server.example.net
+
+if [ "$ERROR_ON" == "" ]
+then
+    echo Success at $(date) | sendxmpp -s $NAME $XMPP_TO
+else
+    echo Failure on $ERROR_ON at $(date) | sendxmpp -s $NAME $XMPP_TO
+fi
