@@ -445,6 +445,13 @@ package body Savadur.Build is
                            Success := True;
                            exit Run_Actions;
                         when Actions.Error =>
+                           Project.Variables.Insert
+                             (New_Item =>
+                              Variables.Variable'
+                                (Name =>
+                                 Variables.Name_Utils.Value ("failed_action"),
+                                 Value => Actions.Id_Utils.
+                                   To_Unbounded_String (Ref.Id)));
                            exit Run_Actions;
                         when Actions.Continue =>
                            null;
