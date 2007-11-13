@@ -74,7 +74,7 @@ package body Config_Parse is
          & "SAVADUR_DIR : value = "
          & "action is CLEAR"
          & "]"),
-         "Wrong variable list");
+         "Wrong env variable list");
    end Check_Env_Var_Config;
 
    --------------------------
