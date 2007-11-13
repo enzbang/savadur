@@ -242,23 +242,36 @@ package body Savadur.Config.Project is
    -----------
 
    function Parse
-     (Filename : in String; Project_Name : in String) return Project_Config is
+     (Project_Name : in String;
+      Filename     : in String := "")
+      return Project_Config
+   is
       Reader : Tree_Reader;
       Source : Input_Sources.File.File_Input;
    begin
-      if not Directories.Exists (Name => Filename) then
-         raise Config_Error with "No Project at path :" & Filename;
-      end if;
+
+      --  Set the project name
 
       Reader.Current_Project.Project_Id :=
         Config.Project.Project_Id_Utils.Value (Project_Name);
+
+      if Filename /= "" then
+         Reader.Current_Project.Directories.Project_Filename := +Filename;
+      end if;
+
+      if not Directories.Exists
+        (Config.Project.Project_Filename (Reader.Current_Project'Access)) then
+         raise Config_Error with "No Project at path :"
+           & Config.Project.Project_Filename (Reader.Current_Project'Access);
+      end if;
 
       --  Get default variable;
 
       Savadur.Variables.Default (Reader.Current_Project'Access);
 
       Input_Sources.File.Open
-        (Filename => Filename,
+        (Filename => Config.Project.Project_Filename
+           (Reader.Current_Project'Access),
          Input    => Source);
 
       Parse (Reader, Source);
@@ -277,9 +290,11 @@ package body Savadur.Config.Project is
    is
    begin
       if Project.Directories.Project_Directory = +"" then
+         Ada.Text_IO.Put_Line ("Proj dir");
          Project.Directories.Project_Directory := +Directories.Compose
-           (Containing_Directory => Work_Directory,
+           (Containing_Directory => Config.Work_Directory,
             Name                 => -Unbounded_String (Project.Project_Id));
+         Ada.Text_IO.Put_Line (-Project.Directories.Project_Directory);
          if not Directories.Exists
            (Name => -Project.Directories.Project_Directory)
          then
@@ -289,6 +304,24 @@ package body Savadur.Config.Project is
       end if;
       return -Project.Directories.Project_Directory;
    end Project_Directory;
+
+   ----------------------
+   -- Project_Filename --
+   ----------------------
+
+   function Project_Filename
+     (Project : access Project_Config) return String
+   is
+   begin
+      if Project.Directories.Project_Filename = +"" then
+         Project.Directories.Project_Filename := +Directories.Compose
+           (Containing_Directory => Config.Project_File_Directory,
+            Name                 => Project_Id_Utils.To_String
+              (Project.Project_Id),
+            Extension            => "xml");
+      end if;
+      return -Project.Directories.Project_Filename;
+   end Project_Filename;
 
    ---------------------------
    -- Project_Log_Directory --

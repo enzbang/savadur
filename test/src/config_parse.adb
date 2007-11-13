@@ -88,8 +88,8 @@ package body Config_Parse is
       use Ada.Strings.Unbounded;
 
       Project : Savadur.Config.Project.Project_Config :=
-                  Savadur.Config.Project.Parse ("ex_project.xml",
-                                                "ex_project");
+                  Savadur.Config.Project.Parse (Project_Name => "ex_project",
+                                                Filename => "ex_project.xml");
    begin
       Assertions.Assert
         (-Unbounded_String (Project.Project_Id) = "ex_project",

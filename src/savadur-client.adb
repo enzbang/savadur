@@ -172,10 +172,6 @@ begin
         (Containing_Directory => Config.Savadur_Directory,
          Name                 => "env");
    begin
-      Project_Filename := +Directories.Compose
-        (Containing_Directory => Project_Directory,
-         Name                 => -Project_Name,
-         Extension            => "xml");
 
       Project_Env_Filename := +Directories.Compose
         (Containing_Directory => Env_Var_Directory,
@@ -188,7 +184,7 @@ begin
 
    Run_Project : declare
       Project : aliased Config.Project.Project_Config :=
-                  Config.Project.Parse (-Project_Filename, -Project_Name);
+                  Config.Project.Parse (-Project_Name);
       Env_Var : Environment_Variables.Maps.Map;
    begin
 

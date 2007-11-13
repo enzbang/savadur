@@ -51,12 +51,18 @@ package Savadur.Config.Project is
    end record;
 
    function Parse
-     (Filename : in String; Project_Name : in String) return Project_Config;
+     (Project_Name : in String;
+      Filename     : in String := "")
+      return Project_Config;
    --  Returns the project configuration read in the given file
 
    function Project_Directory
      (Project : access Project_Config) return String;
    --  Returns project directory (or create it if does not exist)
+
+   function Project_Filename
+     (Project : access Project_Config) return String;
+   --  Returns project filename
 
    function Project_Log_Directory
      (Project : access Project_Config) return String;
@@ -77,5 +83,6 @@ private
       Project_Log_Directory     : Unbounded_String;
       Project_State_Directory   : Unbounded_String;
       Project_Sources_Directory : Unbounded_String;
+      Project_Filename          : Unbounded_String;
    end record;
 end Savadur.Config.Project;

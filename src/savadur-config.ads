@@ -37,6 +37,9 @@ package Savadur.Config is
    --  Set savadur directory (Overwrite environment variables)
 
    function Work_Directory return String;
-   --  Returns Work directory
+   --  Returns Work directory (create if empty)
+
+   function Project_File_Directory return String;
+   --  Returns project file directory $(savadur_dir)/projects
 
 end Savadur.Config;
