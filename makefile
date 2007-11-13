@@ -30,7 +30,18 @@ OPTIONS = MODE="$(MODE)" $(GENERAL_OPTIONS)
 
 BIN_DIR=".build/$(shell echo $(MODE) | tr [[:upper:]] [[:lower:]])/bin"
 
+VERSION     = $(shell git describe --abbrev=0 2>/dev/null)
+VERSION_ALL = $(shell git describe 2>/dev/null)
+
 all: build
+
+setup:
+# If git is not present then use the version.ads provided in distrib
+ifneq ("$(VERSION)", "")
+	sed -e 's,\$$VERSION\$$,$(VERSION),g' \
+	-e 's,\$$VERSION_ALL\$$,$(VERSION_ALL),g' \
+	src/savadur-version.tads > src/savadur-version.ads
+endif
 
 build:
 	$(GNATMAKE) -XPRJ_BUILD=$(MODE) -P savadur
@@ -55,4 +66,7 @@ install:
 	@cp $(BIN_DIR)/savadur-client $(INSTALL)
 	@echo savadur is installed in $(INSTALL)
 
-
+distrib: setup
+	git archive --prefix=savadur/ HEAD > savadur.tar
+	tar -C ../ -r --file=savadur.tar savadur/src/savadur-version.ads
+	gzip -f savadur.tar

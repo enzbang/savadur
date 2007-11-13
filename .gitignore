@@ -1,6 +1,13 @@
 *.ali
 *.o
 *~
+#*
+*.#*
 test/harness
+test/bin
+test/test-dir/scm
+test/test-dir/work
 .gpsrcs
 .build
+src/savadur-version.ads
+savadur.tar.gz

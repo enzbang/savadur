@@ -45,6 +45,7 @@ with Savadur.Actions;
 with Savadur.Scenarios;
 with Savadur.SCM;
 with Savadur.Logs;
+with Savadur.Version;
 with Savadur.Environment_Variables;
 
 procedure Savadur.Client is
@@ -79,11 +80,13 @@ procedure Savadur.Client is
          Command_Line.Set_Exit_Status (Command_Line.Failure);
       end if;
 
+      Logs.Write ("Savadur " & Version.Simple);
       Logs.Write ("usage : savadur-client [OPTIONS] -p|-project name"
                   & " -s|-sid scenario_id");
       Logs.Write ("OPTIONS :");
       Logs.Write ("    -savadurdir dirname : set savadur directory");
       Logs.Write ("          ($SAVADUR_DIR or $HOME/.savadur by default)");
+      Logs.Write ("    -v|-version");
       Logs.Write ("    -V|-verbose");
       Logs.Write ("    -VV|-very_verbose");
    end Usage;
@@ -98,7 +101,8 @@ begin
    Parse_Opt : begin
       Interate_On_Opt : loop
          case GNAT.Command_Line.Getopt
-              ("V verbose VV very_verbose p: project: savadurdir: s: sid: ") is
+              ("V verbose VV very_verbose version v "
+               & "p: project: savadurdir: s: sid: ") is
             when ASCII.NUL =>
                exit Interate_On_Opt;
 
@@ -136,6 +140,10 @@ begin
                                Activated => True);
                      Logs.Set (Kind      => Logs.Very_Verbose,
                                Activated => True);
+                  elsif Full = "version" or else Full = "v" then
+                     Logs.Write (Content => "Savadur "
+                                 & Savadur.Version.Complete);
+                     return;
                   end if;
                end Complete_V;
 
