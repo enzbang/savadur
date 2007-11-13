@@ -9,7 +9,7 @@
   </action>
 
   <action id="regtests">
-    <cmd>make regtestsh</cmd>
+    <cmd>make regtests</cmd>
   </action>
 
   <action id="jabber_error">
