@@ -114,6 +114,7 @@ package body Config_Parse is
       Assertions.Assert
         (Utils.Strip (Savadur.Variables.Image (Project.Variables)) =
            Utils.Strip ("["
+             & "project_name : ex_project"
              & "project_dir : "
              & Directories.Compose
                (Containing_Directory => Savadur.Config.Work_Directory,
