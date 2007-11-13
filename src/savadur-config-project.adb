@@ -305,6 +305,24 @@ package body Savadur.Config.Project is
       return -Project.Directories.Project_Directory;
    end Project_Directory;
 
+   --------------------------
+   -- Project_Env_Filename --
+   --------------------------
+
+   function Project_Env_Filename
+     (Project : access Project_Config) return String
+   is
+   begin
+      if Project.Directories.Project_Env_Filename = +"" then
+         Project.Directories.Project_Env_Filename := +Directories.Compose
+           (Containing_Directory => Config.Project_Env_Directory,
+            Name                 => Project_Id_Utils.To_String
+              (Project.Project_Id),
+            Extension            => "xml");
+      end if;
+      return -Project.Directories.Project_Env_Filename;
+   end Project_Env_Filename;
+
    ----------------------
    -- Project_Filename --
    ----------------------

@@ -42,4 +42,7 @@ package Savadur.Config is
    function Project_File_Directory return String;
    --  Returns project file directory $(savadur_dir)/projects
 
+   function Project_Env_Directory return String;
+   --  Returns project file directory $(savadur_dir)/env
+
 end Savadur.Config;

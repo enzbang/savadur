@@ -34,6 +34,17 @@ package body Savadur.Config is
 
    Directory : Unbounded_String;
 
+   ---------------------------
+   -- Project_Env_Directory --
+   ---------------------------
+
+   function Project_Env_Directory return String is
+   begin
+      return Directories.Compose
+        (Containing_Directory => Savadur_Directory,
+         Name                 => "env");
+   end Project_Env_Directory;
+
    ----------------------------
    -- Project_File_Directory --
    ----------------------------

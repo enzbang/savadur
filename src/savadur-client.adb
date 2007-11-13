@@ -30,11 +30,9 @@
 --       -verbose
 --       -very_verbose
 
-with Ada.IO_Exceptions;
 with Ada.Exceptions;
 with Ada.Command_Line;
 with Ada.Strings.Unbounded;
-with Ada.Directories;
 
 with GNAT.Command_Line;
 
@@ -59,8 +57,6 @@ procedure Savadur.Client is
    Syntax_Error         : exception;
 
    Project_Name         : Unbounded_String;
-   Project_Filename     : Unbounded_String;
-   Project_Env_Filename : Unbounded_String;
    Scenario_Id          : Unbounded_String
      := Scenarios.Id_Utils.To_Unbounded_String (Scenarios.Default_Scenario);
 
@@ -164,24 +160,6 @@ begin
 
    Savadur.Config.SCM.Parse;
 
-   Get_Project_Filename : declare
-      Project_Directory : constant String := Directories.Compose
-        (Containing_Directory => Config.Savadur_Directory,
-         Name                 => "projects");
-      Env_Var_Directory : constant String := Directories.Compose
-        (Containing_Directory => Config.Savadur_Directory,
-         Name                 => "env");
-   begin
-
-      Project_Env_Filename := +Directories.Compose
-        (Containing_Directory => Env_Var_Directory,
-         Name                 => -Project_Name,
-         Extension            => "xml");
-   exception
-      when IO_Exceptions.Name_Error =>
-         raise Syntax_Error with "Wrong project name !";
-   end Get_Project_Filename;
-
    Run_Project : declare
       Project : aliased Config.Project.Project_Config :=
                   Config.Project.Parse (-Project_Name);
@@ -208,10 +186,8 @@ begin
                   & ASCII.LF,
                   Kind    => Logs.Very_Verbose);
 
-      if Directories.Exists (-Project_Env_Filename) then
-         Env_Var := Savadur.Config.Environment_Variables.Parse
-           (Filename => -Project_Env_Filename);
-      end if;
+      Env_Var := Savadur.Config.Environment_Variables.Parse (Project'Access);
+      --  ??? Should be called by Run
 
       if Savadur.Build.Run
         (Project => Project'Access,

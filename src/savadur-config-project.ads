@@ -64,6 +64,10 @@ package Savadur.Config.Project is
      (Project : access Project_Config) return String;
    --  Returns project filename
 
+   function Project_Env_Filename
+     (Project : access Project_Config) return String;
+   --  Returns project env filename
+
    function Project_Log_Directory
      (Project : access Project_Config) return String;
    --  Returns project log directory (or create it if does not exist)
@@ -84,5 +88,6 @@ private
       Project_State_Directory   : Unbounded_String;
       Project_Sources_Directory : Unbounded_String;
       Project_Filename          : Unbounded_String;
+      Project_Env_Filename      : Unbounded_String;
    end record;
 end Savadur.Config.Project;

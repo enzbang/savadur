@@ -20,6 +20,7 @@
 ------------------------------------------------------------------------------
 
 with Ada.Strings.Unbounded;
+with Ada.Directories;
 
 with GNAT.Case_Util;
 
@@ -118,19 +119,26 @@ package body Savadur.Config.Environment_Variables is
    -----------
 
    function Parse
-     (Filename : in String) return Savadur.Environment_Variables.Maps.Map
+     (Project : access Config.Project.Project_Config)
+      return Savadur.Environment_Variables.Maps.Map
    is
       Reader : Tree_Reader;
       Source : Input_Sources.File.File_Input;
    begin
-      Input_Sources.File.Open
-        (Filename => Filename,
-         Input    => Source);
+      if Directories.Exists
+        (Config.Project.Project_Env_Filename (Project)) then
 
-      Parse (Reader, Source);
+         --  Skip parsing without errors if file not found as having an env
+         --  file is not required
 
-      Input_Sources.File.Close (Source);
+         Input_Sources.File.Open
+           (Filename => Config.Project.Project_Env_Filename (Project),
+            Input    => Source);
 
+         Parse (Reader, Source);
+
+         Input_Sources.File.Close (Source);
+      end if;
       return Reader.Map;
    end Parse;
 
