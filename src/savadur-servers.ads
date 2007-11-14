@@ -49,7 +49,7 @@ package Savadur.Servers is
       Equivalent_Elements => Key_Equal);
 
    function Image (Servers_Set : in Sets.Set) return String;
-   --  Return the Servers_Map image
+   --  Return the Servers_Set image
 
 private
 

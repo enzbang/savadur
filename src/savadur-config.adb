@@ -64,8 +64,10 @@ package body Savadur.Config is
    begin
       if Directory /= Null_Unbounded_String then
          return -Directory;
+
       elsif Environment_Variables.Exists ("SAVADUR_DIR") then
          return Environment_Variables.Value ("SAVADUR_DIR");
+
       elsif Environment_Variables.Exists ("HOME") then
          return Directories.Compose
            (Containing_Directory => Environment_Variables.Value ("HOME"),
@@ -74,9 +76,9 @@ package body Savadur.Config is
 
       --  All tries fail raise exception
 
-      raise Config_Error with "No savadur directory found ! Use --savadur-dir "
-        & "option or set SAVADUR_DIR environment variable";
-
+      raise Config_Error
+        with "No savadur directory found ! Use --savadur-dir "
+          & "option or set SAVADUR_DIR environment variable";
    end Savadur_Directory;
 
    ---------------------------

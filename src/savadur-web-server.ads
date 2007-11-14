@@ -23,6 +23,6 @@ package Savadur.Web.Server is
 
    procedure Start;
    --  Start the server-side Web server, this is the server that receive the
-   --  client requests.
+   --  client's requests.
 
 end Savadur.Web.Server;
