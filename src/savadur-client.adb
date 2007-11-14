@@ -30,23 +30,30 @@
 --       -verbose
 --       -very_verbose
 
-with Ada.Exceptions;
 with Ada.Command_Line;
+with Ada.Containers;
+with Ada.Exceptions;
 with Ada.Strings.Unbounded;
 
 with GNAT.Command_Line;
 
-with Savadur.Utils;
-with Savadur.Config.Project;
-with Savadur.Build;
-with Savadur.Config.SCM;
-with Savadur.Config.Environment_Variables;
 with Savadur.Actions;
+with Savadur.Build;
+with Savadur.Client_Service.Client;
+with Savadur.Client_Service.Types;
+with Savadur.Config.Environment_Variables;
+with Savadur.Config.Project;
+with Savadur.Config.SCM;
+with Savadur.Config.Server;
+with Savadur.Environment_Variables;
+with Savadur.Logs;
+with Savadur.Server_Service;
 with Savadur.Scenarios;
 with Savadur.SCM;
-with Savadur.Logs;
+with Savadur.Servers;
+with Savadur.Utils;
 with Savadur.Version;
-with Savadur.Environment_Variables;
+with Savadur.Web.Client;
 
 procedure Savadur.Client is
 
@@ -60,9 +67,127 @@ procedure Savadur.Client is
    Project_Name         : Unbounded_String;
    Scenario_Id          : Unbounded_String
      := Scenarios.Id_Utils.To_Unbounded_String (Scenarios.Default_Scenario);
+   Server_Mode          : Boolean := False;
 
    procedure Usage (Error_Message : in String := "");
    --  Display Usage
+
+   procedure Run_Standalone;
+   --  Launch client in standalone mode
+
+   procedure Run_Server_Mode;
+   --  Launch client in server mode
+
+   ---------------------
+   -- Run_Server_Mode --
+   ---------------------
+
+   procedure Run_Server_Mode is
+
+      use type Containers.Count_Type;
+
+      procedure Register (Cursor : in Servers.Sets.Cursor);
+      --  Register client to the pointer server
+
+      --------------
+      -- Register --
+      --------------
+
+      procedure Register (Cursor : in Servers.Sets.Cursor) is
+         Server   : constant Savadur.Servers.Server :=
+                      Servers.Sets.Element (Cursor);
+         Metadata : constant Client_Service.Types.Metadata_Type :=
+                      (OS => +"windows");
+      begin
+         Logs.Write
+           (Content =>
+              "Register to " & (-Server.Name) & " at " & (-Server.URL),
+            Kind    => Logs.Information);
+
+         Client_Service.Client.Register
+           ("me", Metadata, Server_Service.URL, -Server.URL);
+
+         Logs.Write (Content => "Done.",
+                     Kind    => Logs.Information);
+      end Register;
+
+   begin
+      --  Parse the servers
+
+      Config.Server.Parse;
+
+      if Config.Server.Configurations.Length = 0 then
+         Logs.Write
+           (Content => "No server configured",
+            Kind    => Logs.Error);
+
+      else
+         --  Start the server
+
+         Web.Client.Start;
+
+         --  Register this client to all known server
+
+         Config.Server.Configurations.Iterate (Register'Access);
+      end if;
+   end Run_Server_Mode;
+
+   --------------------
+   -- Run_Standalone --
+   --------------------
+
+   procedure Run_Standalone is
+   begin
+      if To_String (Project_Name) = "" then
+         Usage (Error_Message => "no project name");
+         return;
+      end if;
+
+      Run_Project : declare
+         Project : aliased Config.Project.Project_Config :=
+                     Config.Project.Parse (-Project_Name);
+         Env_Var : Environment_Variables.Maps.Map;
+      begin
+         Logs.Write
+           (Content => "Savadur client" & ASCII.LF,
+            Kind    => Logs.Verbose);
+
+         Logs.Write
+           (Content => "SCM : " & ASCII.LF
+            & To_String (Unbounded_String (Project.SCM_Id)) & ASCII.LF,
+            Kind    => Logs.Very_Verbose);
+
+         Logs.Write
+           (Content => "Action list : " & ASCII.LF
+            & Actions.Image (Project.Actions) & ASCII.LF,
+            Kind    => Logs.Very_Verbose);
+
+         Logs.Write
+           (Content => "Scenarios : " & ASCII.LF
+            & Scenarios.Image (Project.Scenarios) & ASCII.LF,
+            Kind    => Logs.Very_Verbose);
+
+         Logs.Write
+           (Content => "SCM Found" & ASCII.LF
+            & Savadur.SCM.Image (Savadur.Config.SCM.Configurations)
+            & ASCII.LF,
+            Kind    => Logs.Very_Verbose);
+
+         Env_Var :=
+           Savadur.Config.Environment_Variables.Parse (Project'Access);
+         --  ??? Should be called by Run
+
+         if Savadur.Build.Run
+           (Project => Project'Access,
+            Env_Var => Env_Var,
+            Id      => Scenarios.Id (Scenario_Id))
+         then
+            Logs.Write ("Success");
+         else
+            Logs.Write ("Failure");
+         end if;
+      end Run_Project;
+   end Run_Standalone;
 
    -----------
    -- Usage --
@@ -101,8 +226,9 @@ begin
    Parse_Opt : begin
       Interate_On_Opt : loop
          case GNAT.Command_Line.Getopt
-              ("V verbose VV very_verbose version v "
-               & "p: project: savadurdir: s: sid: ") is
+              ("V verbose VV very_verbose p: project: savadurdir: s: "
+               & "sid: server")
+         is
             when ASCII.NUL =>
                exit Interate_On_Opt;
 
@@ -113,6 +239,9 @@ begin
                   if Full = "project" or else Full = "p" then
                      Project_Name :=
                        To_Unbounded_String (GNAT.Command_Line.Parameter);
+
+                  else
+                     raise Syntax_Error with "Unknown option " & Full;
                   end if;
                end Complete_P;
 
@@ -123,9 +252,16 @@ begin
                   if Full = "savadurdir" then
                      Config.Set_Savadur_Directory
                        (GNAT.Command_Line.Parameter);
-                  elsif  Full = "sid" or else Full = "s" then
+
+                  elsif Full = "sid" or else Full = "s" then
                      Scenario_Id :=
                        To_Unbounded_String (GNAT.Command_Line.Parameter);
+
+                  elsif Full = "server" then
+                     Server_Mode := True;
+
+                  else
+                     raise Syntax_Error with "Unknown option " & Full;
                   end if;
                end Complete_S;
 
@@ -135,15 +271,20 @@ begin
                begin
                   if Full = "verbose" or else Full = "V"  then
                      Logs.Set (Kind => Logs.Verbose, Activated => True);
+
                   elsif Full = "very_verbose" or else Full = "VV" then
                      Logs.Set (Kind      => Logs.Verbose,
                                Activated => True);
                      Logs.Set (Kind      => Logs.Very_Verbose,
                                Activated => True);
+
                   elsif Full = "version" or else Full = "v" then
                      Logs.Write (Content => "Savadur "
                                  & Savadur.Version.Complete);
                      return;
+
+                  else
+                     raise Syntax_Error with "Unknown option " & Full;
                   end if;
                end Complete_V;
 
@@ -152,6 +293,7 @@ begin
                return;
          end case;
       end loop Interate_On_Opt;
+
    exception
       when GNAT.Command_Line.Invalid_Section
          | GNAT.Command_Line.Invalid_Switch
@@ -159,54 +301,15 @@ begin
          raise Syntax_Error with "unknown syntax";
    end Parse_Opt;
 
-   if To_String (Project_Name) = "" then
-      Usage (Error_Message => "no project name");
-      return;
-   end if;
-
    --  Parse SCM configuration files
 
    Savadur.Config.SCM.Parse;
 
-   Run_Project : declare
-      Project : aliased Config.Project.Project_Config :=
-                  Config.Project.Parse (-Project_Name);
-      Env_Var : Environment_Variables.Maps.Map;
-   begin
-
-      Logs.Write (Content => "Savadur client" & ASCII.LF,
-                  Kind    => Logs.Verbose);
-
-      Logs.Write (Content => "SCM : " & ASCII.LF
-                  & To_String (Unbounded_String (Project.SCM_Id)) & ASCII.LF,
-                  Kind    => Logs.Very_Verbose);
-
-      Logs.Write (Content => "Action list : " & ASCII.LF
-                  & Actions.Image (Project.Actions) & ASCII.LF,
-                  Kind    => Logs.Very_Verbose);
-
-      Logs.Write (Content => "Scenarios : " & ASCII.LF
-                  & Scenarios.Image (Project.Scenarios) & ASCII.LF,
-                  Kind    => Logs.Very_Verbose);
-
-      Logs.Write (Content => "SCM Found" & ASCII.LF
-                  & Savadur.SCM.Image (Savadur.Config.SCM.Configurations)
-                  & ASCII.LF,
-                  Kind    => Logs.Very_Verbose);
-
-      Env_Var := Savadur.Config.Environment_Variables.Parse (Project'Access);
-      --  ??? Should be called by Run
-
-      if Savadur.Build.Run
-        (Project => Project'Access,
-         Env_Var => Env_Var,
-         Id      => Scenarios.Id (Scenario_Id))
-      then
-         Logs.Write ("Success");
-      else
-         Logs.Write ("Failure");
-      end if;
-   end Run_Project;
+   if Server_Mode then
+      Run_Server_Mode;
+   else
+      Run_Standalone;
+   end if;
 
 exception
    when E : Syntax_Error

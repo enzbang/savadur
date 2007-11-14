@@ -19,9 +19,10 @@
 --  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.       --
 ------------------------------------------------------------------------------
 
-with Savadur.Web.Server;
+package Savadur.Web.Server is
 
-procedure Savadur.Server is
-begin
-   Web.Server.Start;
-end Savadur.Server;
+   procedure Start;
+   --  Start the server-side Web server, this is the server that receive the
+   --  client requests.
+
+end Savadur.Web.Server;

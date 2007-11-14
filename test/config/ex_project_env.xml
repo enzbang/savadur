@@ -1,0 +1,7 @@
+<environment_variables>
+  <project name="ex_project" />
+  <var name="PATH" value="/usr/bin" mode="append" />
+  <var name="SAVADUR_DIR" mode="clear" />
+  <var name="LD_LIBRARY_PATH" value="/opt/lib" mode="replace" />
+
+</environment_variables>

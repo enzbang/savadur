@@ -19,9 +19,10 @@
 --  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.       --
 ------------------------------------------------------------------------------
 
-with Savadur.Web.Server;
+--  SOAP communication layer for the clients and the server
 
-procedure Savadur.Server is
-begin
-   Web.Server.Start;
-end Savadur.Server;
+package Savadur.Web_Services is
+
+   pragma Pure;
+
+end Savadur.Web_Services;

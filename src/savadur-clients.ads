@@ -19,9 +19,46 @@
 --  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.       --
 ------------------------------------------------------------------------------
 
-with Savadur.Web.Server;
+with Ada.Containers.Indefinite_Hashed_Sets;
+with Ada.Strings.Unbounded;
 
-procedure Savadur.Server is
-begin
-   Web.Server.Start;
-end Savadur.Server;
+with Savadur.Web_Services.Client;
+
+package Savadur.Clients is
+
+   use Ada;
+   use Ada.Strings.Unbounded;
+
+   type Client is record
+      Key               : Unbounded_String;
+      Metadata          : Web_Services.Client.Metadata;
+      Callback_Endpoint : Unbounded_String;
+   end record;
+
+   function Hash (Client : in Clients.Client) return Containers.Hash_Type;
+   --  Renames Strings.Hash
+
+   function Key_Equal (C1, C2 : in Client) return Boolean;
+
+   Emtpy_Client : constant Client;
+
+   ----------
+   -- Sets --
+   ----------
+
+   package Sets is new Ada.Containers.Indefinite_Hashed_Sets
+     (Element_Type        => Client,
+      Hash                => Hash,
+      Equivalent_Elements => Key_Equal);
+
+   function Image (Clients_Set : in Sets.Set) return String;
+   --  Return the Client_Set image
+
+   Registered : Sets.Set;
+
+private
+
+   Emtpy_Client : constant Client :=
+                    (Key => <>, Metadata => <>, Callback_Endpoint => <>);
+
+end Savadur.Clients;

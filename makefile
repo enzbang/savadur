@@ -36,17 +36,16 @@ VERSION_ALL = $(shell git describe 2>/dev/null)
 
 all: build
 
+build: setup
+	$(GNATMAKE) -XPRJ_BUILD=$(MODE) -P savadur
+
+setup:
 # If git is not present then use the version.ads provided in distrib
 ifneq ("$(VERSION)", "")
 	sed -e 's,\$$VERSION\$$,$(VERSION),g' \
 	-e 's,\$$VERSION_ALL\$$,$(VERSION_ALL),g' \
 	src/savadur-version.tads > src/savadur-version.ads
 endif
-
-build: setup
-	$(GNATMAKE) -XPRJ_BUILD=$(MODE) -P savadur
-
-setup:
 	$(MAKE) -C soap setup $(OPTIONS)
 
 regtests:
@@ -65,9 +64,12 @@ check:
 
 install:
 	@$(MKDIR) $(INSTALL)/example
-	@$(CP) -r config/scm $(INSTALL)/scm
-	@$(CP) test/ex_project.xml $(INSTALL)/example/
+	@$(MKDIR) $(INSTALL)/scm
+	@$(MKDIR) $(INSTALL)/servers
+	@$(CP) config/scm/* $(INSTALL)/scm
+	@$(CP) test/config/*.xml $(INSTALL)/example/
 	@cp $(BIN_DIR)/savadur-client $(INSTALL)
+	@cp $(BIN_DIR)/savadur-server $(INSTALL)
 	@echo savadur is installed in $(INSTALL)
 
 distrib: setup

@@ -19,9 +19,24 @@
 --  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.       --
 ------------------------------------------------------------------------------
 
-with Savadur.Web.Server;
+with Ada.Text_IO;
 
-procedure Savadur.Server is
-begin
-   Web.Server.Start;
-end Savadur.Server;
+package body Savadur.Web_Services.Server is
+
+   use Ada;
+
+   ---------
+   -- Run --
+   ---------
+
+   procedure Run
+     (Scenario : in String;
+      Project  : in String;
+      Sha1     : in String)
+   is
+      pragma Unreferenced (Sha1);
+   begin
+      Text_IO.Put_Line ("Run : " & Scenario & ", " & Project);
+   end Run;
+
+end Savadur.Web_Services.Server;

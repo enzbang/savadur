@@ -19,9 +19,35 @@
 --  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.       --
 ------------------------------------------------------------------------------
 
-with Savadur.Web.Server;
+with Ada.Strings.Unbounded;
 
-procedure Savadur.Server is
-begin
-   Web.Server.Start;
-end Savadur.Server;
+package Savadur.Web_Services.Client is
+
+   use Ada.Strings.Unbounded;
+
+   type Metadata is record
+      OS : Unbounded_String;
+   end record;
+
+   procedure Register
+     (Key               : in String;
+      Data              : in Metadata;
+      Callback_Endpoint : in String);
+   --  Register a new client whose id is Key and with the given metadata. The
+   --  endpoint is the SOAP callback for the server to reach the client.
+
+   type Returned_Status is (Success, Failure);
+
+   type Project is new String;
+
+   procedure Status
+     (Key      : in String;
+      Ref      : in Project;
+      Scenario : in String;
+      Action   : in String;
+      Output   : in String;
+      Result   : in Returned_Status);
+   --  Status is called by the client to register status of each action in the
+   --  given scenario.
+
+end Savadur.Web_Services.Client;

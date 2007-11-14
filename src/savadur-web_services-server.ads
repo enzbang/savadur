@@ -19,9 +19,12 @@
 --  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.       --
 ------------------------------------------------------------------------------
 
-with Savadur.Web.Server;
+package Savadur.Web_Services.Server is
 
-procedure Savadur.Server is
-begin
-   Web.Server.Start;
-end Savadur.Server;
+   procedure Run
+     (Scenario : in String;
+      Project  : in String;
+      Sha1     : in String);
+   --  Ask a client to run a specific scenario
+
+end Savadur.Web_Services.Server;

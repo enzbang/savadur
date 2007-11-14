@@ -19,9 +19,45 @@
 --  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.       --
 ------------------------------------------------------------------------------
 
-with Savadur.Web.Server;
+with Ada.Text_IO;
 
-procedure Savadur.Server is
-begin
-   Web.Server.Start;
-end Savadur.Server;
+with Savadur.Clients;
+with Savadur.Utils;
+
+package body Savadur.Web_Services.Client is
+
+   use Ada;
+   use Savadur.Utils;
+
+   --------------
+   -- Register --
+   --------------
+
+   procedure Register
+     (Key               : in String;
+      Data              : in Metadata;
+      Callback_Endpoint : in String) is
+   begin
+      Text_IO.Put_Line
+        ("Register new client : " & Key & '@' & Callback_Endpoint);
+      Clients.Registered.Insert (New_Item => (+Key, Data, +Callback_Endpoint));
+   end Register;
+
+   ------------
+   -- Status --
+   ------------
+
+   procedure Status
+     (Key      : in String;
+      Ref      : in Project;
+      Scenario : in String;
+      Action   : in String;
+      Output   : in String;
+      Result   : in Returned_Status)
+   is
+      pragma Unreferenced (Key, Ref, Scenario, Action, Output, Result);
+   begin
+      null;
+   end Status;
+
+end Savadur.Web_Services.Client;

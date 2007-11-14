@@ -201,6 +201,11 @@ package body Config_Parse is
          & "[" & ASCII.LF
          & "Name => myserver"  & ASCII.LF
          & "URL => http://www.myserver.net/" & ASCII.LF
+         & "]" & ASCII.LF
+         & "* test_server" & ASCII.LF
+         & "[" & ASCII.LF
+         & "Name => test_server"  & ASCII.LF
+         & "URL => http://localhost:8181" & ASCII.LF
          & "]" & ASCII.LF,
          "Wrong Servers parse, expected : " & ASCII.LF
          & ''' & Savadur.Servers.Image

@@ -19,9 +19,56 @@
 --  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.       --
 ------------------------------------------------------------------------------
 
-with Savadur.Web.Server;
+with Ada.Strings.Hash;
 
-procedure Savadur.Server is
-begin
-   Web.Server.Start;
-end Savadur.Server;
+with Savadur.Utils;
+
+package body Savadur.Clients is
+
+   use Savadur.Utils;
+
+   ----------
+   -- Hash --
+   ----------
+
+   function Hash (Client : in Clients.Client) return Containers.Hash_Type is
+   begin
+      return Strings.Hash (To_String (Client.Key));
+   end Hash;
+
+   -----------
+   -- Image --
+   -----------
+
+   function Image (Clients_Set : in Sets.Set) return String is
+      Position : Sets.Cursor := Sets.First (Clients_Set);
+      Result   : Unbounded_String;
+   begin
+      while Sets.Has_Element (Position) loop
+         Append
+           (Result, "* "
+            & To_String (Sets.Element (Position).Key) & ASCII.LF);
+         Append (Result, "[" & ASCII.LF);
+         Append
+           (Result,
+            "Name => " & To_String (Sets.Element (Position).Key) & ASCII.LF);
+         Append
+           (Result, "Endpoint => " &
+            To_String (Sets.Element (Position).Callback_Endpoint) & ASCII.LF);
+         Append (Result, "]" & ASCII.LF);
+         Sets.Next (Position);
+      end loop;
+
+      return -Result;
+   end Image;
+
+   ---------------
+   -- Key_Equal --
+   ---------------
+
+   function Key_Equal (C1, C2 : in Client) return Boolean is
+   begin
+      return C1.Key = C2.Key;
+   end Key_Equal;
+
+end Savadur.Clients;
