@@ -36,16 +36,14 @@ package Savadur.Scenarios is
 
    package Id_Utils is new Generic_Utils (Source => Id);
 
-   Default_Scenario : constant Id := Id (+"default");
+   Default_Scenario : constant Id;
 
    type Scenario is record
       Id      : Scenarios.Id;
       Actions : Savadur.Actions.Vectors.Vector;
    end record;
 
-   Null_Scenario : constant Scenario :=
-                     Scenario'(Id      => Id_Utils.Nil,
-                               Actions => Actions.Vectors.Empty_Vector);
+   Null_Scenario : constant Scenario;
 
    function Image (Scenario : in Scenarios.Scenario) return String;
    --  Return Scenario image
@@ -76,4 +74,10 @@ package Savadur.Scenarios is
    function Image (Scenarios : in Sets.Set) return String;
    --  Return Scenario map image
 
+private
+
+   Null_Scenario    : constant Scenario :=
+                        Scenario'(Id      => Id_Utils.Nil,
+                                  Actions => Actions.Vectors.Empty_Vector);
+   Default_Scenario : constant Id := Id (+"default");
 end Savadur.Scenarios;

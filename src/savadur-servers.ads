@@ -54,6 +54,7 @@ package Savadur.Servers is
 private
 
    Emtpy_Server : constant Server :=
-                    (Null_Unbounded_String, Null_Unbounded_String);
+                    (Name => Null_Unbounded_String,
+                     Url  => Null_Unbounded_String);
 
 end Savadur.Servers;

@@ -36,7 +36,7 @@ package Savadur.Utils is
       type Source is new Unbounded_String;
    package Generic_Utils is
 
-      Nil : constant Source := Source (Null_Unbounded_String);
+      Nil : constant Source;
 
       function To_Unbounded_String (S : in Source) return Unbounded_String;
 
@@ -50,6 +50,8 @@ package Savadur.Utils is
 
       function Value (Img : in String) return Source;
 
+   private
+      Nil : constant Source := Source (Null_Unbounded_String);
    end Generic_Utils;
 
    function Content (Filename : in String) return String;

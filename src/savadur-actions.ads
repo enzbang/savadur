@@ -48,10 +48,7 @@ package Savadur.Actions is
       Result : Result_Type := Exit_Status;
    end record;
 
-   Null_Action : constant Action :=
-                   Action'(Id     => Id_Utils.Nil,
-                           Cmd    => Command_Utils.Nil,
-                           Result => <>);
+   Null_Action : constant Action;
 
    function Image (Action : in Actions.Action) return String;
    --  Returns action image
@@ -66,12 +63,7 @@ package Savadur.Actions is
       On_Error       : On_Error_Hook    := Error;
    end record;
 
-   Null_Ref_Action : constant Ref_Action :=
-                       Ref_Action'(Id             => Id_Utils.Nil,
-                                   Action_Type    => <>,
-                                   Value          => <>,
-                                   Require_Change => <>,
-                                   On_Error       => <>);
+   Null_Ref_Action : constant Ref_Action;
 
    function Image (Action : in Ref_Action) return String;
    --  Returns action image
@@ -115,4 +107,17 @@ package Savadur.Actions is
    function Image (Vector : in Vectors.Vector) return String;
    --  Returns vector image
 
+private
+
+   Null_Action : constant Action :=
+                   Action'(Id     => Id_Utils.Nil,
+                           Cmd    => Command_Utils.Nil,
+                           Result => <>);
+
+   Null_Ref_Action : constant Ref_Action :=
+                       Ref_Action'(Id             => Id_Utils.Nil,
+                                   Action_Type    => <>,
+                                   Value          => <>,
+                                   Require_Change => <>,
+                                   On_Error       => <>);
 end Savadur.Actions;
