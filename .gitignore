@@ -3,6 +3,8 @@
 *~
 #*
 *.#*
+soap/*.ad?
+soap/*.wsdl
 test/harness
 test/bin
 test/test-dir/scm
