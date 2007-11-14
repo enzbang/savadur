@@ -21,7 +21,7 @@
 
 with Ada.Strings.Hash_Case_Insensitive;
 
-with Savadur.Config.Project;
+with Savadur.Projects;
 
 package body Savadur.Variables is
 
@@ -31,7 +31,7 @@ package body Savadur.Variables is
    -- Default --
    -------------
 
-   procedure Default (Project : access Config.Project.Project_Config) is
+   procedure Default (Project : access Projects.Project_Config) is
    begin
       Project.Variables.Insert
         (New_Item =>
@@ -40,12 +40,12 @@ package body Savadur.Variables is
       Project.Variables.Insert
         (New_Item =>
            Variable'(Name => Name_Utils.Value ("project_dir"),
-                     Value => +Config.Project.Project_Directory (Project)));
+                     Value => +Projects.Project_Directory (Project)));
       Project.Variables.Insert
         (New_Item =>
            Variable'(Name => Name_Utils.Value ("project_name"),
                      Value =>
-                       Config.Project.Project_Id_Utils.To_Unbounded_String
+                       Projects.Project_Id_Utils.To_Unbounded_String
                          (Project.Project_Id)));
    end Default;
 

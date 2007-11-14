@@ -22,6 +22,7 @@
 with Ada.Directories;
 
 with Savadur.Actions;
+with Savadur.Config;
 
 package body Savadur.Build.Notification is
 
@@ -32,11 +33,11 @@ package body Savadur.Build.Notification is
    ------------
 
    procedure Notify
-     (Project : access Config.Project.Project_Config;
+     (Project : access Projects.Project_Config;
       Success : in     Boolean)
    is
       Log_Directory : constant String :=
-                        Config.Project.Project_Log_Directory (Project);
+                        Projects.Project_Log_Directory (Project);
 
    begin
       if Success then

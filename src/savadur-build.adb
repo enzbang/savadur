@@ -54,14 +54,14 @@ package body Savadur.Build is
    --  Returns the programme name and the argument list
 
    function Parse
-     (Project : in Config.Project.Project_Config;
+     (Project : in Projects.Project_Config;
       Cmd     : in Actions.Command)
      return Actions.Command;
    --  Replace strings beginning with $
    --  by the correponding entry in project <variable> section
 
    function Check
-     (Project      : access Config.Project.Project_Config;
+     (Project      : access Projects.Project_Config;
       Exec_Action  : in Actions.Action;
       Ref          : in Actions.Ref_Action;
       Return_Code  : in Integer;
@@ -73,7 +73,7 @@ package body Savadur.Build is
    -----------
 
    function Check
-     (Project      : access Config.Project.Project_Config;
+     (Project      : access Projects.Project_Config;
       Exec_Action  : in Actions.Action;
       Ref          : in Actions.Ref_Action;
       Return_Code  : in Integer;
@@ -82,7 +82,7 @@ package body Savadur.Build is
    is
       use type Actions.Result_Type;
       State_Directory   : constant String :=
-                            Config.Project.Project_State_Directory (Project);
+                            Projects.Project_State_Directory (Project);
 
       Result : Boolean := True;
    begin
@@ -231,7 +231,7 @@ package body Savadur.Build is
    ----------------
 
    function Get_Action
-     (Project    : in Config.Project.Project_Config;
+     (Project    : in Projects.Project_Config;
       Ref_Action : in Actions.Ref_Action)
       return Actions.Action
    is
@@ -300,7 +300,7 @@ package body Savadur.Build is
    -----------
 
    function Parse
-     (Project : in Config.Project.Project_Config;
+     (Project : in Projects.Project_Config;
       Cmd     : in Actions.Command)
       return Actions.Command
    is
@@ -362,7 +362,7 @@ package body Savadur.Build is
    ---------
 
    function Run
-     (Project : access Config.Project.Project_Config;
+     (Project : access Projects.Project_Config;
       Env_Var : in Environment_Variables.Maps.Map;
       Id      : in Scenarios.Id)
       return Boolean
@@ -396,9 +396,9 @@ package body Savadur.Build is
       Selected_Scenario : constant Savadur.Scenarios.Scenario := Init;
 
       Sources_Directory : constant String :=
-                            Config.Project.Project_Sources_Directory (Project);
+                            Projects.Project_Sources_Directory (Project);
       Log_Directory     : constant String :=
-                            Config.Project.Project_Log_Directory (Project);
+                            Projects.Project_Log_Directory (Project);
       Success           : Boolean := True;
    begin
 
@@ -473,7 +473,7 @@ package body Savadur.Build is
                        (Project    => Project.all,
                         Ref_Action => Savadur.SCM.SCM_Init),
                      Directory     =>
-                       Config.Project.Project_Directory (Project),
+                       Projects.Project_Directory (Project),
                      Log_Filename  => Directories.Compose
                        (Containing_Directory => Log_Directory,
                         Name                 => "init"),

@@ -39,6 +39,7 @@ with GNAT.Command_Line;
 
 with Savadur.Actions;
 with Savadur.Build;
+with Savadur.Projects;
 with Savadur.Client_Service.Client;
 with Savadur.Client_Service.Types;
 with Savadur.Config.Environment_Variables;
@@ -144,7 +145,7 @@ procedure Savadur.Client is
       end if;
 
       Run_Project : declare
-         Project : aliased Config.Project.Project_Config :=
+         Project : aliased Projects.Project_Config :=
                      Config.Project.Parse (-Project_Name);
          Env_Var : Environment_Variables.Maps.Map;
       begin

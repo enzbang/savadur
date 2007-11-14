@@ -35,16 +35,16 @@ with Savadur.Environment_Variables;
 with Savadur.Config.Environment_Variables;
 with Savadur.Notifications;
 with Savadur.Servers;
+with Savadur.Projects;
 
 with Utils;
-with Savadur.Config; use Savadur.Config;
 
 package body Config_Parse is
 
    use Ada;
    use Savadur.Utils;
 
-   Project : aliased Savadur.Config.Project.Project_Config;
+   Project : aliased Savadur.Projects.Project_Config;
 
    procedure Check_SCM_Config
      (T : in out AUnit.Test_Cases.Test_Case'Class);

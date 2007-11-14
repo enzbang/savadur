@@ -20,7 +20,7 @@
 ------------------------------------------------------------------------------
 
 with Savadur.Scenarios;
-with Savadur.Config.Project;
+with Savadur.Projects;
 with Savadur.Environment_Variables;
 
 private with Savadur.Actions;
@@ -30,7 +30,7 @@ package Savadur.Build is
    Command_Parse_Error : exception;
 
    function Run
-     (Project : access Config.Project.Project_Config;
+     (Project : access Projects.Project_Config;
       Env_Var : in Environment_Variables.Maps.Map;
       Id      : in Scenarios.Id)
       return Boolean;
@@ -53,7 +53,7 @@ private
    --  Otherwise, Return_Code is undefined.
 
    function Get_Action
-     (Project    : in Config.Project.Project_Config;
+     (Project    : in Projects.Project_Config;
       Ref_Action : in Actions.Ref_Action)
       return Actions.Action;
    --  Returns the action to execute matching the ref_action

@@ -20,6 +20,9 @@
 ------------------------------------------------------------------------------
 
 with Ada.Directories;
+with Ada.Strings.Unbounded;
+with Ada.Text_IO;
+with Ada.Exceptions;
 
 with GNAT.Case_Util;
 
@@ -28,12 +31,18 @@ with Sax.Attributes;
 
 with Input_Sources.File;
 with Unicode.CES;
-with Ada.Text_IO;
-with Ada.Exceptions; use Ada.Exceptions;
+
+with Savadur.Utils;
+with Savadur.Variables;
+with Savadur.Scenarios;
+with Savadur.Actions;
+with Savadur.SCM;
 
 package body Savadur.Config.Project is
 
    use Ada;
+   use Ada.Exceptions;
+   use Ada.Strings.Unbounded;
 
    use Savadur.Utils;
 
@@ -92,7 +101,7 @@ package body Savadur.Config.Project is
       Scenario             : Scenarios.Scenario;
       Inside_Scenario      : Boolean := False;
       Inside_Notifications : Boolean := False;
-      Current_Project      : aliased Project_Config;
+      Current_Project      : aliased Projects.Project_Config;
    end record;
 
    procedure Start_Element
@@ -244,7 +253,7 @@ package body Savadur.Config.Project is
    function Parse
      (Project_Name : in String;
       Filename     : in String := "")
-      return Project_Config
+      return Projects.Project_Config
    is
       Reader : Tree_Reader;
       Source : Input_Sources.File.File_Input;
@@ -253,16 +262,16 @@ package body Savadur.Config.Project is
       --  Set the project name
 
       Reader.Current_Project.Project_Id :=
-        Config.Project.Project_Id_Utils.Value (Project_Name);
+        Projects.Project_Id_Utils.Value (Project_Name);
 
       if Filename /= "" then
-         Reader.Current_Project.Directories.Project_Filename := +Filename;
+         Projects.Set_Filename (Reader.Current_Project'Access, Filename);
       end if;
 
       if not Directories.Exists
-        (Config.Project.Project_Filename (Reader.Current_Project'Access)) then
+        (Projects.Project_Filename (Reader.Current_Project'Access)) then
          raise Config_Error with "No Project at path :"
-           & Config.Project.Project_Filename (Reader.Current_Project'Access);
+           & Projects.Project_Filename (Reader.Current_Project'Access);
       end if;
 
       --  Get default variable;
@@ -270,7 +279,7 @@ package body Savadur.Config.Project is
       Savadur.Variables.Default (Reader.Current_Project'Access);
 
       Input_Sources.File.Open
-        (Filename => Config.Project.Project_Filename
+        (Filename => Projects.Project_Filename
            (Reader.Current_Project'Access),
          Input    => Source);
 
@@ -279,140 +288,6 @@ package body Savadur.Config.Project is
       Input_Sources.File.Close (Source);
       return Reader.Current_Project;
    end Parse;
-
-   -----------------------
-   -- Project_Directory --
-   -----------------------
-
-   function Project_Directory
-     (Project : access Project_Config)
-      return String
-   is
-   begin
-      if Project.Directories.Project_Directory = +"" then
-         Ada.Text_IO.Put_Line ("Proj dir");
-         Project.Directories.Project_Directory := +Directories.Compose
-           (Containing_Directory => Config.Work_Directory,
-            Name                 => -Unbounded_String (Project.Project_Id));
-         Ada.Text_IO.Put_Line (-Project.Directories.Project_Directory);
-         if not Directories.Exists
-           (Name => -Project.Directories.Project_Directory)
-         then
-            Directories.Create_Path
-              (New_Directory => -Project.Directories.Project_Directory);
-         end if;
-      end if;
-      return -Project.Directories.Project_Directory;
-   end Project_Directory;
-
-   --------------------------
-   -- Project_Env_Filename --
-   --------------------------
-
-   function Project_Env_Filename
-     (Project : access Project_Config) return String
-   is
-   begin
-      if Project.Directories.Project_Env_Filename = +"" then
-         Project.Directories.Project_Env_Filename := +Directories.Compose
-           (Containing_Directory => Config.Project_Env_Directory,
-            Name                 => Project_Id_Utils.To_String
-              (Project.Project_Id),
-            Extension            => "xml");
-      end if;
-      return -Project.Directories.Project_Env_Filename;
-   end Project_Env_Filename;
-
-   ----------------------
-   -- Project_Filename --
-   ----------------------
-
-   function Project_Filename
-     (Project : access Project_Config) return String
-   is
-   begin
-      if Project.Directories.Project_Filename = +"" then
-         Project.Directories.Project_Filename := +Directories.Compose
-           (Containing_Directory => Config.Project_File_Directory,
-            Name                 => Project_Id_Utils.To_String
-              (Project.Project_Id),
-            Extension            => "xml");
-      end if;
-      return -Project.Directories.Project_Filename;
-   end Project_Filename;
-
-   ---------------------------
-   -- Project_Log_Directory --
-   ---------------------------
-
-   function Project_Log_Directory
-     (Project : access Config.Project.Project_Config)
-      return String
-   is
-   begin
-      if Project.Directories.Project_Log_Directory = +"" then
-         Project.Directories.Project_Log_Directory := +Directories.Compose
-           (Containing_Directory => Project_Directory (Project),
-            Name                 => "log");
-         if not Directories.Exists
-           (Name => -Project.Directories.Project_Log_Directory) then
-            Directories.Create_Path
-              (New_Directory => -Project.Directories.Project_Log_Directory);
-         end if;
-      end if;
-      return -Project.Directories.Project_Log_Directory;
-   end Project_Log_Directory;
-
-   -------------------------------
-   -- Project_Sources_Directory --
-   -------------------------------
-
-   function Project_Sources_Directory
-     (Project : access Project_Config) return String
-   is
-   begin
-
-      if Project.Directories.Project_Sources_Directory = +"" then
-         declare
-            Var : Savadur.Variables.Variable :=
-                    Savadur.Variables.Keys.Element
-                      (Container => Project.Variables,
-                       Key        => Savadur.Variables.Name_Utils.Value
-                         (Img => "sources"));
-         begin
-            Project.Directories.Project_Sources_Directory :=
-              +Directories.Compose
-                (Containing_Directory => Project_Directory (Project),
-                 Name                 => To_String (Var.Value));
-         end;
-      end if;
-
-      return -Project.Directories.Project_Sources_Directory;
-   end Project_Sources_Directory;
-
-   -----------------------------
-   -- Project_State_Directory --
-   -----------------------------
-
-   function Project_State_Directory
-     (Project : access Config.Project.Project_Config)
-      return String
-   is
-   begin
-      if Project.Directories.Project_State_Directory = +"" then
-         Project.Directories.Project_State_Directory :=
-           +Directories.Compose
-             (Containing_Directory => Project_Directory (Project),
-            Name                 => "state");
-         if not Directories.Exists
-           (Name => -Project.Directories.Project_State_Directory) then
-            Directories.Create_Path
-              (New_Directory => -Project.Directories.Project_State_Directory);
-         end if;
-      end if;
-      return -Project.Directories.Project_State_Directory;
-   end Project_State_Directory;
-
    -------------------
    -- Start_Element --
    -------------------
@@ -477,7 +352,7 @@ package body Savadur.Config.Project is
 
                   when Name =>
                      Handler.Current_Project.Project_Id :=
-                       Project_Id (+Get_Value (Atts, Position));
+                       Projects.Project_Id (+Get_Value (Atts, Position));
 
                   when others => null;
                end case;

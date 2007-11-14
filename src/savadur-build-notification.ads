@@ -19,12 +19,12 @@
 --  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.       --
 ------------------------------------------------------------------------------
 
-with Savadur.Config.Project;
+with Savadur.Projects;
 
 private package Savadur.Build.Notification is
 
    procedure Notify
-     (Project : access Config.Project.Project_Config;
+     (Project : access Projects.Project_Config;
       Success : in     Boolean);
    --  Run notify hooks
 

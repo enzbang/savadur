@@ -20,14 +20,14 @@
 ------------------------------------------------------------------------------
 
 with Savadur.Environment_Variables;
-with Savadur.Config.Project;
+with Savadur.Projects;
 
 package Savadur.Config.Environment_Variables is
 
    Config_Error : exception;
 
    function Parse
-     (Project : access Config.Project.Project_Config)
+     (Project : access Projects.Project_Config)
       return Savadur.Environment_Variables.Maps.Map;
    --  Returns the project configuration read in the given file
 

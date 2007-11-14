@@ -119,20 +119,20 @@ package body Savadur.Config.Environment_Variables is
    -----------
 
    function Parse
-     (Project : access Config.Project.Project_Config)
+     (Project : access Projects.Project_Config)
       return Savadur.Environment_Variables.Maps.Map
    is
       Reader : Tree_Reader;
       Source : Input_Sources.File.File_Input;
    begin
       if Directories.Exists
-        (Config.Project.Project_Env_Filename (Project)) then
+        (Projects.Project_Env_Filename (Project)) then
 
          --  Skip parsing without errors if file not found as having an env
          --  file is not required
 
          Input_Sources.File.Open
-           (Filename => Config.Project.Project_Env_Filename (Project),
+           (Filename => Projects.Project_Env_Filename (Project),
             Input    => Source);
 
          Parse (Reader, Source);

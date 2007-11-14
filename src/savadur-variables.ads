@@ -22,7 +22,7 @@
 with Ada.Strings.Unbounded;
 with Ada.Containers.Indefinite_Hashed_Sets;
 
-limited with Savadur.Config.Project;
+limited with Savadur.Projects;
 with Savadur.Utils;
 
 package Savadur.Variables is
@@ -64,7 +64,7 @@ package Savadur.Variables is
       Hash            => Hash,
       Equivalent_Keys => "=");
 
-   procedure Default (Project : access Config.Project.Project_Config);
+   procedure Default (Project : access Projects.Project_Config);
    --  Set default variables :
    --     - sources is set as "sources"
    --     - project_dir
