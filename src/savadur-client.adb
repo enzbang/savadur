@@ -2,7 +2,7 @@
 --                                Savadur                                   --
 --                                                                          --
 --                           Copyright (C) 2007                             --
---                            Olivier Ramonat                               --
+--                      Pascal Obry - Olivier Ramonat                       --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
 --  it under the terms of the GNU General Public License as published by    --
@@ -226,8 +226,8 @@ begin
    Parse_Opt : begin
       Interate_On_Opt : loop
          case GNAT.Command_Line.Getopt
-              ("V verbose VV very_verbose p: project: savadurdir: s: "
-               & "sid: server")
+              ("V verbose VV very_verbose version v "
+               & "p: project: savadurdir: s: sid: server")
          is
             when ASCII.NUL =>
                exit Interate_On_Opt;
