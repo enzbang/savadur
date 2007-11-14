@@ -54,7 +54,4 @@ package Savadur.Utils is
       Nil : constant Source := Source (Null_Unbounded_String);
    end Generic_Utils;
 
-   function Content (Filename : in String) return String;
-   --  Returns a file content
-
 end Savadur.Utils;
