@@ -2,7 +2,7 @@
 --                                Savadur                                   --
 --                                                                          --
 --                           Copyright (C) 2007                             --
---                            Olivier Ramonat                               --
+--                      Pascal Obry - Olivier Ramonat                       --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
 --  it under the terms of the GNU General Public License as published by    --
@@ -19,26 +19,53 @@
 --  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.       --
 ------------------------------------------------------------------------------
 
-with Config_Parse;
-with Signed_Files;
+with SHA.Strings;
 
-package body Savadur_Suite is
+with Savadur.Signed_Files;
 
-   use AUnit.Test_Suites;
+package body Signed_Files is
 
-   Result : aliased Test_Suite;
-   Test_1 : aliased Config_Parse.Test_Case;
-   Test_2 : aliased Signed_Files.Test_Case;
+   procedure Check_Signed_Files
+     (T : in out AUnit.Test_Cases.Test_Case'Class);
 
-   -----------
-   -- Suite --
-   -----------
+   ------------------------
+   -- Check_Signed_Files --
+   ------------------------
 
-   function Suite return Access_Test_Suite is
+   procedure Check_Signed_Files
+     (T : in out AUnit.Test_Cases.Test_Case'Class)
+   is
+      pragma Unreferenced (T);
+      use type SHA.Strings.Hex_SHA_String;
+      Filename : constant String := "config/servers/another.xml";
+      H        : Savadur.Signed_Files.Handler;
    begin
-      Add_Test (Result'Access, Test_1'Access);
-      Add_Test (Result'Access, Test_2'Access);
-      return Result'Access;
-   end Suite;
+      Savadur.Signed_Files.Create (H, Name => Filename);
+      Assertions.Assert
+        (Savadur.Signed_Files.SHA1 (H) =
+           "0f3eee5c1cb57be993a14a63091c41aca754f483",
+         "Wrong file signature for " & Filename
+         & " found '" & String (Savadur.Signed_Files.SHA1 (H)) & ''');
+   end Check_Signed_Files;
 
-end Savadur_Suite;
+   ----------
+   -- Name --
+   ----------
+
+   function Name (T : in Test_Case) return Test_String is
+      pragma Unreferenced (T);
+   begin
+      return Format ("Check the signed_files API");
+   end Name;
+
+   --------------------
+   -- Register_Tests --
+   --------------------
+
+   procedure Register_Tests (T : in out Test_Case) is
+   begin
+      Registration.Register_Routine
+        (T, Check_Signed_Files'Access, "check signed files");
+   end Register_Tests;
+
+end Signed_Files;

@@ -2,7 +2,7 @@
 --                                Savadur                                   --
 --                                                                          --
 --                           Copyright (C) 2007                             --
---                            Olivier Ramonat                               --
+--                      Pascal Obry - Olivier Ramonat                       --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
 --  it under the terms of the GNU General Public License as published by    --
@@ -19,26 +19,41 @@
 --  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.       --
 ------------------------------------------------------------------------------
 
-with Config_Parse;
-with Signed_Files;
+with Ada.Strings.Unbounded;
 
-package body Savadur_Suite is
+with SHA.Strings;
 
-   use AUnit.Test_Suites;
+package Savadur.Signed_Files is
 
-   Result : aliased Test_Suite;
-   Test_1 : aliased Config_Parse.Test_Case;
-   Test_2 : aliased Signed_Files.Test_Case;
+   use Ada;
+   use Ada.Strings.Unbounded;
 
-   -----------
-   -- Suite --
-   -----------
+   type Handler is limited private;
 
-   function Suite return Access_Test_Suite is
-   begin
-      Add_Test (Result'Access, Test_1'Access);
-      Add_Test (Result'Access, Test_2'Access);
-      return Result'Access;
-   end Suite;
+   procedure Create (File : in out Handler; Name : in String);
+   --  Create a new signed file object referencing file Name
 
-end Savadur_Suite;
+   function Exists (File : in Handler) return Boolean;
+   --  Returns True if File exists
+
+   function Name (File : in Handler) return String;
+   --  Returns File's simple name
+
+   function Full_Name (File : in Handler) return String;
+   --  Returns File's full pathname
+
+   function SHA1 (File : in Handler) return SHA.Strings.Hex_SHA_String;
+   --  Returns File's SHA1 signature, compute it if not already done
+
+private
+
+   No_SHA1 : constant SHA.Strings.Hex_SHA_String := (others => '0');
+
+   type Handler is limited record
+      Self      : access Handler := Handler'Unchecked_Access;
+      Full_Name : Unbounded_String;
+      Exists    : Boolean := False;
+      SHA1      : SHA.Strings.Hex_SHA_String := No_SHA1;
+   end record;
+
+end Savadur.Signed_Files;
