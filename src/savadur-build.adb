@@ -132,9 +132,9 @@ package body Savadur.Build is
 
                --  Write new state
 
-               Integer_Text_IO.Put (File => State_File,
-                                    Item => Return_Code);
+               Integer_Text_IO.Put (File => State_File, Item => Return_Code);
                Text_IO.Close (State_File);
+
             else
                --  ??? Filter this result
 
@@ -145,7 +145,7 @@ package body Savadur.Build is
 
                   Result := False;
                   Logs.Write (Content => Actions.Id_Utils.To_String (Ref.Id)
-                              & " has no changes " & State_Filename,
+                                 & " has no changes " & State_Filename,
                               Kind    => Logs.Verbose);
                end if;
 
