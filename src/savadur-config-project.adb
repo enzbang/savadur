@@ -2,7 +2,7 @@
 --                                Savadur                                   --
 --                                                                          --
 --                           Copyright (C) 2007                             --
---                            Olivier Ramonat                               --
+--                      Pascal Obry - Olivier Ramonat                       --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
 --  it under the terms of the GNU General Public License as published by    --
@@ -205,7 +205,6 @@ package body Savadur.Config.Project is
       end case;
 
       Handler.Content_Value := Null_Unbounded_String;
-
    end End_Element;
 
    -------------------
@@ -252,13 +251,11 @@ package body Savadur.Config.Project is
 
    function Parse
      (Project_Name : in String;
-      Filename     : in String := "")
-      return Projects.Project_Config
+      Filename     : in String := "") return Projects.Project_Config
    is
       Reader : Tree_Reader;
       Source : Input_Sources.File.File_Input;
    begin
-
       --  Set the project name
 
       Reader.Current_Project.Project_Id :=
@@ -269,7 +266,8 @@ package body Savadur.Config.Project is
       end if;
 
       if not Directories.Exists
-        (Projects.Project_Filename (Reader.Current_Project'Access)) then
+        (Projects.Project_Filename (Reader.Current_Project'Access))
+      then
          raise Config_Error with "No Project at path :"
            & Projects.Project_Filename (Reader.Current_Project'Access);
       end if;
@@ -286,6 +284,7 @@ package body Savadur.Config.Project is
       Parse (Reader, Source);
 
       Input_Sources.File.Close (Source);
+
       return Reader.Current_Project;
    end Parse;
    -------------------
@@ -444,8 +443,8 @@ package body Savadur.Config.Project is
                end case;
          end case;
       end Get_Attribute_Value;
-   begin
 
+   begin
       --  Set global state
 
       case NV is
@@ -478,7 +477,8 @@ package body Savadur.Config.Project is
       end loop;
 
    exception
-         when E : others => Ada.Text_IO.Put_Line (Exception_Information (E));
+      when E : others =>
+         Ada.Text_IO.Put_Line (Exception_Information (E));
    end Start_Element;
 
 end Savadur.Config.Project;

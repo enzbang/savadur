@@ -2,7 +2,7 @@
 --                                Savadur                                   --
 --                                                                          --
 --                           Copyright (C) 2007                             --
---                            Olivier Ramonat                               --
+--                      Pascal Obry - Olivier Ramonat                       --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
 --  it under the terms of the GNU General Public License as published by    --
@@ -27,8 +27,7 @@ package Savadur.Config.Project is
 
    function Parse
      (Project_Name : in String;
-      Filename     : in String := "")
-      return Projects.Project_Config;
+      Filename     : in String := "") return Projects.Project_Config;
    --  Returns the project configuration read in the given file
 
 end Savadur.Config.Project;
