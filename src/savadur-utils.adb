@@ -19,7 +19,31 @@
 --  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.       --
 ------------------------------------------------------------------------------
 
+with Ada.Text_IO;
+
 package body Savadur.Utils is
+
+-------------
+-- Content --
+-------------
+
+   function Content (Filename : in String) return String is
+      use Ada.Text_IO;
+
+      Result : Unbounded_String;
+      File   : File_Type;
+   begin
+      Open (File => File,
+            Mode => In_File,
+            Name => Filename);
+
+      while not End_Of_File (File) loop
+         Append (Result, Get_Line (File));
+      end loop;
+
+      Close (File);
+      return -Result;
+   end Content;
 
    -------------
    -- Convert --
