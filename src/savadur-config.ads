@@ -29,6 +29,7 @@ package Savadur.Config is
    --      projects/
    --      scm/
    --      env/
+   --      servers/
    --      work/
    --           $(project_name)/
    --                           log
@@ -44,5 +45,8 @@ package Savadur.Config is
 
    function Project_Env_Directory return String;
    --  Returns project file directory $(savadur_dir)/env
+
+   function Server_Directory return String;
+   --  Returns server directory
 
 end Savadur.Config;

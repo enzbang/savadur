@@ -81,6 +81,23 @@ package body Savadur.Config is
           & "option or set SAVADUR_DIR environment variable";
    end Savadur_Directory;
 
+   ----------------------
+   -- Server_Directory --
+   ----------------------
+
+   function Server_Directory return String is
+      Server_Dir : constant String :=
+                     Directories.Compose
+                       (Containing_Directory => Config.Savadur_Directory,
+                        Name                 => "servers");
+   begin
+      if not Directories.Exists (Server_Dir) then
+         Directories.Create_Path (Server_Dir);
+      end if;
+
+      return Server_Dir;
+   end Server_Directory;
+
    ---------------------------
    -- Set_Savadur_Directory --
    ---------------------------

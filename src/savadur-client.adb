@@ -34,6 +34,8 @@ with Ada.Command_Line;
 with Ada.Containers;
 with Ada.Exceptions;
 with Ada.Strings.Unbounded;
+with Ada.Text_IO;
+with Ada.Directories;
 
 with GNAT.Command_Line;
 
@@ -70,6 +72,8 @@ procedure Savadur.Client is
    Scenario_Id          : Unbounded_String
      := Scenarios.Id_Utils.To_Unbounded_String (Scenarios.Default_Scenario);
 
+   New_Server           : Savadur.Servers.Server;
+
    procedure Usage (Error_Message : in String := "");
    --  Displays Usage
 
@@ -79,11 +83,38 @@ procedure Savadur.Client is
    procedure Run_Server_Mode;
    --  Launches client in server mode
 
+   procedure Add_Remote_Server;
+   --  Add a new remote server
+
    procedure List_Remote_Server;
    --  Lists remote servers
 
    Action               : access procedure;
    --  Action to execute (after Command Line parsing)
+
+   procedure Add_Remote_Server is
+      use Ada.Text_IO;
+      File : File_Type;
+      Filename : constant String :=
+                   Ada.Directories.Compose
+                     (Containing_Directory => Config.Server_Directory,
+                      Name                 => -New_Server.Name,
+                      Extension            => "xml");
+   begin
+      Create (File => File,
+              Mode => Out_File,
+              Name => Filename);
+
+      Logs.Write ("Add new remote server : "
+                  & (-New_Server.Name) & " " & (-New_Server.URL));
+
+      Put_Line (File, "<server>");
+      Put_Line (File, "<name value='" & (-New_Server.Name) & "'/>");
+      Put_Line (File, "<location url='" & (-New_Server.URL) & "'/>");
+      Put_Line (File, "</server>");
+
+      Close (File);
+   end Add_Remote_Server;
 
    ------------------------
    -- List_Remote_Server --
@@ -140,6 +171,11 @@ procedure Savadur.Client is
       end Register;
 
    begin
+
+      --  Parse SCM configuration files ???
+
+      Savadur.Config.SCM.Parse;
+
       --  Parse the servers
 
       Config.Server.Parse;
@@ -167,6 +203,10 @@ procedure Savadur.Client is
    procedure Run_Standalone is
       --  ??? This part should be moved into Savadur.Jobs
    begin
+      --  Parse SCM configuration files
+
+      Savadur.Config.SCM.Parse;
+
       if To_String (Project_Name) = "" then
          Usage (Error_Message => "no project name");
          return;
@@ -247,6 +287,7 @@ procedure Savadur.Client is
       Logs.Write ("    -VV|-very_verbose");
       Logs.Write ("    -server             : run in server mode");
       Logs.Write ("    -remotelist        : List new remote server");
+      Logs.Write ("    -remoteadd         : Add a new remote server");
    end Usage;
 
 begin
@@ -256,95 +297,114 @@ begin
       return;
    end if;
 
-   Parse_Opt : begin
-      Interate_On_Opt : loop
-         case GNAT.Command_Line.Getopt
-              ("V verbose VV very_verbose version v "
-               & "p: project: savadurdir: s: sid: server remotelist")
+   GNAT.Command_Line.Initialize_Option_Scan (Section_Delimiters => "remote");
+
+   Interate_On_Opt : loop
+      case GNAT.Command_Line.Getopt
+           ("V verbose VV very_verbose version v "
+            & "p: project: savadurdir: s: sid: server")
          is
-            when ASCII.NUL =>
-               exit Interate_On_Opt;
+         when ASCII.NUL =>
+            exit Interate_On_Opt;
 
             when 'p' =>
-               Complete_P : declare
-                  Full : constant String := GNAT.Command_Line.Full_Switch;
-               begin
-                  if Full = "project" or else Full = "p" then
-                     Project_Name :=
-                       To_Unbounded_String (GNAT.Command_Line.Parameter);
-                     Action := Run_Standalone'Access;
+            Complete_P : declare
+               Full : constant String := GNAT.Command_Line.Full_Switch;
+            begin
+               if Full = "project" or else Full = "p" then
+                  Project_Name :=
+                    To_Unbounded_String (GNAT.Command_Line.Parameter);
+                  Logs.Write (GNAT.Command_Line.Parameter);
+                  Action := Run_Standalone'Access;
 
-                  else
-                     raise Syntax_Error with "Unknown option " & Full;
-                  end if;
-               end Complete_P;
+               else
+                  raise Syntax_Error with "Unknown option " & Full;
+               end if;
+            end Complete_P;
 
-            when 's' =>
-               Complete_S : declare
-                  Full : constant String := GNAT.Command_Line.Full_Switch;
-               begin
-                  if Full = "savadurdir" then
-                     Config.Set_Savadur_Directory
-                       (GNAT.Command_Line.Parameter);
+         when 's' =>
+            Complete_S : declare
+               Full : constant String := GNAT.Command_Line.Full_Switch;
+            begin
+               if Full = "savadurdir" then
+                  Config.Set_Savadur_Directory
+                    (GNAT.Command_Line.Parameter);
 
-                  elsif Full = "sid" or else Full = "s" then
-                     Scenario_Id :=
-                       To_Unbounded_String (GNAT.Command_Line.Parameter);
+               elsif Full = "sid" or else Full = "s" then
+                  Scenario_Id :=
+                    To_Unbounded_String (GNAT.Command_Line.Parameter);
 
-                  elsif Full = "server" then
-                     Action := Run_Server_Mode'Access;
-                  else
-                     raise Syntax_Error with "Unknown option " & Full;
-                  end if;
-               end Complete_S;
+               elsif Full = "server" then
+                  Action := Run_Server_Mode'Access;
+               else
+                  raise Syntax_Error with "Unknown option " & Full;
+               end if;
+            end Complete_S;
 
-            when 'r' =>
-               Complete_R : declare
-                  Full : constant String := GNAT.Command_Line.Full_Switch;
-               begin
-                  if Full = "remoteadd" then
-                     Action := List_Remote_Server'Access;
-                  end if;
-               end Complete_R;
-            when 'v' | 'V' =>
-               Complete_V : declare
-                  Full : constant String := GNAT.Command_Line.Full_Switch;
-               begin
-                  if Full = "verbose" or else Full = "V"  then
-                     Logs.Set (Kind => Logs.Verbose, Activated => True);
+         when 'r' =>
+            Complete_R : declare
+               Full : constant String := GNAT.Command_Line.Full_Switch;
+            begin
+               if Full = "remoteadd" then
+                  Action := List_Remote_Server'Access;
+               else
+                  Action := Add_Remote_Server'Access;
+               end if;
+            end Complete_R;
+         when 'v' | 'V' =>
+            Complete_V : declare
+               Full : constant String := GNAT.Command_Line.Full_Switch;
+            begin
+               if Full = "verbose" or else Full = "V"  then
+                  Logs.Set (Kind => Logs.Verbose, Activated => True);
 
-                  elsif Full = "very_verbose" or else Full = "VV" then
-                     Logs.Set (Kind      => Logs.Verbose,
-                               Activated => True);
-                     Logs.Set (Kind      => Logs.Very_Verbose,
-                               Activated => True);
+               elsif Full = "very_verbose" or else Full = "VV" then
+                  Logs.Set (Kind      => Logs.Verbose,
+                            Activated => True);
+                  Logs.Set (Kind      => Logs.Very_Verbose,
+                            Activated => True);
 
-                  elsif Full = "version" or else Full = "v" then
-                     Logs.Write (Content => "Savadur "
-                                 & Savadur.Version.Complete);
-                     return;
+               elsif Full = "version" or else Full = "v" then
+                  Logs.Write (Content => "Savadur "
+                              & Savadur.Version.Complete);
+                  return;
 
-                  else
-                     raise Syntax_Error with "Unknown option " & Full;
-                  end if;
-               end Complete_V;
+               else
+                  raise Syntax_Error with "Unknown option " & Full;
+               end if;
+            end Complete_V;
 
-            when others =>
-               Usage (Error_Message => "unknown syntax");
-               return;
-         end case;
-      end loop Interate_On_Opt;
+         when others =>
+            Usage (Error_Message => "unknown syntax");
+            return;
+      end case;
+   end loop Interate_On_Opt;
 
-   exception
-      when GNAT.Command_Line.Invalid_Section
-         | GNAT.Command_Line.Invalid_Switch
-         | GNAT.Command_Line.Invalid_Parameter =>
-         raise Syntax_Error with "unknown syntax";
-   end Parse_Opt;
+   GNAT.Command_Line.Goto_Section ("remote");
+   Remote_Opt : loop
+      case GNAT.Command_Line.Getopt ("* add list") is
+         when ASCII.NUL =>
+            exit Remote_Opt;
 
-   --  Parse SCM configuration files
+         when '*' =>
+            if New_Server.Name = Null_Unbounded_String then
+               New_Server.Name := +GNAT.Command_Line.Full_Switch;
+            else
+               New_Server.URL  := +GNAT.Command_Line.Full_Switch;
+            end if;
 
-   Savadur.Config.SCM.Parse;
+         when 'a' =>
+            Action := Add_Remote_Server'Access;
+
+         when 'l' =>
+            Action := List_Remote_Server'Access;
+
+         when others =>
+            Usage (Error_Message => "unknown syntax");
+            return;
+
+      end case;
+   end loop Remote_Opt;
 
    if Action /= null then
       Action.all;
@@ -353,8 +413,11 @@ begin
    end if;
 
 exception
-   when E : Syntax_Error
-      | Savadur.Config.Config_Error
+   when GNAT.Command_Line.Invalid_Section
+      | GNAT.Command_Line.Invalid_Switch
+      | GNAT.Command_Line.Invalid_Parameter =>
+      Usage ("unknown syntax");
+   when E : Savadur.Config.Config_Error
       | Savadur.Config.Project.Config_Error
       | Savadur.Config.Environment_Variables.Config_Error =>
       Usage (Error_Message => Exceptions.Exception_Message (E));

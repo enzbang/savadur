@@ -112,8 +112,7 @@ package body Savadur.Config.Server is
    begin
       Start_Search
         (Search    => S,
-         Directory =>
-           Directories.Compose (Config.Savadur_Directory, "servers"),
+         Directory => Config.Server_Directory,
          Pattern   => "*.xml",
          Filter    => Filter_Type'(Ordinary_File => True,
                                    Directory     => False,
