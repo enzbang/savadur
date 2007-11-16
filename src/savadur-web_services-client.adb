@@ -45,7 +45,8 @@ package body Savadur.Web_Services.Client is
       Project_Filename : constant String :=
                            Directories.Compose
                              (Config.Project_File_Directory,
-                              Project_Name & ".xml");
+                              Project_Name,
+                              Extension => "xml");
       --  ??? Would be better to have the list of all projects in the server
       --  and be able to find the corresponding filename.
    begin

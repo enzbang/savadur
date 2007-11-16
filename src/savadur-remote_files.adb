@@ -51,7 +51,8 @@ package body Savadur.Remote_Files is
 
       Project_Filename : constant String :=
                            Directories.Compose
-                             (Config.Project_File_Directory, Project & ".xml");
+                             (Config.Project_File_Directory,
+                              Project, Extension => "xml");
 
       Done             : Boolean := False;
       Found            : Boolean := False;
