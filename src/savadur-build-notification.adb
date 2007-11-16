@@ -2,7 +2,7 @@
 --                                Savadur                                   --
 --                                                                          --
 --                           Copyright (C) 2007                             --
---                            Olivier Ramonat                               --
+--                      Pascal Obry - Olivier Ramonat                       --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
 --  it under the terms of the GNU General Public License as published by    --
@@ -65,6 +65,7 @@ package body Savadur.Build.Notification is
                         Result        => Result);
             end;
          end loop;
+
       else
          for K in 1 .. Project.Notifications.On_Failure.Length loop
             declare

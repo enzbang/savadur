@@ -2,7 +2,7 @@
 --                                Savadur                                   --
 --                                                                          --
 --                           Copyright (C) 2007                             --
---                            Olivier Ramonat                               --
+--                      Pascal Obry - Olivier Ramonat                       --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
 --  it under the terms of the GNU General Public License as published by    --
@@ -68,6 +68,7 @@ package body Savadur.Environment_Variables is
             case V.Action is
                when Replace =>
                   Ada.Environment_Variables.Set (N, -V.Value);
+
                when Append  =>
                   if Ada.Environment_Variables.Exists (N) then
                      Ada.Environment_Variables.Set
@@ -76,6 +77,7 @@ package body Savadur.Environment_Variables is
                   else
                      Ada.Environment_Variables.Set (N, -V.Value);
                   end if;
+
                when Clear =>
                   Ada.Environment_Variables.Clear (N);
             end case;

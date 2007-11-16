@@ -2,7 +2,7 @@
 --                                Savadur                                   --
 --                                                                          --
 --                           Copyright (C) 2007                             --
---                            Olivier Ramonat                               --
+--                      Pascal Obry - Olivier Ramonat                       --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
 --  it under the terms of the GNU General Public License as published by    --
@@ -69,6 +69,7 @@ package body Savadur.Scenarios is
       begin
          Append (Result, Image (Sets.Element (Position)));
       end Image;
+
    begin
       Sets.Iterate (Container => Scenarios,
                     Process   => Image'Access);

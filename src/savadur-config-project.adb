@@ -146,7 +146,6 @@ package body Savadur.Config.Project is
       pragma Unreferenced (Qname);
       NV : constant Node_Value := Get_Node_Value (Local_Name);
    begin
-
       case NV is
          when Variable =>
             --  Overwrite default values
@@ -212,8 +211,8 @@ package body Savadur.Config.Project is
    -------------------
 
    function Get_Attribute (S : in String) return Attribute is
-      Upper_S : String := S;
       use GNAT;
+      Upper_S : String := S;
    begin
       Case_Util.To_Upper (Upper_S);
 
@@ -231,8 +230,8 @@ package body Savadur.Config.Project is
    --------------------
 
    function Get_Node_Value (S : in String) return Node_Value is
-      Upper_S : String := S;
       use GNAT;
+      Upper_S : String := S;
    begin
       Case_Util.To_Upper (Upper_S);
 

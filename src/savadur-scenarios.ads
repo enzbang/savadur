@@ -2,7 +2,7 @@
 --                                Savadur                                   --
 --                                                                          --
 --                           Copyright (C) 2007                             --
---                            Olivier Ramonat                               --
+--                      Pascal Obry - Olivier Ramonat                       --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
 --  it under the terms of the GNU General Public License as published by    --
@@ -80,4 +80,5 @@ private
                         Scenario'(Id      => Id_Utils.Nil,
                                   Actions => Actions.Vectors.Empty_Vector);
    Default_Scenario : constant Id := Id (+"default");
+
 end Savadur.Scenarios;

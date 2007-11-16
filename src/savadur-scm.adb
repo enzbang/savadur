@@ -2,7 +2,7 @@
 --                                Savadur                                   --
 --                                                                          --
 --                           Copyright (C) 2007                             --
---                            Olivier Ramonat                               --
+--                      Pascal Obry - Olivier Ramonat                       --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
 --  it under the terms of the GNU General Public License as published by    --
@@ -47,8 +47,7 @@ package body Savadur.SCM is
 
    function Image (SCM : in Savadur.SCM.SCM) return String is
    begin
-      return To_String (SCM.Id) & ASCII.LF
-        & Actions.Image (SCM.Actions);
+      return To_String (SCM.Id) & ASCII.LF & Actions.Image (SCM.Actions);
    end Image;
 
    -----------
@@ -57,7 +56,7 @@ package body Savadur.SCM is
 
    function Image (Set : in Sets.Set) return String is
       Position : Sets.Cursor := Sets.First (Set);
-      Result  : Unbounded_String;
+      Result   : Unbounded_String;
    begin
       while Sets.Has_Element (Position) loop
          Append (Result, "* " & Image (Sets.Element (Position)));

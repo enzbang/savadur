@@ -2,7 +2,7 @@
 --                                Savadur                                   --
 --                                                                          --
 --                           Copyright (C) 2007                             --
---                            Olivier Ramonat                               --
+--                      Pascal Obry - Olivier Ramonat                       --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
 --  it under the terms of the GNU General Public License as published by    --
@@ -82,7 +82,7 @@ package body Savadur.Variables is
 
    function Image (Set : in Sets.Set) return String is
       Position : Sets.Cursor := Set.First;
-      Result   : Unbounded_String := +"[" & ASCII.Lf;
+      Result   : Unbounded_String := +"[" & ASCII.LF;
    begin
       while Sets.Has_Element (Position) loop
          Append (Result, Image (Sets.Element (Position)));
