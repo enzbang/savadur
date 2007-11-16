@@ -83,7 +83,7 @@ package body Savadur.Signed_Files is
    -- SHA1 --
    ----------
 
-   function SHA1 (File : in Handler) return SHA.Strings.Hex_SHA_String is
+   function SHA1 (File : in Handler) return Signature is
       use type SHA.Strings.Hex_SHA_String;
    begin
       if not Exists (File) then
@@ -116,7 +116,7 @@ package body Savadur.Signed_Files is
             Stream_IO.Close (F);
 
             SHA.Process_Data.Finalize (Digest, Ctx);
-            File.Self.SHA1 := SHA.Strings.Hex_SHA_String
+            File.Self.SHA1 := Signature
               (Characters.Handling.To_Lower
                  (String (SHA.Strings.Hex_From_SHA (Digest))));
          end;

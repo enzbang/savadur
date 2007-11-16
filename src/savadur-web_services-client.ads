@@ -36,17 +36,20 @@ package Savadur.Web_Services.Client is
    --  Register a new client whose id is Key and with the given metadata. The
    --  endpoint is the SOAP callback for the server to reach the client.
 
+   function Load_Project
+     (Project_Name : in String;
+      SHA1         : in String) return String;
+   --  Returns the project content from a server
+
    type Returned_Status is (Success, Failure);
 
-   type Project is new String;
-
    procedure Status
-     (Key      : in String;
-      Ref      : in Project;
-      Scenario : in String;
-      Action   : in String;
-      Output   : in String;
-      Result   : in Returned_Status);
+     (Key          : in String;
+      Project_Name : in String;
+      Scenario     : in String;
+      Action       : in String;
+      Output       : in String;
+      Result       : in Returned_Status);
    --  Status is called by the client to register status of each action in the
    --  given scenario.
 

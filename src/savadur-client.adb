@@ -47,6 +47,7 @@ with Savadur.Config.Project;
 with Savadur.Config.SCM;
 with Savadur.Config.Server;
 with Savadur.Environment_Variables;
+with Savadur.Jobs;
 with Savadur.Logs;
 with Savadur.Server_Service;
 with Savadur.Scenarios;
@@ -138,6 +139,7 @@ procedure Savadur.Client is
    --------------------
 
    procedure Run_Standalone is
+      --  ??? This part should be moved into Savadur.Jobs
    begin
       if To_String (Project_Name) = "" then
          Usage (Error_Message => "no project name");
@@ -188,6 +190,8 @@ procedure Savadur.Client is
             Logs.Write ("Failure");
          end if;
       end Run_Project;
+
+      Jobs.Stop;
    end Run_Standalone;
 
    -----------
@@ -215,6 +219,7 @@ procedure Savadur.Client is
       Logs.Write ("    -v|-version");
       Logs.Write ("    -V|-verbose");
       Logs.Write ("    -VV|-very_verbose");
+      Logs.Write ("    -server             : run in server mode");
    end Usage;
 
 begin

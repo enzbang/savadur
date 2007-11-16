@@ -30,6 +30,10 @@ package Savadur.Signed_Files is
 
    type Handler is limited private;
 
+   subtype Signature is SHA.Strings.Hex_SHA_String;
+
+   No_SHA1 : constant Signature;
+
    procedure Create (File : in out Handler; Name : in String);
    --  Create a new signed file object referencing file Name
 
@@ -42,18 +46,18 @@ package Savadur.Signed_Files is
    function Full_Name (File : in Handler) return String;
    --  Returns File's full pathname
 
-   function SHA1 (File : in Handler) return SHA.Strings.Hex_SHA_String;
+   function SHA1 (File : in Handler) return Signature;
    --  Returns File's SHA1 signature, compute it if not already done
 
 private
 
-   No_SHA1 : constant SHA.Strings.Hex_SHA_String := (others => '0');
+   No_SHA1 : constant Signature := (others => '0');
 
    type Handler is limited record
       Self      : access Handler := Handler'Unchecked_Access;
       Full_Name : Unbounded_String;
       Exists    : Boolean := False;
-      SHA1      : SHA.Strings.Hex_SHA_String := No_SHA1;
+      SHA1      : Signature := No_SHA1;
    end record;
 
 end Savadur.Signed_Files;

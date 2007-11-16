@@ -19,24 +19,30 @@
 --  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.       --
 ------------------------------------------------------------------------------
 
-with Ada.Text_IO;
+with Savadur.Logs;
+with Savadur.Jobs;
+with Savadur.Signed_Files;
 
 package body Savadur.Web_Services.Server is
-
-   use Ada;
 
    ---------
    -- Run --
    ---------
 
    procedure Run
-     (Scenario : in String;
-      Project  : in String;
-      Sha1     : in String)
-   is
-      pragma Unreferenced (Sha1);
+     (Scenario     : in String;
+      Project_Name : in String;
+      SHA1         : in String) is
    begin
-      Text_IO.Put_Line ("Run : " & Scenario & ", " & Project);
+      if SHA1'Length /= Signed_Files.Signature'Length then
+         Logs.Write
+           ("Wrong SHA1 length : '" & SHA1 & ''', Kind => Logs.Error);
+      end if;
+
+      Savadur.Jobs.Add
+        (Scenario     => Scenario,
+         Project_Name => Project_Name,
+         SHA1         => Signed_Files.Signature (SHA1));
    end Run;
 
 end Savadur.Web_Services.Server;

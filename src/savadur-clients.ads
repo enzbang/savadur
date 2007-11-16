@@ -29,9 +29,11 @@ package Savadur.Clients is
    use Ada;
    use Ada.Strings.Unbounded;
 
+   subtype Metadata is Web_Services.Client.Metadata;
+
    type Client is record
       Key               : Unbounded_String;
-      Metadata          : Web_Services.Client.Metadata;
+      Metadata          : Clients.Metadata;
       Callback_Endpoint : Unbounded_String;
    end record;
 

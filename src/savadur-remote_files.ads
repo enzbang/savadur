@@ -2,7 +2,7 @@
 --                                Savadur                                   --
 --                                                                          --
 --                           Copyright (C) 2007                             --
---                            Olivier Ramonat                               --
+--                      Pascal Obry - Olivier Ramonat                       --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
 --  it under the terms of the GNU General Public License as published by    --
@@ -19,45 +19,17 @@
 --  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.       --
 ------------------------------------------------------------------------------
 
-with Ada.Strings.Unbounded;
+with Savadur.Projects;
+with Savadur.Signed_Files;
 
-package Savadur.Utils is
+package Savadur.Remote_Files is
 
-   use Ada;
-   use Ada.Strings.Unbounded;
+   Unknown_File : exception;
 
-   function "+" (Source : in String) return Unbounded_String
-                 renames To_Unbounded_String;
+   function Load_Project
+     (Project : in String;
+      SHA1    : in Signed_Files.Signature) return Projects.Project_Config;
+   --  Returns the project, try to download it from all known server if not
+   --  found locally. Raises Unknown_File if the file cannot be found.
 
-   function "-" (Source : in Unbounded_String) return String
-                 renames To_String;
-
-   generic
-      type Source is new Unbounded_String;
-   package Generic_Utils is
-
-      Nil : constant Source;
-
-      function To_Unbounded_String (S : in Source) return Unbounded_String;
-
-      function "+" (S : in Source) return Unbounded_String
-                    renames To_Unbounded_String;
-
-      function To_String (S : in Source) return String;
-
-      function "-" (S : in Source) return String
-                    renames To_String;
-
-      function Value (Img : in String) return Source;
-
-   private
-      Nil : constant Source := Source (Null_Unbounded_String);
-   end Generic_Utils;
-
-   function Content (Filename : in String) return String;
-   --  Returns a file content
-
-   procedure Set_Content (Filename, Content : in String);
-   --  Set the content of the given file
-
-end Savadur.Utils;
+end Savadur.Remote_Files;

@@ -20,17 +20,20 @@
 ------------------------------------------------------------------------------
 
 with Ada.Directories;
-with Ada.Text_IO;
+with Ada.Strings.Unbounded;
 
-with Savadur.Clients;
-with Savadur.Config;
+with Savadur.Config.Project;
+with Savadur.Config.Server;
 with Savadur.Logs;
-with Savadur.Signed_Files;
+with Savadur.Servers;
+with Savadur.Client_Service.Client;
+with Savadur.Web_Services.Client;
 with Savadur.Utils;
 
-package body Savadur.Web_Services.Client is
+package body Savadur.Remote_Files is
 
    use Ada;
+   use Ada.Strings.Unbounded;
    use Savadur.Utils;
 
    ------------------
@@ -38,74 +41,72 @@ package body Savadur.Web_Services.Client is
    ------------------
 
    function Load_Project
-     (Project_Name : in String;
-      SHA1         : in String) return String
+     (Project : in String;
+      SHA1    : in Signed_Files.Signature) return Projects.Project_Config
    is
       use type Signed_Files.Signature;
+
+      procedure Download (Cursor : in Servers.Sets.Cursor);
+      --  Try downloading Project from this server
+
       Project_Filename : constant String :=
                            Directories.Compose
-                             (Config.Project_File_Directory,
-                              Project_Name & ".xml");
-      --  ??? Would be better to have the list of all projects in the server
-      --  and be able to find the corresponding filename.
+                             (Config.Project_File_Directory, Project & ".xml");
+
+      Done             : Boolean := False;
+      Found            : Boolean := False;
+
+      --------------
+      -- Download --
+      --------------
+
+      procedure Download (Cursor : in Servers.Sets.Cursor) is
+         Server  : constant Servers.Server := Servers.Sets.Element (Cursor);
+         Content : Unbounded_String;
+      begin
+         if not Done then
+            Logs.Write
+              ("Try loading " & Project_Filename & " from " & (-Server.URL));
+            Content := +Client_Service.Client.Load_Project
+              (Project,
+               String (SHA1), -Server.URL);
+
+            if Content /= Null_Unbounded_String then
+               Logs.Write ("   found.");
+               Utils.Set_Content (Project_Filename, -Content);
+               Done := True;
+            end if;
+         end if;
+      end Download;
+
    begin
       Logs.Write ("Load_Project " & Project_Filename);
       if Directories.Exists (Project_Filename) then
+         Logs.Write ("   file exists");
          declare
             S_File : Signed_Files.Handler;
          begin
             Signed_Files.Create (S_File, Project_Filename);
 
-            if SHA1'Length = 40
-              and then
-                Signed_Files.SHA1 (S_File) = Signed_Files.Signature (SHA1)
-            then
-               Logs.Write ("   up-to-date");
-               --  Client up-to-date
-               return "";
-
+            if Signed_Files.SHA1 (S_File) = SHA1 then
+               Logs.Write ("   is already up-to-date");
+               Found := True;
             else
-               Logs.Write ("   content returned");
-               return Utils.Content (Project_Filename);
+               Logs.Write ("   is not up-to-date");
             end if;
          end;
+      end if;
 
+      if not Found then
+         --  Try to download it from known servers
+         Config.Server.Configurations.Iterate (Download'Access);
+      end if;
+
+      if Found then
+         return Config.Project.Parse (Project, Project_Filename);
       else
-         Logs.Write ("   project not found!");
-         return "";
+         raise Unknown_File with "Cannot found project " & Project;
       end if;
    end Load_Project;
 
-   --------------
-   -- Register --
-   --------------
-
-   procedure Register
-     (Key               : in String;
-      Data              : in Metadata;
-      Callback_Endpoint : in String) is
-   begin
-      Text_IO.Put_Line
-        ("Register new client : " & Key & '@' & Callback_Endpoint);
-      Clients.Registered.Insert (New_Item => (+Key, Data, +Callback_Endpoint));
-   end Register;
-
-   ------------
-   -- Status --
-   ------------
-
-   procedure Status
-     (Key          : in String;
-      Project_Name : in String;
-      Scenario     : in String;
-      Action       : in String;
-      Output       : in String;
-      Result       : in Returned_Status)
-   is
-      pragma Unreferenced
-        (Key, Project_Name, Scenario, Action, Output, Result);
-   begin
-      null;
-   end Status;
-
-end Savadur.Web_Services.Client;
+end Savadur.Remote_Files;

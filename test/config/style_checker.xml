@@ -1,0 +1,22 @@
+<project>
+  <name id="style_checker" />
+  <scm id="git" />
+
+  <variable id="url" 
+     value="git+ssh://pobry@repo.or.cz/srv/git/style_checker.git" />
+
+  <action id="make">
+    <cmd>make</cmd>
+  </action>
+
+  <action id="regtests">
+    <cmd>make regtests</cmd>
+  </action>
+
+  <scenario id="default">
+    <scm_action id="version" require_change="true" on_error="quit" />
+    <scm_action id="pull" />
+    <action id="make" />
+    <action id="regtests" />
+  </scenario>
+</project>

@@ -22,9 +22,9 @@
 package Savadur.Web_Services.Server is
 
    procedure Run
-     (Scenario : in String;
-      Project  : in String;
-      Sha1     : in String);
+     (Scenario     : in String;
+      Project_Name : in String;
+      SHA1         : in String);
    --  Ask a client to run a specific scenario
 
 end Savadur.Web_Services.Server;

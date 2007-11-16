@@ -19,30 +19,36 @@
 --  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.       --
 ------------------------------------------------------------------------------
 
-with Ada.Text_IO;
+with Ada.Streams.Stream_IO;
+
+with AWS.Translator;
 
 package body Savadur.Utils is
 
--------------
--- Content --
--------------
+   use Ada.Streams;
+   use AWS;
+
+   -------------
+   -- Content --
+   -------------
 
    function Content (Filename : in String) return String is
-      use Ada.Text_IO;
-
-      Result : Unbounded_String;
-      File   : File_Type;
+      File    : Stream_IO.File_Type;
+      Content : Unbounded_String;
+      Buffer  : Stream_Element_Array (1 .. 1_024);
+      Last    : Stream_Element_Offset;
    begin
-      Open (File => File,
-            Mode => In_File,
-            Name => Filename);
+      Stream_IO.Open
+        (File => File, Mode => Stream_IO.In_File, Name => Filename);
 
-      while not End_Of_File (File) loop
-         Append (Result, Get_Line (File));
+      while not Stream_IO.End_Of_File (File) loop
+         Stream_IO.Read (File, Buffer, Last);
+         exit when Last = 0;
+         Append (Content, Translator.To_String (Buffer (1 .. Last)));
       end loop;
 
-      Close (File);
-      return -Result;
+      Stream_IO.Close (File);
+      return -Content;
    end Content;
 
    -------------
@@ -79,5 +85,17 @@ package body Savadur.Utils is
       end Value;
 
    end Generic_Utils;
+
+   -----------------
+   -- Set_Content --
+   -----------------
+
+   procedure Set_Content (Filename, Content : in String) is
+      File : Stream_IO.File_Type;
+   begin
+      Stream_IO.Create (File, Stream_IO.Out_File, Filename);
+      String'Write (Stream_IO.Stream (File), Content);
+      Stream_IO.Close (File);
+   end Set_Content;
 
 end Savadur.Utils;
