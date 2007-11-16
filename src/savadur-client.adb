@@ -69,16 +69,42 @@ procedure Savadur.Client is
    Project_Name         : Unbounded_String;
    Scenario_Id          : Unbounded_String
      := Scenarios.Id_Utils.To_Unbounded_String (Scenarios.Default_Scenario);
-   Server_Mode          : Boolean := False;
 
    procedure Usage (Error_Message : in String := "");
-   --  Display Usage
+   --  Displays Usage
 
    procedure Run_Standalone;
-   --  Launch client in standalone mode
+   --  Launches client in standalone mode
 
    procedure Run_Server_Mode;
-   --  Launch client in server mode
+   --  Launches client in server mode
+
+   procedure List_Remote_Server;
+   --  Lists remote servers
+
+   Action               : access procedure;
+   --  Action to execute (after Command Line parsing)
+
+   ------------------------
+   -- List_Remote_Server --
+   ------------------------
+
+   procedure List_Remote_Server is
+      use type Containers.Count_Type;
+   begin
+      --  Parse the servers
+
+      Config.Server.Parse;
+
+      if Config.Server.Configurations.Length = 0 then
+         Logs.Write
+           (Content => "No server configured",
+            Kind    => Logs.Error);
+
+      else
+         Logs.Write (Savadur.Servers.Image (Config.Server.Configurations));
+      end if;
+   end List_Remote_Server;
 
    ---------------------
    -- Run_Server_Mode --
@@ -220,6 +246,7 @@ procedure Savadur.Client is
       Logs.Write ("    -V|-verbose");
       Logs.Write ("    -VV|-very_verbose");
       Logs.Write ("    -server             : run in server mode");
+      Logs.Write ("    -remotelist        : List new remote server");
    end Usage;
 
 begin
@@ -233,7 +260,7 @@ begin
       Interate_On_Opt : loop
          case GNAT.Command_Line.Getopt
               ("V verbose VV very_verbose version v "
-               & "p: project: savadurdir: s: sid: server")
+               & "p: project: savadurdir: s: sid: server remotelist")
          is
             when ASCII.NUL =>
                exit Interate_On_Opt;
@@ -245,6 +272,7 @@ begin
                   if Full = "project" or else Full = "p" then
                      Project_Name :=
                        To_Unbounded_String (GNAT.Command_Line.Parameter);
+                     Action := Run_Standalone'Access;
 
                   else
                      raise Syntax_Error with "Unknown option " & Full;
@@ -264,13 +292,20 @@ begin
                        To_Unbounded_String (GNAT.Command_Line.Parameter);
 
                   elsif Full = "server" then
-                     Server_Mode := True;
-
+                     Action := Run_Server_Mode'Access;
                   else
                      raise Syntax_Error with "Unknown option " & Full;
                   end if;
                end Complete_S;
 
+            when 'r' =>
+               Complete_R : declare
+                  Full : constant String := GNAT.Command_Line.Full_Switch;
+               begin
+                  if Full = "remoteadd" then
+                     Action := List_Remote_Server'Access;
+                  end if;
+               end Complete_R;
             when 'v' | 'V' =>
                Complete_V : declare
                   Full : constant String := GNAT.Command_Line.Full_Switch;
@@ -311,10 +346,10 @@ begin
 
    Savadur.Config.SCM.Parse;
 
-   if Server_Mode then
-      Run_Server_Mode;
+   if Action /= null then
+      Action.all;
    else
-      Run_Standalone;
+      Usage;
    end if;
 
 exception
