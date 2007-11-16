@@ -2,7 +2,7 @@
 --                                Savadur                                   --
 --                                                                          --
 --                           Copyright (C) 2007                             --
---                            Olivier Ramonat                               --
+--                      Pascal Obry - Olivier Ramonat                       --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
 --  it under the terms of the GNU General Public License as published by    --
@@ -31,19 +31,18 @@ package Savadur.Build is
 
    function Run
      (Project : access Projects.Project_Config;
-      Env_Var : in Environment_Variables.Maps.Map;
-      Id      : in Scenarios.Id)
-      return Boolean;
+      Env_Var : in     Environment_Variables.Maps.Map;
+      Id      : in     Scenarios.Id) return Boolean;
    --  Run selected scenario from project config
 
 private
 
    procedure Execute
-     (Exec_Action  : in Actions.Action;
-      Directory    : in String;
-      Log_Filename : in String;
-      Return_Code  : out Integer;
-      Result       : out Boolean);
+     (Exec_Action  : in     Actions.Action;
+      Directory    : in     String;
+      Log_Filename : in     String;
+      Return_Code  :    out Integer;
+      Result       :    out Boolean);
    --  Executes a command defined by Exec_Action.Cmd
    --  Before command execution, the string beginning with $ are replaced
    --  by the correponding entry in project <variable> section
@@ -54,7 +53,7 @@ private
 
    function Get_Action
      (Project    : in Projects.Project_Config;
-      Ref_Action : in Actions.Ref_Action)
-      return Actions.Action;
+      Ref_Action : in Actions.Ref_Action) return Actions.Action;
    --  Returns the action to execute matching the ref_action
+
 end Savadur.Build;

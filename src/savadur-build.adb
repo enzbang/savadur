@@ -2,7 +2,7 @@
 --                                Savadur                                   --
 --                                                                          --
 --                           Copyright (C) 2007                             --
---                            Olivier Ramonat                               --
+--                      Pascal Obry - Olivier Ramonat                       --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
 --  it under the terms of the GNU General Public License as published by    --
@@ -48,43 +48,40 @@ package body Savadur.Build is
    use Savadur.Utils;
 
    procedure Get_Arguments
-     (Command         : in Actions.Command;
-      Prog_Name       : out Unbounded_String;
-      Argument_String : out OS_Lib.Argument_List_Access);
+     (Command         : in     Actions.Command;
+      Prog_Name       :    out Unbounded_String;
+      Argument_String :    out OS_Lib.Argument_List_Access);
    --  Returns the programme name and the argument list
 
    function Parse
      (Project : in Projects.Project_Config;
-      Cmd     : in Actions.Command)
-     return Actions.Command;
+      Cmd     : in Actions.Command) return Actions.Command;
    --  Replace strings beginning with $
    --  by the correponding entry in project <variable> section
 
    function Check
-     (Project      : access Projects.Project_Config;
-      Exec_Action  : in Actions.Action;
-      Ref          : in Actions.Ref_Action;
-      Return_Code  : in Integer;
-      Log_File     : in String)
-      return Boolean;
+     (Project     : access Projects.Project_Config;
+      Exec_Action : in     Actions.Action;
+      Ref         : in     Actions.Ref_Action;
+      Return_Code : in     Integer;
+      Log_File    : in     String) return Boolean;
 
    -----------
    -- Check --
    -----------
 
    function Check
-     (Project      : access Projects.Project_Config;
-      Exec_Action  : in Actions.Action;
-      Ref          : in Actions.Ref_Action;
-      Return_Code  : in Integer;
-      Log_File     : in String)
-     return Boolean
+     (Project     : access Projects.Project_Config;
+      Exec_Action : in     Actions.Action;
+      Ref         : in     Actions.Ref_Action;
+      Return_Code : in     Integer;
+      Log_File    : in     String) return Boolean
    is
       use type Actions.Result_Type;
-      State_Directory   : constant String :=
-                            Projects.Project_State_Directory (Project);
+      State_Directory : constant String :=
+                          Projects.Project_State_Directory (Project);
 
-      Result : Boolean := True;
+      Result          : Boolean := True;
    begin
       if Exec_Action.Result = Actions.Exit_Status then
          if Ref.Value /= "" then
@@ -175,11 +172,11 @@ package body Savadur.Build is
    -------------
 
    procedure Execute
-     (Exec_Action  : in Actions.Action;
-      Directory    : in String;
-      Log_Filename : in String;
-      Return_Code  : out Integer;
-      Result       : out Boolean)
+     (Exec_Action  : in     Actions.Action;
+      Directory    : in     String;
+      Log_Filename : in     String;
+      Return_Code  :    out Integer;
+      Result       :    out Boolean)
    is
       use GNAT.OS_Lib;
       use type Actions.Result_Type;
@@ -232,8 +229,7 @@ package body Savadur.Build is
 
    function Get_Action
      (Project    : in Projects.Project_Config;
-      Ref_Action : in Actions.Ref_Action)
-      return Actions.Action
+      Ref_Action : in Actions.Ref_Action) return Actions.Action
    is
       use Savadur.Actions;
       Action_Id  : constant Id := Ref_Action.Id;
@@ -273,9 +269,9 @@ package body Savadur.Build is
    -------------------
 
    procedure Get_Arguments
-     (Command         : in Actions.Command;
-      Prog_Name       : out Unbounded_String;
-      Argument_String : out OS_Lib.Argument_List_Access)
+     (Command         : in     Actions.Command;
+      Prog_Name       :    out Unbounded_String;
+      Argument_String :    out OS_Lib.Argument_List_Access)
    is
       use GNAT.OS_Lib;
       Command_String : constant String := -Unbounded_String (Command);
@@ -301,8 +297,7 @@ package body Savadur.Build is
 
    function Parse
      (Project : in Projects.Project_Config;
-      Cmd     : in Actions.Command)
-      return Actions.Command
+      Cmd     : in Actions.Command) return Actions.Command
    is
       Source     : constant String := -Unbounded_String (Cmd);
       Start      : Positive := Source'First;
@@ -314,6 +309,7 @@ package body Savadur.Build is
             Append (Result, Source (Start .. K - 1));
             Start      := K;
             Do_Replace := True;
+
          elsif Do_Replace and then Source (K) = ' ' then
             Query_Project_Variables : declare
                Key  : constant String := Source (Start + 1 .. K - 1);
@@ -341,8 +337,7 @@ package body Savadur.Build is
                         Key       => Savadur.Variables.
                           Name_Utils.Value (Key));
          begin
-            Append (Result,
-                    To_String (Var.Value));
+            Append (Result, To_String (Var.Value));
          end Replace_Var;
 
       else
@@ -363,12 +358,12 @@ package body Savadur.Build is
 
    function Run
      (Project : access Projects.Project_Config;
-      Env_Var : in Environment_Variables.Maps.Map;
-      Id      : in Scenarios.Id)
-      return Boolean
+      Env_Var : in     Environment_Variables.Maps.Map;
+      Id      : in     Scenarios.Id) return Boolean
    is
 
       function Init return Savadur.Scenarios.Scenario;
+      --  ???
 
       ----------
       -- Init --
@@ -386,7 +381,6 @@ package body Savadur.Build is
          Savadur.Environment_Variables.Set_Environment (Env_Var);
 
          return Selected_Scenario;
-
       exception
          when Constraint_Error =>
             raise Command_Parse_Error with " Scenario "
@@ -400,8 +394,8 @@ package body Savadur.Build is
       Log_Directory     : constant String :=
                             Projects.Project_Log_Directory (Project);
       Success           : Boolean := True;
-   begin
 
+   begin
       For_All_Ref_Actions : declare
          use Savadur.Actions.Vectors;
          Position : Cursor := Selected_Scenario.Actions.First;

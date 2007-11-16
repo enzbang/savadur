@@ -32,9 +32,7 @@ package body Savadur.Projects is
    -----------------------
 
    function Project_Directory
-     (Project : access Project_Config)
-      return String
-   is
+     (Project : access Project_Config) return String is
    begin
       if Project.Directories.Project_Directory = +"" then
          Project.Directories.Project_Directory := +Directories.Compose
@@ -55,8 +53,7 @@ package body Savadur.Projects is
    --------------------------
 
    function Project_Env_Filename
-     (Project : access Project_Config) return String
-   is
+     (Project : access Project_Config) return String is
    begin
       if Project.Directories.Project_Env_Filename = +"" then
          Project.Directories.Project_Env_Filename := +Directories.Compose
@@ -73,8 +70,7 @@ package body Savadur.Projects is
    ----------------------
 
    function Project_Filename
-     (Project : access Project_Config) return String
-   is
+     (Project : access Project_Config) return String is
    begin
       if Project.Directories.Project_Filename = +"" then
          Project.Directories.Project_Filename := +Directories.Compose
@@ -91,9 +87,7 @@ package body Savadur.Projects is
    ---------------------------
 
    function Project_Log_Directory
-     (Project : access Projects.Project_Config)
-      return String
-   is
+     (Project : access Projects.Project_Config) return String is
    begin
       if Project.Directories.Project_Log_Directory = +"" then
          Project.Directories.Project_Log_Directory := +Directories.Compose
@@ -113,8 +107,7 @@ package body Savadur.Projects is
    -------------------------------
 
    function Project_Sources_Directory
-     (Project : access Project_Config) return String
-   is
+     (Project : access Project_Config) return String is
    begin
 
       if Project.Directories.Project_Sources_Directory = +"" then
@@ -140,9 +133,7 @@ package body Savadur.Projects is
    -----------------------------
 
    function Project_State_Directory
-     (Project : access Projects.Project_Config)
-      return String
-   is
+     (Project : access Projects.Project_Config) return String is
    begin
       if Project.Directories.Project_State_Directory = +"" then
          Project.Directories.Project_State_Directory :=
@@ -163,10 +154,9 @@ package body Savadur.Projects is
    ------------------
 
    procedure Set_Filename
-     (Project  : access Project_Config;
-      Filename : in     String)
-   is
+     (Project  : access Project_Config; Filename : in String) is
    begin
       Project.Directories.Project_Filename := +Filename;
    end Set_Filename;
+
 end Savadur.Projects;

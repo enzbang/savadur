@@ -101,4 +101,5 @@ project Shared is
             null;
       end case;
    end Linker;
+
 end Shared;
