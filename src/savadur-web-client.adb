@@ -37,7 +37,7 @@ package body Savadur.Web.Client is
    use SOAP;
 
    HTTP       : AWS.Server.HTTP;
-   Config     : AWS.Config.Object;
+   Config     : AWS.Config.Object := AWS.Config.Get_Current;
    Dispatcher : Server_Service.CB.Handler;
    Address    : URL.Object;
 
