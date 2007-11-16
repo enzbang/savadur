@@ -45,7 +45,7 @@ package body Savadur.Variables is
         (New_Item =>
            Variable'(Name => Name_Utils.Value ("project_name"),
                      Value =>
-                       Projects.Project_Id_Utils.To_Unbounded_String
+                       Projects.Id_Utils.To_Unbounded_String
                          (Project.Project_Id)));
    end Default;
 

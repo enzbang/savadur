@@ -2,7 +2,7 @@
 --                                Savadur                                   --
 --                                                                          --
 --                           Copyright (C) 2007                             --
---                            Olivier Ramonat                               --
+--                      Pascal Obry - Olivier Ramonat                       --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
 --  it under the terms of the GNU General Public License as published by    --
@@ -34,7 +34,7 @@ package Savadur.Projects is
 
    type Project_Id is new Unbounded_String;
 
-   package Project_Id_Utils is new Utils.Generic_Utils (Source => Project_Id);
+   package Id_Utils is new Utils.Generic_Utils (Source => Project_Id);
 
    type Project_Directories is private;
 

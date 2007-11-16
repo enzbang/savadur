@@ -259,7 +259,7 @@ package body Savadur.Config.Project is
       --  Set the project name
 
       Reader.Current_Project.Project_Id :=
-        Projects.Project_Id_Utils.Value (Project_Name);
+        Projects.Id_Utils.Value (Project_Name);
 
       if Filename /= "" then
          Projects.Set_Filename (Reader.Current_Project'Access, Filename);

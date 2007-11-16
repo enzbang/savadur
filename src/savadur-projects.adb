@@ -2,7 +2,7 @@
 --                                Savadur                                   --
 --                                                                          --
 --                           Copyright (C) 2007                             --
---                            Olivier Ramonat                               --
+--                      Pascal Obry - Olivier Ramonat                       --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
 --  it under the terms of the GNU General Public License as published by    --
@@ -61,7 +61,7 @@ package body Savadur.Projects is
       if Project.Directories.Project_Env_Filename = +"" then
          Project.Directories.Project_Env_Filename := +Directories.Compose
            (Containing_Directory => Config.Project_Env_Directory,
-            Name                 => Project_Id_Utils.To_String
+            Name                 => Id_Utils.To_String
               (Project.Project_Id),
             Extension            => "xml");
       end if;
@@ -79,7 +79,7 @@ package body Savadur.Projects is
       if Project.Directories.Project_Filename = +"" then
          Project.Directories.Project_Filename := +Directories.Compose
            (Containing_Directory => Config.Project_File_Directory,
-            Name                 => Project_Id_Utils.To_String
+            Name                 => Id_Utils.To_String
               (Project.Project_Id),
             Extension            => "xml");
       end if;
