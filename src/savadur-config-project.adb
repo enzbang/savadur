@@ -301,11 +301,12 @@ package body Savadur.Config.Project is
       pragma Unreferenced (Qname);
 
       use Sax.Attributes;
-      Attr : Attribute;
+
       NV   : constant Node_Value := Get_Node_Value (Local_Name);
+      Attr : Attribute;
 
       procedure Get_Attribute_Value (Position : in Natural);
-      --  Get attribute value
+      --  Gets attribute value
 
       -------------------------
       -- Get_Attribute_Value --

@@ -25,6 +25,6 @@ package Savadur.Web_Services.Server is
      (Scenario     : in String;
       Project_Name : in String;
       SHA1         : in String);
-   --  Ask a client to run a specific scenario
+   --  Asks a client to run a specific scenario
 
 end Savadur.Web_Services.Server;

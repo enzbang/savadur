@@ -292,11 +292,6 @@ procedure Savadur.Client is
 
 begin
 
-   if Command_Line.Argument_Count = 0 then
-      Usage (Error_Message => "no argument ?");
-      return;
-   end if;
-
    GNAT.Command_Line.Initialize_Option_Scan (Section_Delimiters => "remote");
 
    Interate_On_Opt : loop

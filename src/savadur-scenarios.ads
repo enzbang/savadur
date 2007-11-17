@@ -53,7 +53,7 @@ package Savadur.Scenarios is
    ----------
 
    function Hash (Key : in Scenario) return Containers.Hash_Type;
-   --  Use scenario.Id hash (Strings.Hash_Case_Insensitive)
+   --  Uses scenario.Id hash (Strings.Hash_Case_Insensitive)
 
    package Sets is new Ada.Containers.Indefinite_Hashed_Sets
      (Element_Type        => Scenario,
@@ -61,7 +61,7 @@ package Savadur.Scenarios is
       Equivalent_Elements => "=");
 
    function Key (Element : in Scenario) return Id;
-   --  Return scenario id
+   --  Returns scenario id
 
    function Hash (Key : in Id) return Containers.Hash_Type;
 
@@ -72,7 +72,7 @@ package Savadur.Scenarios is
       Equivalent_Keys => "=");
 
    function Image (Scenarios : in Sets.Set) return String;
-   --  Return Scenario map image
+   --  Returns Scenario map image
 
 private
 

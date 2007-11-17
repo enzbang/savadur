@@ -66,7 +66,7 @@ package Savadur.SCM is
       Equivalent_Elements => "=");
 
    function Key (Element : in SCM) return Id;
-   --  Return SCM id
+   --  Returns SCM id
 
    function Hash (Key : in Id) return Containers.Hash_Type;
 
@@ -77,6 +77,6 @@ package Savadur.SCM is
       Equivalent_Keys => "=");
 
    function Image (Set : in Sets.Set) return String;
-   --  Return the SCM set image
+   --  Returns the SCM set image
 
 end Savadur.SCM;

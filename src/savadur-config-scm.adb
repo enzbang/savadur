@@ -119,8 +119,10 @@ package body Savadur.Config.SCM is
          when Action =>
             Handler.SCM.Actions.Insert
               (New_Item => Handler.Action);
+
          when Cmd =>
             Handler.Action.Cmd := Actions.Command (Handler.Content_Value);
+
          when SCM | Name =>
             null;
       end case;
@@ -234,8 +236,9 @@ package body Savadur.Config.SCM is
       pragma Unreferenced (Qname);
 
       use Sax.Attributes;
-      Attr : Attribute;
+
       NV   : constant Node_Value := Get_Node_Value (Local_Name);
+      Attr : Attribute;
 
    begin
       for J in 0 .. Get_Length (Atts) - 1 loop

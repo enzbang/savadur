@@ -363,7 +363,7 @@ package body Savadur.Build is
    is
 
       function Init return Savadur.Scenarios.Scenario;
-      --  ???
+      --  Returns the selected scenario and set the environment variables
 
       ----------
       -- Init --

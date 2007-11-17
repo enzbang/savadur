@@ -58,8 +58,8 @@ package body Savadur.Build.Notification is
                Return_Code : Integer;
                Result      : Boolean;
             begin
-               Execute (Exec_Action => Exec_Action,
-                        Directory   => Config.Savadur_Directory,
+               Execute (Exec_Action   => Exec_Action,
+                        Directory     => Config.Savadur_Directory,
                         Log_Filename  => Log_File,
                         Return_Code   => Return_Code,
                         Result        => Result);
@@ -83,8 +83,8 @@ package body Savadur.Build.Notification is
                Return_Code : Integer;
                Result      : Boolean;
             begin
-               Execute (Exec_Action => Exec_Action,
-                        Directory   => Config.Savadur_Directory,
+               Execute (Exec_Action   => Exec_Action,
+                        Directory     => Config.Savadur_Directory,
                         Log_Filename  => Log_File,
                         Return_Code   => Return_Code,
                         Result        => Result);

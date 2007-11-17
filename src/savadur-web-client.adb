@@ -42,7 +42,7 @@ package body Savadur.Web.Client is
    Address    : URL.Object;
 
    function HTTP_Callback (Request : in Status.Data) return Response.Data;
-   --  Callback used for HTTP requests
+   --  Callbacks used for HTTP requests
 
    -------------------
    -- HTTP_Callback --

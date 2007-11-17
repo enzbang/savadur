@@ -62,7 +62,7 @@ package Savadur.Project_List is
      (Project  : in String;
       Scenario : in String;
       Client   : in String);
-   --  Register a new client which handle the given project/scenario
+   --  Registers a new client which handle the given project/scenario
 
    function Get_Clients (Project, Scenario : in String) return Clients.Vector;
    --  Returns the list of clients which can handle the give project/scenario

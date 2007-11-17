@@ -51,7 +51,7 @@ package Savadur.Projects is
    procedure Set_Filename
      (Project  : access Project_Config;
       Filename : in     String);
-   --  Set project filename
+   --  Sets project filename
 
    function Project_Directory
      (Project : access Project_Config) return String;

@@ -26,6 +26,6 @@ package Savadur.Config.Project_List is
    Configurations : Savadur.Project_List.Sets.Set;
 
    procedure Parse;
-   --  Fill the server configuration map
+   --  Fills the server configuration map
 
 end Savadur.Config.Project_List;

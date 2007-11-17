@@ -24,15 +24,15 @@ package Savadur.Logs is
    type Log_Level is (Information, Warnings, Error, Verbose, Very_Verbose);
 
    procedure Set_File (Filename : in String);
-   --  Set log file (default to stdout)
+   --  Sets log file (default to stdout)
 
    procedure Write
      (Content : in String;
       Kind    : in Log_Level := Information);
-   --  Write Content into the log file
+   --  Writes Content into the log file
 
    procedure Set (Kind : in Log_Level; Activated : in Boolean);
-   --  Activate/Deactivate the specified level of log
+   --  Activates/Deactivates the specified level of log
 
    function NV (Name, Value : in String) return String;
    function NV (Name : in String; Value : in Integer) return String;

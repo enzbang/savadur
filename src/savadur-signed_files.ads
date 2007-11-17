@@ -35,7 +35,7 @@ package Savadur.Signed_Files is
    No_SHA1 : constant Signature;
 
    procedure Create (File : in out Handler; Name : in String);
-   --  Create a new signed file object referencing file Name
+   --  Creates a new signed file object referencing file Name
 
    function Exists (File : in Handler) return Boolean;
    --  Returns True if File exists

@@ -56,7 +56,6 @@ package body Savadur.Config.Environment_Variables is
                                                             Mode   => True));
 
    function Get_Node_Value (S : in String) return Node_Value;
-
    --  Returns the node value matching the given string or raise Config_Error
 
    function Get_Attribute (S : in String) return Attribute;
@@ -125,8 +124,7 @@ package body Savadur.Config.Environment_Variables is
       Reader : Tree_Reader;
       Source : Input_Sources.File.File_Input;
    begin
-      if Directories.Exists
-        (Projects.Project_Env_Filename (Project)) then
+      if Directories.Exists (Projects.Project_Env_Filename (Project)) then
 
          --  Skip parsing without errors if file not found as having an env
          --  file is not required
@@ -157,8 +155,9 @@ package body Savadur.Config.Environment_Variables is
       pragma Unreferenced (Qname);
 
       use Sax.Attributes;
-      Attr : Attribute;
+
       NV   : constant Node_Value := Get_Node_Value (Local_Name);
+      Attr : Attribute;
    begin
 
       case NV is
@@ -173,6 +172,7 @@ package body Savadur.Config.Environment_Variables is
                      raise Config_Error with "Unknow attribute "
                        & Node_Value'Image (NV) & "." & Get_Qname (Atts, J);
                   end if;
+
                   case Attr is
                      when Name  => Var_Name  := +Get_Value (Atts, J);
                      when Value => Var.Value := +Get_Value (Atts, J);
@@ -188,6 +188,7 @@ package body Savadur.Config.Environment_Variables is
                   Key       => -Var_Name,
                   New_Item  => Var);
             end New_Var;
+
          when Environment_Variables | Project =>
             null;
       end case;

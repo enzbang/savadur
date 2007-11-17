@@ -22,7 +22,7 @@
 package Savadur.Web.Client is
 
    procedure Start;
-   --  Start the client-side Web server, this is the server that receive the
+   --  Starts the client-side Web server, this is the server that receive the
    --  server's requests.
 
 end Savadur.Web.Client;

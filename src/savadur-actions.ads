@@ -81,7 +81,7 @@ package Savadur.Actions is
       Equivalent_Elements => "=");
 
    function Key (Element : in Action) return Id;
-   --  Return SCM id
+   --  Returns SCM id
 
    function Hash (Key : in Id) return Containers.Hash_Type;
 

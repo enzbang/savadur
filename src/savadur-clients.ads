@@ -54,7 +54,7 @@ package Savadur.Clients is
       Equivalent_Elements => Key_Equal);
 
    function Image (Clients_Set : in Sets.Set) return String;
-   --  Return the Client_Set image
+   --  Returns the Client_Set image
 
    Registered : Sets.Set;
 

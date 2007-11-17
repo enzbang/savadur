@@ -35,7 +35,7 @@ package Savadur.Config is
    --                           log
 
    procedure Set_Savadur_Directory (Dir : in String);
-   --  Set savadur directory (Overwrite environment variables)
+   --  Sets savadur directory (overwrite environment variables)
 
    function Work_Directory return String;
    --  Returns Work directory (create if empty)

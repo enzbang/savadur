@@ -54,7 +54,7 @@ package Savadur.Variables is
       Equivalent_Elements => "=");
 
    function Key (Element : in Variable) return Name;
-   --  Return variable name
+   --  Returns variable name
 
    function Hash (Key : in Name) return Containers.Hash_Type;
 
@@ -65,7 +65,7 @@ package Savadur.Variables is
       Equivalent_Keys => "=");
 
    procedure Default (Project : access Projects.Project_Config);
-   --  Set default variables :
+   --  Sets default variables :
    --     - sources is set as "sources"
    --     - project_dir
 

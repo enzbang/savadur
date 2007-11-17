@@ -48,7 +48,7 @@ package Savadur.Environment_Variables is
    --  Returns map image
 
    procedure Set_Environment (Map : in Maps.Map);
-   --  Read environment variable in $project_name$_env.xml
-   --  and set environment variables according to rules
+   --  Reads environment variable in env/$project_name$.xml
+   --  and sets environment variables according to rules
 
 end Savadur.Environment_Variables;

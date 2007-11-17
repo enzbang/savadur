@@ -33,7 +33,7 @@ package Savadur.Build is
      (Project : access Projects.Project_Config;
       Env_Var : in     Environment_Variables.Maps.Map;
       Id      : in     Scenarios.Id) return Boolean;
-   --  Run selected scenario from project config
+   --  Runs selected scenario from project config
 
 private
 

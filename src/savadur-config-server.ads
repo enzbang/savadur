@@ -26,6 +26,6 @@ package Savadur.Config.Server is
    Configurations : Savadur.Servers.Sets.Set;
 
    procedure Parse;
-   --  Fill the server configuration map
+   --  Fills the server configuration map
 
 end Savadur.Config.Server;

@@ -33,7 +33,7 @@ package Savadur.Web_Services.Client is
      (Key               : in String;
       Data              : in Metadata;
       Callback_Endpoint : in String);
-   --  Register a new client whose id is Key and with the given metadata. The
+   --  Registers a new client whose id is Key and with the given metadata. The
    --  endpoint is the SOAP callback for the server to reach the client.
 
    function Load_Project

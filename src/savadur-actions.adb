@@ -91,8 +91,7 @@ package body Savadur.Actions is
 
       procedure Image (Position : in Sets.Cursor) is
       begin
-         Append (Result,
-                 Image (Sets.Element (Position)));
+         Append (Result, Image (Sets.Element (Position)));
       end Image;
    begin
       Sets.Iterate (Container => Set,

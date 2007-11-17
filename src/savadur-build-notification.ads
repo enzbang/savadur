@@ -26,6 +26,6 @@ private package Savadur.Build.Notification is
    procedure Notify
      (Project : access Projects.Project_Config;
       Success : in     Boolean);
-   --  Run notify hooks
+   --  Runs notify hooks
 
 end Savadur.Build.Notification;

@@ -47,7 +47,7 @@ package body Savadur.Remote_Files is
       use type Signed_Files.Signature;
 
       procedure Download (Cursor : in Servers.Sets.Cursor);
-      --  Try downloading Project from this server
+      --  Tries downloading Project from this server
 
       Project_Filename : constant String :=
                            Directories.Compose
