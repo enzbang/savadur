@@ -19,12 +19,13 @@
 --  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.       --
 ------------------------------------------------------------------------------
 
-with Ada.Directories;
+--  with Ada.Directories;
 with Ada.Text_IO;
 
 with Savadur.Clients;
-with Savadur.Config;
+with Savadur.Config.Project;
 with Savadur.Logs;
+with Savadur.Projects.Sets;
 with Savadur.Signed_Files;
 with Savadur.Utils;
 
@@ -38,42 +39,48 @@ package body Savadur.Web_Services.Client is
    ------------------
 
    function Load_Project
-     (Project_Name : in String;
-      SHA1         : in String) return String
+     (Signed_Project : in Client.Signed_Project) return Project_Data
    is
       use type Signed_Files.Signature;
-      Project_Filename : constant String :=
-                           Directories.Compose
-                             (Config.Project_File_Directory,
-                              Project_Name,
-                              Extension => "xml");
-      --  ??? Would be better to have the list of all projects in the server
-      --  and be able to find the corresponding filename.
-   begin
-      Logs.Write ("Load_Project " & Project_Filename);
-      if Directories.Exists (Project_Filename) then
-         declare
-            S_File : Signed_Files.Handler;
-         begin
-            Signed_Files.Create (S_File, Project_Filename);
 
-            if SHA1'Length = 40
-              and then
-                Signed_Files.SHA1 (S_File) = Signed_Files.Signature (SHA1)
+      Project      : aliased Signed_Files.Handler :=
+                       Signed_Files.To_Handler
+                         (Signed_Files.External_Handler (Signed_Project));
+      Project_Name : constant String := Signed_Files.Name (Project);
+   begin
+      Logs.Write ("Load_Project " & Project_Name);
+
+      if Projects.Sets.Keys.Contains
+        (Config.Project.Configurations, Project_Name)
+      then
+         declare
+            Proj             : aliased Projects.Project_Config :=
+                                 Config.Project.Get (Project_Name);
+            Project_Filename : constant String :=
+                                 Projects.Project_Filename (Proj'Access);
+            Local_Project    : aliased Signed_Files.Handler;
+         begin
+            Signed_Files.Create
+              (Local_Project, Project_Name, Project_Filename);
+
+            if Signed_Files.SHA1 (Local_Project'Access) =
+              Signed_Files.SHA1 (Project'Access)
             then
                Logs.Write ("   up-to-date");
                --  Client up-to-date
-               return "";
+               return No_Data;
 
             else
                Logs.Write ("   content returned");
-               return Utils.Content (Project_Filename);
+               return Project_Data'
+                 (Filename => +Project_Filename,
+                  Content  => +Utils.Content (Project_Filename));
             end if;
          end;
 
       else
          Logs.Write ("   project not found!");
-         return "";
+         return No_Data;
       end if;
    end Load_Project;
 

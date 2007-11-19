@@ -245,7 +245,8 @@ package body Config_Parse is
    procedure Set_Up_Case (Test : in out Test_Case) is
       pragma Unreferenced (Test);
    begin
-      Project := Savadur.Config.Project.Parse (Project_Name => "regtests");
+      Savadur.Config.Project.Parse;
+      Project := Savadur.Config.Project.Get (Project_Name => "regtests");
    end Set_Up_Case;
 
 end Config_Parse;

@@ -28,13 +28,13 @@ package Savadur.Signed_Files is
    use Ada;
    use Ada.Strings.Unbounded;
 
-   type Handler is limited private;
+   type Handler is private;
 
    subtype Signature is SHA.Strings.Hex_SHA_String;
 
    No_SHA1 : constant Signature;
 
-   procedure Create (File : in out Handler; Name : in String);
+   procedure Create (File : in out Handler; Name, Filename : in String);
    --  Creates a new signed file object referencing file Name
 
    function Exists (File : in Handler) return Boolean;
@@ -46,15 +46,24 @@ package Savadur.Signed_Files is
    function Full_Name (File : in Handler) return String;
    --  Returns File's full pathname
 
-   function SHA1 (File : in Handler) return Signature;
+   function SHA1 (File : access Handler) return Signature;
    --  Returns File's SHA1 signature, compute it if not already done
+
+   type External_Handler is new String;
+
+   function To_Handler (File : in External_Handler) return Handler;
+   --  Convert to an internal handler representation
+
+   function To_External_Handler
+     (File : access Handler) return External_Handler;
+   --  Convert to an external handler representation for the Web Services
 
 private
 
    No_SHA1 : constant Signature := (others => '0');
 
-   type Handler is limited record
-      Self      : access Handler := Handler'Unchecked_Access;
+   type Handler is record
+      Name      : Unbounded_String;
       Full_Name : Unbounded_String;
       Exists    : Boolean := False;
       SHA1      : Signature := No_SHA1;

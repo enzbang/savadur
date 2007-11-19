@@ -21,10 +21,11 @@
 
 package Savadur.Web_Services.Server is
 
+   type Signed_Project is new String;
+
    procedure Run
-     (Scenario     : in String;
-      Project_Name : in String;
-      SHA1         : in String);
+     (Scenario       : in String;
+      Signed_Project : in Server.Signed_Project);
    --  Asks a client to run a specific scenario
 
 end Savadur.Web_Services.Server;

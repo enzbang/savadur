@@ -19,7 +19,6 @@
 --  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.       --
 ------------------------------------------------------------------------------
 
-with Savadur.Logs;
 with Savadur.Jobs;
 with Savadur.Signed_Files;
 
@@ -30,19 +29,13 @@ package body Savadur.Web_Services.Server is
    ---------
 
    procedure Run
-     (Scenario     : in String;
-      Project_Name : in String;
-      SHA1         : in String) is
+     (Scenario       : in String;
+      Signed_Project : in Server.Signed_Project) is
    begin
-      if SHA1'Length /= Signed_Files.Signature'Length then
-         Logs.Write
-           ("Wrong SHA1 length : '" & SHA1 & ''', Kind => Logs.Error);
-      end if;
-
       Savadur.Jobs.Add
-        (Scenario     => Scenario,
-         Project_Name => Project_Name,
-         SHA1         => Signed_Files.Signature (SHA1));
+        (Project  => Signed_Files.To_Handler
+           (Signed_Files.External_Handler (Signed_Project)),
+         Scenario => Scenario);
    end Run;
 
 end Savadur.Web_Services.Server;

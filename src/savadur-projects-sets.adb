@@ -19,51 +19,36 @@
 --  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.       --
 ------------------------------------------------------------------------------
 
-with Ada.Strings.Unbounded;
+with Ada.Strings.Unbounded.Hash;
 
-package Savadur.Web_Services.Client is
+package body Savadur.Projects.Sets is
 
-   use Ada.Strings.Unbounded;
+   ---------
+   -- "=" --
+   ---------
 
-   type Metadata is record
-      OS : Unbounded_String;
-   end record;
+   function "=" (P1, P2 : in Project_Config) return Boolean is
+   begin
+      return P1.Project_Id = P2.Project_Id;
+   end "=";
 
-   procedure Register
-     (Key               : in String;
-      Data              : in Metadata;
-      Callback_Endpoint : in String);
-   --  Registers a new client whose id is Key and with the given metadata. The
-   --  endpoint is the SOAP callback for the server to reach the client.
+   ----------
+   -- Hash --
+   ----------
 
-   type Signed_Project is new String;
+   function Hash (Project : in Project_Config) return Containers.Hash_Type is
+   begin
+      return Hash (Project.Project_Id);
+   end Hash;
 
-   type Project_Data is record
-      Filename : Unbounded_String;
-      Content  : Unbounded_String;
-   end record;
+   ---------
+   -- Key --
+   ---------
 
-   No_Data : constant Project_Data;
+   function Key (Project : in Project_Config) return String is
+      use Projects.Id_Utils;
+   begin
+      return -Project.Project_Id;
+   end Key;
 
-   function Load_Project
-     (Signed_Project : in Client.Signed_Project) return Project_Data;
-   --  Returns the project content from a server
-
-   type Returned_Status is (Success, Failure);
-
-   procedure Status
-     (Key          : in String;
-      Project_Name : in String;
-      Scenario     : in String;
-      Action       : in String;
-      Output       : in String;
-      Result       : in Returned_Status);
-   --  Status is called by the client to register status of each action in the
-   --  given scenario.
-
-private
-
-   No_Data : constant Project_Data :=
-               (Null_Unbounded_String, Null_Unbounded_String);
-
-end Savadur.Web_Services.Client;
+end Savadur.Projects.Sets;

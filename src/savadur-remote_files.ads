@@ -20,15 +20,16 @@
 ------------------------------------------------------------------------------
 
 with Savadur.Projects;
-with Savadur.Signed_Files;
+--  with Savadur.Signed_Files;
+with Savadur.Web_Services.Client;
 
 package Savadur.Remote_Files is
 
    Unknown_File : exception;
 
    function Load_Project
-     (Project : in String;
-      SHA1    : in Signed_Files.Signature) return Projects.Project_Config;
+     (Signed_Project : in Web_Services.Client.Signed_Project)
+      return Projects.Project_Config;
    --  Returns the project, try to download it from all known server if not
    --  found locally. Raises Unknown_File if the file cannot be found.
 

@@ -24,9 +24,8 @@ with Savadur.Signed_Files;
 package Savadur.Jobs is
 
    procedure Add
-     (Project_Name : in String;
-      Scenario     : in String;
-      SHA1         : in Signed_Files.Signature);
+     (Project  : in Signed_Files.Handler;
+      Scenario : in String);
    --  Schedure a new job
 
    procedure Stop;

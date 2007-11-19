@@ -23,6 +23,7 @@ with Ada.Characters.Handling;
 with Ada.Directories;
 with Ada.IO_Exceptions;
 with Ada.Streams.Stream_IO;
+with Ada.Strings.Fixed;
 
 with SHA.Process_Data;
 
@@ -37,16 +38,17 @@ package body Savadur.Signed_Files is
    -- Create --
    ------------
 
-   procedure Create (File : in out Handler; Name : in String) is
+   procedure Create (File : in out Handler; Name, Filename : in String) is
       F : Stream_IO.File_Type;
    begin
-      if Directories.Exists (Name) then
-         Stream_IO.Open (F, Stream_IO.In_File, Name);
+      File.Name := +Name;
+
+      if Directories.Exists (Filename) then
+         Stream_IO.Open (F, Stream_IO.In_File, Filename);
          File.Full_Name := +Stream_IO.Name (F);
          File.Exists := True;
          Stream_IO.Close (F);
       else
-         File.Full_Name := +Name;
          raise IO_Exceptions.Name_Error
            with "File " & Name & " does not exist.";
       end if;
@@ -76,22 +78,22 @@ package body Savadur.Signed_Files is
 
    function Name (File : in Handler) return String is
    begin
-      return Directories.Simple_Name (-File.Full_Name);
+      return -File.Name;
    end Name;
 
    ----------
    -- SHA1 --
    ----------
 
-   function SHA1 (File : in Handler) return Signature is
+   function SHA1 (File : access Handler) return Signature is
       use type SHA.Strings.Hex_SHA_String;
    begin
-      if not Exists (File) then
-         raise IO_Exceptions.Name_Error
-            with "File " & (-File.Full_Name) & " does not exist.";
-      end if;
-
       if File.SHA1 = No_SHA1 then
+         if not Exists (File.all) then
+            raise IO_Exceptions.Name_Error
+               with "File " & (-File.Full_Name) & " does not exist.";
+         end if;
+
          declare
             F      : Stream_IO.File_Type;
             Ctx    : SHA.Process_Data.Context;
@@ -116,7 +118,7 @@ package body Savadur.Signed_Files is
             Stream_IO.Close (F);
 
             SHA.Process_Data.Finalize (Digest, Ctx);
-            File.Self.SHA1 := Signature
+            File.SHA1 := Signature
               (Characters.Handling.To_Lower
                  (String (SHA.Strings.Hex_From_SHA (Digest))));
          end;
@@ -124,5 +126,29 @@ package body Savadur.Signed_Files is
 
       return File.SHA1;
    end SHA1;
+
+   -------------------------
+   -- To_External_Handler --
+   -------------------------
+
+   function To_External_Handler
+     (File : access Handler) return External_Handler is
+   begin
+      return External_Handler (Name (File.all))
+        & "@" & External_Handler (SHA1 (File));
+   end To_External_Handler;
+
+   ----------------
+   -- To_Handler --
+   ----------------
+
+   function To_Handler (File : in External_Handler) return Handler is
+      K : constant Natural := Strings.Fixed.Index (String (File), "@");
+   begin
+      return H : Handler do
+         H.Name  := +String (File (File'First .. K - 1));
+         H.SHA1  := Signature (File (K + 1 .. File'Last));
+      end return;
+   end To_Handler;
 
 end Savadur.Signed_Files;

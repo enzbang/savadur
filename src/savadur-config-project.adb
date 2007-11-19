@@ -20,9 +20,10 @@
 ------------------------------------------------------------------------------
 
 with Ada.Directories;
+with Ada.Exceptions;
+with Ada.IO_Exceptions;
 with Ada.Strings.Unbounded;
 with Ada.Text_IO;
-with Ada.Exceptions;
 
 with GNAT.Case_Util;
 
@@ -32,6 +33,7 @@ with Sax.Attributes;
 with Input_Sources.File;
 with Unicode.CES;
 
+with Savadur.Logs;
 with Savadur.Utils;
 with Savadur.Variables;
 with Savadur.Scenarios;
@@ -89,7 +91,11 @@ package body Savadur.Config.Project is
 
    function Get_Attribute (S : in String) return Attribute;
    --  Returns the attributed value matching the given string or raise
-   --  Config_Error
+   --  Config_Error.
+
+   function Internal_Parse
+     (Filename : in String) return Projects.Project_Config;
+   --  Parse the given filename and return the parsed project
 
    --  SAX overloaded routines to parse the incoming XML stream.
 
@@ -206,6 +212,20 @@ package body Savadur.Config.Project is
       Handler.Content_Value := Null_Unbounded_String;
    end End_Element;
 
+   ---------
+   -- Get --
+   ---------
+
+   function Get (Project_Name : in String) return Projects.Project_Config is
+      use Projects.Id_Utils;
+      P : Projects.Project_Config;
+      C : Projects.Sets.Sets.Cursor;
+   begin
+      P.Project_Id := Value (Project_Name);
+      C := Configurations.Find (P);
+      return Projects.Sets.Sets.Element (C);
+   end Get;
+
    -------------------
    -- Get_Attribute --
    -------------------
@@ -244,25 +264,19 @@ package body Savadur.Config.Project is
       raise Config_Error with "Unknown node " & S;
    end Get_Node_Value;
 
-   -----------
-   -- Parse --
-   -----------
+   --------------------
+   -- Internal_Parse --
+   --------------------
 
-   function Parse
-     (Project_Name : in String;
-      Filename     : in String := "") return Projects.Project_Config
+   function Internal_Parse
+     (Filename : in String) return Projects.Project_Config
    is
       Reader : Tree_Reader;
       Source : Input_Sources.File.File_Input;
    begin
       --  Set the project name
 
-      Reader.Current_Project.Project_Id :=
-        Projects.Id_Utils.Value (Project_Name);
-
-      if Filename /= "" then
-         Projects.Set_Filename (Reader.Current_Project'Access, Filename);
-      end if;
+      Projects.Set_Filename (Reader.Current_Project'Access, Filename);
 
       if not Directories.Exists
         (Projects.Project_Filename (Reader.Current_Project'Access))
@@ -271,21 +285,80 @@ package body Savadur.Config.Project is
            & Projects.Project_Filename (Reader.Current_Project'Access);
       end if;
 
-      --  Get default variable;
-
-      Savadur.Variables.Default (Reader.Current_Project'Access);
-
       Input_Sources.File.Open
-        (Filename => Projects.Project_Filename
-           (Reader.Current_Project'Access),
+        (Filename => Projects.Project_Filename (Reader.Current_Project'Access),
          Input    => Source);
 
       Parse (Reader, Source);
 
       Input_Sources.File.Close (Source);
 
+      --  Get default variable;
+
+      Savadur.Variables.Default (Reader.Current_Project'Access);
+
       return Reader.Current_Project;
+   end Internal_Parse;
+
+   -----------
+   -- Parse --
+   -----------
+
+   procedure Parse is
+      use Ada.Directories;
+      Dir : constant String :=
+              Directories.Compose
+                (Containing_Directory => Config.Savadur_Directory,
+                 Name                 => "projects");
+      S   : Search_Type;
+      D   : Directory_Entry_Type;
+   begin
+      Start_Search
+        (Search    => S,
+         Directory => Dir,
+         Pattern   => "*.xml",
+         Filter    => Filter_Type'(Ordinary_File => True,
+                                   Directory     => False,
+                                   Special_File  => False));
+
+      Walk_Directories : while More_Entries (S) loop
+         Get_Next_Entry (S, D);
+         Load_Config : declare
+            Filename : constant String := Full_Name (D);
+            Project  : Projects.Project_Config;
+            pragma Unreferenced (Project);
+         begin
+            Logs.Write (Content => "Read Project config file : " & Filename,
+                        Kind    => Logs.Verbose);
+            Project := Parse (Filename);
+         end Load_Config;
+      end loop Walk_Directories;
+   exception
+      when IO_Exceptions.Name_Error =>
+         raise Config_Error with " No Project Directory ? (" & Dir & ')';
    end Parse;
+
+   function Parse (Filename : in String) return Projects.Project_Config is
+      Project : constant Projects.Project_Config := Internal_Parse (Filename);
+   begin
+      Configurations.Insert (Project);
+      return Project;
+   end Parse;
+
+   ------------
+   -- Reload --
+   ------------
+
+   procedure Reload (Project_Name : in String) is
+      Old_Project : aliased Projects.Project_Config := Get (Project_Name);
+      Filename    : constant String :=
+                      Projects.Project_Filename (Old_Project'Access);
+      New_Project : constant Projects.Project_Config :=
+                      Internal_Parse (Filename);
+   begin
+      Configurations.Include (New_Project);
+   end Reload;
+
    -------------------
    -- Start_Element --
    -------------------

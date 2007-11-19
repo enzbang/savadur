@@ -19,15 +19,15 @@
 --  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.       --
 ------------------------------------------------------------------------------
 
-with Ada.Directories;
 with Ada.Strings.Unbounded;
 
 with Savadur.Config.Project;
 with Savadur.Config.Server;
 with Savadur.Logs;
+with Savadur.Projects.Sets;
 with Savadur.Servers;
 with Savadur.Client_Service.Client;
-with Savadur.Web_Services.Client;
+with Savadur.Signed_Files;
 with Savadur.Utils;
 
 package body Savadur.Remote_Files is
@@ -41,18 +41,18 @@ package body Savadur.Remote_Files is
    ------------------
 
    function Load_Project
-     (Project : in String;
-      SHA1    : in Signed_Files.Signature) return Projects.Project_Config
+     (Signed_Project : in Web_Services.Client.Signed_Project)
+      return Projects.Project_Config
    is
       use type Signed_Files.Signature;
 
       procedure Download (Cursor : in Servers.Sets.Cursor);
       --  Tries downloading Project from this server
 
-      Project_Filename : constant String :=
-                           Directories.Compose
-                             (Config.Project_File_Directory,
-                              Project, Extension => "xml");
+      Project          : aliased Signed_Files.Handler :=
+                           Signed_Files.To_Handler
+                             (Signed_Files.External_Handler (Signed_Project));
+      Project_Name     : constant String := Signed_Files.Name (Project);
 
       Done             : Boolean := False;
       Found            : Boolean := False;
@@ -62,34 +62,45 @@ package body Savadur.Remote_Files is
       --------------
 
       procedure Download (Cursor : in Servers.Sets.Cursor) is
-         Server  : constant Servers.Server := Servers.Sets.Element (Cursor);
-         Content : Unbounded_String;
+         use type Web_Services.Client.Project_Data;
+         Server : constant Servers.Server := Servers.Sets.Element (Cursor);
+         Data   : Web_Services.Client.Project_Data;
       begin
          if not Done then
             Logs.Write
-              ("Try loading " & Project_Filename & " from " & (-Server.URL));
-            Content := +Client_Service.Client.Load_Project
-              (Project,
-               String (SHA1), -Server.URL);
+              ("Try loading " & Project_Name & " from " & (-Server.URL));
+            Data := Client_Service.Client.Load_Project
+              (Signed_Project, -Server.URL);
 
-            if Content /= Null_Unbounded_String then
+            if Data /= Web_Services.Client.No_Data then
                Logs.Write ("   found.");
-               Utils.Set_Content (Project_Filename, -Content);
+               Utils.Set_Content (-Data.Filename, -Data.Content);
+               Config.Project.Reload (Project_Name);
                Done := True;
             end if;
          end if;
       end Download;
 
    begin
-      Logs.Write ("Load_Project " & Project_Filename);
-      if Directories.Exists (Project_Filename) then
-         Logs.Write ("   file exists");
-         declare
-            S_File : Signed_Files.Handler;
-         begin
-            Signed_Files.Create (S_File, Project_Filename);
+      Logs.Write ("Load_Project " & Project_Name);
 
-            if Signed_Files.SHA1 (S_File) = SHA1 then
+      if Projects.Sets.Keys.Contains
+        (Config.Project.Configurations, Project_Name)
+      then
+         Logs.Write ("   project exists");
+         declare
+            Proj             : aliased Projects.Project_Config :=
+                                 Config.Project.Get (Project_Name);
+            Project_Filename : constant String :=
+                                 Projects.Project_Filename (Proj'Access);
+            Local_Project    : aliased Signed_Files.Handler;
+         begin
+            Signed_Files.Create
+              (Local_Project, Project_Name, Project_Filename);
+
+            if Signed_Files.SHA1 (Local_Project'Access) =
+              Signed_Files.SHA1 (Project'Access)
+            then
                Logs.Write ("   is already up-to-date");
                Found := True;
             else
@@ -104,9 +115,9 @@ package body Savadur.Remote_Files is
       end if;
 
       if Found then
-         return Config.Project.Parse (Project, Project_Filename);
+         return Config.Project.Get (Project_Name);
       else
-         raise Unknown_File with "Cannot found project " & Project;
+         raise Unknown_File with "Cannot found project " & Project_Name;
       end if;
    end Load_Project;
 

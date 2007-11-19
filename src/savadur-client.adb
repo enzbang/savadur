@@ -179,6 +179,7 @@ procedure Savadur.Client is
       --  Parse the servers
 
       Config.Server.Parse;
+      Config.Project.Parse;
 
       if Config.Server.Configurations.Length = 0 then
          Logs.Write

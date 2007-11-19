@@ -38,14 +38,14 @@ package body Signed_Files is
       pragma Unreferenced (T);
       use type SHA.Strings.Hex_SHA_String;
       Filename : constant String := "config/servers/another.xml";
-      H        : Savadur.Signed_Files.Handler;
+      H        : aliased Savadur.Signed_Files.Handler;
    begin
-      Savadur.Signed_Files.Create (H, Name => Filename);
+      Savadur.Signed_Files.Create (H, Name => "another", Filename => Filename);
       Assertions.Assert
-        (Savadur.Signed_Files.SHA1 (H) =
+        (Savadur.Signed_Files.SHA1 (H'Access) =
            "0f3eee5c1cb57be993a14a63091c41aca754f483",
          "Wrong file signature for " & Filename
-         & " found '" & String (Savadur.Signed_Files.SHA1 (H)) & ''');
+         & " found '" & String (Savadur.Signed_Files.SHA1 (H'Access)) & ''');
    end Check_Signed_Files;
 
    ----------

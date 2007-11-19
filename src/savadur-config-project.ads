@@ -19,15 +19,25 @@
 --  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.       --
 ------------------------------------------------------------------------------
 
-with Savadur.Projects;
+with Savadur.Projects.Sets;
 
 package Savadur.Config.Project is
 
    Config_Error : exception;
 
-   function Parse
-     (Project_Name : in String;
-      Filename     : in String := "") return Projects.Project_Config;
-   --  Returns the project configuration read in the given file
+   Configurations : Savadur.Projects.Sets.Set;
+
+   procedure Parse;
+   --  Parse all projects
+
+   function Get (Project_Name : in String) return Projects.Project_Config;
+   --  Returns the project with the given name
+
+   procedure Reload (Project_Name : in String);
+   --  Reload project name
+
+   function Parse (Filename : in String) return Projects.Project_Config;
+   --  Returns the project configuration read in the given file, add it to the
+   --  sets of known projects.
 
 end Savadur.Config.Project;

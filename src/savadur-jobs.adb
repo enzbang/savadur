@@ -33,6 +33,7 @@ with Savadur.Projects;
 with Savadur.Remote_Files;
 with Savadur.Scenarios;
 with Savadur.Utils;
+with Savadur.Web_Services.Client;
 
 package body Savadur.Jobs is
 
@@ -42,15 +43,13 @@ package body Savadur.Jobs is
    use Savadur.Utils;
 
    type Job_Data is record
-      Project  : Unbounded_String;
+      Project  : aliased Signed_Files.Handler;
       Scenario : Unbounded_String;
-      SHA1     : Signed_Files.Signature;
    end record;
 
    End_Job : constant Job_Data :=
-               (Null_Unbounded_String,
-                Null_Unbounded_String,
-                Signed_Files.No_SHA1);
+               (Project  => <>,
+                Scenario => Null_Unbounded_String);
 
    package Job_List is new Containers.Doubly_Linked_Lists (Job_Data);
 
@@ -71,14 +70,12 @@ package body Savadur.Jobs is
    ---------
 
    procedure Add
-     (Project_Name : in String;
-      Scenario     : in String;
-      SHA1         : in Signed_Files.Signature) is
+     (Project  : in Signed_Files.Handler;
+      Scenario : in String) is
    begin
       Job_Handler.Add
-        (Job_Data'(Project  => +Project_Name,
-                   Scenario => +Scenario,
-                   SHA1     => SHA1));
+        (Job_Data'(Project  => Project,
+                   Scenario => +Scenario));
    end Add;
 
    Runner : Run_Jobs_Handler;
@@ -135,8 +132,8 @@ package body Savadur.Jobs is
       use Projects.Id_Utils;
       use SCM.Id_Utils;
 
-      Job     : Job_Data;
       Project : aliased Projects.Project_Config;
+      Job     : Job_Data;
       Env_Var : Environment_Variables.Maps.Map;
       SCM     : Savadur.SCM.SCM;
    begin
@@ -146,11 +143,15 @@ package body Savadur.Jobs is
          exit Jobs_Loop when Job = End_Job;
 
          begin
-            Logs.Write ("Run : " & (-Job.Scenario) & ", " & (-Job.Project));
+            Logs.Write
+              ("Run : " & (-Job.Scenario) & ", "
+               & Signed_Files.Name (Job.Project));
 
             --  Look for project file
 
-            Project := Remote_Files.Load_Project (-Job.Project, Job.SHA1);
+            Project := Remote_Files.Load_Project
+              (Web_Services.Client.Signed_Project
+                 (Signed_Files.To_External_Handler (Job.Project'Access)));
 
             Logs.Write ("Project Id : " & (-Project.Project_Id));
             Logs.Write ("SCM Id     : " & (-Project.SCM_Id));
