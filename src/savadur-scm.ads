@@ -60,6 +60,8 @@ package Savadur.SCM is
    function Hash (Key : in SCM) return Containers.Hash_Type;
    --  Renames Strings.Hash
 
+   function "=" (S1, S2 : in SCM) return Boolean;
+
    package Sets is new Ada.Containers.Indefinite_Hashed_Sets
      (Element_Type        => SCM,
       Hash                => Hash,

@@ -23,6 +23,15 @@ with Ada.Strings.Hash;
 
 package body Savadur.SCM is
 
+   ---------
+   -- "=" --
+   ---------
+
+   function "=" (S1, S2 : in SCM) return Boolean is
+   begin
+      return S1.Id = S2.Id;
+   end "=";
+
    ----------
    -- Hash --
    ----------
