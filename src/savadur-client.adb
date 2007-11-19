@@ -171,12 +171,9 @@ procedure Savadur.Client is
       end Register;
 
    begin
-      --  Parse SCM configuration files ???
+      --  Parse configuration files
 
       Config.SCM.Parse;
-
-      --  Parse the servers
-
       Config.Server.Parse;
       Config.Project.Parse;
 

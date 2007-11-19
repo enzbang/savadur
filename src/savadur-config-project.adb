@@ -218,11 +218,9 @@ package body Savadur.Config.Project is
 
    function Get (Project_Name : in String) return Projects.Project_Config is
       use Projects.Id_Utils;
-      P : Projects.Project_Config;
       C : Projects.Sets.Sets.Cursor;
    begin
-      P.Project_Id := Value (Project_Name);
-      C := Configurations.Find (P);
+      C := Projects.Sets.Keys.Find (Configurations, Project_Name);
       return Projects.Sets.Sets.Element (C);
    end Get;
 
