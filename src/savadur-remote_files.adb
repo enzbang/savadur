@@ -21,6 +21,7 @@
 
 with Ada.Strings.Unbounded;
 
+with Savadur.Config.SCM;
 with Savadur.Config.Project;
 with Savadur.Config.Server;
 with Savadur.Logs;
@@ -29,6 +30,8 @@ with Savadur.Servers;
 with Savadur.Client_Service.Client;
 with Savadur.Signed_Files;
 with Savadur.Utils;
+
+with Savadur.Web_Services.Client;
 
 package body Savadur.Remote_Files is
 
@@ -41,20 +44,16 @@ package body Savadur.Remote_Files is
    ------------------
 
    function Load_Project
-     (Signed_Project : in Web_Services.Client.Signed_Project)
-      return Projects.Project_Config
+     (Project_Name : in String) return Projects.Project_Config
    is
       use type Signed_Files.Signature;
 
       procedure Download (Cursor : in Servers.Sets.Cursor);
       --  Tries downloading Project from this server
 
-      Project          : aliased Signed_Files.Handler :=
-                           Signed_Files.To_Handler
-                             (Signed_Files.External_Handler (Signed_Project));
-      Project_Name     : constant String := Signed_Files.Name (Project);
+      Signed_Project   : aliased Signed_Files.Handler;
 
-      Done             : Boolean := False;
+      Loaded           : Boolean := False;
       Found            : Boolean := False;
 
       --------------
@@ -62,21 +61,24 @@ package body Savadur.Remote_Files is
       --------------
 
       procedure Download (Cursor : in Servers.Sets.Cursor) is
-         use type Web_Services.Client.Project_Data;
+         use type Web_Services.Client.File_Data;
          Server : constant Servers.Server := Servers.Sets.Element (Cursor);
-         Data   : Web_Services.Client.Project_Data;
+         Data   : Web_Services.Client.File_Data;
       begin
-         if not Done then
+         if not Loaded then
             Logs.Write
               ("Try loading " & Project_Name & " from " & (-Server.URL));
-            Data := Client_Service.Client.Load_Project
-              (Signed_Project, -Server.URL);
 
-            if Data /= Web_Services.Client.No_Data then
-               Logs.Write ("   found.");
+            Data := Client_Service.Client.Load_Project
+              (Web_Services.Client.Signed_Project
+                 (Signed_Files.To_External_Handler (Signed_Project)),
+                  -Server.URL);
+
+            if Data /= Web_Services.Client.No_File then
+               Logs.Write ("   found new or updated");
                Utils.Set_Content (-Data.Filename, -Data.Content);
                Config.Project.Reload (Project_Name);
-               Done := True;
+               Loaded := True;
             end if;
          end if;
       end Download;
@@ -89,36 +91,100 @@ package body Savadur.Remote_Files is
       then
          Logs.Write ("   project exists");
          declare
-            Proj             : aliased Projects.Project_Config :=
+            Project          : aliased Projects.Project_Config :=
                                  Config.Project.Get (Project_Name);
             Project_Filename : constant String :=
-                                 Projects.Project_Filename (Proj'Access);
-            Local_Project    : aliased Signed_Files.Handler;
+                                 Projects.Project_Filename (Project'Access);
          begin
             Signed_Files.Create
-              (Local_Project, Project_Name, Project_Filename);
-
-            if Signed_Files.SHA1 (Local_Project'Access) =
-              Signed_Files.SHA1 (Project'Access)
-            then
-               Logs.Write ("   is already up-to-date");
-               Found := True;
-            else
-               Logs.Write ("   is not up-to-date");
-            end if;
+              (Signed_Project, Project_Name, Project_Filename);
+            Found := True;
          end;
+
+      else
+         Logs.Write ("   project does not exist");
+         Signed_Files.Create (Signed_Project, Project_Name, "");
       end if;
 
-      if not Found then
-         --  Try to download it from known servers
-         Config.Server.Configurations.Iterate (Download'Access);
-      end if;
+      --  Download the project from the servers if not up-to-date
 
-      if Found then
+      Config.Server.Configurations.Iterate (Download'Access);
+
+      if Found or else Loaded then
          return Config.Project.Get (Project_Name);
       else
          raise Unknown_File with "Cannot found project " & Project_Name;
       end if;
    end Load_Project;
+
+   --------------
+   -- Load_SCM --
+   --------------
+
+   function Load_SCM (SCM_Name : in String) return SCM.SCM is
+      use SCM.Id_Utils;
+
+      procedure Download (Cursor : in Servers.Sets.Cursor);
+      --  Tries downloading SCM from this server
+
+      Signed_SCM : aliased Signed_Files.Handler;
+      Loaded     : Boolean := False;
+      Found      : Boolean := False;
+
+      --------------
+      -- Download --
+      --------------
+
+      procedure Download (Cursor : in Servers.Sets.Cursor) is
+         use type Web_Services.Client.File_Data;
+         Server : constant Servers.Server := Servers.Sets.Element (Cursor);
+         Data   : Web_Services.Client.File_Data;
+      begin
+         if not Loaded then
+            Logs.Write
+              ("Try loading " & SCM_Name & " from " & (-Server.URL));
+
+            Data := Client_Service.Client.Load_SCM
+              (Web_Services.Client.Signed_SCM
+                 (Signed_Files.To_External_Handler (Signed_SCM)),
+                  -Server.URL);
+
+            if Data /= Web_Services.Client.No_File then
+               Logs.Write ("   found new or updated");
+               Utils.Set_Content (-Data.Filename, -Data.Content);
+               Config.SCM.Reload (SCM_Name);
+               Loaded := True;
+            end if;
+         end if;
+      end Download;
+
+   begin
+      Logs.Write ("Load_SCM " & SCM_Name);
+
+      if SCM.Keys.Contains (Config.SCM.Configurations, Value (SCM_Name)) then
+         Logs.Write ("   SCM exists");
+         declare
+            S            : aliased SCM.SCM := Config.SCM.Get (SCM_Name);
+            SCM_Filename : constant String := -S.Filename;
+         begin
+            Signed_Files.Create (Signed_SCM, SCM_Name, SCM_Filename);
+            Found := True;
+         end;
+
+      else
+         Logs.Write ("   SCM does not exist");
+         Signed_Files.Create (Signed_SCM, SCM_Name, "");
+      end if;
+
+      --  Download the project from the servers if not up-to-date
+
+      Config.Server.Configurations.Iterate (Download'Access);
+
+      if Found or else Loaded then
+         return Config.SCM.Get (SCM_Name);
+      else
+         raise Unknown_File with "Cannot found project " & SCM_Name;
+      end if;
+   end Load_SCM;
 
 end Savadur.Remote_Files;

@@ -19,18 +19,20 @@
 --  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.       --
 ------------------------------------------------------------------------------
 
+with Savadur.SCM;
 with Savadur.Projects;
---  with Savadur.Signed_Files;
-with Savadur.Web_Services.Client;
 
 package Savadur.Remote_Files is
 
    Unknown_File : exception;
 
    function Load_Project
-     (Signed_Project : in Web_Services.Client.Signed_Project)
-      return Projects.Project_Config;
+     (Project_Name : in String) return Projects.Project_Config;
    --  Returns the project, try to download it from all known server if not
+   --  found locally. Raises Unknown_File if the file cannot be found.
+
+   function Load_SCM (SCM_Name : in String) return SCM.SCM;
+   --  Returns the SCM, try to download it from all known server if not
    --  found locally. Raises Unknown_File if the file cannot be found.
 
 end Savadur.Remote_Files;

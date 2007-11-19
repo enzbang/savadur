@@ -24,7 +24,6 @@ with Ada.Exceptions;
 with Ada.Strings.Unbounded;
 
 with Savadur.Build;
-with Savadur.Config.SCM;
 with Savadur.Config.Environment_Variables;
 with Savadur.Environment_Variables;
 with Savadur.SCM;
@@ -33,7 +32,6 @@ with Savadur.Projects;
 with Savadur.Remote_Files;
 with Savadur.Scenarios;
 with Savadur.Utils;
-with Savadur.Web_Services.Client;
 
 package body Savadur.Jobs is
 
@@ -136,6 +134,7 @@ package body Savadur.Jobs is
       Job     : Job_Data;
       Env_Var : Environment_Variables.Maps.Map;
       SCM     : Savadur.SCM.SCM;
+      pragma Unreferenced (SCM);
    begin
       Jobs_Loop : loop
          Job_Handler.Get (Job);
@@ -150,36 +149,28 @@ package body Savadur.Jobs is
             --  Look for project file
 
             Project := Remote_Files.Load_Project
-              (Web_Services.Client.Signed_Project
-                 (Signed_Files.To_External_Handler (Job.Project'Access)));
+              (Signed_Files.Name (Job.Project));
 
             Logs.Write ("Project Id : " & (-Project.Project_Id));
             Logs.Write ("SCM Id     : " & (-Project.SCM_Id));
 
             --  Check if we know about this SCM
 
-            SCM.Id := Project.SCM_Id;
+            SCM := Remote_Files.Load_SCM (-Project.SCM_Id);
 
-            if Config.SCM.Configurations.Contains (SCM) then
-               --  We can run the job
+            --  We can run the job
 
-               Env_Var :=
-                 Savadur.Config.Environment_Variables.Parse (Project'Access);
+            Env_Var :=
+              Savadur.Config.Environment_Variables.Parse (Project'Access);
 
-               if Savadur.Build.Run
-                 (Project => Project'Access,
-                  Env_Var => Env_Var,
-                  Id      => Scenarios.Id (Job.Scenario))
-               then
-                  Logs.Write ("Success");
-               else
-                  Logs.Write ("Failure");
-               end if;
-
+            if Savadur.Build.Run
+              (Project => Project'Access,
+               Env_Var => Env_Var,
+               Id      => Scenarios.Id (Job.Scenario))
+            then
+               Logs.Write ("Success");
             else
-               --  ??? we have to load it
-               Logs.Write ("Need to load the SCM");
-               --  ??? TBD
+               Logs.Write ("Failure");
             end if;
 
          exception

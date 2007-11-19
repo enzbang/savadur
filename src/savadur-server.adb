@@ -19,8 +19,6 @@
 --  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.       --
 ------------------------------------------------------------------------------
 
---  with Ada.Directories;
-
 with Savadur.Config.Project;
 with Savadur.Config.SCM;
 with Savadur.Logs;
@@ -31,7 +29,6 @@ with Savadur.Web.Server;
 with Savadur.Web_Services.Server;
 
 procedure Savadur.Server is
---     use Ada;
 begin
    Config.SCM.Parse;
    Config.Project.Parse;
@@ -48,14 +45,14 @@ begin
                            Config.Project.Get (Project_Name);
       Project_Filename : constant String :=
                            Projects.Project_Filename (Project'Access);
-      Signed_Project   : aliased Signed_Files.Handler;
+      Signed_Project   : Signed_Files.Handler;
    begin
       Signed_Files.Create (Signed_Project, Project_Name, Project_Filename);
 
       Savadur.Server_Service.Client.Run
-        (Scenario       => "nightly",
+        (Scenario       => "default",
          Signed_Project =>
            Web_Services.Server.Signed_Project
-             (Signed_Files.To_External_Handler (Signed_Project'Access)));
+             (Signed_Files.To_External_Handler (Signed_Project)));
    end;
 end Savadur.Server;

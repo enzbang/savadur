@@ -33,11 +33,13 @@ with Unicode.CES;
 
 with Savadur.Actions;
 with Savadur.Logs;
+with Savadur.Utils;
 
 package body Savadur.Config.SCM is
 
    use Ada;
    use Ada.Strings.Unbounded;
+   use Savadur.Utils;
 
    type Node_Value is (SCM, Name, Action, Cmd);
 
@@ -65,6 +67,10 @@ package body Savadur.Config.SCM is
    --  Returns the attribute value matching the given string or raise
    --  Config_Error.
 
+   function Internal_Parse (Filename : in String) return Savadur.SCM.SCM;
+   --  Parse an SCM in the give filename
+
+   --  Parse the given filename and return the parsed project
    --  SAX overloaded routines to parse the incoming XML stream.
 
    type Tree_Reader is new Sax.Readers.Reader with record
@@ -130,6 +136,18 @@ package body Savadur.Config.SCM is
       Handler.Content_Value := Null_Unbounded_String;
    end End_Element;
 
+   ---------
+   -- Get --
+   ---------
+
+   function Get (SCM_Name : in String) return Savadur.SCM.SCM is
+      use Savadur.SCM.Id_Utils;
+      C : Savadur.SCM.Sets.Cursor;
+   begin
+      C := Savadur.SCM.Keys.Find (Configurations, Value (SCM_Name));
+      return Savadur.SCM.Sets.Element (C);
+   end Get;
+
    -------------------
    -- Get_Attribute --
    -------------------
@@ -168,15 +186,36 @@ package body Savadur.Config.SCM is
       raise Config_Error with "Unknown node " & S;
    end Get_Node_Value;
 
+   --------------------
+   -- Internal_Parse --
+   --------------------
+
+   function Internal_Parse (Filename : in String) return Savadur.SCM.SCM is
+      Reader : Tree_Reader;
+      Source : Input_Sources.File.File_Input;
+   begin
+      Reader.SCM :=
+        Savadur.SCM.SCM'
+          (Id       => Savadur.SCM.Id_Utils.Nil,
+           Actions  => Actions.Sets.Empty_Set,
+           Filename => +Filename);
+
+      Input_Sources.File.Open
+        (Filename => Filename,
+         Input    => Source);
+
+      Parse (Reader, Source);
+      Input_Sources.File.Close (Source);
+
+      return Reader.SCM;
+   end Internal_Parse;
+
    -----------
    -- Parse --
    -----------
 
    procedure Parse is
       use Ada.Directories;
-
-      Reader : Tree_Reader;
-      Source : Input_Sources.File.File_Input;
 
       S : Search_Type;
       D : Directory_Entry_Type;
@@ -199,27 +238,25 @@ package body Savadur.Config.SCM is
             Logs.Write (Content => "Read SCM config file : " & Filename,
                         Kind    => Logs.Verbose);
 
-            Reader.SCM :=
-              Savadur.SCM.SCM'(Id      => Savadur.SCM.Id_Utils.Nil,
-                               Actions => Actions.Sets.Empty_Set);
-
-            Input_Sources.File.Open
-              (Filename => Filename,
-               Input    => Source);
-
-            Parse (Reader, Source);
-            Input_Sources.File.Close (Source);
-
-            Savadur.SCM.Sets.Insert
-              (Container => Configurations,
-               New_Item  => Reader.SCM);
-
+            Configurations.Insert (Internal_Parse (Filename));
          end Load_Config;
       end loop Walk_Directories;
    exception
       when IO_Exceptions.Name_Error =>
          raise Config_Error with " No SCM Directory ?";
    end Parse;
+
+   ------------
+   -- Reload --
+   ------------
+
+   procedure Reload (SCM_Name : in String) is
+      Old_SCM  : aliased Savadur.SCM.SCM := Get (SCM_Name);
+      Filename : constant String := -Old_SCM.Filename;
+      New_SCM  : constant Savadur.SCM.SCM := Internal_Parse (Filename);
+   begin
+      Configurations.Include (New_SCM);
+   end Reload;
 
    -------------------
    -- Start_Element --

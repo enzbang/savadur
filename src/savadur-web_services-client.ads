@@ -38,15 +38,21 @@ package Savadur.Web_Services.Client is
 
    type Signed_Project is new String;
 
-   type Project_Data is record
+   type File_Data is record
       Filename : Unbounded_String;
       Content  : Unbounded_String;
    end record;
 
-   No_Data : constant Project_Data;
+   No_File : constant File_Data;
 
    function Load_Project
-     (Signed_Project : in Client.Signed_Project) return Project_Data;
+     (Signed_Project : in Client.Signed_Project) return File_Data;
+   --  Returns the project content from a server
+
+   type Signed_SCM is new String;
+
+   function Load_SCM
+     (Signed_SCM : in Client.Signed_SCM) return File_Data;
    --  Returns the project content from a server
 
    type Returned_Status is (Success, Failure);
@@ -63,7 +69,7 @@ package Savadur.Web_Services.Client is
 
 private
 
-   No_Data : constant Project_Data :=
+   No_File : constant File_Data :=
                (Null_Unbounded_String, Null_Unbounded_String);
 
 end Savadur.Web_Services.Client;

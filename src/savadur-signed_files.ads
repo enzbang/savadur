@@ -46,7 +46,7 @@ package Savadur.Signed_Files is
    function Full_Name (File : in Handler) return String;
    --  Returns File's full pathname
 
-   function SHA1 (File : access Handler) return Signature;
+   function SHA1 (File : in Handler) return Signature;
    --  Returns File's SHA1 signature, compute it if not already done
 
    type External_Handler is new String;
@@ -55,7 +55,7 @@ package Savadur.Signed_Files is
    --  Convert to an internal handler representation
 
    function To_External_Handler
-     (File : access Handler) return External_Handler;
+     (File : in Handler) return External_Handler;
    --  Convert to an external handler representation for the Web Services
 
 private

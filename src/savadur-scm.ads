@@ -46,8 +46,9 @@ package Savadur.SCM is
    package Id_Utils is new Generic_Utils (Source => Id);
 
    type SCM is record
-      Id      : Savadur.SCM.Id;
-      Actions : Savadur.Actions.Sets.Set;
+      Id       : Savadur.SCM.Id;
+      Actions  : Savadur.Actions.Sets.Set;
+      Filename : Unbounded_String;
    end record;
 
    function Image (SCM : in Savadur.SCM.SCM) return String;

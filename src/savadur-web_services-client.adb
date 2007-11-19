@@ -23,9 +23,11 @@
 with Ada.Text_IO;
 
 with Savadur.Clients;
+with Savadur.Config.SCM;
 with Savadur.Config.Project;
 with Savadur.Logs;
 with Savadur.Projects.Sets;
+with Savadur.SCM;
 with Savadur.Signed_Files;
 with Savadur.Utils;
 
@@ -39,7 +41,7 @@ package body Savadur.Web_Services.Client is
    ------------------
 
    function Load_Project
-     (Signed_Project : in Client.Signed_Project) return Project_Data
+     (Signed_Project : in Client.Signed_Project) return File_Data
    is
       use type Signed_Files.Signature;
 
@@ -63,16 +65,16 @@ package body Savadur.Web_Services.Client is
             Signed_Files.Create
               (Local_Project, Project_Name, Project_Filename);
 
-            if Signed_Files.SHA1 (Local_Project'Access) =
-              Signed_Files.SHA1 (Project'Access)
+            if Signed_Files.SHA1 (Local_Project) =
+              Signed_Files.SHA1 (Project)
             then
                Logs.Write ("   up-to-date");
                --  Client up-to-date
-               return No_Data;
+               return No_File;
 
             else
                Logs.Write ("   content returned");
-               return Project_Data'
+               return File_Data'
                  (Filename => +Project_Filename,
                   Content  => +Utils.Content (Project_Filename));
             end if;
@@ -80,9 +82,56 @@ package body Savadur.Web_Services.Client is
 
       else
          Logs.Write ("   project not found!");
-         return No_Data;
+         return No_File;
       end if;
    end Load_Project;
+
+   --------------
+   -- Load_SCM --
+   --------------
+
+   function Load_SCM
+     (Signed_SCM : in Client.Signed_SCM) return File_Data
+   is
+      use SCM.Id_Utils;
+      use type Signed_Files.Signature;
+
+      S_SCM    : aliased Signed_Files.Handler :=
+                   Signed_Files.To_Handler
+                     (Signed_Files.External_Handler (Signed_SCM));
+      SCM_Name : constant String := Signed_Files.Name (S_SCM);
+   begin
+      Logs.Write ("Load_SCM " & SCM_Name);
+
+      if SCM.Keys.Contains
+        (Config.SCM.Configurations, Value (SCM_Name))
+      then
+         declare
+            S            : aliased SCM.SCM := Config.SCM.Get (SCM_Name);
+            SCM_Filename : constant String := -S.Filename;
+            Local_SCM    : aliased Signed_Files.Handler;
+         begin
+            Signed_Files.Create
+              (Local_SCM, SCM_Name, SCM_Filename);
+
+            if Signed_Files.SHA1 (Local_SCM) = Signed_Files.SHA1 (S_SCM) then
+               Logs.Write ("   up-to-date");
+               --  Client up-to-date
+               return No_File;
+
+            else
+               Logs.Write ("   content returned");
+               return File_Data'
+                 (Filename => +SCM_Filename,
+                  Content  => +Utils.Content (SCM_Filename));
+            end if;
+         end;
+
+      else
+         Logs.Write ("   SCM not found!");
+         return No_File;
+      end if;
+   end Load_SCM;
 
    --------------
    -- Register --
