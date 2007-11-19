@@ -49,7 +49,7 @@ package Savadur.Scenarios is
    --  Return Scenario image
 
    ----------
-   -- Maps --
+   -- Sets --
    ----------
 
    function Hash (Key : in Scenario) return Containers.Hash_Type;

@@ -171,10 +171,9 @@ procedure Savadur.Client is
       end Register;
 
    begin
-
       --  Parse SCM configuration files ???
 
-      Savadur.Config.SCM.Parse;
+      Config.SCM.Parse;
 
       --  Parse the servers
 
@@ -267,7 +266,6 @@ procedure Savadur.Client is
 
    procedure Usage (Error_Message : in String := "") is
    begin
-
       --  Display error message if not null
 
       if Error_Message /= "" then
@@ -287,12 +285,11 @@ procedure Savadur.Client is
       Logs.Write ("    -V|-verbose");
       Logs.Write ("    -VV|-very_verbose");
       Logs.Write ("    -server             : run in server mode");
-      Logs.Write ("    -remotelist        : List new remote server");
-      Logs.Write ("    -remoteadd         : Add a new remote server");
+      Logs.Write ("    -remotelist         : List new remote server");
+      Logs.Write ("    -remoteadd          : Add a new remote server");
    end Usage;
 
 begin
-
    GNAT.Command_Line.Initialize_Option_Scan (Section_Delimiters => "remote");
 
    Interate_On_Opt : loop

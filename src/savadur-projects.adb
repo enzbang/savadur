@@ -20,6 +20,7 @@
 ------------------------------------------------------------------------------
 
 with Ada.Directories;
+
 with Savadur.Config;
 
 package body Savadur.Projects is
