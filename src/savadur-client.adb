@@ -211,7 +211,12 @@ procedure Savadur.Client is
 
       Run_Project : declare
          Project : aliased Projects.Project_Config :=
-                     Config.Project.Parse (-Project_Name);
+                     Config.Project.Parse
+                       (Directories.Compose
+                          (Containing_Directory =>
+                             Config.Project_File_Directory,
+                           Name                 => -Project_Name,
+                           Extension            => "xml"));
          Env_Var : Environment_Variables.Maps.Map;
       begin
          Logs.Write
