@@ -2,9 +2,9 @@
 
 cd $(dirname $0)
 
-SAVADUR_DIR=test-dir/server ./bin/savadur-server &
+SAVADUR_DIR=$PWD/test-dir/server ./bin/savadur-server &
 PID_SERVER=$!
-SAVADUR_DIR=test-dir/client ./bin/savadur-client -server &
+SAVADUR_DIR=$PWD/test-dir/client ./bin/savadur-client -server &
 PID_CLIENT=$!
 
 echo "Press any key to stop"
