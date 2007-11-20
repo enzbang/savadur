@@ -36,7 +36,6 @@ package body Savadur.Config.Environment_Variables is
 
    use Ada;
    use Ada.Strings.Unbounded;
-
    use Savadur.Utils;
 
    type Node_Value is (Environment_Variables, Project, Var);
@@ -125,7 +124,6 @@ package body Savadur.Config.Environment_Variables is
       Source : Input_Sources.File.File_Input;
    begin
       if Directories.Exists (Projects.Project_Env_Filename (Project)) then
-
          --  Skip parsing without errors if file not found as having an env
          --  file is not required
 
@@ -163,8 +161,8 @@ package body Savadur.Config.Environment_Variables is
       case NV is
          when Var =>
             New_Var : declare
-               Var_Name  : Unbounded_String;
-               Var       : Savadur.Environment_Variables.Var;
+               Var_Name : Unbounded_String;
+               Var      : Savadur.Environment_Variables.Var;
             begin
                for J in 0 .. Get_Length (Atts) - 1 loop
                   Attr := Get_Attribute (Get_Qname (Atts, J));
