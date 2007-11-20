@@ -19,11 +19,11 @@
 --  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.       --
 ------------------------------------------------------------------------------
 
-with Savadur.Project_List;
+with Savadur.Projects.Sets;
 
 package Savadur.Config.Project_List is
 
-   Configurations : Savadur.Project_List.Sets.Set;
+   Configurations : Savadur.Projects.Sets.Set;
 
    procedure Parse;
    --  Fills the server configuration map
