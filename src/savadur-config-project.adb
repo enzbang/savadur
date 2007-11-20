@@ -221,7 +221,12 @@ package body Savadur.Config.Project is
       C : Projects.Sets.Sets.Cursor;
    begin
       C := Projects.Sets.Keys.Find (Configurations, Project_Name);
-      return Projects.Sets.Sets.Element (C);
+      if Projects.Sets.Sets.Has_Element (C) then
+         return Projects.Sets.Sets.Element (C);
+      else
+         raise IO_Exceptions.Name_Error
+           with "Try loading unknown project " & Project_Name;
+      end if;
    end Get;
 
    -------------------

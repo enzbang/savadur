@@ -23,6 +23,7 @@ with Ada.Containers.Doubly_Linked_Lists;
 with Ada.Exceptions;
 with Ada.Strings.Unbounded;
 
+with Savadur.Actions;
 with Savadur.Build;
 with Savadur.Config.Environment_Variables;
 with Savadur.Environment_Variables;
@@ -152,7 +153,20 @@ package body Savadur.Jobs is
               (Signed_Files.Name (Job.Project));
 
             Logs.Write ("Project Id : " & (-Project.Project_Id));
-            Logs.Write ("SCM Id     : " & (-Project.SCM_Id));
+
+            Logs.Write
+              (Content => "SCM Id     : " & (-Project.SCM_Id),
+               Kind    => Logs.Very_Verbose);
+
+            Logs.Write
+              (Content => "Action list : " & ASCII.LF
+                             & Actions.Image (Project.Actions) & ASCII.LF,
+               Kind    => Logs.Very_Verbose);
+
+            Logs.Write
+              (Content => "Scenarios : " & ASCII.LF
+                            & Scenarios.Image (Project.Scenarios) & ASCII.LF,
+               Kind    => Logs.Very_Verbose);
 
             --  Check if we know about this SCM
 

@@ -39,8 +39,6 @@ with Ada.Directories;
 
 with GNAT.Command_Line;
 
-with Savadur.Actions;
-with Savadur.Build;
 with Savadur.Projects;
 with Savadur.Client_Service.Client;
 with Savadur.Client_Service.Types;
@@ -48,11 +46,11 @@ with Savadur.Config.Environment_Variables;
 with Savadur.Config.Project;
 with Savadur.Config.SCM;
 with Savadur.Config.Server;
-with Savadur.Environment_Variables;
 with Savadur.Jobs;
 with Savadur.Logs;
-with Savadur.Server_Service;
 with Savadur.Scenarios;
+with Savadur.Server_Service;
+with Savadur.Signed_Files;
 with Savadur.SCM;
 with Savadur.Servers;
 with Savadur.Utils;
@@ -177,6 +175,12 @@ procedure Savadur.Client is
       Config.Server.Parse;
       Config.Project.Parse;
 
+      Logs.Write
+        (Content => "SCM Found" & ASCII.LF
+         & Savadur.SCM.Image (Savadur.Config.SCM.Configurations)
+         & ASCII.LF,
+         Kind    => Logs.Very_Verbose);
+
       if Config.Server.Configurations.Length = 0 then
          Logs.Write
            (Content => "No server configured",
@@ -198,11 +202,20 @@ procedure Savadur.Client is
    --------------------
 
    procedure Run_Standalone is
-      --  ??? This part should be moved into Savadur.Jobs
    begin
       --  Parse SCM configuration files
+      --  We do not load the servers description as we want to run in
+      --  standalone mode. In this case the project and SCM won't get checked
+      --  on the server side.
 
       Savadur.Config.SCM.Parse;
+      Savadur.Config.Project.Parse;
+
+      Logs.Write
+        (Content => "SCM Found" & ASCII.LF
+         & Savadur.SCM.Image (Savadur.Config.SCM.Configurations)
+         & ASCII.LF,
+         Kind    => Logs.Very_Verbose);
 
       if To_String (Project_Name) = "" then
          Usage (Error_Message => "no project name");
@@ -210,53 +223,20 @@ procedure Savadur.Client is
       end if;
 
       Run_Project : declare
-         Project : aliased Projects.Project_Config :=
-                     Config.Project.Parse
-                       (Directories.Compose
-                          (Containing_Directory =>
-                             Config.Project_File_Directory,
-                           Name                 => -Project_Name,
-                           Extension            => "xml"));
-         Env_Var : Environment_Variables.Maps.Map;
+         Project        : aliased Projects.Project_Config :=
+                            Config.Project.Get (-Project_Name);
+         Signed_Project : Signed_Files.Handler;
       begin
          Logs.Write
            (Content => "Savadur client" & ASCII.LF,
             Kind    => Logs.Verbose);
 
-         Logs.Write
-           (Content => "SCM : " & ASCII.LF
-            & To_String (Unbounded_String (Project.SCM_Id)) & ASCII.LF,
-            Kind    => Logs.Very_Verbose);
+         Signed_Files.Create
+           (Signed_Project,
+            -Project_Name,
+            Projects.Project_Filename (Project'Access));
 
-         Logs.Write
-           (Content => "Action list : " & ASCII.LF
-            & Actions.Image (Project.Actions) & ASCII.LF,
-            Kind    => Logs.Very_Verbose);
-
-         Logs.Write
-           (Content => "Scenarios : " & ASCII.LF
-            & Scenarios.Image (Project.Scenarios) & ASCII.LF,
-            Kind    => Logs.Very_Verbose);
-
-         Logs.Write
-           (Content => "SCM Found" & ASCII.LF
-            & Savadur.SCM.Image (Savadur.Config.SCM.Configurations)
-            & ASCII.LF,
-            Kind    => Logs.Very_Verbose);
-
-         Env_Var :=
-           Savadur.Config.Environment_Variables.Parse (Project'Access);
-         --  ??? Should be called by Run
-
-         if Savadur.Build.Run
-           (Project => Project'Access,
-            Env_Var => Env_Var,
-            Id      => Scenarios.Id (Scenario_Id))
-         then
-            Logs.Write ("Success");
-         else
-            Logs.Write ("Failure");
-         end if;
+         Jobs.Add (Signed_Project, -Scenario_Id);
       end Run_Project;
 
       Jobs.Stop;
