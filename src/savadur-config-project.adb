@@ -304,10 +304,7 @@ package body Savadur.Config.Project is
 
    procedure Parse is
       use Ada.Directories;
-      Dir : constant String :=
-              Directories.Compose
-                (Containing_Directory => Config.Savadur_Directory,
-                 Name                 => "projects");
+      Dir : constant String := Config.Project_File_Directory;
       S   : Search_Type;
       D   : Directory_Entry_Type;
    begin

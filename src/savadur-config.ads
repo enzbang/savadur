@@ -38,10 +38,14 @@ package Savadur.Config is
    --  Sets savadur directory (overwrite environment variables)
 
    function Work_Directory return String;
-   --  Returns Work directory (create if empty)
+   --  Returns Work directory, creates it if it does not exist
+
+   function SCM_Directory return String;
+   --  Returns SCM directory,  creates it if it does not exist
 
    function Project_File_Directory return String;
    --  Returns project file directory $(savadur_dir)/projects
+   --  Creates it if it does not exist
 
    function Project_Env_Directory return String;
    --  Returns project file directory $(savadur_dir)/env

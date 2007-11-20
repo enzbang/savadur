@@ -222,9 +222,7 @@ package body Savadur.Config.SCM is
    begin
       Start_Search
         (Search    => S,
-         Directory => Directories.Compose
-           (Containing_Directory => Config.Savadur_Directory,
-            Name                 => "scm"),
+         Directory => Config.SCM_Directory,
          Pattern   => "*.xml",
          Filter    => Filter_Type'(Ordinary_File => True,
                                    Directory     => False,

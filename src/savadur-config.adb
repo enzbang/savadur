@@ -50,10 +50,15 @@ package body Savadur.Config is
    ----------------------------
 
    function Project_File_Directory return String is
-   begin
-      return Directories.Compose
+      Dir : constant String := Directories.Compose
         (Containing_Directory => Savadur_Directory,
          Name                 => "projects");
+   begin
+      if not Directories.Exists (Dir) then
+         Directories.Create_Path (Dir);
+      end if;
+
+      return Dir;
    end Project_File_Directory;
 
    -----------------------
@@ -106,6 +111,23 @@ package body Savadur.Config is
    begin
       Directory := +Dir;
    end Set_Savadur_Directory;
+
+   -------------------
+   -- SCM_Directory --
+   -------------------
+
+   function SCM_Directory return String is
+      Dir : constant String :=
+              Directories.Compose
+                (Containing_Directory => Config.Savadur_Directory,
+                 Name                 => "scm");
+   begin
+      if not Directories.Exists (Dir) then
+         Directories.Create_Path (Dir);
+      end if;
+
+      return Dir;
+   end SCM_Directory;
 
    --------------------
    -- Work_Directory --
