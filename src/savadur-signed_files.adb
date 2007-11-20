@@ -46,7 +46,7 @@ package body Savadur.Signed_Files is
    begin
       File.Name := +Name;
 
-      if Directories.Exists (Filename) then
+      if Filename /= "" and then Directories.Exists (Filename) then
          Stream_IO.Open (F, Stream_IO.In_File, Filename);
          File.Full_Name := +Stream_IO.Name (F);
 
