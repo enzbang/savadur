@@ -122,7 +122,7 @@ package body Savadur.Web_Services.Client is
             else
                Logs.Write ("   content returned");
                return File_Data'
-                 (Filename => +SCM_Filename,
+                 (Filename => +Directories.Simple_Name (SCM_Filename),
                   Content  => +Utils.Content (SCM_Filename));
             end if;
          end;

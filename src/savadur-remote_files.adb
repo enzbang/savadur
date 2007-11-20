@@ -159,6 +159,11 @@ package body Savadur.Remote_Files is
 
             if Data /= Web_Services.Client.No_File then
                Logs.Write ("   found new or updated");
+
+               Data.Filename := +Directories.Compose
+                 (Containing_Directory => Config.SCM_Directory,
+                  Name                 => -Data.Filename);
+
                Utils.Set_Content (-Data.Filename, -Data.Content);
                Config.SCM.Reload (SCM_Name);
                Loaded := True;
