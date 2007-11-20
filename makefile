@@ -54,6 +54,9 @@ regtests:
 regtests_bootstrap:
 	$(MAKE) -C test regtests_bootstrap $(OPTIONS)
 
+regtests_clientserver:
+	$(MAKE) -C test regtests_clientserver $(OPTIONS)
+
 clean:
 	$(GNATCLEAN) -P savadur
 	make -C test clean $(OPTIONS)

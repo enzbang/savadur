@@ -39,3 +39,15 @@ regtests_bootstrap: setup
 clean:
 	$(RM) -r test-dir/work test-dir/scm
 	$(GNATCLEAN) -P savadur_regtests
+
+regtests_clientserver: setup_clientserver
+	$(MAKE) -C ../ build IN_TEST=TRUE
+	./clientserver_regtest.sh
+
+setup_clientserver:
+	@$(MKDIR) test-dir/client/servers
+	@$(MKDIR) test-dir/server/projects
+	@$(CP) -r ../config/scm/ test-dir/server
+	@$(CP) config/style_checker.xml test-dir/server/projects/
+	@$(CP) config/servers/localhost.xml test-dir/client/servers/
+

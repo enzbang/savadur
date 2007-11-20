@@ -2,8 +2,8 @@
   <name id="style_checker" />
   <scm id="git" />
 
-  <variable id="url" 
-     value="git+ssh://pobry@repo.or.cz/srv/git/style_checker.git" />
+  <variable id="url"
+     value="http://repo.or.cz/r/style_checker.git" />
 
   <action id="make">
     <cmd>make</cmd>
