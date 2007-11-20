@@ -22,20 +22,22 @@
 with Ada.Strings.Unbounded;
 with Ada.Directories;
 
-with Savadur.Utils;
+with Savadur.Actions;
+with Savadur.Config.Environment_Variables;
 with Savadur.Config.Project;
+with Savadur.Config.Project_List;
 with Savadur.Config.SCM;
 with Savadur.Config.Server;
-with Savadur.Actions;
 with Savadur.Config;
-with Savadur.Scenarios;
-with Savadur.Variables;
-with Savadur.SCM;
 with Savadur.Environment_Variables;
-with Savadur.Config.Environment_Variables;
 with Savadur.Notifications;
-with Savadur.Servers;
 with Savadur.Projects;
+with Savadur.Project_List;
+with Savadur.Scenarios;
+with Savadur.SCM;
+with Savadur.Servers;
+with Savadur.Variables;
+with Savadur.Utils;
 
 with Utils;
 
@@ -56,6 +58,9 @@ package body Config_Parse is
      (T : in out AUnit.Test_Cases.Test_Case'Class);
 
    procedure Check_Server_Config
+     (T : in out AUnit.Test_Cases.Test_Case'Class);
+
+   procedure Check_Project_List
      (T : in out AUnit.Test_Cases.Test_Case'Class);
 
    --------------------------
@@ -152,6 +157,38 @@ package body Config_Parse is
          Savadur.Notifications.Image (Project.Notifications));
    end Check_Project_Config;
 
+   ------------------------
+   -- Check_Project_List --
+   ------------------------
+
+   procedure Check_Project_List
+     (T : in out AUnit.Test_Cases.Test_Case'Class)
+   is
+      pragma Unreferenced (T);
+   begin
+      Savadur.Config.Project_List.Parse;
+      Assertions.Assert
+        (Utils.Strip (Savadur.Project_List.Image
+         (Savadur.Config.Project_List.Configurations)) =
+           Utils.Strip ("* style_checker"
+             & " - nightly"
+             & "["
+             & " . azerty"
+             & "]"
+             & " - daily"
+             & "["
+             & " . qwerty"
+             & "]"
+             & " * dummy"
+             & " - donotcare"
+             & "["
+             & " . me"
+             & " . and_just_me"
+             & "]"),
+         "Wrong Project_List parse" & Savadur.Project_List.Image
+           (Savadur.Config.Project_List.Configurations));
+   end Check_Project_List;
+
    ----------------------
    -- Check_SCM_Config --
    ----------------------
@@ -236,6 +273,8 @@ package body Config_Parse is
         (T, Check_Env_Var_Config'Access, "check env var configuration");
       Registration.Register_Routine
         (T, Check_Server_Config'Access, "check server configuration");
+      Registration.Register_Routine
+        (T, Check_Project_List'Access, "check project list");
    end Register_Tests;
 
    -----------------

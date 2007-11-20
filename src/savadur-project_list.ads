@@ -58,13 +58,10 @@ package Savadur.Project_List is
       Equivalent_Keys => "=",
       "="             => Scenarios."=");
 
-   procedure Register_Client
-     (Project  : in String;
-      Scenario : in String;
-      Client   : in String);
-   --  Registers a new client which handle the given project/scenario
-
    function Get_Clients (Project, Scenario : in String) return Clients.Vector;
    --  Returns the list of clients which can handle the give project/scenario
+
+   function Image (Project_List : in Projects.Map) return String;
+   --  Returns the Project_List map image
 
 end Savadur.Project_List;

@@ -19,13 +19,9 @@
 --  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.       --
 ------------------------------------------------------------------------------
 
-with Savadur.Utils;
+with Savadur.Config.Project_List;
 
 package body Savadur.Project_List is
-
-   use Savadur.Utils;
-
-   Project_Mapping : Projects.Map;
 
    -----------------
    -- Get_Clients --
@@ -34,7 +30,8 @@ package body Savadur.Project_List is
    function Get_Clients
      (Project, Scenario : in String) return Clients.Vector
    is
-      P_Position : constant Projects.Cursor := Project_Mapping.Find (Project);
+      P_Position : constant Projects.Cursor :=
+                     Config.Project_List.Configurations.Find (Project);
       Result     : Clients.Vector;
    begin
       if Projects.Has_Element (P_Position) then
@@ -51,70 +48,58 @@ package body Savadur.Project_List is
       return Result;
    end Get_Clients;
 
-   ---------------------
-   -- Register_Client --
-   ---------------------
+   -----------
+   -- Image --
+   -----------
 
-   procedure Register_Client
-     (Project  : in String;
-      Scenario : in String;
-      Client   : in String)
-   is
-      procedure Update_Scenario
-        (Key     : in String;
-         Element : in out Scenarios.Map);
+   function Image (Project_List : in Projects.Map) return String is
 
-      procedure Update_Client
-        (Key     : in String;
-         Element : in out Clients.Vector);
+      procedure Image_Scenarios (Position : in Scenarios.Cursor);
+
+      procedure Image_Clients (Position : in Clients.Cursor);
+
+      procedure Image_Projects (Position : in Projects.Cursor);
+
+      Result : Unbounded_String;
 
       -------------------
-      -- Update_Client --
+      -- Image_Clients --
       -------------------
 
-      procedure Update_Client
-        (Key     : in String;
-         Element : in out Clients.Vector)
-      is
-         pragma Unreferenced (Key);
+      procedure Image_Clients (Position : in Clients.Cursor) is
       begin
-         Element.Append (New_Item => (+Client, True));
-      end Update_Client;
+         Result := Result
+           & "      . " & Clients.Element (Position).Key & ASCII.LF;
+      end Image_Clients;
+
+      --------------------
+      -- Image_Projects --
+      --------------------
+
+      procedure Image_Projects (Position : in Projects.Cursor) is
+      begin
+         Result := Result & "* " & Projects.Key (Position) & ASCII.LF;
+
+         Projects.Element (Position).Iterate (Image_Scenarios'Access);
+      end Image_Projects;
 
       ---------------------
-      -- Update_Scenario --
+      -- Image_Scenarios --
       ---------------------
 
-      procedure Update_Scenario
-        (Key     : in String;
-         Element : in out Scenarios.Map)
-      is
-         pragma Unreferenced (Key);
-         Position : constant Scenarios.Cursor := Element.Find (Scenario);
+      procedure Image_Scenarios (Position : in Scenarios.Cursor) is
       begin
-         if not Scenarios.Has_Element (Position) then
-            declare
-               V : Clients.Vector;
-            begin
-               Element.Insert (Scenario, New_Item => V);
-            end;
-         end if;
+         Result := Result & "   - " & Scenarios.Key (Position) & ASCII.LF;
 
-         Element.Update_Element (Position, Update_Client'Access);
-      end Update_Scenario;
-
-      Position : constant Projects.Cursor := Project_Mapping.Find (Project);
+         Result := Result & "[" & ASCII.LF;
+         Scenarios.Element (Position).Iterate (Image_Clients'Access);
+         Result := Result & "]";
+      end Image_Scenarios;
 
    begin
-      if not Projects.Has_Element (Position) then
-         declare
-            M : Scenarios.Map;
-         begin
-            Project_Mapping.Insert (Project, New_Item => M);
-         end;
-      end if;
+      Project_List.Iterate (Image_Projects'Access);
 
-      Project_Mapping.Update_Element (Position, Update_Scenario'Access);
-   end Register_Client;
+      return To_String (Result);
+   end Image;
 
 end Savadur.Project_List;

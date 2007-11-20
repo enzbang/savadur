@@ -20,6 +20,7 @@
 ------------------------------------------------------------------------------
 
 with Ada.Directories;
+with Ada.Exceptions;
 with Ada.IO_Exceptions;
 with Ada.Text_IO;
 with Ada.Strings.Unbounded;
@@ -36,8 +37,10 @@ with Savadur.Utils;
 package body Savadur.Config.Project_List is
 
    use Ada;
-   use Savadur.Utils;
+   use Ada.Exceptions;
    use Ada.Strings.Unbounded;
+   use Savadur;
+   use Savadur.Utils;
 
    type Node_Value is (Project_List, Project, Scenario, Client);
 
@@ -61,6 +64,12 @@ package body Savadur.Config.Project_List is
       Local_Name    : in     Unicode.CES.Byte_Sequence := "";
       Qname         : in     Unicode.CES.Byte_Sequence := "";
       Atts          : in     Sax.Attributes.Attributes'Class);
+
+   procedure Register_Client
+     (Project  : in String;
+      Scenario : in String;
+      Client   : in String);
+   --  Registers a new client which handle the given project/scenario
 
    -------------------
    -- Get_Attribute --
@@ -115,8 +124,7 @@ package body Savadur.Config.Project_List is
    begin
       Start_Search
         (Search    => S,
-         Directory =>
-           Directories.Compose (Config.Savadur_Directory, "config"),
+         Directory => Directories.Compose (Config.Savadur_Directory, "config"),
          Pattern   => "project_list.xml",
          Filter    => Filter_Type'(Ordinary_File => True,
                                    Directory     => False,
@@ -136,8 +144,84 @@ package body Savadur.Config.Project_List is
       end loop Walk_Directories;
    exception
       when IO_Exceptions.Name_Error =>
-         raise Config_Error with " No Servers Directory ?";
+         raise Config_Error with " No Servers Directory ?"
+           & Directories.Compose (Config.Savadur_Directory, "config");
+      when E : others =>
+         Text_IO.Put_Line (Exception_Information (E));
    end Parse;
+
+   ---------------------
+   -- Register_Client --
+   ---------------------
+
+   procedure Register_Client
+     (Project  : in String;
+      Scenario : in String;
+      Client   : in String)
+   is
+      procedure Update_Scenario
+        (Key     : in     String;
+         Element : in out Savadur.Project_List.Scenarios.Map);
+
+      procedure Update_Client
+        (Key     : in     String;
+         Element : in out Savadur.Project_List.Clients.Vector);
+
+      -------------------
+      -- Update_Client --
+      -------------------
+
+      procedure Update_Client
+        (Key     : in     String;
+         Element : in out Savadur.Project_List.Clients.Vector)
+      is
+         pragma Unreferenced (Key);
+      begin
+         Element.Append (New_Item => (+Client, True));
+      end Update_Client;
+
+      ---------------------
+      -- Update_Scenario --
+      ---------------------
+
+      procedure Update_Scenario
+        (Key     : in String;
+         Element : in out Savadur.Project_List.Scenarios.Map)
+      is
+         pragma Unreferenced (Key);
+         Position : Savadur.Project_List.Scenarios.Cursor :=
+                      Element.Find (Scenario);
+      begin
+         if not Savadur.Project_List.Scenarios.Has_Element (Position) then
+            declare
+               V : Savadur.Project_List.Clients.Vector;
+               I : Boolean;
+            begin
+               Element.Insert
+                 (Scenario,
+                  New_Item => V, Position => Position, Inserted => I);
+            end;
+         end if;
+
+         Element.Update_Element (Position, Update_Client'Access);
+      end Update_Scenario;
+
+      Position : Savadur.Project_List.Projects.Cursor :=
+                   Configurations.Find (Project);
+
+   begin
+      if not Savadur.Project_List.Projects.Has_Element (Position) then
+         declare
+            M : Savadur.Project_List.Scenarios.Map;
+            I : Boolean;
+         begin
+            Configurations.Insert
+              (Project, New_Item => M, Position => Position, Inserted => I);
+         end;
+      end if;
+
+      Configurations.Update_Element (Position, Update_Scenario'Access);
+   end Register_Client;
 
    -------------------
    -- Start_Element --
@@ -190,7 +274,10 @@ package body Savadur.Config.Project_List is
                Attr := Get_Attribute (Get_Qname (Atts, J));
                case Attr is
                   when Key =>
-                     null;
+                     Register_Client
+                       (Project  => -Handler.Project,
+                        Scenario => -Handler.Scenario,
+                        Client   => Get_Value (Atts, J));
                   when Id =>
                      raise Config_Error with "Unexpected Id attribute";
                end case;
