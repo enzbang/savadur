@@ -37,14 +37,12 @@ package body Utils is
       Position : Natural;
    begin
       loop
-         Position := Index (Source => Result,
-                            Set    => Maps.To_Set
-                              (" " & ASCII.HT & ASCII.CR & ASCII.LF));
+         Position := Index
+           (Source => Result,
+            Set    => Maps.To_Set (" " & ASCII.HT & ASCII.CR & ASCII.LF));
          exit when Position = 0;
 
-         Delete (Source  => Result,
-                 From    => Position,
-                 Through => Position);
+         Delete (Source => Result, From => Position, Through => Position);
       end loop;
 
       return To_String (Result);

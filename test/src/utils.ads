@@ -23,6 +23,6 @@ package Utils is
 
    function Strip (Source : in String) return String;
    --  Strip the given string removing line feed, carriage return, duplicated
-   --  whitespaces
+   --  whitespaces.
 
 end Utils;
