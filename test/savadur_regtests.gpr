@@ -65,4 +65,10 @@ project Savadur_Regtests is
 
    package Linker renames Shared.Linker;
 
+   ---------
+   -- IDE --
+   ---------
+
+   package IDE renames Shared.IDE;
+
 end Savadur_Regtests;

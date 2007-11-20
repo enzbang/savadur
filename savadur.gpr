@@ -71,4 +71,10 @@ project Savadur is
 
    package Linker renames Shared.Linker;
 
+   ---------
+   -- IDE --
+   ---------
+
+   package IDE renames Shared.IDE;
+
 end Savadur;

@@ -102,4 +102,12 @@ project Shared is
       end case;
    end Linker;
 
+   ---------
+   -- IDE --
+   ---------
+
+   package IDE is
+      for VCS_Kind use "Git";
+   end IDE;
+
 end Shared;
