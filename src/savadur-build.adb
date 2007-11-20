@@ -458,9 +458,7 @@ package body Savadur.Build is
                   --  The sources directory has to be created by the SCM
                   --  Call SCM init from current directory
 
-                  Logs.Write
-                    (Content => "Create directory : " & Sources_Directory,
-                     Kind    => Logs.Error);
+                  Logs.Write ("Create directory : " & Sources_Directory);
 
                   Execute
                     (Exec_Action   => Get_Action

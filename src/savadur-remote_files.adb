@@ -77,9 +77,6 @@ package body Savadur.Remote_Files is
 
             if Data /= Web_Services.Client.No_File then
                Logs.Write ("   found new or updated");
-               Logs.Write ("   "
-                           & Config.Savadur_Directory);
-
                Data.Filename := +Directories.Compose
                  (Containing_Directory => Config.Project_File_Directory,
                   Name                 => -Data.Filename);

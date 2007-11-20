@@ -26,10 +26,10 @@ package Savadur.Jobs is
    procedure Add
      (Project  : in Signed_Files.Handler;
       Scenario : in String);
-   --  Schedure a new job
+   --  Schedules a new job
 
    procedure Stop;
-   --  Send a stop signal to the job task. All currently registered jobs will
+   --  Sends a stop signal to the job task. All currently registered jobs will
    --  be terminated first.
 
 end Savadur.Jobs;

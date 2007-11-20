@@ -22,7 +22,6 @@
 with Ada.Directories;
 with Ada.Exceptions;
 with Ada.IO_Exceptions;
-with Ada.Text_IO;
 with Ada.Strings.Unbounded;
 
 with GNAT.Case_Util;
@@ -33,6 +32,7 @@ with Input_Sources.File;
 with Unicode.CES;
 
 with Savadur.Utils;
+with Savadur.Logs;
 
 package body Savadur.Config.Project_List is
 
@@ -135,7 +135,7 @@ package body Savadur.Config.Project_List is
          Load_Config : declare
             Filename : constant String := Full_Name (D);
          begin
-            Text_IO.Put_Line (Filename);
+            Logs.Write (Filename);
 
             Input_Sources.File.Open (Filename => Filename, Input => Source);
             Parse (Reader, Source);
