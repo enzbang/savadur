@@ -249,11 +249,27 @@ package body Savadur.Config.SCM is
    ------------
 
    procedure Reload (SCM_Name : in String) is
-      Old_SCM  : aliased Savadur.SCM.SCM := Get (SCM_Name);
-      Filename : constant String := -Old_SCM.Filename;
-      New_SCM  : constant Savadur.SCM.SCM := Internal_Parse (Filename);
    begin
-      Configurations.Include (New_SCM);
+      Try_Reload : declare
+         Old_SCM  : aliased Savadur.SCM.SCM := Get (SCM_Name);
+         Filename : constant String := -Old_SCM.Filename;
+         New_SCM  : constant Savadur.SCM.SCM := Internal_Parse (Filename);
+      begin
+         Configurations.Include (New_SCM);
+      end Try_Reload;
+
+   exception
+      when Constraint_Error =>
+         --  SCM is new
+         Load : declare
+            Filename : constant String := Directories.Compose
+              (Containing_Directory => Config.SCM_Directory,
+               Name                 => SCM_Name,
+               Extension            => "xml");
+            New_SCM  : constant Savadur.SCM.SCM := Internal_Parse (Filename);
+         begin
+            Configurations.Include (New_SCM);
+         end Load;
    end Reload;
 
    -------------------

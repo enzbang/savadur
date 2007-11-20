@@ -345,13 +345,30 @@ package body Savadur.Config.Project is
    ------------
 
    procedure Reload (Project_Name : in String) is
-      Old_Project : aliased Projects.Project_Config := Get (Project_Name);
-      Filename    : constant String :=
-                      Projects.Project_Filename (Old_Project'Access);
-      New_Project : constant Projects.Project_Config :=
-                      Internal_Parse (Filename);
    begin
-      Configurations.Include (New_Project);
+      Try_Reload : declare
+         Old_Project : aliased Projects.Project_Config := Get (Project_Name);
+         Filename    : constant String :=
+                         Projects.Project_Filename (Old_Project'Access);
+         New_Project : constant Projects.Project_Config :=
+                         Internal_Parse (Filename);
+      begin
+         Configurations.Include (New_Project);
+      end Try_Reload;
+
+   exception
+      when Constraint_Error =>
+         --  Project is new
+         Load : declare
+            Filename    : constant String := Directories.Compose
+              (Containing_Directory => Config.Project_File_Directory,
+               Name                 => Project_Name,
+               Extension            => "xml");
+            New_Project : constant Projects.Project_Config :=
+                            Internal_Parse (Filename);
+         begin
+            Configurations.Include (New_Project);
+         end Load;
    end Reload;
 
    -------------------
