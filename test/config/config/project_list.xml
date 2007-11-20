@@ -1,0 +1,16 @@
+<project_list>
+   <project id="style_checker">
+      <scenario id="nightly">
+         <client key="azerty"/>
+      </scenario>
+      <scenario id="daily">
+         <client key="qwerty"/>
+      </scenario>
+  </project>
+   <project id="dummy">
+      <scenario id="donotcare">
+         <client key="me"/>
+         <client key="and_just_me"/>
+      </scenario>
+  </project>
+</project_list>
