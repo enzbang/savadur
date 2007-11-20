@@ -19,7 +19,7 @@
 --  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.       --
 ------------------------------------------------------------------------------
 
---  with Ada.Directories;
+with Ada.Directories;
 with Ada.Text_IO;
 
 with Savadur.Clients;
@@ -75,7 +75,7 @@ package body Savadur.Web_Services.Client is
             else
                Logs.Write ("   content returned");
                return File_Data'
-                 (Filename => +Project_Filename,
+                 (Filename => +Directories.Simple_Name (Project_Filename),
                   Content  => +Utils.Content (Project_Filename));
             end if;
          end;
