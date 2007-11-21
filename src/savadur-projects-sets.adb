@@ -38,7 +38,7 @@ package body Savadur.Projects.Sets is
 
    function Hash (Project : in Project_Config) return Containers.Hash_Type is
    begin
-      return Hash (Project.Project_Id);
+      return Hash (Unbounded_String (Project.Project_Id));
    end Hash;
 
    ---------
