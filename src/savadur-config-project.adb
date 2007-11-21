@@ -95,7 +95,7 @@ package body Savadur.Config.Project is
 
    function Internal_Parse
      (Filename : in String) return Projects.Project_Config;
-   --  Parse the given filename and return the parsed project
+   --  Parses the given filename and return the parsed project
 
    --  SAX overloaded routines to parse the incoming XML stream.
 

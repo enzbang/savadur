@@ -28,12 +28,12 @@ package Savadur.Config.SCM is
    Configurations : Savadur.SCM.Sets.Set;
 
    procedure Parse;
-   --  Fill the SCM configuration map
+   --  Fills the SCM configuration map
 
    function Get (SCM_Name : in String) return Savadur.SCM.SCM;
    --  Returns the SCM with the given name
 
    procedure Reload (SCM_Name : in String);
-   --  Reload SCM name
+   --  Reloads SCM name
 
 end Savadur.Config.SCM;

@@ -20,7 +20,6 @@
 ------------------------------------------------------------------------------
 
 with Ada.Directories;
-with Ada.Text_IO;
 
 with Savadur.Clients;
 with Savadur.Config.SCM;
@@ -90,9 +89,7 @@ package body Savadur.Web_Services.Client is
    -- Load_SCM --
    --------------
 
-   function Load_SCM
-     (Signed_SCM : in Client.Signed_SCM) return File_Data
-   is
+   function Load_SCM (Signed_SCM : in Client.Signed_SCM) return File_Data is
       use SCM.Id_Utils;
       use type Signed_Files.Signature;
 
@@ -142,8 +139,7 @@ package body Savadur.Web_Services.Client is
       Data              : in Metadata;
       Callback_Endpoint : in String) is
    begin
-      Text_IO.Put_Line
-        ("Register new client : " & Key & '@' & Callback_Endpoint);
+      Logs.Write ("Register new client : " & Key & '@' & Callback_Endpoint);
       Clients.Registered.Insert (New_Item => (+Key, Data, +Callback_Endpoint));
    end Register;
 

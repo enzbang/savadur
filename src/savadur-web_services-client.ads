@@ -51,8 +51,7 @@ package Savadur.Web_Services.Client is
 
    type Signed_SCM is new String;
 
-   function Load_SCM
-     (Signed_SCM : in Client.Signed_SCM) return File_Data;
+   function Load_SCM (Signed_SCM : in Client.Signed_SCM) return File_Data;
    --  Returns the project content from a server
 
    type Returned_Status is (Success, Failure);

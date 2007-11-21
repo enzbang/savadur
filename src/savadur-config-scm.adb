@@ -60,7 +60,6 @@ package body Savadur.Config.SCM is
                                                    others => False));
 
    function Get_Node_Value (S : in String) return Node_Value;
-
    --  Returns the node value matching the given string or raise Config_Error
 
    function Get_Attribute (S : in String) return Attribute;
@@ -68,9 +67,8 @@ package body Savadur.Config.SCM is
    --  Config_Error.
 
    function Internal_Parse (Filename : in String) return Savadur.SCM.SCM;
-   --  Parse an SCM in the give filename
+   --  Parses the given filename and returns the parsed SCM
 
-   --  Parse the given filename and return the parsed project
    --  SAX overloaded routines to parse the incoming XML stream.
 
    type Tree_Reader is new Sax.Readers.Reader with record

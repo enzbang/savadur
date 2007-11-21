@@ -58,6 +58,6 @@ package Savadur.Utils is
    --  Returns a file content
 
    procedure Set_Content (Filename, Content : in String);
-   --  Set the content of the given file
+   --  Sets the content of the given file
 
 end Savadur.Utils;

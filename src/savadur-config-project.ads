@@ -28,13 +28,13 @@ package Savadur.Config.Project is
    Configurations : Savadur.Projects.Sets.Set;
 
    procedure Parse;
-   --  Parse all projects
+   --  Parses all projects
 
    function Get (Project_Name : in String) return Projects.Project_Config;
    --  Returns the project with the given name
 
    procedure Reload (Project_Name : in String);
-   --  Reload project name
+   --  Reloads project name
 
    function Parse (Filename : in String) return Projects.Project_Config;
    --  Returns the project configuration read in the given file, add it to the

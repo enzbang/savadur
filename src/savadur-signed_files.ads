@@ -52,11 +52,11 @@ package Savadur.Signed_Files is
    type External_Handler is new String;
 
    function To_Handler (File : in External_Handler) return Handler;
-   --  Convert to an internal handler representation
+   --  Converts to an internal handler representation
 
    function To_External_Handler
      (File : in Handler) return External_Handler;
-   --  Convert to an external handler representation for the Web Services
+   --  Converts to an external handler representation for the Web Services
 
 private
 

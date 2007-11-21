@@ -46,7 +46,7 @@ package Savadur.Scenarios is
    Null_Scenario : constant Scenario;
 
    function Image (Scenario : in Scenarios.Scenario) return String;
-   --  Return Scenario image
+   --  Returns Scenario image
 
    ----------
    -- Sets --

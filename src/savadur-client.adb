@@ -144,7 +144,7 @@ procedure Savadur.Client is
       use type Containers.Count_Type;
 
       procedure Register (Cursor : in Servers.Sets.Cursor);
-      --  Register client to the pointer server
+      --  Registers client to the pointer server
 
       --------------
       -- Register --

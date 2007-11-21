@@ -56,7 +56,7 @@ package body Savadur.Build is
    function Parse
      (Project : in Projects.Project_Config;
       Cmd     : in Actions.Command) return Actions.Command;
-   --  Replace strings beginning with $
+   --  Replaces strings beginning with $
    --  by the correponding entry in project <variable> section
 
    function Check
