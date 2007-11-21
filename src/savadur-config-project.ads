@@ -33,7 +33,7 @@ package Savadur.Config.Project is
    function Get (Project_Name : in String) return Projects.Project_Config;
    --  Returns the project with the given name
 
-   procedure Reload (Project_Name, Filename : in String);
+   procedure Reload (Project_Name : in String; Filename : in String := "");
    --  Reloads project name or load the given filename if no project found
 
    function Parse (Filename : in String) return Projects.Project_Config;

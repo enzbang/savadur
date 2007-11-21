@@ -246,7 +246,7 @@ package body Savadur.Config.SCM is
    -- Reload --
    ------------
 
-   procedure Reload (SCM_Name, Filename : in String) is
+   procedure Reload (SCM_Name : in String; Filename : in String := "") is
    begin
       Try_Reload : declare
          Old_SCM  : aliased Savadur.SCM.SCM := Get (SCM_Name);

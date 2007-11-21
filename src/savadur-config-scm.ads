@@ -33,7 +33,7 @@ package Savadur.Config.SCM is
    function Get (SCM_Name : in String) return Savadur.SCM.SCM;
    --  Returns the SCM with the given name
 
-   procedure Reload (SCM_Name, Filename : in String);
-   --  Reloads SCM name
+   procedure Reload (SCM_Name : in String; Filename : in String := "");
+   --  Reloads SCM name or load the given filename if no SCM found
 
 end Savadur.Config.SCM;

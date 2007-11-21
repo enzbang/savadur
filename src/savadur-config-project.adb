@@ -349,7 +349,7 @@ package body Savadur.Config.Project is
    -- Reload --
    ------------
 
-   procedure Reload (Project_Name, Filename : in String) is
+   procedure Reload (Project_Name : in String; Filename : in String := "") is
    begin
       Try_Reload : declare
          Old_Project : aliased Projects.Project_Config := Get (Project_Name);
