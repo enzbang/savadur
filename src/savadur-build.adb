@@ -30,6 +30,7 @@ with GNAT.OS_Lib;
 with Savadur.Utils;
 with Savadur.SCM;
 with Savadur.Config.SCM;
+with Savadur.Config.Client;
 with Savadur.Variables;
 with Savadur.Logs;
 with Savadur.Build.Notification;
@@ -320,8 +321,7 @@ package body Savadur.Build is
                            Key       => Savadur.Variables.
                              Name_Utils.Value (Key));
             begin
-               Append (Result,
-                       To_String (Var.Value));
+               Append (Result, To_String (Var.Value));
 
                Start      := K;
                Do_Replace := False;
@@ -445,7 +445,7 @@ package body Savadur.Build is
                                     Log_File    => Log_File);
 
                   Client_Service.Client.Status
-                    (Key => "me",
+                    (Key          => Config.Client.Get_Key,
                      Project_Name =>
                        Projects.Id_Utils.To_String (Project.Project_Id),
                      Scenario     => Scenarios.Id_Utils.To_String (Id),

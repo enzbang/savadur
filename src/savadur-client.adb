@@ -44,6 +44,7 @@ with Savadur.Client_Service.Client;
 with Savadur.Client_Service.Types;
 with Savadur.Config.Environment_Variables;
 with Savadur.Config.Project;
+with Savadur.Config.Client;
 with Savadur.Config.SCM;
 with Savadur.Config.Server;
 with Savadur.Jobs;
@@ -155,6 +156,7 @@ procedure Savadur.Client is
                       Servers.Sets.Element (Cursor);
          Metadata : constant Client_Service.Types.Metadata_Type :=
                       (OS => +"windows");
+         Key      : constant String := Config.Client.Get_Key;
       begin
          Logs.Write
            (Content =>
@@ -162,7 +164,7 @@ procedure Savadur.Client is
             Kind    => Logs.Information);
 
          Client_Service.Client.Register
-           ("me", Metadata, Server_Service.URL, -Server.URL);
+           (Key, Metadata, Server_Service.URL, -Server.URL);
 
          Logs.Write (Content => "Done.",
                      Kind    => Logs.Information);
