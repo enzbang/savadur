@@ -54,15 +54,13 @@ package Savadur.Web_Services.Client is
    function Load_SCM (Signed_SCM : in Client.Signed_SCM) return File_Data;
    --  Returns the project content from a server
 
-   type Returned_Status is (Success, Failure);
-
    procedure Status
      (Key          : in String;
       Project_Name : in String;
       Scenario     : in String;
       Action       : in String;
       Output       : in String;
-      Result       : in Returned_Status);
+      Result       : in Boolean);
    --  Status is called by the client to register status of each action in the
    --  given scenario.
 

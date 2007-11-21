@@ -153,12 +153,13 @@ package body Savadur.Web_Services.Client is
       Scenario     : in String;
       Action       : in String;
       Output       : in String;
-      Result       : in Returned_Status)
+      Result       : in Boolean)
    is
-      pragma Unreferenced
-        (Key, Project_Name, Scenario, Action, Output, Result);
    begin
-      null;
+      Logs.Write (Key & ":" & Project_Name);
+      Logs.Write ("Running " & Scenario & "/" & Action);
+      Logs.Write ("Output is " & Output);
+      Logs.Write (Boolean'Image (Result));
    end Status;
 
 end Savadur.Web_Services.Client;

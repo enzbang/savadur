@@ -33,6 +33,7 @@ with Savadur.Config.SCM;
 with Savadur.Variables;
 with Savadur.Logs;
 with Savadur.Build.Notification;
+with Savadur.Client_Service.Client;
 
 -------------------
 -- Savadur.Build --
@@ -393,7 +394,8 @@ package body Savadur.Build is
                             Projects.Project_Sources_Directory (Project);
       Log_Directory     : constant String :=
                             Projects.Project_Log_Directory (Project);
-      Success           : Boolean := True;
+
+      Status            : Boolean := True;
 
    begin
       For_All_Ref_Actions : declare
@@ -422,21 +424,40 @@ package body Savadur.Build is
                            Result       => Result);
 
                   if not Result then
-                     Success := False; --  Exit with error
+                     Status := False; --  Exit with error
+
+                     Client_Service.Client.Status
+                       (Key          => Config.Client.Get_Key,
+                        Project_Name =>
+                          Projects.Id_Utils.To_String (Project.Project_Id),
+                        Scenario     => Scenarios.Id_Utils.To_String (Id),
+                        Action       => Actions.Id_Utils.To_String (Ref.Id),
+                        Output       => "",
+                        Result       => False);
+
                      exit Run_Actions;
                   end if;
 
-                  Success := Check (Project     => Project,
+                  Status := Check (Project     => Project,
                                     Exec_Action => Exec_Action,
                                     Ref         => Ref,
                                     Return_Code => Return_Code,
                                     Log_File    => Log_File);
 
-                  if not Success then
+                  Client_Service.Client.Status
+                    (Key => "me",
+                     Project_Name =>
+                       Projects.Id_Utils.To_String (Project.Project_Id),
+                     Scenario     => Scenarios.Id_Utils.To_String (Id),
+                     Action       => Actions.Id_Utils.To_String (Ref.Id),
+                     Output       => Content (Log_File),
+                     Result       => Status);
+
+                  if not Status then
 
                      case Ref.On_Error is
                         when Actions.Quit =>
-                           Success := True;
+                           Status := True;
                            exit Run_Actions;
                         when Actions.Error =>
                            Project.Variables.Insert
@@ -475,8 +496,27 @@ package body Savadur.Build is
                   if not Result or else Return_Code /= 0
                     or else not Directories.Exists (Sources_Directory)
                   then
+                     Client_Service.Client.Status
+                       (Key          => Config.Client.Get_Key,
+                        Project_Name =>
+                          Projects.Id_Utils.To_String (Project.Project_Id),
+                        Scenario     => Scenarios.Id_Utils.To_String (Id),
+                        Action       => "init",
+                        Output       => "",
+                        Result       => False);
                      raise Command_Parse_Error with " SCM init failed !";
                   end if;
+
+                  Client_Service.Client.Status
+                    (Key          => Config.Client.Get_Key,
+                     Project_Name =>
+                       Projects.Id_Utils.To_String (Project.Project_Id),
+                     Scenario     => Scenarios.Id_Utils.To_String (Id),
+                     Action       => "init",
+                     Output       => Directories.Compose
+                       (Containing_Directory => Log_Directory,
+                        Name                 => "init"),
+                     Result       => Status);
 
                   --  No Next (Position) to retry the same command
                end if;
@@ -494,9 +534,9 @@ package body Savadur.Build is
 
       --  Execute notifications hooks
 
-      Build.Notification.Notify (Project, Success);
+      Build.Notification.Notify (Project, Status);
 
-      return Success;
+      return Status;
    end Run;
 
 end Savadur.Build;
