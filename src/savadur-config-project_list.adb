@@ -20,7 +20,6 @@
 ------------------------------------------------------------------------------
 
 with Ada.Directories;
-with Ada.Exceptions;
 with Ada.IO_Exceptions;
 with Ada.Strings.Unbounded;
 
@@ -37,7 +36,6 @@ with Savadur.Logs;
 package body Savadur.Config.Project_List is
 
    use Ada;
-   use Ada.Exceptions;
    use Ada.Strings.Unbounded;
    use Savadur;
    use Savadur.Utils;
@@ -146,8 +144,6 @@ package body Savadur.Config.Project_List is
       when IO_Exceptions.Name_Error =>
          raise Config_Error with " No Servers Directory ?"
            & Directories.Compose (Config.Savadur_Directory, "config");
-      when E : others =>
-         Text_IO.Put_Line (Exception_Information (E));
    end Parse;
 
    ---------------------
