@@ -82,7 +82,7 @@ package body Savadur.Remote_Files is
                   Name                 => -Data.Filename);
 
                Utils.Set_Content (-Data.Filename, -Data.Content);
-               Config.Project.Reload (Project_Name);
+               Config.Project.Reload (Project_Name, -Data.Filename);
                Loaded := True;
             end if;
          end if;
@@ -162,7 +162,7 @@ package body Savadur.Remote_Files is
                   Name                 => -Data.Filename);
 
                Utils.Set_Content (-Data.Filename, -Data.Content);
-               Config.SCM.Reload (SCM_Name);
+               Config.SCM.Reload (SCM_Name, -Data.Filename);
                Loaded := True;
             end if;
          end if;

@@ -349,7 +349,7 @@ package body Savadur.Config.Project is
    -- Reload --
    ------------
 
-   procedure Reload (Project_Name : in String) is
+   procedure Reload (Project_Name, Filename : in String) is
    begin
       Try_Reload : declare
          Old_Project : aliased Projects.Project_Config := Get (Project_Name);
@@ -363,12 +363,14 @@ package body Savadur.Config.Project is
 
    exception
       when Constraint_Error =>
-         --  Project is new
+
+         --  Project is new. Load the given filename
+
+         if Filename = "" then
+            raise Config_Error;
+         end if;
+
          Load : declare
-            Filename    : constant String := Directories.Compose
-              (Containing_Directory => Config.Project_File_Directory,
-               Name                 => Project_Name,
-               Extension            => "xml");
             New_Project : constant Projects.Project_Config :=
                             Internal_Parse (Filename);
          begin
