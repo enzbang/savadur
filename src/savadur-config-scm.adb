@@ -143,7 +143,12 @@ package body Savadur.Config.SCM is
       C : Savadur.SCM.Sets.Cursor;
    begin
       C := Savadur.SCM.Keys.Find (Configurations, Value (SCM_Name));
-      return Savadur.SCM.Sets.Element (C);
+      if Savadur.SCM.Sets.Has_Element (C) then
+         return Savadur.SCM.Sets.Element (C);
+      else
+         raise IO_Exceptions.Name_Error
+         with "Try loading unknown scm " & SCM_Name;
+      end if;
    end Get;
 
    -------------------
@@ -257,11 +262,11 @@ package body Savadur.Config.SCM is
       end Try_Reload;
 
    exception
-      when Constraint_Error =>
+      when IO_Exceptions.Name_Error =>
 
          --  SCM is new. Load the given filename
 
-         if Filename /= "" then
+         if Filename = "" then
             raise Config_Error;
          end if;
 

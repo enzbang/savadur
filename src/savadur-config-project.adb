@@ -362,7 +362,7 @@ package body Savadur.Config.Project is
       end Try_Reload;
 
    exception
-      when Constraint_Error =>
+      when IO_Exceptions.Name_Error =>
 
          --  Project is new. Load the given filename
 
