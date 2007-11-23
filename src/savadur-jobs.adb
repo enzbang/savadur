@@ -75,6 +75,7 @@ package body Savadur.Jobs is
 
       procedure Stop;
       --  Schedule a terminating job into the queue
+
    private
       Jobs    : Job_Set.Set;
       Size    : Natural := 0;
@@ -214,7 +215,7 @@ package body Savadur.Jobs is
          Job_Handler.Get (Job);
 
          if Job.Time /= Times.No_Time then
-            --  This is a periodic job, rescedule it
+            --  This is a periodic job, reschedule it
             Job_Handler.Add (Job);
          end if;
 

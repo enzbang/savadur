@@ -80,6 +80,7 @@ package body Savadur.Actions is
    -----------
 
    function Image (Set : in Sets.Set) return String is
+
       Result : Unbounded_String := +"[" & ASCII.LF;
 
       procedure Image (Position : in Sets.Cursor);
@@ -93,9 +94,9 @@ package body Savadur.Actions is
       begin
          Append (Result, Image (Sets.Element (Position)));
       end Image;
+
    begin
-      Sets.Iterate (Container => Set,
-                    Process   => Image'Access);
+      Sets.Iterate (Container => Set, Process => Image'Access);
       Append (Result, "]");
       return -Result;
    end Image;
@@ -105,6 +106,7 @@ package body Savadur.Actions is
    -----------
 
    function Image (Vector : in Vectors.Vector) return String is
+
       Result : Unbounded_String := +"[" & ASCII.LF;
 
       procedure Image (Position : in Vectors.Cursor);
@@ -119,9 +121,9 @@ package body Savadur.Actions is
       begin
          Append (Result, Image (Element) & ASCII.LF);
       end Image;
+
    begin
-      Vectors.Iterate (Container => Vector,
-                       Process   => Image'Access);
+      Vectors.Iterate (Container => Vector, Process => Image'Access);
       Append (Result, +"]");
       return -Result;
    end Image;

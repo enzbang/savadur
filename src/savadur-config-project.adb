@@ -298,7 +298,7 @@ package body Savadur.Config.Project is
 
       Input_Sources.File.Close (Source);
 
-      --  Get default variable;
+      --  Get default variable
 
       Savadur.Variables.Default (Reader.Current_Project'Access);
 

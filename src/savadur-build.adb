@@ -36,10 +36,6 @@ with Savadur.Logs;
 with Savadur.Build.Notification;
 with Savadur.Client_Service.Client;
 
--------------------
--- Savadur.Build --
--------------------
-
 package body Savadur.Build is
 
    use Ada;
@@ -125,8 +121,7 @@ package body Savadur.Build is
 
                   Text_IO.Reset (File => State_File);
                else
-                  Text_IO.Create (File => State_File,
-                                  Name => State_Filename);
+                  Text_IO.Create (File => State_File, Name => State_Filename);
                end if;
 
                --  Write new state
@@ -154,12 +149,12 @@ package body Savadur.Build is
             end if;
          end Check_Last_State;
       end if;
+
       if not Result then
          Logs.Write
            (Actions.Command_Utils.To_String (Exec_Action.Cmd) & " failed");
       else
-         Logs.Write (Content => "... success",
-                     Kind    => Logs.Verbose);
+         Logs.Write (Content => "... success", Kind => Logs.Verbose);
       end if;
 
       return Result;
@@ -186,7 +181,6 @@ package body Savadur.Build is
       Argument_String : Argument_List_Access;
       Prog_Name       : Unbounded_String;
    begin
-
       Logs.Write
         (Content => "Execute "
          & Actions.Command_Utils.To_String (Exec_Action.Cmd),
@@ -201,8 +195,8 @@ package body Savadur.Build is
       Exec_Path := Locate_Exec_On_Path (-Prog_Name);
 
       if Exec_Path = null then
-         raise Command_Parse_Error with "No Exec " & (-Prog_Name)
-           & " on this system";
+         raise Command_Parse_Error
+           with "No Exec " & (-Prog_Name) & " on this system";
       end if;
 
       Spawn (Program_Name => Exec_Path.all,
@@ -235,9 +229,8 @@ package body Savadur.Build is
    is
       use Savadur.Actions;
       Action_Id  : constant Id := Ref_Action.Id;
-      Get_Action : Action;
+      Get_Action : Action := Actions.Null_Action;
    begin
-
       if Ref_Action.Action_Type = Actions.SCM then
          --  Search the action in the SCM list
 
@@ -247,17 +240,16 @@ package body Savadur.Build is
               (Container => Savadur.Config.SCM.Configurations,
                Key       => Project.SCM_Id);
          begin
-
             Get_Action := Actions.Keys.Element
               (Container => SCM_Used.Actions,
                Key       => Action_Id);
-
          end Search_Action;
+
       else
          --  Search in project action
 
-         Get_Action := Keys.Element (Container => Project.Actions,
-                                     Key       => Action_Id);
+         Get_Action := Keys.Element
+           (Container => Project.Actions, Key => Action_Id);
       end if;
 
       --  Parse command
@@ -362,15 +354,14 @@ package body Savadur.Build is
       Env_Var : in     Environment_Variables.Maps.Map;
       Id      : in     Scenarios.Id) return Boolean
    is
-
-      Status : Boolean := True;
-
       function Init return Savadur.Scenarios.Scenario;
       --  Returns the selected scenario and set the environment variables
 
       procedure Send_Status
         (Action_Id : in Actions.Id; Log_File : in String := "");
       --  Sends the status to savadur server
+
+      Status : Boolean := True;
 
       ----------
       -- Init --
@@ -390,7 +381,7 @@ package body Savadur.Build is
          return Selected_Scenario;
       exception
          when Constraint_Error =>
-            raise Command_Parse_Error with " Scenario "
+            raise Command_Parse_Error with "Scenario "
               & Savadur.Scenarios.Id_Utils.To_String (Id) & " not found";
       end Init;
 
@@ -399,7 +390,8 @@ package body Savadur.Build is
       -----------------
 
       procedure Send_Status
-        (Action_Id : in Actions.Id; Log_File : in String := "") is
+        (Action_Id : in Actions.Id; Log_File : in String := "")
+      is
 
          function Log_Content return String;
          --  Returns log content or empty string
@@ -444,7 +436,7 @@ package body Savadur.Build is
 
             Execute_Command : declare
                Ref         : constant Actions.Ref_Action := Element (Position);
-               Log_File    : constant String     := Directories.Compose
+               Log_File    : constant String := Directories.Compose
                  (Containing_Directory => Log_Directory,
                   Name                 => Actions.To_String (Ref.Id));
                Exec_Action : constant Actions.Action :=
@@ -496,7 +488,9 @@ package body Savadur.Build is
                            null;
                      end case;
                   end if;
+
                   Next (Position);
+
                else
                   --  No sources directory. This means that the project has not
                   --  been initialized.
@@ -538,10 +532,10 @@ package body Savadur.Build is
       exception
          when Constraint_Error =>
             if Has_Element (Position) then
-               raise Command_Parse_Error with " Command "
+               raise Command_Parse_Error with "Command "
                  & Actions.To_String (Element (Position).Id) & " not found";
             else
-               raise Command_Parse_Error with " Command not found";
+               raise Command_Parse_Error with "Command not found";
             end if;
       end For_All_Ref_Actions;
 
