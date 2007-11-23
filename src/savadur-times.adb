@@ -91,27 +91,35 @@ package body Savadur.Times is
    -----------------
 
    function Next_Run_In (Time : in Periodic) return Duration is
-      Now     : constant Calendar.Time := Calendar.Clock;
-      S_Now   : constant Duration := Calendar.Seconds (Now);
-      S_Event : Duration := Calendar.Seconds (Time.Event);
-      Elapsed : constant Duration := S_Now - S_Event;
    begin
-      if Elapsed > 0.0 then
-         --  Now is passed the current event
-         while S_Event < S_Now loop
-            S_Event := S_Event + Time.Every;
-         end loop;
-
-         return S_Event - S_Now;
+      if Time = No_Time then
+         return 0.0;
 
       else
-         --  Event is in the futur
-         while S_Event > S_Now loop
-            S_Event := S_Event - Time.Every;
-         end loop;
-         S_Event := S_Event + Time.Every;
+         declare
+            Now     : constant Calendar.Time := Calendar.Clock;
+            S_Now   : constant Duration := Calendar.Seconds (Now);
+            S_Event : Duration := Calendar.Seconds (Time.Event);
+            Elapsed : constant Duration := S_Now - S_Event;
+         begin
+            if Elapsed > 0.0 then
+               --  Now is passed the current event
+               while S_Event < S_Now loop
+                  S_Event := S_Event + Time.Every;
+               end loop;
 
-         return S_Event - S_Now;
+               return S_Event - S_Now;
+
+            else
+               --  Event is in the futur
+               while S_Event > S_Now loop
+                  S_Event := S_Event - Time.Every;
+               end loop;
+               S_Event := S_Event + Time.Every;
+
+               return S_Event - S_Now;
+            end if;
+         end;
       end if;
    end Next_Run_In;
 
