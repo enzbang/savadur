@@ -33,10 +33,13 @@ package body Savadur.Utils is
    -------------
 
    function Content (Filename : in String) return String is
-      File    : Stream_IO.File_Type;
-      Content : Unbounded_String;
-      Buffer  : Stream_Element_Array (1 .. 1_024);
-      Last    : Stream_Element_Offset;
+      Max_Content : constant := 4_096; --  ??? Should be in conf file
+      Buffer_Len  : constant := 1_024;
+      File        : Stream_IO.File_Type;
+      Content     : Unbounded_String;
+      Buffer      : Stream_Element_Array (1 .. Buffer_Len);
+      Last        : Stream_Element_Offset;
+      Count       : Natural := 0;
    begin
       Stream_IO.Open
         (File => File, Mode => Stream_IO.In_File, Name => Filename);
@@ -45,6 +48,11 @@ package body Savadur.Utils is
          Stream_IO.Read (File, Buffer, Last);
          exit when Last = 0;
          Append (Content, Translator.To_String (Buffer (1 .. Last)));
+
+         --  Check max size
+
+         Count := Count + 1;
+         exit when Count * Buffer_Len = Max_Content;
       end loop;
 
       Stream_IO.Close (File);

@@ -55,7 +55,7 @@ package Savadur.Utils is
    end Generic_Utils;
 
    function Content (Filename : in String) return String;
-   --  Returns a file content
+   --  Returns a file content. Limits to 4 KB
 
    procedure Set_Content (Filename, Content : in String);
    --  Sets the content of the given file
