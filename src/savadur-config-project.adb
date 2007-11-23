@@ -33,13 +33,14 @@ with Sax.Attributes;
 with Input_Sources.File;
 with Unicode.CES;
 
+with Savadur.Actions;
 with Savadur.Logs;
+with Savadur.Scenarios;
+with Savadur.SCM;
+with Savadur.Signed_Files;
+with Savadur.Times;
 with Savadur.Utils;
 with Savadur.Variables;
-with Savadur.Scenarios;
-with Savadur.Actions;
-with Savadur.Times;
-with Savadur.SCM;
 
 package body Savadur.Config.Project is
 
@@ -276,6 +277,7 @@ package body Savadur.Config.Project is
    function Internal_Parse
      (Filename : in String) return Projects.Project_Config
    is
+      use Projects.Id_Utils;
       Reader : Tree_Reader;
       Source : Input_Sources.File.File_Input;
    begin
@@ -301,6 +303,13 @@ package body Savadur.Config.Project is
       --  Get default variable
 
       Savadur.Variables.Default (Reader.Current_Project'Access);
+
+      --  Now compute set the signed files
+
+      Signed_Files.Create
+        (Reader.Current_Project.Signature,
+         Name     => -Reader.Current_Project.Project_Id,
+         Filename => Filename);
 
       return Reader.Current_Project;
    end Internal_Parse;

@@ -27,6 +27,7 @@ with Savadur.Actions;
 with Savadur.Scenarios;
 with Savadur.Notifications;
 with Savadur.Variables;
+with Savadur.Signed_Files;
 
 package Savadur.Projects is
 
@@ -40,6 +41,7 @@ package Savadur.Projects is
 
    type Project_Config is record
       Project_Id    : Projects.Project_Id;
+      Signature     : Signed_Files.Handler;
       SCM_Id        : Savadur.SCM.Id;
       Actions       : Savadur.Actions.Sets.Set;
       Scenarios     : Savadur.Scenarios.Sets.Set;
