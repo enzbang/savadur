@@ -35,24 +35,9 @@ begin
 
    Web.Server.Start;
 
-   delay 5.0;
+   --  Endless loop
 
-   Logs.Write ("Call a client to run a project");
-
-   declare
-      Project_Name     : constant String := "style_checker";
-      Project          : aliased Projects.Project_Config :=
-                           Config.Project.Get (Project_Name);
-      Project_Filename : constant String :=
-                           Projects.Project_Filename (Project'Access);
-      Signed_Project   : Signed_Files.Handler;
-   begin
-      Signed_Files.Create (Signed_Project, Project_Name, Project_Filename);
-
-      Savadur.Server_Service.Client.Run
-        (Scenario       => "default",
-         Signed_Project =>
-           Web_Services.Server.Signed_Project
-             (Signed_Files.To_External_Handler (Signed_Project)));
-   end;
+   loop
+      delay Duration'Last;
+   end loop;
 end Savadur.Server;

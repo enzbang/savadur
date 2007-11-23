@@ -19,16 +19,25 @@
 --  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.       --
 ------------------------------------------------------------------------------
 
+with IO_Exceptions;
+
 with AWS.Config.Set;
 with AWS.Messages;
 with AWS.MIME;
 with AWS.Response;
+with AWS.Parameters;
 with AWS.Server;
 with AWS.Status;
 with AWS.URL;
+
 with SOAP.Dispatchers.Callback;
 
 with Savadur.Client_Service.CB;
+with Savadur.Config.Project;
+with Savadur.Projects;
+with Savadur.Signed_Files;
+with Savadur.Server_Service.Client;
+with Savadur.Web_Services.Server;
 with Savadur.Logs;
 
 package body Savadur.Web.Server is
@@ -44,15 +53,64 @@ package body Savadur.Web.Server is
    function HTTP_Callback (Request : in Status.Data) return Response.Data;
    --  Callbacks used for HTTP requests
 
+   function Run (Request : in Status.Data) return Response.Data;
+   --  Runs a project
+
    -------------------
    -- HTTP_Callback --
    -------------------
 
    function HTTP_Callback (Request : in Status.Data) return Response.Data is
-      pragma Unreferenced (Request);
+      URI : constant String := Status.URI (Request);
    begin
-      return Response.Build (MIME.Text_HTML, "<p>Not found<P>", Messages.S404);
+      if URI = "/run" then
+         return Run (Request);
+      end if;
+
+      return Response.Build (MIME.Text_HTML,
+                             "<p>Not found</p>",
+                             Messages.S404);
    end HTTP_Callback;
+
+   ---------
+   -- Run --
+   ---------
+
+   function Run (Request : in Status.Data) return Response.Data is
+      P            : constant AWS.Parameters.List :=
+                       AWS.Status.Parameters (Request);
+      Project_Name : constant String              :=
+                       AWS.Parameters.Get (P, "p");
+      Scenario_Id  : constant String              :=
+                       AWS.Parameters.Get (P, "s");
+   begin
+
+      Run_Project : declare
+         Project          : aliased Projects.Project_Config :=
+                              Savadur.Config.Project.Get (Project_Name);
+         Project_Filename : constant String :=
+                              Projects.Project_Filename (Project'Access);
+         Signed_Project   : Signed_Files.Handler;
+      begin
+         Signed_Files.Create (Signed_Project, Project_Name, Project_Filename);
+
+         Savadur.Server_Service.Client.Run
+           (Scenario       => Scenario_Id,
+            Signed_Project => Web_Services.Server.Signed_Project
+              (Signed_Files.To_External_Handler (Signed_Project)));
+
+         return Response.Build (MIME.Text_HTML,
+                                "<p>Running " & Project_Name &
+                                "...</p>",
+                                Messages.S404);
+      exception
+         when IO_Exceptions.Name_Error =>
+            return Response.Build (MIME.Text_HTML,
+                                   "<p>Project " & Project_Name &
+                                   " Not found</p>",
+                                   Messages.S404);
+      end Run_Project;
+   end Run;
 
    -----------
    -- Start --
