@@ -53,10 +53,12 @@ project Savadur_Soap is
    package Compiler is
       case Shared.Build is
          when "Debug" | "Profile" =>
-            for Default_Switches ("Ada") use Shared.Debug_Options;
+            for Default_Switches ("Ada") use
+              Shared.Debug_Options & ("-gnat05");
 
          when "Release" =>
-            for Default_Switches ("Ada") use Shared.Release_Options;
+            for Default_Switches ("Ada") use
+              Shared.Release_Options  & ("-gnat05");
       end case;
    end Compiler;
 
