@@ -24,6 +24,7 @@ with Ada.Strings.Unbounded;
 
 with Savadur.Actions;
 with Savadur.Utils;
+with Savadur.Times;
 
 package Savadur.Scenarios is
 
@@ -39,8 +40,9 @@ package Savadur.Scenarios is
    Default_Scenario : constant Id;
 
    type Scenario is record
-      Id      : Scenarios.Id;
-      Actions : Savadur.Actions.Vectors.Vector;
+      Id       : Scenarios.Id;
+      Actions  : Savadur.Actions.Vectors.Vector;
+      Periodic : Savadur.Times.Periodic := Savadur.Times.No_Time;
    end record;
 
    Null_Scenario : constant Scenario;
@@ -77,8 +79,10 @@ package Savadur.Scenarios is
 private
 
    Null_Scenario    : constant Scenario :=
-                        Scenario'(Id      => Id_Utils.Nil,
-                                  Actions => Actions.Vectors.Empty_Vector);
+                        Scenario'(Id       => Id_Utils.Nil,
+                                  Actions  => Actions.Vectors.Empty_Vector,
+                                  Periodic => <>);
+
    Default_Scenario : constant Id := Id (+"default");
 
 end Savadur.Scenarios;

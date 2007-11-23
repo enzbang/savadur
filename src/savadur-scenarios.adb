@@ -48,7 +48,9 @@ package body Savadur.Scenarios is
    function Image (Scenario : in Scenarios.Scenario) return String is
    begin
       return "* " & To_String (Scenario.Id)
-        & ASCII.LF & Savadur.Actions.Image (Scenario.Actions);
+        & ASCII.LF & Savadur.Actions.Image (Scenario.Actions)
+        & ASCII.LF & "periodic = "
+        & Savadur.Times.Image (Scenario.Periodic);
    end Image;
 
    -----------

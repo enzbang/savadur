@@ -20,7 +20,7 @@
     <cmd>/hooks/send-xmpp $project_name</cmd>
   </action>
 
-  <scenario id="default">
+  <scenario id="default" periodic="23:30/+60">
     <scm_action id="version" require_change="true" on_error="quit" />
     <scm_action id="pull" />
     <action id="make" />

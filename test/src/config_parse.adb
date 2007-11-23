@@ -141,7 +141,7 @@ package body Config_Parse is
          & "SCM pull"
          & "DEFAULT make"
          & "DEFAULT regtests"
-         & "]"),
+         & "] periodic = 23:30/+60"),
          "Wrong scenarios list");
 
       Assertions.Assert
@@ -153,8 +153,7 @@ package body Config_Parse is
              & "On Failure = ["
              & "DEFAULT mail"
              & "]"),
-         "Wrong notifications list" &
-         Savadur.Notifications.Image (Project.Notifications));
+         "Wrong notifications list");
    end Check_Project_Config;
 
    ------------------------

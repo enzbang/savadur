@@ -38,6 +38,7 @@ with Savadur.Utils;
 with Savadur.Variables;
 with Savadur.Scenarios;
 with Savadur.Actions;
+with Savadur.Times;
 with Savadur.SCM;
 
 package body Savadur.Config.Project is
@@ -54,7 +55,7 @@ package body Savadur.Config.Project is
       Notifications, On_Failure, On_Success,
       Project, Name);
 
-   type Attribute is (Id, Value, Result, Require_Change, On_Error);
+   type Attribute is (Id, Value, Result, Require_Change, On_Error, Periodic);
 
    type XML_Attribute is array (Attribute) of Boolean;
 
@@ -76,8 +77,9 @@ package body Savadur.Config.Project is
                                                     Require_Change => True,
                                                     On_Error       => True,
                                                     others         => False),
-                    Scenario      => XML_Attribute'(Id     => True,
-                                                    others => False),
+                    Scenario      => XML_Attribute'(Id       => True,
+                                                    Periodic => True,
+                                                    others   => False),
                     Cmd           => XML_Attribute'(others => False),
                     Project       => XML_Attribute'(others => False),
                     Notifications => XML_Attribute'(others => False),
@@ -530,6 +532,17 @@ package body Savadur.Config.Project is
                              & Get_Qname (Atts, Position)
                              & " value = " & Get_Value (Atts, Position);
                      end Get_On_Error_Value;
+
+                  when others => null;
+               end case;
+
+            when Periodic =>
+               case NV is
+                  when Scenario =>
+                     if Get_Value (Atts, Position) /= "" then
+                        Handler.Scenario.Periodic :=
+                          Savadur.Times.Create (Get_Value (Atts, Position));
+                     end if;
 
                   when others => null;
                end case;
