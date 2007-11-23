@@ -7,6 +7,10 @@ PID_SERVER=$!
 SAVADUR_DIR=$PWD/test-dir/client ./bin/savadur-client -server &
 PID_CLIENT=$!
 
+sleep 5
+
+wget --no-proxy "http://localhost:8181/run?p=style_checker&s=default"
+
 echo "Press any key to stop"
 
 read
