@@ -38,6 +38,8 @@ package Savadur.SCM is
 
    type Id is new Unbounded_String;
 
+   Null_Id : constant Id;
+
    package Id_Utils is new Generic_Utils (Source => Id);
 
    type SCM is record
@@ -85,5 +87,7 @@ private
                          Value          => <>,
                          Require_Change => <>,
                          On_Error       => <>);
+
+   Null_Id : constant Id := Id (Null_Unbounded_String);
 
 end Savadur.SCM;
