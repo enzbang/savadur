@@ -19,10 +19,12 @@
 --  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.       --
 ------------------------------------------------------------------------------
 
-with Ada.Strings.Unbounded;
 with Ada.Directories;
+with Ada.Environment_Variables;
 with Ada.Exceptions;
 with Ada.Integer_Text_IO;
+with Ada.Strings.Fixed;
+with Ada.Strings.Unbounded;
 with Ada.Text_IO;
 
 with GNAT.OS_Lib;
@@ -63,6 +65,9 @@ package body Savadur.Build is
       Ref         : in     Actions.Ref_Action;
       Return_Code : in     Integer;
       Log_File    : in     String) return Boolean;
+
+   Windows_Host : constant Boolean :=
+                    Ada.Environment_Variables.Value ("OS") = "Windows_NT";
 
    -----------
    -- Check --
@@ -175,8 +180,9 @@ package body Savadur.Build is
       Return_Code  :    out Integer;
       Result       :    out Boolean)
    is
-      use GNAT.OS_Lib;
       use type Actions.Result_Type;
+      use Actions.Command_Utils;
+      use GNAT.OS_Lib;
       Exec_Path       : OS_Lib.String_Access;
       Argument_String : Argument_List_Access;
       Prog_Name       : Unbounded_String;
@@ -199,12 +205,49 @@ package body Savadur.Build is
            with "No Exec " & (-Prog_Name) & " on this system";
       end if;
 
-      Spawn (Program_Name => Exec_Path.all,
-             Args         => Argument_String.all,
-             Output_File  => Log_Filename,
-             Success      => Result,
-             Return_Code  => Return_Code,
-             Err_To_Out   => True);
+      --  On Windows we must launch scripts using the shell
+
+      if Windows_Host
+        and then
+          (Exec_Path.all'Length < 5
+           or else
+             Strings.Fixed.Index (Exec_Path.all, ".exe") /=
+               Exec_Path.all'Last - 3)
+      then
+         --  This is a Windows script, we just assume that it is a Cygwin shell
+         --  script.
+         --  ??? would be nice to check for .cmd and .bat that needs to be
+         --  executed under cmd.exe.
+
+         Free (Argument_String);
+
+         Argument_String := new Argument_List (1 .. 2);
+         Argument_String (1) := new String'("-c");
+         Argument_String (2) := new String'('"' & (-Exec_Action.Cmd) & '"');
+
+         Free (Exec_Path);
+         Exec_Path := Locate_Exec_On_Path ("sh");
+
+         if Exec_Path = null then
+            raise Command_Parse_Error
+              with "No sh shell found, can't run scripts";
+         end if;
+
+         Spawn (Program_Name => Exec_Path.all,
+                Args         => Argument_String.all,
+                Output_File  => Log_Filename,
+                Success      => Result,
+                Return_Code  => Return_Code,
+                Err_To_Out   => True);
+
+      else
+         Spawn (Program_Name => Exec_Path.all,
+                Args         => Argument_String.all,
+                Output_File  => Log_Filename,
+                Success      => Result,
+                Return_Code  => Return_Code,
+                Err_To_Out   => True);
+      end if;
 
       if not Result then
          --  Command failed to execute
@@ -213,10 +256,10 @@ package body Savadur.Build is
            (Content => "Can not execute "
             & Actions.Command_Utils.To_String (Exec_Action.Cmd),
             Kind    => Logs.Error);
-      else
-         Free (Argument_String);
-         Free (Exec_Path);
       end if;
+
+      Free (Argument_String);
+      Free (Exec_Path);
    end Execute;
 
    ----------------
