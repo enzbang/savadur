@@ -34,12 +34,7 @@ package Savadur.SCM is
 
    --  Special actions references
 
-   SCM_Init : Actions.Ref_Action :=
-                Actions.Ref_Action'(Action_Type    => Actions.SCM,
-                                    Id             => Actions.Id (+"init"),
-                                    Value          => <>,
-                                    Require_Change => <>,
-                                    On_Error       => <>);
+   SCM_Init : constant Actions.Ref_Action;
 
    type Id is new Unbounded_String;
 
@@ -81,5 +76,14 @@ package Savadur.SCM is
 
    function Image (Set : in Sets.Set) return String;
    --  Returns the SCM set image
+
+private
+
+   SCM_Init : constant Actions.Ref_Action :=
+     Actions.Ref_Action'(Action_Type    => Actions.SCM,
+                         Id             => Actions.Id (+"init"),
+                         Value          => <>,
+                         Require_Change => <>,
+                         On_Error       => <>);
 
 end Savadur.SCM;
