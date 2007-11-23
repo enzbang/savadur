@@ -20,12 +20,14 @@
 ------------------------------------------------------------------------------
 
 with Savadur.Signed_Files;
+with Savadur.Times;
 
 package Savadur.Jobs is
 
    procedure Add
      (Project  : in Signed_Files.Handler;
-      Scenario : in String);
+      Scenario : in String;
+      Time     : in Times.Periodic := Times.No_Time);
    --  Schedules a new job
 
    procedure Stop;
