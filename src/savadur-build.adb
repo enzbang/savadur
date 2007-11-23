@@ -370,7 +370,7 @@ package body Savadur.Build is
 
       procedure Send_Status
         (Action_Id : in Actions.Id; Log_File : in String := "");
-      --  Send the status to savadur server
+      --  Sends the status to savadur server
 
       ----------
       -- Init --
