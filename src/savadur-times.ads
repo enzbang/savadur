@@ -32,9 +32,9 @@ package Savadur.Times is
    No_Time : constant Periodic;
 
    function Create (From : in String) return Periodic;
-   --  Convert a periodic time external representation to a periodic object.
+   --  Converts a periodic time external representation to a periodic object.
    --  Current supported format is:
-   --     H:M/+H   - event sceduled at H:M, run every H hours
+   --     H:M/+H   - event sceduled at H:M, runs every H hours
    --  Raises Constraint_Error if format is not recognized.
 
    function Image (Time : in Periodic) return String;
