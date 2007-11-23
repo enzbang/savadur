@@ -19,29 +19,20 @@
 --  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.       --
 ------------------------------------------------------------------------------
 
-with Config_Parse;
-with Signed_Files;
-with Periodic_Times;
+with AUnit;
 
-package body Savadur_Suite is
+package Periodic_Times is
 
-   use AUnit.Test_Suites;
+   use AUnit;
+   use AUnit.Test_Cases;
+   use AUnit.Test_Results;
 
-   Result : aliased Test_Suite;
-   Test_1 : aliased Config_Parse.Test_Case;
-   Test_2 : aliased Signed_Files.Test_Case;
-   Test_3 : aliased Periodic_Times.Test_Case;
+   type Test_Case is new AUnit.Test_Cases.Test_Case with null record;
 
-   -----------
-   -- Suite --
-   -----------
+   procedure Register_Tests (T : in out Test_Case);
+   --  Register routines to be run
 
-   function Suite return Access_Test_Suite is
-   begin
-      Add_Test (Result'Access, Test_1'Access);
-      Add_Test (Result'Access, Test_2'Access);
-      Add_Test (Result'Access, Test_3'Access);
-      return Result'Access;
-   end Suite;
+   function Name (T : in Test_Case) return Test_String;
+   --  Returns name identifying the test case
 
-end Savadur_Suite;
+end Periodic_Times;

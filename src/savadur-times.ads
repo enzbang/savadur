@@ -19,29 +19,38 @@
 --  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.       --
 ------------------------------------------------------------------------------
 
-with Config_Parse;
-with Signed_Files;
-with Periodic_Times;
+with Ada.Calendar;
+with Ada.Strings.Unbounded;
 
-package body Savadur_Suite is
+package Savadur.Times is
 
-   use AUnit.Test_Suites;
+   use Ada;
+   use Ada.Strings.Unbounded;
 
-   Result : aliased Test_Suite;
-   Test_1 : aliased Config_Parse.Test_Case;
-   Test_2 : aliased Signed_Files.Test_Case;
-   Test_3 : aliased Periodic_Times.Test_Case;
+   type Periodic is private;
 
-   -----------
-   -- Suite --
-   -----------
+   function Create (From : in String) return Periodic;
+   --  Convert a periodic time external representation to a periodic object.
+   --  Current supported format is:
+   --     H:M/+H   - event sceduled at H:M, run every H hours
+   --  Raises Constraint_Error if format is not recognized.
 
-   function Suite return Access_Test_Suite is
-   begin
-      Add_Test (Result'Access, Test_1'Access);
-      Add_Test (Result'Access, Test_2'Access);
-      Add_Test (Result'Access, Test_3'Access);
-      return Result'Access;
-   end Suite;
+   function Image (Time : in Periodic) return String;
+   --  Returns the string representation of the given periodic time. This
+   --  routine is the exact opposite of the create routine above.
 
-end Savadur_Suite;
+   function Next_Run_In (Time : in Periodic) return Duration;
+   --  Returns the duration until next events
+
+   function Next_Run_At (Time : in Periodic) return Calendar.Time;
+   --  Returns the time at which next event will be sceduled
+
+private
+
+   type Periodic is record
+      From  : Unbounded_String;
+      Event : Calendar.Time;
+      Every : Duration;
+   end record;
+
+end Savadur.Times;
