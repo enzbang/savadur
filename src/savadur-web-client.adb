@@ -51,7 +51,7 @@ package body Savadur.Web.Client is
    function HTTP_Callback (Request : in Status.Data) return Response.Data is
       pragma Unreferenced (Request);
    begin
-      return Response.Build (MIME.Text_HTML, "<p>Not found<P>", Messages.S404);
+      return Response.Build (MIME.Text_HTML, "<p>Not found<p>", Messages.S404);
    end HTTP_Callback;
 
    -----------
