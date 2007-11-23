@@ -478,6 +478,7 @@ package body Savadur.Build is
          Run_Actions : while Has_Element (Position) loop
 
             Execute_Command : declare
+               use type SCM.Id;
                Ref         : constant Actions.Ref_Action := Element (Position);
                Log_File    : constant String := Directories.Compose
                  (Containing_Directory => Log_Directory,
@@ -538,35 +539,40 @@ package body Savadur.Build is
                   --  No sources directory. This means that the project has not
                   --  been initialized.
                   --  The sources directory has to be created by the SCM
-                  --  Call SCM init from current directory
+                  --  Call SCM init from current directory. If there is no SCM
+                  --  defined for this project we create the directory.
 
                   Logs.Write ("Create directory : " & Sources_Directory);
 
-                  Execute
-                    (Exec_Action   => Get_Action
-                       (Project    => Project.all,
-                        Ref_Action => Savadur.SCM.SCM_Init),
-                     Directory     =>
-                       Projects.Project_Directory (Project),
-                     Log_Filename  => Directories.Compose
-                       (Containing_Directory => Log_Directory,
-                        Name                 => "init"),
-                     Return_Code   => Return_Code,
-                     Result        => Result);
+                  if Project.SCM_Id = SCM.Null_Id then
+                     Directories.Create_Directory (Sources_Directory);
 
-                  if not Result or else Return_Code /= 0
-                    or else not Directories.Exists (Sources_Directory)
-                  then
-                     Status := False;
-                     Send_Status (Savadur.SCM.SCM_Init.Id);
-                     raise Command_Parse_Error with " SCM init failed !";
+                  else
+                     Execute
+                       (Exec_Action   => Get_Action
+                          (Project    => Project.all,
+                           Ref_Action => Savadur.SCM.SCM_Init),
+                        Directory     =>
+                          Projects.Project_Directory (Project),
+                        Log_Filename  => Directories.Compose
+                          (Containing_Directory => Log_Directory,
+                           Name                 => "init"),
+                        Return_Code   => Return_Code,
+                        Result        => Result);
+
+                     if not Result or else Return_Code /= 0
+                       or else not Directories.Exists (Sources_Directory)
+                     then
+                        Status := False;
+                        Send_Status (Savadur.SCM.SCM_Init.Id);
+                        raise Command_Parse_Error with "SCM init failed !";
+                     end if;
+
+                     Send_Status (Savadur.SCM.SCM_Init.Id,
+                       Directories.Compose
+                         (Containing_Directory => Log_Directory,
+                          Name                 => "init"));
                   end if;
-
-                  Send_Status (Savadur.SCM.SCM_Init.Id,
-                               Directories.Compose
-                                 (Containing_Directory => Log_Directory,
-                                  Name                 => "init"));
-
                   --  No Next (Position) to retry the same command
                end if;
             end Execute_Command;
