@@ -363,8 +363,14 @@ package body Savadur.Build is
       Id      : in     Scenarios.Id) return Boolean
    is
 
+      Status : Boolean := True;
+
       function Init return Savadur.Scenarios.Scenario;
       --  Returns the selected scenario and set the environment variables
+
+      procedure Send_Status
+        (Action_Id : in Actions.Id; Log_File : in String := "");
+      --  Send the status to savadur server
 
       ----------
       -- Init --
@@ -388,14 +394,46 @@ package body Savadur.Build is
               & Savadur.Scenarios.Id_Utils.To_String (Id) & " not found";
       end Init;
 
+      -----------------
+      -- Send_Status --
+      -----------------
+
+      procedure Send_Status
+        (Action_Id : in Actions.Id; Log_File : in String := "") is
+
+         function Log_Content return String;
+         --  Returns log content or empty string
+
+         -----------------
+         -- Log_Content --
+         -----------------
+
+         function Log_Content return String is
+         begin
+            if Log_File = "" then
+               return "";
+            else
+               return Content (Log_File);
+            end if;
+         end Log_Content;
+
+      begin
+         Client_Service.Client.Status
+           (Key          => Config.Client.Get_Key,
+            Project_Name =>
+              Projects.Id_Utils.To_String (Project.Project_Id),
+            Scenario     => Scenarios.Id_Utils.To_String (Id),
+            Action       => Actions.Id_Utils.To_String (Action_Id),
+            Output       => Log_Content,
+            Result       => Status);
+      end Send_Status;
+
       Selected_Scenario : constant Savadur.Scenarios.Scenario := Init;
 
       Sources_Directory : constant String :=
                             Projects.Project_Sources_Directory (Project);
       Log_Directory     : constant String :=
                             Projects.Project_Log_Directory (Project);
-
-      Status            : Boolean := True;
 
    begin
       For_All_Ref_Actions : declare
@@ -426,32 +464,18 @@ package body Savadur.Build is
                   if not Result then
                      Status := False; --  Exit with error
 
-                     Client_Service.Client.Status
-                       (Key          => Config.Client.Get_Key,
-                        Project_Name =>
-                          Projects.Id_Utils.To_String (Project.Project_Id),
-                        Scenario     => Scenarios.Id_Utils.To_String (Id),
-                        Action       => Actions.Id_Utils.To_String (Ref.Id),
-                        Output       => "",
-                        Result       => False);
+                     Send_Status (Ref.Id);
 
                      exit Run_Actions;
                   end if;
 
                   Status := Check (Project     => Project,
-                                    Exec_Action => Exec_Action,
-                                    Ref         => Ref,
-                                    Return_Code => Return_Code,
-                                    Log_File    => Log_File);
+                                   Exec_Action => Exec_Action,
+                                   Ref         => Ref,
+                                   Return_Code => Return_Code,
+                                   Log_File    => Log_File);
 
-                  Client_Service.Client.Status
-                    (Key          => Config.Client.Get_Key,
-                     Project_Name =>
-                       Projects.Id_Utils.To_String (Project.Project_Id),
-                     Scenario     => Scenarios.Id_Utils.To_String (Id),
-                     Action       => Actions.Id_Utils.To_String (Ref.Id),
-                     Output       => Content (Log_File),
-                     Result       => Status);
+                  Send_Status (Ref.Id, Log_File);
 
                   if not Status then
 
@@ -496,32 +520,21 @@ package body Savadur.Build is
                   if not Result or else Return_Code /= 0
                     or else not Directories.Exists (Sources_Directory)
                   then
-                     Client_Service.Client.Status
-                       (Key          => Config.Client.Get_Key,
-                        Project_Name =>
-                          Projects.Id_Utils.To_String (Project.Project_Id),
-                        Scenario     => Scenarios.Id_Utils.To_String (Id),
-                        Action       => "init",
-                        Output       => "",
-                        Result       => False);
+                     Status := False;
+                     Send_Status (Savadur.SCM.SCM_Init.Id);
                      raise Command_Parse_Error with " SCM init failed !";
                   end if;
 
-                  Client_Service.Client.Status
-                    (Key          => Config.Client.Get_Key,
-                     Project_Name =>
-                       Projects.Id_Utils.To_String (Project.Project_Id),
-                     Scenario     => Scenarios.Id_Utils.To_String (Id),
-                     Action       => "init",
-                     Output       => Directories.Compose
-                       (Containing_Directory => Log_Directory,
-                        Name                 => "init"),
-                     Result       => Status);
+                  Send_Status (Savadur.SCM.SCM_Init.Id,
+                               Directories.Compose
+                                 (Containing_Directory => Log_Directory,
+                                  Name                 => "init"));
 
                   --  No Next (Position) to retry the same command
                end if;
             end Execute_Command;
          end loop Run_Actions;
+
       exception
          when Constraint_Error =>
             if Has_Element (Position) then
@@ -531,6 +544,10 @@ package body Savadur.Build is
                raise Command_Parse_Error with " Command not found";
             end if;
       end For_All_Ref_Actions;
+
+      --  Final server notification
+
+      Send_Status (Actions.Id_Utils.Nil);
 
       --  Execute notifications hooks
 
