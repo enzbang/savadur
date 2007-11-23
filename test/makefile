@@ -45,8 +45,8 @@ regtests_clientserver: setup_clientserver
 	./clientserver_regtest.sh
 
 setup_clientserver:
-	-@$(RMDIR) test-dir/client
-	-@$(RMDIR) test-dir/server
+	@$(RM) -r test-dir/client
+	@$(RM) -r test-dir/server
 	@$(MKDIR) test-dir/client/servers
 	@$(MKDIR) test-dir/server/projects
 	@$(CP) -r ../config/scm/ test-dir/server

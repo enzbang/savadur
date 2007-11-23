@@ -22,12 +22,11 @@
 with "aws";
 with "xmlada";
 with "shared.gpr";
-with "savadur_soap";
+limited with "savadur";
 
-project Savadur is
+project Savadur_Soap is
 
-   for Source_Dirs use ("src");
-   for Main use ("savadur-client.adb", "savadur-server.adb");
+   for Source_Dirs use ("soap");
 
    case Shared.Build is
       when "Debug" =>
@@ -41,13 +40,6 @@ project Savadur is
          for Exec_Dir use ".build/release/bin";
    end case;
 
-   case Shared.In_Test is
-      when "TRUE" =>
-         for Exec_Dir use "test/bin";
-      when "FALSE" =>
-         null;
-   end case;
-
    ------------
    -- Binder --
    ------------
@@ -58,7 +50,15 @@ project Savadur is
    -- Compiler --
    --------------
 
-   package Compiler renames Shared.Compiler;
+   package Compiler is
+      case Shared.Build is
+         when "Debug" | "Profile" =>
+            for Default_Switches ("Ada") use Shared.Debug_Options;
+
+         when "Release" =>
+            for Default_Switches ("Ada") use Shared.Release_Options;
+      end case;
+   end Compiler;
 
    -------------
    -- Builder --
@@ -78,4 +78,4 @@ project Savadur is
 
    package IDE renames Shared.IDE;
 
-end Savadur;
+end Savadur_Soap;
