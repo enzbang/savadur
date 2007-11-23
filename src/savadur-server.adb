@@ -21,12 +21,8 @@
 
 with Savadur.Config.Project;
 with Savadur.Config.SCM;
-with Savadur.Logs;
-with Savadur.Projects;
-with Savadur.Server_Service.Client;
-with Savadur.Signed_Files;
+with Savadur.Jobs;
 with Savadur.Web.Server;
-with Savadur.Web_Services.Server;
 
 procedure Savadur.Server is
 begin
@@ -36,6 +32,8 @@ begin
    Web.Server.Start;
 
    --  Endless loop
+
+   Jobs.Add_Periodic_Scenario;
 
    loop
       delay Duration'Last;

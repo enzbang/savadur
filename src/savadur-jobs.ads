@@ -30,6 +30,11 @@ package Savadur.Jobs is
       Time     : in Times.Periodic := Times.No_Time);
    --  Schedules a new job
 
+   procedure Add_Periodic_Scenario;
+   --  Adds all known periodic scenarios found in loaded projects into the task
+   --  queue. It is fine to call this routine multiple times as only new
+   --  periodic tasks will get queued.
+
    procedure Stop;
    --  Sends a stop signal to the job task. All currently registered jobs will
    --  be terminated first.

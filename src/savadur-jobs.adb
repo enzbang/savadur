@@ -26,10 +26,11 @@ with Ada.Strings.Unbounded;
 with Savadur.Actions;
 with Savadur.Build;
 with Savadur.Config.Environment_Variables;
+with Savadur.Config.Project;
 with Savadur.Environment_Variables;
 with Savadur.SCM;
 with Savadur.Logs;
-with Savadur.Projects;
+with Savadur.Projects.Sets;
 with Savadur.Remote_Files;
 with Savadur.Scenarios;
 with Savadur.Utils;
@@ -51,6 +52,9 @@ package body Savadur.Jobs is
                (Project  => <>,
                 Scenario => Null_Unbounded_String,
                 Time     => Times.No_Time);
+
+   function "=" (J1, J2 : in Job_Data) return Boolean;
+   --  Returns True and J1 and J2 are equivalent jobs
 
    function "<" (J1, J2 : in Job_Data) return Boolean;
    --  Returns the True if J1 must be executed before J2
@@ -85,6 +89,8 @@ package body Savadur.Jobs is
    task type Run_Jobs;
    type Run_Jobs_Handler is access Run_Jobs;
 
+   Runner : Run_Jobs_Handler;
+
    ---------
    -- "<" --
    ---------
@@ -102,6 +108,19 @@ package body Savadur.Jobs is
    end "<";
 
    ---------
+   -- "=" --
+   ---------
+
+   function "=" (J1, J2 : in Job_Data) return Boolean is
+      use type Times.Periodic;
+   begin
+      return J1.Scenario = J2.Scenario
+        and then
+          Signed_Files.Name (J1.Project) = Signed_Files.Name (J2.Project)
+        and then J1.Time = J2.Time;
+   end "=";
+
+   ---------
    -- Add --
    ---------
 
@@ -116,7 +135,49 @@ package body Savadur.Jobs is
                    Time     => Time));
    end Add;
 
-   Runner : Run_Jobs_Handler;
+   ---------------------------
+   -- Add_Periodic_Scenario --
+   ---------------------------
+
+   procedure Add_Periodic_Scenario is
+
+      procedure Handle_Project (Position : in Projects.Sets.Sets.Cursor);
+      --  Look for periodic scenario into the project
+
+      Project : Projects.Project_Config;
+
+      --------------------
+      -- Handle_Project --
+      --------------------
+
+      procedure Handle_Project (Position : in Projects.Sets.Sets.Cursor) is
+
+         procedure Handle_Scenario (Position : in Scenarios.Sets.Cursor);
+         --  Schedule periodic scenario
+
+         ---------------------
+         -- Handle_Scenario --
+         ---------------------
+
+         procedure Handle_Scenario (Position : in Scenarios.Sets.Cursor) is
+            use Scenarios.Id_Utils;
+            use type Times.Periodic;
+            Scenario : constant Scenarios.Scenario :=
+                         Scenarios.Sets.Element (Position);
+         begin
+            if Scenario.Periodic /= Times.No_Time then
+               Add (Project.Signature, -Scenario.Id, Scenario.Periodic);
+            end if;
+         end Handle_Scenario;
+
+      begin
+         Project := Projects.Sets.Sets.Element (Position);
+         Project.Scenarios.Iterate (Handle_Scenario'Access);
+      end Handle_Project;
+
+   begin
+      Config.Project.Configurations.Iterate (Handle_Project'Access);
+   end Add_Periodic_Scenario;
 
    -----------------
    -- Job_Handler --
@@ -129,14 +190,30 @@ package body Savadur.Jobs is
       ---------
 
       procedure Add (Job : in Job_Data) is
+         use type Times.Periodic;
+         Position : Job_Set.Cursor;
       begin
          --  Ensure the job task is created
+
          if Runner = null then
             Runner := new Run_Jobs;
          end if;
 
-         Jobs.Insert (Job);
-         Size := Size + 1;
+         --  If a periodic job, replace it if it already exists. This can
+         --  happen when reloading projects. We want to replace the existing
+         --  job as the period could have been changed.
+
+         if Job.Time = Times.No_Time
+           or else not Jobs.Contains (Job)
+         then
+            Jobs.Insert (Job);
+            Size := Size + 1;
+
+         else
+            Position := Jobs.Find (Job);
+            Jobs.Replace_Element (Position, Job);
+         end if;
+
          New_Job := True;
       end Add;
 
@@ -191,18 +268,20 @@ package body Savadur.Jobs is
       use Projects.Id_Utils;
       use SCM.Id_Utils;
       use type Times.Periodic;
+      use type SCM.Id;
 
       Project : aliased Projects.Project_Config;
       Job     : Job_Data;
       Env_Var : Environment_Variables.Maps.Map;
-      SCM     : Savadur.SCM.SCM;
-      pragma Unreferenced (SCM);
       Seconds : Duration;
    begin
       Jobs_Loop : loop
 
          Wait_For_Job : loop
             Job_Handler.Next (Seconds);
+            Logs.Write
+              ("Next job in " & Duration'Image (Seconds),
+               Kind => Logs.Very_Verbose);
 
             select
                Job_Handler.Rescedule;
@@ -249,7 +328,14 @@ package body Savadur.Jobs is
 
             --  Check if we know about this SCM
 
-            SCM := Remote_Files.Load_SCM (-Project.SCM_Id);
+            if Project.SCM_Id /= SCM.Null_Id then
+               declare
+                  SCM  : Savadur.SCM.SCM;
+                  pragma Unreferenced (SCM);
+               begin
+                  SCM := Remote_Files.Load_SCM (-Project.SCM_Id);
+               end;
+            end if;
 
             --  We can run the job
 
