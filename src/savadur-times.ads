@@ -29,6 +29,8 @@ package Savadur.Times is
 
    type Periodic is private;
 
+   No_Time : constant Periodic;
+
    function Create (From : in String) return Periodic;
    --  Convert a periodic time external representation to a periodic object.
    --  Current supported format is:
@@ -52,5 +54,10 @@ private
       Event : Calendar.Time;
       Every : Duration;
    end record;
+
+   No_Time : constant Periodic :=
+               (From  => Null_Unbounded_String,
+                Event => <>,
+                Every => 0.0);
 
 end Savadur.Times;

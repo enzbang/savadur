@@ -19,8 +19,6 @@
 --  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.       --
 ------------------------------------------------------------------------------
 
-with GNAT.IO; use GNAT.IO;
-
 with Ada.Calendar.Formatting;
 with Ada.Strings.Fixed;
 
@@ -53,8 +51,6 @@ package body Savadur.Times is
                Calendar.Formatting.Minute_Number'Value
                  (From (S1 + 1 .. S2 - 1));
       begin
-         Put_Line (H'Img & M'Img);
-
          return
            (Event => Calendar.Time_Of
               (Year    => Calendar.Year (Now),
