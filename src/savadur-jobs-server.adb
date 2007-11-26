@@ -46,7 +46,7 @@ package body Savadur.Jobs.Server is
       use Scenarios.Id_Utils;
 
       procedure Send_Job_Request (Position : in Project_List.Clients.Cursor);
-      --  Send the job request to the client
+      --  Sends the job request to the client
 
       ----------------------
       -- Send_Job_Request --

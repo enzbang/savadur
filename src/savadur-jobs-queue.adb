@@ -67,10 +67,10 @@ package body Savadur.Jobs.Queue is
    protected Job_Handler is
 
       procedure Add (Job : in Job_Data);
-      --  Add a new job into the queue, jobs are sorted in ascending time
+      --  Adds a new job into the queue, jobs are sorted in ascending time
 
       entry Get (Job : in out Job_Data);
-      --  Get first job in the queue
+      --  Gets first job in the queue
 
       entry Next (Seconds : out Duration);
       --  Returns the time in seconds to the next job
@@ -145,7 +145,7 @@ package body Savadur.Jobs.Queue is
    procedure Add_Periodic_Scenario is
 
       procedure Handle_Project (Position : in Projects.Sets.Sets.Cursor);
-      --  Look for periodic scenario into the project
+      --  Looks for periodic scenario into the project
 
       Project : Projects.Project_Config;
 
@@ -156,7 +156,7 @@ package body Savadur.Jobs.Queue is
       procedure Handle_Project (Position : in Projects.Sets.Sets.Cursor) is
 
          procedure Handle_Scenario (Position : in Scenarios.Sets.Cursor);
-         --  Schedule periodic scenario
+         --  Schedules periodic scenario
 
          ---------------------
          -- Handle_Scenario --
