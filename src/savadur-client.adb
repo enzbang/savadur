@@ -22,13 +22,22 @@
 --
 --  Usage :
 --
---  savadur-client [OPTIONS] -project name -sid scenario_id
+--  savadur-client [OPTIONS] CMD
+--
+--- CMD:
+--   -project name -sid scenario_id to run a project in standalone mode
+--   -server                        to run in server mode
+--   -remote -list                  to list remote servers
+--   -remote -add                   to add a remote server
+--
 --
 --  OPTIONS :
 --       -savadurdir dirname : Set savadur directory
 --                             ($SAVADUR_DIR or $HOME / .savadur by default)
---       -verbose
---       -very_verbose
+--       -v|-version
+--       -V|-verbose
+--       -VV|-very_verbose
+--       -L filename         : use filename for log file
 
 with Ada.Command_Line;
 with Ada.Containers;
@@ -272,20 +281,20 @@ procedure Savadur.Client is
       Logs.Write ("    -VV|-very_verbose");
       Logs.Write ("    -L filename         : use filename for log file");
       Logs.Write ("    -server             : run in server mode");
-      Logs.Write ("    -remotelist         : List new remote server");
-      Logs.Write ("    -remoteadd          : Add a new remote server");
+      Logs.Write ("    -remote -list       : List new remote server");
+      Logs.Write ("    -remote -add        : Add a new remote server");
    end Usage;
 
 begin
    GNAT.Command_Line.Initialize_Option_Scan (Section_Delimiters => "remote");
 
-   Interate_On_Opt : loop
+   Iterate_On_Opt : loop
       case GNAT.Command_Line.Getopt
            ("V verbose VV very_verbose L: version v "
             & "p: project: savadurdir: s: sid: server")
          is
          when ASCII.NUL =>
-            exit Interate_On_Opt;
+            exit Iterate_On_Opt;
 
             when 'p' =>
             Complete_P : declare
@@ -331,6 +340,7 @@ begin
                   Action := Add_Remote_Server'Access;
                end if;
             end Complete_R;
+
          when 'v' | 'V' =>
             Complete_V : declare
                Full : constant String := GNAT.Command_Line.Full_Switch;
@@ -369,7 +379,7 @@ begin
             Usage (Error_Message => "unknown syntax");
             return;
       end case;
-   end loop Interate_On_Opt;
+   end loop Iterate_On_Opt;
 
    GNAT.Command_Line.Goto_Section ("remote");
    Remote_Opt : loop
