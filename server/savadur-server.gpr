@@ -20,64 +20,61 @@
 ------------------------------------------------------------------------------
 
 with "aws";
-with "xmlada";
-with "shared.gpr";
-limited with "savadur";
+with "../kernel/savadur";
+with "../kernel/savadur-kernel";
 
-project Savadur_Soap is
+project Savadur.Server is
 
-   for Source_Dirs use ("soap");
+   for Source_Dirs use ("src");
+   for Main use ("savadur-server.adb");
 
-   case Shared.Build is
+   case Savadur.Build is
       when "Debug" =>
-         for Object_Dir use ".build/debug/savadur/obj";
+         for Object_Dir use ".build/debug/server/obj";
          for Exec_Dir use ".build/debug/bin";
       when "Profile" =>
-         for Object_Dir use ".build/profile/savadur/obj";
+         for Object_Dir use ".build/profile/server/obj";
          for Exec_Dir use ".build/profile/bin";
       when "Release" =>
-         for Object_Dir use ".build/release/savadur/obj";
+         for Object_Dir use ".build/release/server/obj";
          for Exec_Dir use ".build/release/bin";
+   end case;
+
+   case Savadur.In_Test is
+      when "TRUE" =>
+         for Exec_Dir use "test/bin";
+      when "FALSE" =>
+         null;
    end case;
 
    ------------
    -- Binder --
    ------------
 
-   package Binder renames Shared.Binder;
+   package Binder renames Savadur.Binder;
 
    --------------
    -- Compiler --
    --------------
 
-   package Compiler is
-      case Shared.Build is
-         when "Debug" | "Profile" =>
-            for Default_Switches ("Ada") use
-              Shared.Debug_Options & ("-gnat05");
-
-         when "Release" =>
-            for Default_Switches ("Ada") use
-              Shared.Release_Options  & ("-gnat05");
-      end case;
-   end Compiler;
+   package Compiler renames Savadur.Compiler;
 
    -------------
    -- Builder --
    -------------
 
-   package Builder renames Shared.Builder;
+   package Builder renames Savadur.Builder;
 
    ------------
    -- Linker --
    ------------
 
-   package Linker renames Shared.Linker;
+   package Linker renames Savadur.Linker;
 
    ---------
    -- IDE --
    ---------
 
-   package IDE renames Shared.IDE;
+   package IDE renames Savadur.IDE;
 
-end Savadur_Soap;
+end Savadur.Server;

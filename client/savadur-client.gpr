@@ -20,28 +20,27 @@
 ------------------------------------------------------------------------------
 
 with "aws";
-with "xmlada";
-with "shared.gpr";
-with "savadur_soap";
+with "../kernel/savadur";
+with "../kernel/savadur-kernel";
 
-project Savadur is
+project Savadur.Client is
 
    for Source_Dirs use ("src");
-   for Main use ("savadur-client.adb", "savadur-server.adb");
+   for Main use ("savadur-client.adb");
 
-   case Shared.Build is
+   case Savadur.Build is
       when "Debug" =>
-         for Object_Dir use ".build/debug/savadur/obj";
+         for Object_Dir use ".build/debug/client/obj";
          for Exec_Dir use ".build/debug/bin";
       when "Profile" =>
-         for Object_Dir use ".build/profile/savadur/obj";
+         for Object_Dir use ".build/profile/client/obj";
          for Exec_Dir use ".build/profile/bin";
       when "Release" =>
-         for Object_Dir use ".build/release/savadur/obj";
+         for Object_Dir use ".build/release/client/obj";
          for Exec_Dir use ".build/release/bin";
    end case;
 
-   case Shared.In_Test is
+   case Savadur.In_Test is
       when "TRUE" =>
          for Exec_Dir use "test/bin";
       when "FALSE" =>
@@ -52,30 +51,30 @@ project Savadur is
    -- Binder --
    ------------
 
-   package Binder renames Shared.Binder;
+   package Binder renames Savadur.Binder;
 
    --------------
    -- Compiler --
    --------------
 
-   package Compiler renames Shared.Compiler;
+   package Compiler renames Savadur.Compiler;
 
    -------------
    -- Builder --
    -------------
 
-   package Builder renames Shared.Builder;
+   package Builder renames Savadur.Builder;
 
    ------------
    -- Linker --
    ------------
 
-   package Linker renames Shared.Linker;
+   package Linker renames Savadur.Linker;
 
    ---------
    -- IDE --
    ---------
 
-   package IDE renames Shared.IDE;
+   package IDE renames Savadur.IDE;
 
-end Savadur;
+end Savadur.Client;

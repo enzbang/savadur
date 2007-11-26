@@ -19,95 +19,65 @@
 --  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.       --
 ------------------------------------------------------------------------------
 
-project Shared is
+with "aws";
+with "xmlada";
+with "../kernel/savadur";
+limited with "../kernel/savadur-kernel";
 
-   for Source_Dirs use ();
-   --  No sources for this project
+project Savadur.Soap is
 
-   type Build_Type is ("Debug", "Release", "Profile");
-   Build : Build_Type := external ("PRJ_BUILD", "Debug");
+   for Source_Dirs use ("soap");
 
-   type OS_Type is ("UNIX", "Windows_NT");
-   OS : OS_Type := external ("OS", "UNIX");
-
-   type In_Test_Kind is ("TRUE", "FALSE");
-   In_Test : In_Test_Kind := external ("IN_TEST", "FALSE");
-
-   -------------
-   -- Builder --
-   -------------
-
-   package Builder is
-      case Build is
-         when "Debug" | "Release" =>
-            for Default_Switches ("Ada") use ("-m", "-s");
-         when "Profile" =>
-            for Default_Switches ("Ada") use
-              ("-m", "-s", "-fprofile-arcs", "-ftest-coverage");
-      end case;
-   end Builder;
-
-   --------------
-   -- Compiler --
-   --------------
-
-   Common_Options  :=
-     ("-gnat05", "-gnatwa", "-gnaty3Aabcdefhiklmnoprstux", "-Wall");
-   --  Common options used for the Debug and Release modes
-
-   Debug_Options   :=
-     ("-g", "-gnata", "-gnatVa", "-gnatQ", "-gnato");
-
-   Release_Options :=
-     ("-O2", "-gnatn");
-
-   package Compiler is
-      case Build is
-         when "Debug" | "Profile" =>
-            for Default_Switches ("Ada") use Common_Options & Debug_Options;
-
-         when "Release" =>
-            for Default_Switches ("Ada") use Common_Options & Release_Options;
-      end case;
-   end Compiler;
+   case Savadur.Build is
+      when "Debug" =>
+         for Object_Dir use ".build/debug/savadur/obj";
+         for Exec_Dir use ".build/debug/bin";
+      when "Profile" =>
+         for Object_Dir use ".build/profile/savadur/obj";
+         for Exec_Dir use ".build/profile/bin";
+      when "Release" =>
+         for Object_Dir use ".build/release/savadur/obj";
+         for Exec_Dir use ".build/release/bin";
+   end case;
 
    ------------
    -- Binder --
    ------------
 
-   package Binder is
-      case Build is
+   package Binder renames Savadur.Binder;
+
+   --------------
+   -- Compiler --
+   --------------
+
+   package Compiler is
+      case Savadur.Build is
          when "Debug" | "Profile" =>
-            for Default_Switches ("Ada") use ("-E", "-g");
+            for Default_Switches ("Ada") use
+              Savadur.Debug_Options & ("-gnat05");
 
          when "Release" =>
-            for Default_Switches ("Ada") use ("-E");
+            for Default_Switches ("Ada") use
+              Savadur.Release_Options  & ("-gnat05");
       end case;
-   end Binder;
+   end Compiler;
+
+   -------------
+   -- Builder --
+   -------------
+
+   package Builder renames Savadur.Builder;
 
    ------------
    -- Linker --
    ------------
 
-   package Linker is
-      case Build is
-         when "Debug" =>
-            for Default_Switches ("Ada") use ("-g");
-
-         when "Profile" =>
-            for Default_Switches ("Ada") use ("-g", "-lgmem");
-
-         when "Release" =>
-            null;
-      end case;
-   end Linker;
+   package Linker renames Savadur.Linker;
 
    ---------
    -- IDE --
    ---------
 
-   package IDE is
-      for VCS_Kind use "Git";
-   end IDE;
+   package IDE renames Savadur.IDE;
 
-end Shared;
+end Savadur.Soap;
