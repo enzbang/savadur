@@ -73,6 +73,9 @@ procedure Savadur.Client is
 
    New_Server           : Savadur.Servers.Server;
 
+   Action               : access procedure;
+   --  Action to execute after Command Line parsing
+
    procedure Usage (Error_Message : in String := "");
    --  Displays Usage
 
@@ -88,21 +91,20 @@ procedure Savadur.Client is
    procedure List_Remote_Server;
    --  Lists remote servers
 
-   Action               : access procedure;
-   --  Action to execute (after Command Line parsing)
+   -----------------------
+   -- Add_Remote_Server --
+   -----------------------
 
    procedure Add_Remote_Server is
       use Ada.Text_IO;
       File : File_Type;
       Filename : constant String :=
-                   Ada.Directories.Compose
+                   Directories.Compose
                      (Containing_Directory => Config.Server_Directory,
                       Name                 => -New_Server.Name,
                       Extension            => "xml");
    begin
-      Create (File => File,
-              Mode => Out_File,
-              Name => Filename);
+      Create (File => File, Mode => Out_File, Name => Filename);
 
       Logs.Write ("Add new remote server : "
                   & (-New_Server.Name) & " " & (-New_Server.URL));

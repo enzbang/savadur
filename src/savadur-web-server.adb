@@ -67,9 +67,8 @@ package body Savadur.Web.Server is
          return Run (Request);
       end if;
 
-      return Response.Build (MIME.Text_HTML,
-                             "<p>Not found</p>",
-                             Messages.S404);
+      return Response.Build
+        (MIME.Text_HTML, "<p>" & URI & " not found</p>", Messages.S404);
    end HTTP_Callback;
 
    ---------
@@ -78,13 +77,10 @@ package body Savadur.Web.Server is
 
    function Run (Request : in Status.Data) return Response.Data is
       P            : constant AWS.Parameters.List :=
-                       AWS.Status.Parameters (Request);
-      Project_Name : constant String              :=
-                       AWS.Parameters.Get (P, "p");
-      Scenario_Id  : constant String              :=
-                       AWS.Parameters.Get (P, "s");
+                       Status.Parameters (Request);
+      Project_Name : constant String := Parameters.Get (P, "p");
+      Scenario_Id  : constant String := Parameters.Get (P, "s");
    begin
-
       Run_Project : declare
          Project          : aliased Projects.Project_Config :=
                               Savadur.Config.Project.Get (Project_Name);
@@ -105,10 +101,10 @@ package body Savadur.Web.Server is
                                 Messages.S404);
       exception
          when IO_Exceptions.Name_Error =>
-            return Response.Build (MIME.Text_HTML,
-                                   "<p>Project " & Project_Name &
-                                   " Not found</p>",
-                                   Messages.S404);
+            return Response.Build
+              (MIME.Text_HTML,
+               "<p>Project " & Project_Name & " Not found</p>",
+               Messages.S404);
       end Run_Project;
    end Run;
 
