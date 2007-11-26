@@ -268,6 +268,7 @@ procedure Savadur.Client is
       Logs.Write ("    -v|-version");
       Logs.Write ("    -V|-verbose");
       Logs.Write ("    -VV|-very_verbose");
+      Logs.Write ("    -L filename         : use filename for log file");
       Logs.Write ("    -server             : run in server mode");
       Logs.Write ("    -remotelist         : List new remote server");
       Logs.Write ("    -remoteadd          : Add a new remote server");
@@ -278,7 +279,7 @@ begin
 
    Interate_On_Opt : loop
       case GNAT.Command_Line.Getopt
-           ("V verbose VV very_verbose version v "
+           ("V verbose VV very_verbose L: version v "
             & "p: project: savadurdir: s: sid: server")
          is
          when ASCII.NUL =>
@@ -350,6 +351,17 @@ begin
                   raise Syntax_Error with "Unknown option " & Full;
                end if;
             end Complete_V;
+
+         when 'L' =>
+            Complete_L : declare
+               Full : constant String := GNAT.Command_Line.Full_Switch;
+            begin
+               if Full = "L" then
+                  Logs.Set_File (GNAT.Command_Line.Parameter);
+               else
+                  raise Syntax_Error with "Unknown option " & Full;
+               end if;
+            end Complete_L;
 
          when others =>
             Usage (Error_Message => "unknown syntax");
