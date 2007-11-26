@@ -26,7 +26,7 @@ limited with "../kernel/savadur-kernel";
 
 project Savadur.Soap is
 
-   for Source_Dirs use ("soap");
+   for Source_Dirs use (".");
 
    case Savadur.Build is
       when "Debug" =>

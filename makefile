@@ -37,14 +37,15 @@ VERSION_ALL = $(shell git describe 2>/dev/null)
 all: build
 
 build: setup
-	$(GNATMAKE) -XPRJ_BUILD=$(MODE) -P savadur
+	$(GNATMAKE) -XPRJ_BUILD=$(MODE) -P server/savadur-server
+	$(GNATMAKE) -XPRJ_BUILD=$(MODE) -P client/savadur-client
 
 setup:
 # If git is not present then use the version.ads provided in distrib
 ifneq ("$(VERSION)", "")
 	sed -e 's,\$$VERSION\$$,$(VERSION),g' \
 	-e 's,\$$VERSION_ALL\$$,$(VERSION_ALL),g' \
-	src/savadur-version.tads > src/savadur-version.ads
+	kernel/src/savadur-version.tads > kernel/src/savadur-version.ads
 endif
 	$(MAKE) -C soap setup $(OPTIONS)
 
