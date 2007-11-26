@@ -26,6 +26,7 @@ package Savadur.Config is
    function Savadur_Directory return String;
    --  Returns Savadur directory or raise Config_Error
    --  Savadur directory containing :
+   --      client.xml
    --      projects/
    --      scm/
    --      env/

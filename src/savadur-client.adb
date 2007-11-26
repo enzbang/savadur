@@ -29,7 +29,7 @@
 --   -server                        to run in server mode
 --   -remote -list                  to list remote servers
 --   -remote -add                   to add a remote server
---
+--   -config -id                    set client id
 --
 --  OPTIONS :
 --       -savadurdir dirname : Set savadur directory
@@ -77,6 +77,7 @@ procedure Savadur.Client is
    Syntax_Error         : exception;
 
    Project_Name         : Unbounded_String;
+   Client_Id            : Unbounded_String;
    Scenario_Id          : Unbounded_String
      := Scenarios.Id_Utils.To_Unbounded_String (Scenarios.Default_Scenario);
 
@@ -99,6 +100,9 @@ procedure Savadur.Client is
 
    procedure List_Remote_Server;
    --  Lists remote servers
+
+   procedure Set_Client_Id;
+   --  Sets client id
 
    -----------------------
    -- Add_Remote_Server --
@@ -255,6 +259,28 @@ procedure Savadur.Client is
       Jobs.Client.Queue.Stop;
    end Run_Standalone;
 
+   -------------------
+   -- Set_Client_Id --
+   -------------------
+
+   procedure Set_Client_Id is
+      use Ada.Text_IO;
+      File : File_Type;
+      Filename : constant String :=
+                   Directories.Compose
+                     (Containing_Directory => Config.Savadur_Directory,
+                      Name                 => "client",
+                      Extension            => "xml");
+   begin
+      Create (File => File, Mode => Out_File, Name => Filename);
+      Put_Line (File, "<client>");
+      Put_Line (File, "<name id='" & (-Client_Id) & "'/>");
+      Put_Line (File, "</client>");
+      Close (File);
+
+      Logs.Write ("Set client id : "  & Savadur.Config.Client.Get_Key);
+   end Set_Client_Id;
+
    -----------
    -- Usage --
    -----------
@@ -283,10 +309,12 @@ procedure Savadur.Client is
       Logs.Write ("    -server             : run in server mode");
       Logs.Write ("    -remote -list       : List new remote server");
       Logs.Write ("    -remote -add        : Add a new remote server");
+      Logs.Write ("    -config -id         : Set client id");
    end Usage;
 
 begin
-   GNAT.Command_Line.Initialize_Option_Scan (Section_Delimiters => "remote");
+   GNAT.Command_Line.Initialize_Option_Scan
+     (Section_Delimiters => "remote config");
 
    Iterate_On_Opt : loop
       case GNAT.Command_Line.Getopt
@@ -329,17 +357,6 @@ begin
                   raise Syntax_Error with "Unknown option " & Full;
                end if;
             end Complete_S;
-
-         when 'r' =>
-            Complete_R : declare
-               Full : constant String := GNAT.Command_Line.Full_Switch;
-            begin
-               if Full = "remoteadd" then
-                  Action := List_Remote_Server'Access;
-               else
-                  Action := Add_Remote_Server'Access;
-               end if;
-            end Complete_R;
 
          when 'v' | 'V' =>
             Complete_V : declare
@@ -406,6 +423,29 @@ begin
 
       end case;
    end loop Remote_Opt;
+
+   GNAT.Command_Line.Goto_Section ("config");
+   Config_Opt : loop
+      case GNAT.Command_Line.Getopt ("id:") is
+         when ASCII.NUL =>
+            exit Config_Opt;
+
+         when 'i' =>
+            Complete_R : declare
+               Full : constant String := GNAT.Command_Line.Full_Switch;
+            begin
+               if Full = "id" then
+                  Action := Set_Client_Id'Access;
+                  Client_Id :=
+                    To_Unbounded_String (GNAT.Command_Line.Parameter);
+               end if;
+            end Complete_R;
+
+         when others =>
+            Usage (Error_Message => "unknown syntax");
+            return;
+      end case;
+   end loop Config_Opt;
 
    if Action /= null then
       Action.all;

@@ -21,6 +21,8 @@
 
 package Savadur.Config.Client is
 
+   Config_Error : exception;
+
    function Get_Key return String;
    --  Returns client key
 
