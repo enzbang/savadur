@@ -371,7 +371,7 @@ begin
                   Logs.Handler.Set (Kind      => Logs.Handler.Verbose,
                                     Activated => True);
                   Logs.Handler.Set (Kind      => Logs.Handler.Very_Verbose,
-                            Activated => True);
+                                    Activated => True);
 
                elsif Full = "version" or else Full = "v" then
                   Logs.Write (Content => "Savadur "
@@ -422,6 +422,7 @@ begin
          when others =>
             Usage (Error_Message => "unknown syntax");
             return;
+
       end case;
    end loop Remote_Opt;
 

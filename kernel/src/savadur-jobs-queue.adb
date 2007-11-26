@@ -27,11 +27,11 @@ with Ada.Strings.Unbounded;
 with Savadur.Actions;
 with Savadur.Config.Environment_Variables;
 with Savadur.Config.Project;
-with Savadur.SCM;
+with Savadur.Logs;
 with Savadur.Projects.Sets;
 with Savadur.Remote_Files;
+with Savadur.SCM;
 with Savadur.Utils;
-with Savadur.Logs;
 
 package body Savadur.Jobs.Queue is
 
