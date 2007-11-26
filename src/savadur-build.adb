@@ -66,8 +66,10 @@ package body Savadur.Build is
       Return_Code : in     Integer;
       Log_File    : in     String) return Boolean;
 
+   package EV renames Ada.Environment_Variables;
+
    Windows_Host : constant Boolean :=
-                    Ada.Environment_Variables.Value ("OS") = "Windows_NT";
+                    EV.Exists ("OS") and then EV.Value ("OS") = "Windows_NT";
 
    -----------
    -- Check --
