@@ -51,11 +51,11 @@ package body Savadur.Config.Client is
 
       procedure Parse is
       begin
-
          --  ??? TBD
 
          Configuration.Key := +"me";
       end Parse;
+
    begin
       if Configuration = Empty then
          Parse;
