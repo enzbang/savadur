@@ -25,18 +25,15 @@ with Ada.Exceptions;
 with Ada.Strings.Unbounded;
 
 with Savadur.Actions;
-with Savadur.Build;
 with Savadur.Config.Environment_Variables;
 with Savadur.Config.Project;
-with Savadur.Environment_Variables;
 with Savadur.SCM;
 with Savadur.Logs;
 with Savadur.Projects.Sets;
 with Savadur.Remote_Files;
-with Savadur.Scenarios;
 with Savadur.Utils;
 
-package body Savadur.Jobs is
+package body Savadur.Jobs.Queue is
 
    use Ada;
    use Ada.Exceptions;
@@ -352,10 +349,10 @@ package body Savadur.Jobs is
             Env_Var :=
               Savadur.Config.Environment_Variables.Parse (Project'Access);
 
-            if Savadur.Build.Run
-              (Project => Project'Access,
-               Env_Var => Env_Var,
-               Id      => Scenarios.Id (Job.Scenario))
+            if Run
+              (Project  => Project'Access,
+               Env_Var  => Env_Var,
+               Scenario => Scenarios.Id (Job.Scenario))
             then
                Logs.Write ("Success");
             else
@@ -378,4 +375,4 @@ package body Savadur.Jobs is
       Job_Handler.Stop;
    end Stop;
 
-end Savadur.Jobs;
+end Savadur.Jobs.Queue;

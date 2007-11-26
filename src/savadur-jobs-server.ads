@@ -19,65 +19,21 @@
 --  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.       --
 ------------------------------------------------------------------------------
 
-with Ada.Strings.Hash;
+with Savadur.Environment_Variables;
+with Savadur.Jobs.Queue;
+with Savadur.Projects;
+with Savadur.Scenarios;
 
-with Savadur.Utils;
+package Savadur.Jobs.Server is
 
-package body Savadur.Clients is
+   function Run
+     (Project  : access Projects.Project_Config;
+      Env_Var  : in     Environment_Variables.Maps.Map;
+      Scenario : in     Scenarios.Id) return Boolean;
+   --  This is the server side run routine, it does not call directly the
+   --  Build.Run routine as nothing is actually run on the server but send run
+   --  requests to the clients.
 
-   use Savadur.Utils;
+   package Queue is new Savadur.Jobs.Queue (Run => Run);
 
-   ----------
-   -- Hash --
-   ----------
-
-   function Hash (Client : in Clients.Client) return Containers.Hash_Type is
-   begin
-      return Strings.Hash (To_String (Client.Key));
-   end Hash;
-
-   -----------
-   -- Image --
-   -----------
-
-   function Image (Clients_Set : in Sets.Set) return String is
-      Position : Sets.Cursor := Sets.First (Clients_Set);
-      Result   : Unbounded_String;
-   begin
-      while Sets.Has_Element (Position) loop
-         Append
-           (Result, "* "
-            & To_String (Sets.Element (Position).Key) & ASCII.LF);
-         Append (Result, "[" & ASCII.LF);
-         Append
-           (Result,
-            "Name => " & To_String (Sets.Element (Position).Key) & ASCII.LF);
-         Append
-           (Result, "Endpoint => " &
-            To_String (Sets.Element (Position).Callback_Endpoint) & ASCII.LF);
-         Append (Result, "]" & ASCII.LF);
-         Sets.Next (Position);
-      end loop;
-
-      return -Result;
-   end Image;
-
-   ---------
-   -- Key --
-   ---------
-
-   function Key (Client : in Clients.Client) return String is
-   begin
-      return -Client.Key;
-   end Key;
-
-   ---------------
-   -- Key_Equal --
-   ---------------
-
-   function Key_Equal (C1, C2 : in Client) return Boolean is
-   begin
-      return C1.Key = C2.Key;
-   end Key_Equal;
-
-end Savadur.Clients;
+end Savadur.Jobs.Server;

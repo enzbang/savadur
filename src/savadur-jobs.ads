@@ -19,24 +19,10 @@
 --  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.       --
 ------------------------------------------------------------------------------
 
-with Savadur.Signed_Files;
-with Savadur.Times;
+--  Root package for the Job Queues handler on the client and server side
 
 package Savadur.Jobs is
 
-   procedure Add
-     (Project  : in Signed_Files.Handler;
-      Scenario : in String;
-      Time     : in Times.Periodic := Times.No_Time);
-   --  Schedules a new job
-
-   procedure Add_Periodic_Scenario;
-   --  Adds all known periodic scenarios found in loaded projects into the task
-   --  queue. It is fine to call this routine multiple times as only new
-   --  periodic tasks will get queued.
-
-   procedure Stop;
-   --  Sends a stop signal to the job task. All currently registered jobs will
-   --  be terminated first.
+   pragma Pure;
 
 end Savadur.Jobs;

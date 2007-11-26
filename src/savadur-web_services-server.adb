@@ -19,7 +19,7 @@
 --  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.       --
 ------------------------------------------------------------------------------
 
-with Savadur.Jobs;
+with Savadur.Jobs.Client;
 with Savadur.Signed_Files;
 
 package body Savadur.Web_Services.Server is
@@ -32,7 +32,8 @@ package body Savadur.Web_Services.Server is
      (Scenario       : in String;
       Signed_Project : in Server.Signed_Project) is
    begin
-      Savadur.Jobs.Add
+      --  This is run on the client side
+      Jobs.Client.Queue.Add
         (Project  => Signed_Files.To_Handler
            (Signed_Files.External_Handler (Signed_Project)),
          Scenario => Scenario);

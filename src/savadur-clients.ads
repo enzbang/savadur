@@ -20,6 +20,7 @@
 ------------------------------------------------------------------------------
 
 with Ada.Containers.Indefinite_Hashed_Sets;
+with Ada.Strings.Hash_Case_Insensitive;
 with Ada.Strings.Unbounded;
 
 with Savadur.Web_Services.Client;
@@ -55,6 +56,13 @@ package Savadur.Clients is
 
    function Image (Clients_Set : in Sets.Set) return String;
    --  Returns the Client_Set image
+
+   subtype Set is Sets.Set;
+
+   function Key (Client : in Clients.Client) return String;
+
+   package Keys is new Sets.Generic_Keys
+     (String, Key, Strings.Hash_Case_Insensitive, "=");
 
    Registered : Sets.Set;
 

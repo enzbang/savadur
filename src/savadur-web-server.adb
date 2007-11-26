@@ -34,7 +34,7 @@ with SOAP.Dispatchers.Callback;
 
 with Savadur.Client_Service.CB;
 with Savadur.Config.Project;
-with Savadur.Jobs;
+with Savadur.Jobs.Server;
 with Savadur.Projects;
 with Savadur.Signed_Files;
 with Savadur.Logs;
@@ -89,7 +89,7 @@ package body Savadur.Web.Server is
       begin
          Signed_Files.Create (Signed_Project, Project_Name, Project_Filename);
 
-         Savadur.Jobs.Add (Signed_Project, Scenario_Id);
+         Jobs.Server.Queue.Add (Signed_Project, Scenario_Id);
 
          return Response.Build
            (MIME.Text_HTML,
@@ -118,6 +118,8 @@ package body Savadur.Web.Server is
         (HTTP_Callback'Access, Client_Service.CB.SOAP_CB'Access);
 
       AWS.Server.Start (HTTP, Dispatcher, Config);
+
+      Jobs.Server.Queue.Add_Periodic_Scenario;
 
       Logs.Write
         (Content => "Server started on port " & URL.Port (Address),

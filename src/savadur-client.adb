@@ -39,7 +39,6 @@ with Ada.Directories;
 
 with GNAT.Command_Line;
 
-with Savadur.Projects;
 with Savadur.Client_Service.Client;
 with Savadur.Client_Service.Types;
 with Savadur.Config.Environment_Variables;
@@ -47,8 +46,9 @@ with Savadur.Config.Project;
 with Savadur.Config.Client;
 with Savadur.Config.SCM;
 with Savadur.Config.Server;
-with Savadur.Jobs;
+with Savadur.Jobs.Client;
 with Savadur.Logs;
+with Savadur.Projects;
 with Savadur.Scenarios;
 with Savadur.Server_Service;
 with Savadur.Signed_Files;
@@ -240,10 +240,10 @@ procedure Savadur.Client is
             -Project_Name,
             Projects.Project_Filename (Project'Access));
 
-         Jobs.Add (Signed_Project, -Scenario_Id);
+         Jobs.Client.Queue.Add (Signed_Project, -Scenario_Id);
       end Run_Project;
 
-      Jobs.Stop;
+      Jobs.Client.Queue.Stop;
    end Run_Standalone;
 
    -----------
