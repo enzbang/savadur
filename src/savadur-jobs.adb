@@ -19,6 +19,7 @@
 --  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.       --
 ------------------------------------------------------------------------------
 
+with Ada.Calendar;
 with Ada.Containers.Ordered_Sets;
 with Ada.Exceptions;
 with Ada.Strings.Unbounded;
@@ -46,12 +47,16 @@ package body Savadur.Jobs is
       Project  : aliased Signed_Files.Handler;
       Scenario : Unbounded_String;
       Time     : Times.Periodic;
+      Created  : Calendar.Time;
+      Number   : Natural;
    end record;
 
    End_Job : constant Job_Data :=
                (Project  => <>,
                 Scenario => Null_Unbounded_String,
-                Time     => Times.No_Time);
+                Time     => Times.No_Time,
+                Created  => <>,
+                Number   => 0);
 
    function "=" (J1, J2 : in Job_Data) return Boolean;
    --  Returns True and J1 and J2 are equivalent jobs
@@ -84,6 +89,7 @@ package body Savadur.Jobs is
       Jobs    : Job_Set.Set;
       Size    : Natural := 0;
       New_Job : Boolean := False;
+      Index   : Natural := 0;
    end Job_Handler;
 
    task type Run_Jobs;
@@ -102,6 +108,8 @@ package body Savadur.Jobs is
          return False;
       elsif J2 = End_Job then
          return True;
+      elsif Times.Next_Run_In (J1.Time) = Times.Next_Run_In (J2.Time) then
+         return J1.Number < J2.Number;
       else
          return Times.Next_Run_In (J1.Time) < Times.Next_Run_In (J2.Time);
       end if;
@@ -112,12 +120,8 @@ package body Savadur.Jobs is
    ---------
 
    function "=" (J1, J2 : in Job_Data) return Boolean is
-      use type Times.Periodic;
    begin
-      return J1.Scenario = J2.Scenario
-        and then
-          Signed_Files.Name (J1.Project) = Signed_Files.Name (J2.Project)
-        and then J1.Time = J2.Time;
+      return J1.Number = J2.Number;
    end "=";
 
    ---------
@@ -132,7 +136,9 @@ package body Savadur.Jobs is
       Job_Handler.Add
         (Job_Data'(Project  => Project,
                    Scenario => +Scenario,
-                   Time     => Time));
+                   Time     => Time,
+                   Created  => Calendar.Clock,
+                   Number   => 0));
    end Add;
 
    ---------------------------
@@ -191,7 +197,8 @@ package body Savadur.Jobs is
 
       procedure Add (Job : in Job_Data) is
          use type Times.Periodic;
-         Position : Job_Set.Cursor;
+         Position  : Job_Set.Cursor;
+         Local_Job : Job_Data := Job;
       begin
          --  Ensure the job task is created
 
@@ -199,19 +206,22 @@ package body Savadur.Jobs is
             Runner := new Run_Jobs;
          end if;
 
+         Index := Index + 1;
+         Local_Job.Number := Index;
+
          --  If a periodic job, replace it if it already exists. This can
          --  happen when reloading projects. We want to replace the existing
          --  job as the period could have been changed.
 
-         if Job.Time = Times.No_Time
-           or else not Jobs.Contains (Job)
+         if Local_Job.Time = Times.No_Time
+           or else not Jobs.Contains (Local_Job)
          then
-            Jobs.Insert (Job);
+            Jobs.Insert (Local_Job);
             Size := Size + 1;
 
          else
-            Position := Jobs.Find (Job);
-            Jobs.Replace_Element (Position, Job);
+            Position := Jobs.Find (Local_Job);
+            Jobs.Replace_Element (Position, Local_Job);
          end if;
 
          New_Job := True;
@@ -225,7 +235,7 @@ package body Savadur.Jobs is
       begin
          Job := Jobs.First_Element;
          Jobs.Delete_First;
-         New_Job := False;
+         Size := Size - 1;
       end Get;
 
       ----------

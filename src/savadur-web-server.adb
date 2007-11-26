@@ -34,10 +34,9 @@ with SOAP.Dispatchers.Callback;
 
 with Savadur.Client_Service.CB;
 with Savadur.Config.Project;
+with Savadur.Jobs;
 with Savadur.Projects;
 with Savadur.Signed_Files;
-with Savadur.Server_Service.Client;
-with Savadur.Web_Services.Server;
 with Savadur.Logs;
 
 package body Savadur.Web.Server is
@@ -90,15 +89,13 @@ package body Savadur.Web.Server is
       begin
          Signed_Files.Create (Signed_Project, Project_Name, Project_Filename);
 
-         Savadur.Server_Service.Client.Run
-           (Scenario       => Scenario_Id,
-            Signed_Project => Web_Services.Server.Signed_Project
-              (Signed_Files.To_External_Handler (Signed_Project)));
+         Savadur.Jobs.Add (Signed_Project, Scenario_Id);
 
-         return Response.Build (MIME.Text_HTML,
-                                "<p>Running " & Project_Name &
-                                "...</p>",
-                                Messages.S404);
+         return Response.Build
+           (MIME.Text_HTML,
+            "<p>Running " & Project_Name & "...</p>",
+            Messages.S404);
+
       exception
          when IO_Exceptions.Name_Error =>
             return Response.Build
