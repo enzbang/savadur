@@ -339,8 +339,9 @@ package body Savadur.Config.Project is
             Project  : Projects.Project_Config;
             pragma Unreferenced (Project);
          begin
-            Logs.Write (Content => "Read Project config file : " & Filename,
-                        Kind    => Logs.Verbose);
+            Logs.Write
+              (Content => "Read Project config file : " & Filename,
+               Kind    => Logs.Handler.Verbose);
             Project := Parse (Filename);
          end Load_Config;
       end loop Walk_Directories;

@@ -144,7 +144,7 @@ procedure Savadur.Client is
       if Config.Server.Configurations.Length = 0 then
          Logs.Write
            (Content => "No server configured",
-            Kind    => Logs.Error);
+            Kind    => Logs.Handler.Error);
 
       else
          Logs.Write (Savadur.Servers.Image (Config.Server.Configurations));
@@ -176,13 +176,13 @@ procedure Savadur.Client is
          Logs.Write
            (Content =>
               "Register to " & (-Server.Name) & " at " & (-Server.URL),
-            Kind    => Logs.Information);
+            Kind    => Logs.Handler.Information);
 
          Client_Service.Client.Register
            (Key, Metadata, Server_Service.URL, -Server.URL);
 
          Logs.Write (Content => "Done.",
-                     Kind    => Logs.Information);
+                     Kind    => Logs.Handler.Information);
       end Register;
 
    begin
@@ -197,12 +197,12 @@ procedure Savadur.Client is
         (Content => "SCM Found" & ASCII.LF
          & Savadur.SCM.Image (Savadur.Config.SCM.Configurations)
          & ASCII.LF,
-         Kind    => Logs.Very_Verbose);
+         Kind    => Logs.Handler.Very_Verbose);
 
       if Config.Server.Configurations.Length = 0 then
          Logs.Write
            (Content => "No server configured",
-            Kind    => Logs.Error);
+            Kind    => Logs.Handler.Error);
 
       else
          --  Start the server
@@ -233,7 +233,7 @@ procedure Savadur.Client is
         (Content => "SCM Found" & ASCII.LF
          & Savadur.SCM.Image (Savadur.Config.SCM.Configurations)
          & ASCII.LF,
-         Kind    => Logs.Very_Verbose);
+         Kind    => Logs.Handler.Very_Verbose);
 
       if To_String (Project_Name) = "" then
          Usage (Error_Message => "no project name");
@@ -247,7 +247,7 @@ procedure Savadur.Client is
       begin
          Logs.Write
            (Content => "Savadur client" & ASCII.LF,
-            Kind    => Logs.Verbose);
+            Kind    => Logs.Handler.Verbose);
 
          Signed_Files.Create
            (Signed_Project,
@@ -291,7 +291,7 @@ procedure Savadur.Client is
       --  Display error message if not null
 
       if Error_Message /= "" then
-         Logs.Write (Content => Error_Message, Kind => Logs.Error);
+         Logs.Write (Content => Error_Message, Kind => Logs.Handler.Error);
 
          --  Set exit status to Failure
          Command_Line.Set_Exit_Status (Command_Line.Failure);
@@ -364,12 +364,13 @@ begin
                Full : constant String := GNAT.Command_Line.Full_Switch;
             begin
                if Full = "verbose" or else Full = "V"  then
-                  Logs.Set (Kind => Logs.Verbose, Activated => True);
+                  Logs.Handler.Set (Kind      => Logs.Handler.Verbose,
+                                    Activated => True);
 
                elsif Full = "very_verbose" or else Full = "VV" then
-                  Logs.Set (Kind      => Logs.Verbose,
-                            Activated => True);
-                  Logs.Set (Kind      => Logs.Very_Verbose,
+                  Logs.Handler.Set (Kind      => Logs.Handler.Verbose,
+                                    Activated => True);
+                  Logs.Handler.Set (Kind      => Logs.Handler.Very_Verbose,
                             Activated => True);
 
                elsif Full = "version" or else Full = "v" then
@@ -387,7 +388,7 @@ begin
                Full : constant String := GNAT.Command_Line.Full_Switch;
             begin
                if Full = "L" then
-                  Logs.Set_File (GNAT.Command_Line.Parameter);
+                  Logs.Handler.Set_File (GNAT.Command_Line.Parameter);
                else
                   raise Syntax_Error with "Unknown option " & Full;
                end if;

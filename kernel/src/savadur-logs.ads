@@ -19,24 +19,16 @@
 --  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.       --
 ------------------------------------------------------------------------------
 
+with Morzhol.Logs;
+
 package Savadur.Logs is
 
-   type Log_Level is (Information, Warnings, Error, Verbose, Very_Verbose);
+   package Handler renames Morzhol.Logs;
 
-   procedure Set_File (Filename : in String);
-   --  Sets log file (default to stdout)
+   Module : constant Morzhol.Logs.Module_Name := "savadur";
 
    procedure Write
      (Content : in String;
-      Kind    : in Log_Level := Information);
-   --  Writes Content into the log file
-
-   procedure Set (Kind : in Log_Level; Activated : in Boolean);
-   --  Activates/Deactivates the specified level of log
-
-   function NV (Name, Value : in String) return String;
-   function NV (Name : in String; Value : in Integer) return String;
-   pragma Inline (NV);
-   --  Returns a string formatted as Name="Value" for loggin purpose
+      Kind    : in Handler.Log_Level := Handler.Information);
 
 end Savadur.Logs;

@@ -124,7 +124,7 @@ package body Savadur.Web.Server is
 
       Logs.Write
         (Content => "Server started on port " & URL.Port (Address),
-         Kind    => Logs.Information);
+         Kind    => Logs.Handler.Information);
    end Start;
 
 end Savadur.Web.Server;

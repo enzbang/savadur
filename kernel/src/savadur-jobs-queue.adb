@@ -28,10 +28,10 @@ with Savadur.Actions;
 with Savadur.Config.Environment_Variables;
 with Savadur.Config.Project;
 with Savadur.SCM;
-with Savadur.Logs;
 with Savadur.Projects.Sets;
 with Savadur.Remote_Files;
 with Savadur.Utils;
+with Savadur.Logs;
 
 package body Savadur.Jobs.Queue is
 
@@ -290,7 +290,7 @@ package body Savadur.Jobs.Queue is
             Job_Handler.Next (Seconds);
             Logs.Write
               ("Next job in " & Duration'Image (Seconds),
-               Kind => Logs.Very_Verbose);
+               Kind => Logs.Handler.Very_Verbose);
 
             select
                Job_Handler.Rescedule;
@@ -324,17 +324,17 @@ package body Savadur.Jobs.Queue is
 
             Logs.Write
               (Content => "SCM Id     : " & (-Project.SCM_Id),
-               Kind    => Logs.Very_Verbose);
+               Kind    => Logs.Handler.Very_Verbose);
 
             Logs.Write
               (Content => "Action list : " & ASCII.LF
                              & Actions.Image (Project.Actions) & ASCII.LF,
-               Kind    => Logs.Very_Verbose);
+               Kind    => Logs.Handler.Very_Verbose);
 
             Logs.Write
               (Content => "Scenarios : " & ASCII.LF
                             & Scenarios.Image (Project.Scenarios) & ASCII.LF,
-               Kind    => Logs.Very_Verbose);
+               Kind    => Logs.Handler.Very_Verbose);
 
             --  Check if we know about this SCM
 

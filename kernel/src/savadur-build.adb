@@ -123,7 +123,7 @@ package body Savadur.Build is
                      Result := False;
                      Logs.Write (Content => Actions.Id_Utils.To_String (Ref.Id)
                                    & " has no changes",
-                                 Kind    => Logs.Verbose);
+                                 Kind    => Logs.Handler.Verbose);
                   end if;
 
                   Text_IO.Reset (File => State_File);
@@ -147,7 +147,7 @@ package body Savadur.Build is
                   Result := False;
                   Logs.Write (Content => Actions.Id_Utils.To_String (Ref.Id)
                                  & " has no changes " & State_Filename,
-                              Kind    => Logs.Verbose);
+                              Kind    => Logs.Handler.Verbose);
                end if;
 
                --  Write new state
@@ -161,7 +161,7 @@ package body Savadur.Build is
          Logs.Write
            (Actions.Command_Utils.To_String (Exec_Action.Cmd) & " failed");
       else
-         Logs.Write (Content => "... success", Kind => Logs.Verbose);
+         Logs.Write (Content => "... success", Kind => Logs.Handler.Verbose);
       end if;
 
       return Result;
@@ -192,7 +192,7 @@ package body Savadur.Build is
       Logs.Write
         (Content => "Execute "
          & Actions.Command_Utils.To_String (Exec_Action.Cmd),
-         Kind    => Logs.Verbose);
+         Kind    => Logs.Handler.Verbose);
 
       Get_Arguments (Exec_Action.Cmd, Prog_Name, Argument_String);
 
@@ -257,7 +257,7 @@ package body Savadur.Build is
          Logs.Write
            (Content => "Can not execute "
             & Actions.Command_Utils.To_String (Exec_Action.Cmd),
-            Kind    => Logs.Error);
+            Kind    => Logs.Handler.Error);
       end if;
 
       Free (Argument_String);
@@ -386,7 +386,7 @@ package body Savadur.Build is
    exception
       when E : others => Logs.Write
            (Content => Exception_Information (E),
-            Kind    => Logs.Error);
+            Kind    => Logs.Handler.Error);
          raise;
    end Parse;
 

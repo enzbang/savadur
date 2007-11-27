@@ -1,5 +1,5 @@
 ------------------------------------------------------------------------------
---                                  Savadur                                 --
+--                                Savadur                                   --
 --                                                                          --
 --                           Copyright (C) 2007                             --
 --                      Pascal Obry - Olivier Ramonat                       --
@@ -19,93 +19,7 @@
 --  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.       --
 ------------------------------------------------------------------------------
 
-with Ada.Calendar.Formatting;
-with Ada.Strings.Fixed;
-with Ada.Text_IO;
-
 package body Savadur.Logs is
-
-   use Ada;
-
-   type Logs_Activated is array (Log_Level) of Boolean;
-
-   Is_Activated : Logs_Activated :=
-                    Logs_Activated'(Verbose      => False,
-                                    Very_Verbose => False,
-                                    others       => True);
-
-   Log          : Text_IO.File_Type;
-   Log_Use_File : Boolean := False;
-
-   protected Semaphore is
-      entry Get;
-      procedure Release;
-   private
-      Free : Boolean := True;
-   end Semaphore;
-
-   --------
-   -- NV --
-   --------
-
-   function NV (Name, Value : in String) return String is
-   begin
-      return Name & "=""" & Value & '"';
-   end NV;
-
-   function NV (Name : in String; Value : in Integer) return String is
-   begin
-      return NV
-        (Name,
-         Strings.Fixed.Trim (Integer'Image (Value), Strings.Left));
-   end NV;
-
-   ---------------
-   -- Semaphore --
-   ---------------
-
-   protected body Semaphore is
-
-      ---------
-      -- Get --
-      ---------
-
-      entry Get when Free is
-      begin
-         Free := False;
-      end Get;
-
-      -------------
-      -- Release --
-      -------------
-
-      procedure Release is
-      begin
-         Free := True;
-      end Release;
-
-   end Semaphore;
-
-   ---------
-   -- Set --
-   ---------
-
-   procedure Set (Kind : in Log_Level; Activated : in Boolean) is
-   begin
-      Is_Activated (Kind) := Activated;
-   end Set;
-
-   --------------
-   -- Set_File --
-   --------------
-
-   procedure Set_File (Filename : in String) is
-   begin
-      Text_IO.Create (File => Log,
-                      Mode => Text_IO.Append_File,
-                      Name => Filename);
-      Log_Use_File := True;
-   end Set_File;
 
    -----------
    -- Write --
@@ -113,31 +27,12 @@ package body Savadur.Logs is
 
    procedure Write
      (Content : in String;
-      Kind    : in Log_Level := Information) is
+      Kind    : in Handler.Log_Level := Handler.Information)
+   is
    begin
-      if Is_Activated (Kind) then
-         Semaphore.Get;
-
-         if Log_Use_File then
-            Text_IO.Put_Line
-              (Log,
-               "[" & Calendar.Formatting.Image (Calendar.Clock) & "] ["
-               & Log_Level'Image (Kind) & "] - " & Content);
-            Text_IO.Flush (Log);
-
-         else
-            if Kind = Warnings or else Kind = Error then
-               Text_IO.Put (Log_Level'Image (Kind) & " ");
-            end if;
-            Text_IO.Put_Line (Content);
-            Text_IO.Flush;
-         end if;
-         Semaphore.Release;
-      end if;
-   exception
-      when others =>
-         --  ??? what else to do ?
-         Semaphore.Release;
+      Handler.Write (Name    => Module,
+                     Kind    => Kind,
+                     Content => Content);
    end Write;
 
 end Savadur.Logs;

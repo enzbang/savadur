@@ -237,7 +237,7 @@ package body Savadur.Config.SCM is
             Filename : constant String := Full_Name (D);
          begin
             Logs.Write (Content => "Read SCM config file : " & Filename,
-                        Kind    => Logs.Verbose);
+                        Kind    => Logs.Handler.Verbose);
 
             Configurations.Insert (Internal_Parse (Filename));
          end Load_Config;
