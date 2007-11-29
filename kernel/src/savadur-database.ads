@@ -19,64 +19,17 @@
 --  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.       --
 ------------------------------------------------------------------------------
 
-with "aws";
-with "xmlada";
-with "savadur";
-with "morzhol";
-with "gnadelite";
-with "../soap/savadur-soap";
+package Savadur.Database is
 
-project Savadur.Kernel is
+   No_Database : exception;
 
-   for Source_Dirs use ("src");
+   procedure Log
+     (Key          : in String;
+      Project_Name : in String;
+      Scenario     : in String;
+      Action       : in String;
+      Output       : in String;
+      Result       : in Boolean);
+   --  Adds log to database
 
-   case Savadur.Build is
-      when "Debug" =>
-         for Object_Dir use ".build/debug/savadur/obj";
-         for Exec_Dir use ".build/debug/bin";
-      when "Profile" =>
-         for Object_Dir use ".build/profile/savadur/obj";
-         for Exec_Dir use ".build/profile/bin";
-      when "Release" =>
-         for Object_Dir use ".build/release/savadur/obj";
-         for Exec_Dir use ".build/release/bin";
-   end case;
-
-   case Savadur.In_Test is
-      when "TRUE" =>
-         for Exec_Dir use "test/bin";
-      when "FALSE" =>
-         null;
-   end case;
-
-   ------------
-   -- Binder --
-   ------------
-
-   package Binder renames Savadur.Binder;
-
-   --------------
-   -- Compiler --
-   --------------
-
-   package Compiler renames Savadur.Compiler;
-
-   -------------
-   -- Builder --
-   -------------
-
-   package Builder renames Savadur.Builder;
-
-   ------------
-   -- Linker --
-   ------------
-
-   package Linker renames Savadur.Linker;
-
-   ---------
-   -- IDE --
-   ---------
-
-   package IDE renames Savadur.IDE;
-
-end Savadur.Kernel;
+end Savadur.Database;

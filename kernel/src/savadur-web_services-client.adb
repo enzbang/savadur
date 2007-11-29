@@ -24,6 +24,7 @@ with Ada.Directories;
 with Savadur.Clients;
 with Savadur.Config.SCM;
 with Savadur.Config.Project;
+with Savadur.Database;
 with Savadur.Logs;
 with Savadur.Projects.Sets;
 with Savadur.SCM;
@@ -160,6 +161,7 @@ package body Savadur.Web_Services.Client is
       Logs.Write ("Running " & Scenario & "/" & Action);
       Logs.Write ("Output is " & Output);
       Logs.Write (Boolean'Image (Result));
+      Database.Log (Key, Project_Name, Scenario, Action, Output, Result);
    end Status;
 
 end Savadur.Web_Services.Client;
