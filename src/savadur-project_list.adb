@@ -36,11 +36,13 @@ package body Savadur.Project_List is
    begin
       if Projects.Has_Element (P_Position) then
          declare
-            S_Position : constant Scenarios.Cursor :=
-                           Projects.Element (P_Position).Find (Scenario);
+            Scenarios  : constant Project_List.Scenarios.Map :=
+                           Projects.Element (P_Position);
+            S_Position : constant Project_List.Scenarios.Cursor :=
+                           Scenarios.Find (Scenario);
          begin
-            if Scenarios.Has_Element (S_Position) then
-               Result := Scenarios.Element (S_Position);
+            if Project_List.Scenarios.Has_Element (S_Position) then
+               Result := Project_List.Scenarios.Element (S_Position);
             end if;
          end;
       end if;

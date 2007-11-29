@@ -35,6 +35,7 @@ with Ada.Command_Line;
 with GNAT.Command_Line;
 
 with Savadur.Config.Project;
+with Savadur.Config.Project_List;
 with Savadur.Config.SCM;
 with Savadur.Logs;
 with Savadur.Version;
@@ -136,6 +137,7 @@ begin
 
    Config.SCM.Parse;
    Config.Project.Parse;
+   Config.Project_List.Parse;
 
    Web.Server.Start;
 

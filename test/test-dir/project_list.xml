@@ -1,0 +1,7 @@
+<project_list>
+   <project id="style_checker">
+      <scenario id="default">
+         <client key="me"/>
+      </scenario>
+  </project>
+</project_list>
