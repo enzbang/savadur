@@ -420,7 +420,6 @@ begin
          when others =>
             Usage (Error_Message => "unknown syntax");
             return;
-
       end case;
    end loop Remote_Opt;
 
@@ -456,10 +455,12 @@ begin
 exception
    when GNAT.Command_Line.Invalid_Section
       | GNAT.Command_Line.Invalid_Switch
-      | GNAT.Command_Line.Invalid_Parameter =>
+      | GNAT.Command_Line.Invalid_Parameter
+        =>
       Usage ("unknown syntax");
    when E : Savadur.Config.Config_Error
       | Savadur.Config.Project.Config_Error
-      | Savadur.Config.Environment_Variables.Config_Error =>
+      | Savadur.Config.Environment_Variables.Config_Error
+        =>
       Usage (Error_Message => Exceptions.Exception_Message (E));
 end Savadur.Client;

@@ -91,7 +91,6 @@ package body Savadur.Build.Notification is
             end;
          end loop;
       end if;
-
    end Notify;
 
 end Savadur.Build.Notification;

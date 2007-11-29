@@ -34,7 +34,7 @@ setup:
 regtests_bootstrap: setup
 	$(MAKE) -C ../ build IN_TEST=TRUE
 	./bin/savadur-client -project bootstrap \
-	-savadurdir $(PWD)/test/test-dir
+		-savadurdir $(PWD)/test/test-dir
 
 clean:
 	$(RM) -r test-dir/work test-dir/scm
