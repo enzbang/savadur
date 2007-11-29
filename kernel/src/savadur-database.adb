@@ -108,4 +108,51 @@ package body Savadur.Database is
                              Kind    => Logs.Handler.Error);
 
    end Log;
+
+   -----------
+   -- Login --
+   -----------
+
+   procedure Login (Key : in String) is
+      use DB.Tools;
+
+      DBH : constant TLS_DBH_Access := TLS_DBH_Access (DBH_TLS.Reference);
+      SQL : constant String := "insert into sessions (client, logout_date)"
+        & " values (" & Q (Key) & ", NULL)";
+   begin
+
+      --  Login date is set by default to current_timestamp
+      --  Set logout_date to null
+
+      Connect (DBH);
+      DBH.Handle.Execute (SQL);
+   exception
+      when E : DB.DB_Error =>
+         Logs.Handler.Write (Name    => Module,
+                             Content => Exception_Message (E),
+                             Kind    => Logs.Handler.Error);
+
+   end Login;
+
+   ------------
+   -- Logout --
+   ------------
+
+   procedure Logout (Key : in String) is
+      use DB.Tools;
+
+      DBH : constant TLS_DBH_Access := TLS_DBH_Access (DBH_TLS.Reference);
+      SQL : constant String := "update sessions set logout_date=now where"
+        & " client = " & Q (Key);
+   begin
+      Connect (DBH);
+      DBH.Handle.Execute (SQL);
+   exception
+      when E : DB.DB_Error =>
+         Logs.Handler.Write (Name    => Module,
+                             Content => Exception_Message (E),
+                             Kind    => Logs.Handler.Error);
+
+   end Logout;
+
 end Savadur.Database;

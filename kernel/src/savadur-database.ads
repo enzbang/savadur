@@ -32,4 +32,10 @@ package Savadur.Database is
       Result       : in Boolean);
    --  Adds log to database
 
+   procedure Login (Key : in String);
+   --  Client has login
+
+   procedure Logout (Key : in String);
+   --  Client has logout
+
 end Savadur.Database;
