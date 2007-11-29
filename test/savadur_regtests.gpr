@@ -20,8 +20,8 @@
 ------------------------------------------------------------------------------
 
 with "aunit";
-with "../shared";
-with "../savadur";
+with "../kernel/savadur";
+with "../kernel/savadur-kernel";
 
 project Savadur_Regtests is
 
@@ -29,7 +29,7 @@ project Savadur_Regtests is
    for Source_Dirs use ("src");
    for Main use ("harness");
 
-   case Shared.Build is
+   case Savadur.Build is
       when "Debug" =>
          for Object_Dir use "../.build/debug/savadur_rt/obj";
          for Exec_Dir use ".";
@@ -45,30 +45,30 @@ project Savadur_Regtests is
    -- Binder --
    ------------
 
-   package Binder renames Shared.Binder;
+   package Binder renames Savadur.Binder;
 
    --------------
    -- Compiler --
    --------------
 
-   package Compiler renames Shared.Compiler;
+   package Compiler renames Savadur.Compiler;
 
    -------------
    -- Builder --
    -------------
 
-   package Builder renames Shared.Builder;
+   package Builder renames Savadur.Builder;
 
    ------------
    -- Linker --
    ------------
 
-   package Linker renames Shared.Linker;
+   package Linker renames Savadur.Linker;
 
    ---------
    -- IDE --
    ---------
 
-   package IDE renames Shared.IDE;
+   package IDE renames Savadur.IDE;
 
 end Savadur_Regtests;
