@@ -77,7 +77,6 @@ procedure Savadur.Server is
    end Usage;
 
 begin
-
    Iterate_On_Opt : loop
       case GNAT.Command_Line.Getopt
            ("V verbose VV very_verbose L: version v savadurdir:")
