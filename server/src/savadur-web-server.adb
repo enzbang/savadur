@@ -62,7 +62,9 @@ package body Savadur.Web.Server is
    function HTTP_Callback (Request : in Status.Data) return Response.Data is
       URI : constant String := Status.URI (Request);
    begin
-      Logs.Write (Content => "Calling => " & URI, Kind => Logs.Very_Verbose);
+      Logs.Write
+        (Content => "Calling => " & URI,
+         Kind    => Logs.Handler.Very_Verbose);
       if URI = "/run" then
          return Run (Request);
       end if;

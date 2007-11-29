@@ -59,7 +59,7 @@ procedure Savadur.Server is
       --  Display error message if not null
 
       if Error_Message /= "" then
-         Logs.Write (Content => Error_Message, Kind => Logs.Error);
+         Logs.Write (Content => Error_Message, Kind => Logs.Handler.Error);
 
          --  Set exit status to Failure
          Command_Line.Set_Exit_Status (Command_Line.Failure);
@@ -99,13 +99,16 @@ begin
                Full : constant String := GNAT.Command_Line.Full_Switch;
             begin
                if Full = "verbose" or else Full = "V"  then
-                  Logs.Set (Kind => Logs.Verbose, Activated => True);
+                  Logs.Handler.Set
+                    (Kind => Logs.Handler.Verbose, Activated => True);
 
                elsif Full = "very_verbose" or else Full = "VV" then
-                  Logs.Set (Kind      => Logs.Verbose,
-                            Activated => True);
-                  Logs.Set (Kind      => Logs.Very_Verbose,
-                            Activated => True);
+                  Logs.Handler.Set
+                    (Kind      => Logs.Handler.Verbose,
+                     Activated => True);
+                  Logs.Handler.Set
+                    (Kind      => Logs.Handler.Very_Verbose,
+                     Activated => True);
 
                elsif Full = "version" or else Full = "v" then
                   Logs.Write (Content => "Savadur "
@@ -122,7 +125,7 @@ begin
                Full : constant String := GNAT.Command_Line.Full_Switch;
             begin
                if Full = "L" then
-                  Logs.Set_File (GNAT.Command_Line.Parameter);
+                  Logs.Handler.Set_File (GNAT.Command_Line.Parameter);
                else
                   raise Syntax_Error with "Unknown option " & Full;
                end if;
