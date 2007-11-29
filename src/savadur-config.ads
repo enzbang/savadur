@@ -54,4 +54,7 @@ package Savadur.Config is
    function Server_Directory return String;
    --  Returns server directory
 
+   Client_Server : Boolean := False;
+   --  Set to true if the client is configured to work with a server
+
 end Savadur.Config;

@@ -106,18 +106,22 @@ package body Savadur.Config.Client is
          Reader   : Tree_Reader;
          Source   : Input_Sources.File.File_Input;
       begin
-
          if not Directories.Exists (Filename) then
-            raise Config_Error with "No client.xml file !";
+            if Savadur.Config.Client_Server then
+               raise Config_Error with "No client.xml file !";
+            else
+               Configuration.Key := +"default";
+            end if;
+
+         else
+            Input_Sources.File.Open
+              (Filename => Filename,
+               Input    => Source);
+
+            Parse (Reader, Source);
+
+            Input_Sources.File.Close (Source);
          end if;
-
-         Input_Sources.File.Open
-           (Filename => Filename,
-            Input    => Source);
-
-         Parse (Reader, Source);
-
-         Input_Sources.File.Close (Source);
       end Parse;
 
    begin

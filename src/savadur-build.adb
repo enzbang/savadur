@@ -404,7 +404,8 @@ package body Savadur.Build is
 
       procedure Send_Status
         (Action_Id : in Actions.Id; Log_File : in String := "");
-      --  Sends the status to savadur server
+      --  Sends the status to savadur server, this must be called only in
+      --  client/server mode.
 
       Status : Boolean := True;
 
@@ -455,14 +456,22 @@ package body Savadur.Build is
          end Log_Content;
 
       begin
-         Client_Service.Client.Status
-           (Key          => Config.Client.Get_Key,
-            Project_Name =>
-              Projects.Id_Utils.To_String (Project.Project_Id),
-            Scenario     => Scenarios.Id_Utils.To_String (Id),
-            Action       => Actions.Id_Utils.To_String (Action_Id),
-            Output       => Log_Content,
-            Result       => Status);
+         if Config.Client_Server then
+            Client_Service.Client.Status
+              (Key          => Config.Client.Get_Key,
+               Project_Name =>
+                 Projects.Id_Utils.To_String (Project.Project_Id),
+               Scenario     => Scenarios.Id_Utils.To_String (Id),
+               Action       => Actions.Id_Utils.To_String (Action_Id),
+               Output       => Log_Content,
+               Result       => Status);
+
+         else
+            Logs.Write
+              (Actions.Id_Utils.To_String (Action_Id)
+               & " [" & Log_Content & ']',
+               Kind => Logs.Very_Verbose);
+         end if;
       end Send_Status;
 
       Selected_Scenario : constant Savadur.Scenarios.Scenario := Init;

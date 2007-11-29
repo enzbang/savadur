@@ -45,7 +45,7 @@ package body Savadur.Jobs.Queue is
       Scenario : Unbounded_String;
       Time     : Times.Periodic;
       Created  : Calendar.Time;
-      Number   : Natural;
+      Number   : Integer;
    end record;
 
    End_Job : constant Job_Data :=
@@ -53,7 +53,7 @@ package body Savadur.Jobs.Queue is
                 Scenario => Null_Unbounded_String,
                 Time     => Times.No_Time,
                 Created  => <>,
-                Number   => 0);
+                Number   => Integer'First);
 
    function "=" (J1, J2 : in Job_Data) return Boolean;
    --  Returns True and J1 and J2 are equivalent jobs
@@ -203,8 +203,10 @@ package body Savadur.Jobs.Queue is
             Runner := new Run_Jobs;
          end if;
 
-         Index := Index + 1;
-         Local_Job.Number := Index;
+         if Local_Job /= End_Job then
+            Index := Index + 1;
+            Local_Job.Number := Index;
+         end if;
 
          --  If a periodic job, replace it if it already exists. This can
          --  happen when reloading projects. We want to replace the existing
@@ -309,7 +311,8 @@ package body Savadur.Jobs.Queue is
 
          begin
             Logs.Write
-              ("Run : " & (-Job.Scenario) & ", "
+              (Natural'Image (Job.Number)
+               & ") Run : " & (-Job.Scenario) & ", "
                & Signed_Files.Name (Job.Project));
 
             --  Look for project file

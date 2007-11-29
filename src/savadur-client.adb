@@ -191,6 +191,7 @@ procedure Savadur.Client is
       Config.SCM.Parse;
       Config.Server.Parse;
       Config.Project.Parse;
+      Config.Client_Server := True;
 
       Logs.Write
         (Content => "SCM Found" & ASCII.LF
