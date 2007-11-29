@@ -32,7 +32,7 @@ setup:
 	$(CP) -r ../config/scm test-dir/
 
 regtests_bootstrap: setup
-	$(MAKE) -C ../ build IN_TEST=TRUE
+	$(GNATMAKE) -XPRJ_BUILD=$(MODE) -XIN_TEST=TRUE -P ../client/savadur-client
 	./bin/savadur-client -project bootstrap \
 		-savadurdir $(PWD)/test/test-dir
 
@@ -41,7 +41,9 @@ clean:
 	$(GNATCLEAN) -P savadur_regtests
 
 regtests_clientserver: setup_clientserver
-	$(MAKE) -C ../ build IN_TEST=TRUE
+	make setup -C ../ MODE=$(MODE)
+	$(GNATMAKE) -XPRJ_BUILD=$(MODE) -XIN_TEST=TRUE -P ../server/savadur-server
+	$(GNATMAKE) -XPRJ_BUILD=$(MODE) -XIN_TEST=TRUE -P ../client/savadur-client
 	./clientserver_regtest.sh
 
 setup_clientserver:
