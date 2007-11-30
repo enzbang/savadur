@@ -17,10 +17,11 @@ logout_date date default current_timestamp
 );
 
 create table lastbuilt (
+"client" varchar(50) not null,
 "project"  varchar(50) not null,
 "scenario" varchar(50) not null,
-"date" date,
-primary key ("project", "scenario")
+"status" boolean,
+"date" date default current_timestamp
 );
 
 create table logs (
@@ -30,14 +31,8 @@ create table logs (
 "action" varchar(50) not null,
 "log" longtext,
 "status" boolean,
-"date" date default current_timestamp,
-primary key ("client", "project", "scenario", "action")
+"date" date default current_timestamp
 );
-
-create trigger after insert on logs
-begin
-   insert or replace into lastbuilt values (new.project, new.scenario, new.date);
-end;
 
 EOF
 

@@ -162,7 +162,15 @@ package body Savadur.Web_Services.Client is
       Logs.Write ("Running " & Scenario & "/" & Action);
       Logs.Write ("Output is " & Output);
       Logs.Write (Boolean'Image (Result));
-      Database.Log (Key, Project_Name, Scenario, Action, Output, Result);
+
+      if Action /= "" then
+         --  This is the action log. Scenario is in progress
+         Database.Log (Key, Project_Name, Scenario, Action, Output, Result);
+
+      else
+         --  End of scenario. Final status
+         Database.Final_Status (Key, Project_Name, Scenario, Result);
+      end if;
    end Status;
 
 end Savadur.Web_Services.Client;

@@ -79,6 +79,33 @@ package body Savadur.Database is
       end if;
    end Connect;
 
+   ------------------
+   -- Final_Status --
+   ------------------
+
+   procedure Final_Status
+     (Key          : in String;
+      Project_Name : in String;
+      Scenario     : in String;
+      Result       : in Boolean)
+   is
+      use DB.Tools;
+
+      DBH : constant TLS_DBH_Access := TLS_DBH_Access (DBH_TLS.Reference);
+      SQL : constant String := "insert into lastbuilt (project, client, "
+        & "scenario, status) values (" & Q (Project_Name) & ", " & Q (Key)
+        & ", " & Q (Scenario) & ", " & Q (Result) & ")";
+   begin
+      Connect (DBH);
+      DBH.Handle.Execute (SQL);
+   exception
+      when E : DB.DB_Error =>
+         Logs.Handler.Write (Name    => Module,
+                             Content => Exception_Message (E),
+                             Kind    => Logs.Handler.Error);
+
+   end Final_Status;
+
    ---------
    -- Log --
    ---------

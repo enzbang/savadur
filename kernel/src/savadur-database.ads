@@ -32,6 +32,13 @@ package Savadur.Database is
       Result       : in Boolean);
    --  Adds log to database
 
+   procedure Final_Status
+     (Key          : in String;
+      Project_Name : in String;
+      Scenario     : in String;
+      Result       : in Boolean);
+   --  Adds final status to database
+
    procedure Login (Key : in String);
    --  Client has login
 
