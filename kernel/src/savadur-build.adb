@@ -470,7 +470,7 @@ package body Savadur.Build is
             Logs.Write
               (Actions.Id_Utils.To_String (Action_Id)
                & " [" & Log_Content & ']',
-               Kind => Logs.Very_Verbose);
+               Kind => Logs.Handler.Very_Verbose);
          end if;
       end Send_Status;
 
