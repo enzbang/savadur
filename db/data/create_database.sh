@@ -11,7 +11,7 @@ rm -f ${DATABASE_NAME}
 
 cat <<EOF | ${SQLITE} ${DATABASE_NAME}
 create table sessions (
-"client" varchar(50) not null primary key,
+"client" varchar(50) not null,
 login_date date default current_timestamp,
 logout_date date default current_timestamp
 );
@@ -24,12 +24,14 @@ primary key ("project", "scenario")
 );
 
 create table logs (
-"client" varchar(50) not null primary key,
+"client" varchar(50) not null,
 "project"  varchar(50) not null,
 "scenario" varchar(50) not null,
 "action" varchar(50) not null,
 "log" longtext,
-"date" date default current_timestamp
+"status" boolean,
+"date" date default current_timestamp,
+primary key ("client", "project", "scenario", "action")
 );
 
 create trigger after insert on logs

@@ -41,6 +41,8 @@ clean:
 	$(GNATCLEAN) -P savadur_regtests
 
 regtests_clientserver: setup_clientserver
+	(cd ../db/data/; sh create_database.sh)
+	$(CP) ../db/data/logs.db test-dir/server/
 	make setup -C ../ MODE=$(MODE)
 	$(GNATMAKE) -XPRJ_BUILD=$(MODE) -XIN_TEST=TRUE -P ../server/savadur-server
 	$(GNATMAKE) -XPRJ_BUILD=$(MODE) -XIN_TEST=TRUE -P ../client/savadur-client
