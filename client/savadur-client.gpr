@@ -42,7 +42,7 @@ project Savadur.Client is
 
    case Savadur.In_Test is
       when "TRUE" =>
-         for Exec_Dir use "test/bin";
+         for Exec_Dir use "../test/bin";
       when "FALSE" =>
          null;
    end case;
