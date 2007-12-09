@@ -24,6 +24,8 @@ with Ada.Containers.Indefinite_Vectors;
 with Ada.Strings.Hash_Case_Insensitive;
 with Ada.Strings.Unbounded;
 
+with AWS.Templates;
+
 package Savadur.Project_List is
 
    use Ada;
@@ -63,5 +65,9 @@ package Savadur.Project_List is
 
    function Image (Project_List : in Projects.Map) return String;
    --  Returns the Project_List map image
+
+   function To_Set
+     (Project_List : in Projects.Map) return AWS.Templates.Translate_Set;
+   --  Returns a translate set
 
 end Savadur.Project_List;

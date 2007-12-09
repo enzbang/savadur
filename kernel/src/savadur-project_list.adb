@@ -104,4 +104,89 @@ package body Savadur.Project_List is
       return To_String (Result);
    end Image;
 
+   ------------
+   -- To_Set --
+   ------------
+
+   function To_Set
+     (Project_List : in Projects.Map) return AWS.Templates.Translate_Set is
+      use AWS.Templates;
+
+      Result      : AWS.Templates.Translate_Set;
+
+      T_Clients   : AWS.Templates.Tag;
+      T_Projects  : AWS.Templates.Tag;
+      T_Scenarios : AWS.Templates.Tag;
+
+      Position : Projects.Cursor := Project_List.First;
+
+   begin
+
+      --  For all projects
+
+      while Projects.Has_Element (Position) loop
+         Get_Scenarios_List : declare
+            T_Project_Scenarios        : Tag;
+            T_Project_Scenario_Clients : Tag;
+            M_Scerarios                : constant Scenarios.Map :=
+                                            Projects.Element (Position);
+            Scenarios_Position         : Scenarios.Cursor       :=
+                                            M_Scerarios.First;
+
+         begin
+            --  For all projects scenarios
+
+            while Scenarios.Has_Element (Scenarios_Position) loop
+               Get_Projects_List : declare
+                  T_Scenarios_Client : Tag;
+                  V_Clients          : constant Clients.Vector :=
+                                         Scenarios.Element
+                                           (Scenarios_Position);
+                  Clients_Position   : Clients.Cursor := V_Clients.First;
+               begin
+
+                  --  For all clients registered for this scenario
+
+                  while Clients.Has_Element (Clients_Position) loop
+                     T_Scenarios_Client := T_Scenarios_Client
+                       & Clients.Element (Clients_Position).Key;
+
+                     Clients.Next (Clients_Position);
+                  end loop;
+                  T_Project_Scenarios := T_Project_Scenarios
+                    & Scenarios.Key (Scenarios_Position);
+                  T_Project_Scenario_Clients := T_Project_Scenario_Clients
+                    & T_Scenarios_Client;
+               end Get_Projects_List;
+
+               Scenarios.Next (Scenarios_Position);
+            end loop;
+
+            T_Projects  := T_Projects & Projects.Key (Position);
+            T_Scenarios := T_Scenarios & T_Project_Scenarios;
+            T_Clients   := T_Clients & T_Project_Scenario_Clients;
+
+         end Get_Scenarios_List;
+
+         Projects.Next (Position);
+      end loop;
+
+      AWS.Templates.Insert (Set  => Result,
+                            Item => AWS.Templates.Assoc
+                              (Variable  => "PROJECTS",
+                               Value     => T_Projects));
+
+      AWS.Templates.Insert (Set  => Result,
+                            Item => AWS.Templates.Assoc
+                              (Variable  => "SCENARIOS",
+                               Value     => T_Scenarios));
+
+      AWS.Templates.Insert (Set  => Result,
+                            Item => AWS.Templates.Assoc
+                              (Variable  => "CLIENTS",
+                               Value     => T_Clients));
+
+      return Result;
+   end To_Set;
+
 end Savadur.Project_List;

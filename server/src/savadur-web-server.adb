@@ -21,6 +21,8 @@
 
 with IO_Exceptions;
 
+with Ada.Directories;
+
 with AWS.Config.Set;
 with AWS.Messages;
 with AWS.MIME;
@@ -28,32 +30,39 @@ with AWS.Response;
 with AWS.Parameters;
 with AWS.Server;
 with AWS.Status;
+with AWS.Templates;
 with AWS.URL;
 
 with SOAP.Dispatchers.Callback;
 
 with Savadur.Client_Service.CB;
 with Savadur.Config.Project;
+with Savadur.Config.Project_List;
 with Savadur.Jobs.Server;
 with Savadur.Projects;
+with Savadur.Project_List;
 with Savadur.Signed_Files;
 with Savadur.Logs;
 
 package body Savadur.Web.Server is
 
+   use Ada;
    use AWS;
    use SOAP;
 
-   HTTP       : AWS.Server.HTTP;
-   Config     : AWS.Config.Object := AWS.Config.Get_Current;
-   Dispatcher : Client_Service.CB.Handler;
-   Address    : URL.Object;
+   HTTP          : AWS.Server.HTTP;
+   Config        : AWS.Config.Object := AWS.Config.Get_Current;
+   Dispatcher    : Client_Service.CB.Handler;
+   Address       : URL.Object;
 
    function HTTP_Callback (Request : in Status.Data) return Response.Data;
    --  Callbacks used for HTTP requests
 
    function Run (Request : in Status.Data) return Response.Data;
    --  Runs a project
+
+   function List (Request : in Status.Data) return Response.Data;
+   --  Displays the project list
 
    -------------------
    -- HTTP_Callback --
@@ -65,13 +74,39 @@ package body Savadur.Web.Server is
       Logs.Write
         (Content => "Calling => " & URI,
          Kind    => Logs.Handler.Very_Verbose);
-      if URI = "/run" then
+      if URI = "/" then
+         return List (Request);
+      elsif URI = "/run" then
          return Run (Request);
       end if;
 
       return Response.Build
         (MIME.Text_HTML, "<p>" & URI & " not found</p>", Messages.S404);
    end HTTP_Callback;
+
+   ----------
+   -- List --
+   ----------
+
+   function List (Request : in Status.Data) return Response.Data is
+      pragma Unreferenced (Request);
+      Web_Dir       : constant String := Directories.Compose
+        (Containing_Directory => Savadur.Config.Savadur_Directory,
+         Name                 => "htdocs");
+      Web_Templates : constant String := Directories.Compose
+        (Containing_Directory => Web_Dir,
+         Name                 => "templates");
+   begin
+      return AWS.Response.Build
+        (Content_Type => MIME.Text_HTML,
+         Message_Body => AWS.Templates.Parse
+           (Filename     => Directories.Compose
+              (Containing_Directory => Web_Templates,
+               Name                 => "list",
+               Extension            => "thtml"),
+            Translations => Project_List.To_Set
+              (Savadur.Config.Project_List.Configurations)));
+   end List;
 
    ---------
    -- Run --
