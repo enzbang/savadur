@@ -13,5 +13,4 @@ soap/*.wsdl
 src/savadur-version.ads
 test/bin
 test/harness
-test/test-dir/scm
-test/test-dir/work
+test/test-dir
