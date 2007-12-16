@@ -64,7 +64,7 @@ package body Savadur.Jobs.Server is
                Client : constant Clients.Client :=
                           Clients.Sets.Element (P_Client);
             begin
-               Logs.Write ("Send job requets to " & (-Client.Key));
+               Logs.Write ("Send job request to " & (-Client.Key));
                Server_Service.Client.Run
                  (Scenario       => -Scenario,
                   Signed_Project =>
