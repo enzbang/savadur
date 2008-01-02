@@ -19,7 +19,11 @@
 --  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.       --
 ------------------------------------------------------------------------------
 
+with AWS.Templates;
+
 package Savadur.Database is
+
+   use AWS;
 
    No_Database : exception;
 
@@ -38,6 +42,10 @@ package Savadur.Database is
       Scenario     : in String;
       Result       : in Boolean);
    --  Adds final status to database
+
+   function Get_Final_Status
+     (Project_Name : in String) return Templates.Translate_Set;
+   --  Get final status
 
    procedure Login (Key : in String);
    --  Client has login

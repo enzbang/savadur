@@ -106,6 +106,50 @@ package body Savadur.Database is
 
    end Final_Status;
 
+   ------------------------
+   --  Get_Final_Status  --
+   ------------------------
+
+   function Get_Final_Status
+     (Project_Name : in String) return Templates.Translate_Set is
+      use type Templates.Tag;
+      DBH      : constant TLS_DBH_Access := TLS_DBH_Access (DBH_TLS.Reference);
+      Iter     : DB.SQLite.Iterator;
+      Line     : DB.String_Vectors.Vector;
+      Set      : Templates.Translate_Set;
+      Client   : Templates.Tag;
+      Scenario : Templates.Tag;
+      Status   : Templates.Tag;
+      Date     : Templates.Tag;
+   begin
+      Connect (DBH);
+
+      DBH.Handle.Prepare_Select
+        (Iter, "select client, scenario, status, date from lastbuilt "
+           & "where project = " & DB.Tools.Q (Project_Name)
+           & " order by date DESC limit 50");
+
+      while Iter.More loop
+         Iter.Get_Line (Line);
+
+         Client   := Client & DB.String_Vectors.Element (Line, 1);
+         Scenario := Scenario & DB.String_Vectors.Element (Line, 2);
+         Status   := Status & DB.String_Vectors.Element (Line, 3);
+         Date     := Date & DB.String_Vectors.Element (Line, 4);
+
+         Line.Clear;
+      end loop;
+
+      Iter.End_Select;
+
+      Templates.Insert (Set, Templates.Assoc ("CLIENT", Client));
+      Templates.Insert (Set, Templates.Assoc ("SCENARIO", Scenario));
+      Templates.Insert (Set, Templates.Assoc ("STATUS", Status));
+      Templates.Insert (Set, Templates.Assoc ("DATE", Date));
+
+      return Set;
+   end Get_Final_Status;
+
    ---------
    -- Log --
    ---------

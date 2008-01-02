@@ -38,6 +38,7 @@ with SOAP.Dispatchers.Callback;
 with Savadur.Client_Service.CB;
 with Savadur.Config.Project;
 with Savadur.Config.Project_List;
+with Savadur.Database;
 with Savadur.Jobs.Server;
 with Savadur.Projects;
 with Savadur.Project_List;
@@ -154,11 +155,25 @@ package body Savadur.Web.Server is
    --------------------
 
    function Show_Project (Request : in Status.Data) return Response.Data is
-      Project_Name : constant String := Status.URI (Request);
+      Web_Dir       : constant String := Directories.Compose
+        (Containing_Directory => Savadur.Config.Savadur_Directory,
+         Name                 => "htdocs");
+      Web_Templates : constant String := Directories.Compose
+        (Containing_Directory => Web_Dir,
+         Name                 => "templates");
+      URI          : constant String := Status.URI (Request);
+      Project_Name : constant String := URI (URI'First + 1 .. URI'Last);
+
    begin
-      return Response.Build
-        (MIME.Text_HTML,
-         "<p>Project " & Project_Name & "</p>");
+      return AWS.Response.Build
+        (Content_Type => MIME.Text_HTML,
+         Message_Body => AWS.Templates.Parse
+           (Filename     => Directories.Compose
+              (Containing_Directory => Web_Templates,
+               Name                 => "project_page",
+               Extension            => "thtml"),
+            Translations => Savadur.Database.Get_Final_Status (Project_Name)));
+
    end Show_Project;
 
    -----------
