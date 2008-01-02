@@ -60,7 +60,8 @@ package Savadur.Web_Services.Client is
       Scenario     : in String;
       Action       : in String;
       Output       : in String;
-      Result       : in Boolean);
+      Result       : in Boolean;
+      Job_Id       : in Natural);
    --  Status is called by the client to register status of each action in the
    --  given scenario.
 

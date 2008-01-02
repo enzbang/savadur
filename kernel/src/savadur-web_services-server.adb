@@ -30,13 +30,15 @@ package body Savadur.Web_Services.Server is
 
    procedure Run
      (Scenario       : in String;
-      Signed_Project : in Server.Signed_Project) is
+      Signed_Project : in Server.Signed_Project;
+      Id             : in Natural) is
    begin
       --  This is run on the client side
       Jobs.Client.Queue.Add
         (Project  => Signed_Files.To_Handler
            (Signed_Files.External_Handler (Signed_Project)),
-         Scenario => Scenario);
+         Scenario => Scenario,
+         Id       => Id);
    end Run;
 
 end Savadur.Web_Services.Server;

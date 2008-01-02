@@ -155,11 +155,13 @@ package body Savadur.Web_Services.Client is
       Scenario     : in String;
       Action       : in String;
       Output       : in String;
-      Result       : in Boolean)
+      Result       : in Boolean;
+      Job_Id       : in Natural)
    is
    begin
       Logs.Write (Key & ":" & Project_Name);
-      Logs.Write ("Running " & Scenario & "/" & Action);
+      Logs.Write ("Running Job Id" & Natural'Image (Job_Id)
+                    & " :: " & Scenario & "/" & Action);
       Logs.Write ("Output is " & Output);
       Logs.Write (Boolean'Image (Result));
 

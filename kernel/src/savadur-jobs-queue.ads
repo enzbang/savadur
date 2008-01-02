@@ -29,13 +29,15 @@ generic
    with function Run
      (Project  : access Projects.Project_Config;
       Env_Var  : in     Environment_Variables.Maps.Map;
-      Scenario : in     Scenarios.Id) return Boolean;
+      Scenario : in     Scenarios.Id;
+      Id       : in     Natural) return Boolean;
 package Savadur.Jobs.Queue is
 
    procedure Add
      (Project  : in Signed_Files.Handler;
       Scenario : in String;
-      Time     : in Times.Periodic := Times.No_Time);
+      Time     : in Times.Periodic := Times.No_Time;
+      Id       : in Natural := 0);
    --  Schedules a new job
 
    procedure Add_Periodic_Scenario;

@@ -31,6 +31,27 @@ package body Savadur.Jobs.Server is
 
    use Savadur.Utils;
 
+   protected type Job_Id is
+      procedure Get (Id : out Positive);
+   private
+      Counter : Positive := 1;
+   end Job_Id;
+
+   Current_Job : Job_Id;
+
+   ------------
+   -- Job_Id --
+   ------------
+
+   protected body Job_Id is
+
+      procedure Get (Id : out Positive) is
+      begin
+         Id      := Counter;
+         Counter := Counter + 1;
+      end Get;
+   end Job_Id;
+
    ---------
    -- Run --
    ---------
@@ -38,12 +59,15 @@ package body Savadur.Jobs.Server is
    function Run
      (Project  : access Projects.Project_Config;
       Env_Var  : in     Environment_Variables.Maps.Map;
-      Scenario : in     Scenarios.Id) return Boolean
+      Scenario : in     Scenarios.Id;
+      Id       : in     Natural := 0) return Boolean
    is
-      pragma Unreferenced (Env_Var);
+      pragma Unreferenced (Env_Var, Id);
 
       use Projects.Id_Utils;
       use Scenarios.Id_Utils;
+
+      Generated_Job_Id : Positive;
 
       procedure Send_Job_Request (Position : in Project_List.Clients.Cursor);
       --  Sends the job request to the client
@@ -69,7 +93,8 @@ package body Savadur.Jobs.Server is
                  (Scenario       => -Scenario,
                   Signed_Project =>
                     Web_Services.Server.Signed_Project
-                      (Signed_Files.To_External_Handler (Project.Signature)),
+                    (Signed_Files.To_External_Handler (Project.Signature)),
+                  Id             => Generated_Job_Id,
                   Endpoint       => -Client.Callback_Endpoint);
             end;
 
@@ -83,6 +108,13 @@ package body Savadur.Jobs.Server is
                   Project_List.Get_Clients (-Project.Project_Id, -Scenario);
 
    begin
+
+      --  Generate job id for all clients
+
+      Current_Job.Get (Generated_Job_Id);
+
+      --  Send job request to all clients
+
       Clients.Iterate (Send_Job_Request'Access);
       return True;
    end Run;

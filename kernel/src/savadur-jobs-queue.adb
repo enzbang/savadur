@@ -46,6 +46,7 @@ package body Savadur.Jobs.Queue is
       Time     : Times.Periodic;
       Created  : Calendar.Time;
       Number   : Integer;
+      Id       : Natural;
    end record;
 
    End_Job : constant Job_Data :=
@@ -53,7 +54,8 @@ package body Savadur.Jobs.Queue is
                 Scenario => Null_Unbounded_String,
                 Time     => Times.No_Time,
                 Created  => <>,
-                Number   => Integer'First);
+                Number   => Integer'First,
+                Id       => 0);
 
    function "=" (J1, J2 : in Job_Data) return Boolean;
    --  Returns True and J1 and J2 are equivalent jobs
@@ -128,14 +130,16 @@ package body Savadur.Jobs.Queue is
    procedure Add
      (Project  : in Signed_Files.Handler;
       Scenario : in String;
-      Time     : in Times.Periodic := Times.No_Time) is
+      Time     : in Times.Periodic := Times.No_Time;
+      Id       : in Natural := 0) is
    begin
       Job_Handler.Add
         (Job_Data'(Project  => Project,
                    Scenario => +Scenario,
                    Time     => Time,
                    Created  => Calendar.Clock,
-                   Number   => 0));
+                   Number   => 0,
+                   Id       => Id));
    end Add;
 
    ---------------------------
@@ -313,6 +317,7 @@ package body Savadur.Jobs.Queue is
             Logs.Write
               (Natural'Image (Job.Number)
                & ") Run : " & (-Job.Scenario) & ", "
+               & Natural'Image (Job.Id) & ", "
                & Signed_Files.Name (Job.Project));
 
             --  Look for project file
@@ -355,7 +360,8 @@ package body Savadur.Jobs.Queue is
             if Run
               (Project  => Project'Access,
                Env_Var  => Env_Var,
-               Scenario => Scenarios.Id (Job.Scenario))
+               Scenario => Scenarios.Id (Job.Scenario),
+               Id       => Job.Id)
             then
                Logs.Write ("Success");
             else

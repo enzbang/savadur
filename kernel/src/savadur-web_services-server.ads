@@ -25,7 +25,8 @@ package Savadur.Web_Services.Server is
 
    procedure Run
      (Scenario       : in String;
-      Signed_Project : in Server.Signed_Project);
+      Signed_Project : in Server.Signed_Project;
+      Id             : in Natural);
    --  Asks a client to run a specific scenario
 
 end Savadur.Web_Services.Server;

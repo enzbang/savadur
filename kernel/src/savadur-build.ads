@@ -32,7 +32,8 @@ package Savadur.Build is
    function Run
      (Project : access Projects.Project_Config;
       Env_Var : in     Environment_Variables.Maps.Map;
-      Id      : in     Scenarios.Id) return Boolean;
+      Id      : in     Scenarios.Id;
+      Job_Id  : in     Natural := 0) return Boolean;
    --  Runs selected scenario from project config
 
 private

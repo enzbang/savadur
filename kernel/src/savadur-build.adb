@@ -397,7 +397,8 @@ package body Savadur.Build is
    function Run
      (Project : access Projects.Project_Config;
       Env_Var : in     Environment_Variables.Maps.Map;
-      Id      : in     Scenarios.Id) return Boolean
+      Id      : in     Scenarios.Id;
+      Job_Id  : in     Natural := 0) return Boolean
    is
       function Init return Savadur.Scenarios.Scenario;
       --  Returns the selected scenario and set the environment variables
@@ -464,7 +465,8 @@ package body Savadur.Build is
                Scenario     => Scenarios.Id_Utils.To_String (Id),
                Action       => Actions.Id_Utils.To_String (Action_Id),
                Output       => Log_Content,
-               Result       => Status);
+               Result       => Status,
+               Job_Id       => Job_Id);
 
          else
             Logs.Write
