@@ -64,6 +64,9 @@ package body Savadur.Web.Server is
    function List (Request : in Status.Data) return Response.Data;
    --  Displays the project list
 
+   function Show_Project (Request : in Status.Data) return Response.Data;
+   --  Displays the project status
+
    -------------------
    -- HTTP_Callback --
    -------------------
@@ -78,6 +81,9 @@ package body Savadur.Web.Server is
          return List (Request);
       elsif URI = "/run" then
          return Run (Request);
+      elsif Savadur.Config.Project.Is_Project_Name
+        (URI (URI'First + 1 .. URI'Last)) then
+         return Show_Project (Request);
       end if;
 
       return Response.Build
@@ -142,6 +148,18 @@ package body Savadur.Web.Server is
                Messages.S404);
       end Run_Project;
    end Run;
+
+   --------------------
+   --  Show_Project  --
+   --------------------
+
+   function Show_Project (Request : in Status.Data) return Response.Data is
+      Project_Name : constant String := Status.URI (Request);
+   begin
+      return Response.Build
+        (MIME.Text_HTML,
+         "<p>Project " & Project_Name & "</p>");
+   end Show_Project;
 
    -----------
    -- Start --

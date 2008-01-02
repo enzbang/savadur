@@ -33,6 +33,9 @@ package Savadur.Config.Project is
    function Get (Project_Name : in String) return Projects.Project_Config;
    --  Returns the project with the given name
 
+   function Is_Project_Name (Project_Name : in String) return Boolean;
+   --  Returns TRUE if a project with the given name exists
+
    procedure Reload (Project_Name : in String; Filename : in String := "");
    --  Reloads project name or load the given filename if no project found
 

@@ -314,6 +314,25 @@ package body Savadur.Config.Project is
       return Reader.Current_Project;
    end Internal_Parse;
 
+   -----------------------
+   --  Is_Project_Name  --
+   -----------------------
+
+   function Is_Project_Name (Project_Name : in String) return Boolean is
+      use Projects.Id_Utils;
+      C : Projects.Sets.Sets.Cursor;
+   begin
+      C := Projects.Sets.Keys.Find (Configurations, Project_Name);
+
+      Ada.Text_IO.Put_Line ("IS project name " & Project_Name);
+
+      if Projects.Sets.Sets.Has_Element (C) then
+         return True;
+      else
+         return False;
+      end if;
+   end Is_Project_Name;
+
    -----------
    -- Parse --
    -----------
