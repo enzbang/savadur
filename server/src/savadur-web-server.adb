@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                                Savadur                                   --
 --                                                                          --
---                           Copyright (C) 2007                             --
+--                         Copyright (C) 2007-2008                          --
 --                      Pascal Obry - Olivier Ramonat                       --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -163,8 +163,13 @@ package body Savadur.Web.Server is
          Name                 => "templates");
       URI          : constant String := Status.URI (Request);
       Project_Name : constant String := URI (URI'First + 1 .. URI'Last);
-
+      Set          : Templates.Translate_Set :=
+        Savadur.Database.Get_Final_Status (Project_Name);
    begin
+
+      Templates.Insert (Set,
+                        Templates.Assoc ("PROJECT_NAME", Project_Name));
+
       return AWS.Response.Build
         (Content_Type => MIME.Text_HTML,
          Message_Body => AWS.Templates.Parse
@@ -172,7 +177,7 @@ package body Savadur.Web.Server is
               (Containing_Directory => Web_Templates,
                Name                 => "project_page",
                Extension            => "thtml"),
-            Translations => Savadur.Database.Get_Final_Status (Project_Name)));
+            Translations => Set));
 
    end Show_Project;
 

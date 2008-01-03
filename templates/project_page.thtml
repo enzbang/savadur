@@ -3,26 +3,86 @@
           "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <title>Savadur : Projects list</title>
+    <title>Savadur : @_PROJECT_NAME_@</title>
 
     <meta name="description"
-          content="List of projects " />
+          content="Project page of @_PROJECT_NAME_@" />
 
     <meta http-equiv="Content-Type"
           content="text/html; charset=utf-8" />
+    <style type="text/css">
+      body {
+         background:#333;
+         color:#888;
+         padding:4em 1em 1em;
+      }
+      h1 {
+         color:#ccc;
+         font-size:2.3em
+      }
+      table {
+         background-color:white;
+         border:5px solid white;
+         border-collapse:collapse;
+         margin-bottom:1em;
+      }
+      table td {
+         border-color:-moz-use-text-color #99B195 rgb(242, 242, 242);
+         border-style:none solid solid;
+         border-width:medium 1px 1px;
+         color:#444444;
+         font-size:13px;
+         padding:1px 5px;
+         text-align:center;
+      }
+      td a {
+         color:#081E75;
+      }
+      .success {
+         background:#92CC47 none repeat scroll 0%;
+      }
+      .failure {
+         background:#B50008 none repeat scroll 0%;
+         color:#FFFFFF;
+      }
+    </style>
   </head>
   <body id="menu_page">
-    <div id="content">
 
+    <h1>@_PROJECT_NAME_@</h1>
+
+    <div id="content">
       <table>
-        <tr>
-          <th>Client</th><th>Scenario</th><th>Date</th><th>Status</th>
-        </tr>
+        <tr> @@-- Last Status line
+          <th>Last build</th>
         @@TABLE@@
-        <tr>
-          <td>@_DATE_@</td><td>@_SCENARIO_@</td><td>@_DATE_@</td><td>@_STATUS_@</td>
-        </tr>
+          <td
+             @@IF@@ @_STATUS_@ = FALSE
+             class="failure"
+             @@ELSE@@
+             class="success"
+             @@END_IF@@
+             >@_STATUS_@</td>
         @@END_TABLE@@
+        </tr>
+        <tr> @@-- Client line
+          <th>Builder</th>
+        @@TABLE@@
+          <td>@_CLIENT_@</td>
+        @@END_TABLE@@
+        </tr>
+        <tr> @@-- Last date
+          <th>Timestamp</th>
+        @@TABLE@@
+          <td>@_DATE_@</td>
+        @@END_TABLE@@
+        </tr>
+        <tr> @@-- Last scenario
+          <th>Scenario</th>
+        @@TABLE@@
+          <td>@_SCENARIO_@</td>
+        @@END_TABLE@@
+        </tr>
       </table>
     </div>
   </body>
