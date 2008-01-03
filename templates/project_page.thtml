@@ -11,59 +11,7 @@
     <meta http-equiv="Content-Type"
           content="text/html; charset=utf-8" />
     <style type="text/css">
-      body {
-         background:#333;
-         color:#888;
-         padding:4em 1em 1em;
-      }
-      h1 {
-         color:#ccc;
-         font-size:2.3em
-      }
-      table {
-         background-color:white;
-         border:5px solid white;
-         border-collapse:collapse;
-         margin-bottom:1em;
-      }
-      table td {
-         border-color:-moz-use-text-color #99B195 rgb(242, 242, 242);
-         border-style:none solid solid;
-         border-width:medium 1px 1px;
-         color:#444444;
-         font-size:13px;
-         padding:1px 5px;
-         text-align:center;
-         vertical-align:top;
-      }
-      table.job_id_table {
-         margin:2em 0;
-         border: thin solid #777;
-      }
-      table.job_id_table td {
-         margin:2em 0;
-         padding:0.5em;
-         border: thin solid #777;
-      }
-      td a {
-         color:#081E75;
-      }
-      span.timestamp {
-         font-size:x-small;
-      }
-      .success {
-         background:#92CC47 none repeat scroll 0%;
-      }
-      .failure {
-         background:#B50008 none repeat scroll 0%;
-         color:#FFFFFF;
-      }
-      table.job_id_table td.log-success {
-        border-color:#92CC47;
-      }
-      table.job_id_table td.log-failure {
-         border-color:#B50008;
-      }
+      @import url("/css/style.css");
     </style>
   </head>
   <body id="menu_page">

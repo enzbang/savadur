@@ -10,15 +10,20 @@
 
     <meta http-equiv="Content-Type"
           content="text/html; charset=utf-8" />
+    <style type="text/css">
+      @import url("/css/style.css");
+    </style>
   </head>
   <body id="menu_page">
+    <h1>Projects list</h1>
+
     <div id="content">
 
-      <table>
+      <table class="list">
         <tr><th>Projects Name</th><th>Scenarios (Clients list)</th></tr>
         @@TABLE@@
         <tr>
-          <td>@_PROJECTS_@</td>
+          <td class="project_name"><a href="/@_PROJECTS_@">@_PROJECTS_@</a></td>
           <td>
             <ul>
               @@TABLE@@

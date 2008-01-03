@@ -73,7 +73,13 @@ package body Savadur.Web.Server is
    -------------------
 
    function HTTP_Callback (Request : in Status.Data) return Response.Data is
-      URI : constant String := Status.URI (Request);
+      Web_Dir       : constant String := Directories.Compose
+        (Containing_Directory => Savadur.Config.Savadur_Directory,
+         Name                 => "htdocs");
+      Web_CSS       : constant String := Directories.Compose
+        (Containing_Directory => Web_Dir,
+         Name                 => "css");
+      URI           : constant String := Status.URI (Request);
    begin
       Logs.Write
         (Content => "Calling => " & URI,
@@ -85,6 +91,24 @@ package body Savadur.Web.Server is
       elsif Savadur.Config.Project.Is_Project_Name
         (URI (URI'First + 1 .. URI'Last)) then
          return Show_Project (Request);
+      elsif URI'Length > 4
+        and then URI (URI'First .. URI'First + 3) = "/css"
+      then
+         Get_CSS : declare
+            CSS_File : constant String := Directories.Compose
+              (Containing_Directory => Web_CSS,
+               Name                 => URI (URI'First + 5 .. URI'Last));
+         begin
+            if Directories.Exists (CSS_File) then
+               Logs.Write (CSS_File);
+               return Response.File
+                 (MIME.Text_CSS, CSS_File);
+            else
+               return Response.Build
+                 (MIME.Text_HTML,
+                  "<p>File " & CSS_File & " not found</p>", Messages.S404);
+            end if;
+         end Get_CSS;
       end if;
 
       return Response.Build
