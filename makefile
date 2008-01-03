@@ -68,12 +68,18 @@ check:
 
 install:
 	@$(MKDIR) $(INSTALL)/example
-	@$(MKDIR) $(INSTALL)/scm
-	@$(MKDIR) $(INSTALL)/servers
-	@$(CP) config/scm/* $(INSTALL)/scm
+	@$(MKDIR) $(INSTALL)/client-savadurdir/scm
+	@$(MKDIR) $(INSTALL)/client-savadurdir/servers
+	@$(MKDIR) $(INSTALL)/server-savadurdir/config
+	@$(MKDIR) $(INSTALL)/server-savadurdir/projects
+	@$(MKDIR) $(INSTALL)/server-savadurdir/htdocs/templates
+	@$(MKDIR) $(INSTALL)/server-savadurdir/scm
+	@$(CP) db/data/logs.db $(INSTALL)/server-savadurdir/
+	@$(CP) config/scm/* $(INSTALL)/server-savadurdir/scm
+	@$(CP) templates/* $(INSTALL)/server-savadurdir/htdocs/templates
 	@$(CP) test/config/*.xml $(INSTALL)/example/
-	@cp $(BIN_DIR)/savadur-client $(INSTALL)
-	@cp $(BIN_DIR)/savadur-server $(INSTALL)
+	cp client/$(BIN_DIR)/savadur-client $(INSTALL)
+	cp server/$(BIN_DIR)/savadur-server $(INSTALL)
 	@echo savadur is installed in $(INSTALL)
 
 distrib: setup
