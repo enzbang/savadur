@@ -181,11 +181,22 @@ package body Savadur.Database is
       --  Remember last client and his scenarios
 
       Last_Client     : Unbounded_String;
+      Last_Job_Id     : Natural := 0;
+
+      --  Temporay Tag for a client
+
       Scenario_Client : Templates.Tag;
       Status_Client   : Templates.Tag;
       Date_Client     : Templates.Tag;
       Action_Client   : Templates.Tag;
       Job_Id_Client   : Templates.Tag;
+
+      --  Temporay Tag for a job id
+
+      Scenario_Job_Id : Templates.Tag;
+      Status_Job_Id   : Templates.Tag;
+      Date_Job_Id     : Templates.Tag;
+      Action_Job_Id   : Templates.Tag;
 
    begin
       Connect (DBH);
@@ -203,6 +214,23 @@ package body Savadur.Database is
            and then To_String
            (Last_Client) /= DB.String_Vectors.Element (Line, 1)
          then
+
+            Job_Id_Client := Job_Id_Client & Last_Job_Id;
+
+            --  Reset last Job_ID
+            Last_Job_Id := 0;
+
+            Scenario_Client := Scenario_Client & Scenario_Job_Id;
+            Status_Client   := Status_Client   & Status_Job_Id;
+            Date_Client     := Date_Client     & Date_Job_Id;
+            Action_Client   := Action_Client   & Action_Job_Id;
+
+            --  Clear temp tag
+            Templates.Clear (Scenario_Job_Id);
+            Templates.Clear (Status_Job_Id);
+            Templates.Clear (Date_Job_Id);
+            Templates.Clear (Action_Job_Id);
+
             --  New client column
             Client   := Client   & Last_Client;
             Scenario := Scenario & Scenario_Client;
@@ -217,27 +245,51 @@ package body Savadur.Database is
             Templates.Clear (Date_Client);
             Templates.Clear (Action_Client);
             Templates.Clear (Job_Id_Client);
-
          end if;
 
-         Scenario_Client := Scenario_Client &
+         if Last_Job_Id /= 0
+           and then Last_Job_Id /=
+           Natural'Value (DB.String_Vectors.Element (Line, 6)) then
+            Job_Id_Client := Job_Id_Client & Last_Job_Id;
+
+            --  Reset last Job_ID
+            Last_Job_Id := 0;
+
+            Scenario_Client := Scenario_Client & Scenario_Job_Id;
+            Status_Client   := Status_Client   & Status_Job_Id;
+            Date_Client     := Date_Client     & Date_Job_Id;
+            Action_Client   := Action_Client   & Action_Job_Id;
+
+            --  Clear temp tag
+            Templates.Clear (Scenario_Job_Id);
+            Templates.Clear (Status_Job_Id);
+            Templates.Clear (Date_Job_Id);
+            Templates.Clear (Action_Job_Id);
+         end if;
+
+         Scenario_Job_Id := Scenario_Job_Id &
            DB.String_Vectors.Element (Line, 2);
-         Status_Client   := Status_Client &
+         Status_Job_Id   := Status_Job_Id &
            DB.String_Vectors.Element (Line, 3);
-         Date_Client     := Date_Client &
+         Date_Job_Id     := Date_Job_Id &
            DB.String_Vectors.Element (Line, 4);
-         Action_Client   := Action_Client &
+         Action_Job_Id   := Action_Job_Id &
            DB.String_Vectors.Element (Line, 5);
-         Job_Id_Client   := Job_Id_Client &
-           DB.String_Vectors.Element (Line, 6);
 
          Last_Client := To_Unbounded_String
            (DB.String_Vectors.Element (Line, 1));
+         Last_Job_Id := Natural'Value (DB.String_Vectors.Element (Line, 6));
 
          Line.Clear;
       end loop;
 
       if To_String (Last_Client) /= "" then
+            Job_Id_Client := Job_Id_Client & Last_Job_Id;
+            Scenario_Client := Scenario_Client & Scenario_Job_Id;
+            Status_Client   := Status_Client   & Status_Job_Id;
+            Date_Client     := Date_Client     & Date_Job_Id;
+            Action_Client   := Action_Client   & Action_Job_Id;
+
             --  New client column
             Client   := Client & Last_Client;
             Scenario := Scenario & Scenario_Client;

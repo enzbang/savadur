@@ -34,9 +34,22 @@
          font-size:13px;
          padding:1px 5px;
          text-align:center;
+         vertical-align:top;
+      }
+      table.job_id_table {
+         margin:2em 0;
+         border: thin solid #777;
+      }
+      table.job_id_table td {
+         margin:2em 0;
+         padding:0.5em;
+         border: thin solid #777;
       }
       td a {
          color:#081E75;
+      }
+      span.timestamp {
+         font-size:x-small;
       }
       .success {
          background:#92CC47 none repeat scroll 0%;
@@ -44,6 +57,12 @@
       .failure {
          background:#B50008 none repeat scroll 0%;
          color:#FFFFFF;
+      }
+      table.job_id_table td.log-success {
+        border-color:#92CC47;
+      }
+      table.job_id_table td.log-failure {
+         border-color:#B50008;
       }
     </style>
   </head>
@@ -88,18 +107,33 @@
           <td></td>
           @@TABLE@@
           <td>
-            <!-- @_LOGS_CLIENT_@ -->
-            <table>
+            <!-- for client @_LOGS_CLIENT_@ -->
+
             @@TABLE@@
-            <tr>
-              <td>
-                @@IF@@ @_LOGS_ACTION_@ /= ""
-                <abbr title="@_LOGS_DATE_@">@_LOGS_JOB_ID_@:@_LOGS_ACTION_@ - @_LOGS_STATUS_@</abbr>
-                @@END_IF@@
-              </td>
-            </tr>
-            @@END_TABLE@@
+            <!-- for job id @_LOGS_JOB_ID_@ -->
+
+            @@IF@@ @_LOGS_JOB_ID_@ /= ""
+            <table class="job_id_table">
+              @@TABLE@@
+              @@IF@@ @_LOGS_ACTION_@ /= ""
+              <tr>
+                <td
+                   @@IF@@ @_LOGS_STATUS_@ = FALSE
+                   class="log-failure"
+                   @@ELSE@@
+                   class="log-success"
+                   @@END_IF@@
+                   >
+                  <span class="timestamp">@_LOGS_DATE_@</span>
+                  @_LOGS_ACTION_@
+                </td>
+              </tr>
+              @@END_IF@@
+              @@END_TABLE@@
+              <th>#@_LOGS_JOB_ID_@</th>
             </table>
+            @@END_IF@@
+            @@END_TABLE@@
           </td>
           @@END_TABLE@@
         </tr>
