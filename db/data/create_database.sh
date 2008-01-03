@@ -35,4 +35,3 @@ create table logs (
 );
 
 EOF
-
