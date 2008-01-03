@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                                Savadur                                   --
 --                                                                          --
---                           Copyright (C) 2007                             --
+--                        Copyright (C) 2007-2008                           --
 --                      Pascal Obry - Olivier Ramonat                       --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -167,11 +167,12 @@ package body Savadur.Web_Services.Client is
 
       if Action /= "" then
          --  This is the action log. Scenario is in progress
-         Database.Log (Key, Project_Name, Scenario, Action, Output, Result);
+         Database.Log (Key, Project_Name, Scenario,
+                       Action, Output, Result, Job_Id);
 
       else
          --  End of scenario. Final status
-         Database.Final_Status (Key, Project_Name, Scenario, Result);
+         Database.Final_Status (Key, Project_Name, Scenario, Result, Job_Id);
       end if;
    end Status;
 

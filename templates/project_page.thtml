@@ -94,7 +94,7 @@
             <tr>
               <td>
                 @@IF@@ @_LOGS_ACTION_@ /= ""
-                <abbr title="@_LOGS_DATE_@">@_LOGS_ACTION_@ - @_LOGS_STATUS_@</abbr>
+                <abbr title="@_LOGS_DATE_@">@_LOGS_JOB_ID_@:@_LOGS_ACTION_@ - @_LOGS_STATUS_@</abbr>
                 @@END_IF@@
               </td>
             </tr>

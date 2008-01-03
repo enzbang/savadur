@@ -90,14 +90,17 @@ package body Savadur.Database is
      (Key          : in String;
       Project_Name : in String;
       Scenario     : in String;
-      Result       : in Boolean)
+      Result       : in Boolean;
+      Job_Id       : in Natural)
    is
       use DB.Tools;
 
       DBH : constant TLS_DBH_Access := TLS_DBH_Access (DBH_TLS.Reference);
       SQL : constant String := "insert into lastbuilt (project, client, "
-        & "scenario, status) values (" & Q (Project_Name) & ", " & Q (Key)
-        & ", " & Q (Scenario) & ", " & Q (Result) & ")";
+        & "scenario, status, job_id) values ("
+        & Q (Project_Name) & ", " & Q (Key)
+        & ", " & Q (Scenario) & ", " & Q (Result)
+        & ", " & I (Job_Id) & ")";
    begin
       Connect (DBH);
       DBH.Handle.Execute (SQL);
@@ -124,11 +127,13 @@ package body Savadur.Database is
       Scenario : Templates.Tag;
       Status   : Templates.Tag;
       Date     : Templates.Tag;
+      Job_Id   : Templates.Tag;
    begin
       Connect (DBH);
 
       DBH.Handle.Prepare_Select
-        (Iter, "select client, scenario, status, max(date) from lastbuilt "
+        (Iter, "select client, scenario, status, "
+           & "max(date), job_id from lastbuilt "
            & "where project = " & DB.Tools.Q (Project_Name)
            & " group by client order by client");
 
@@ -139,6 +144,7 @@ package body Savadur.Database is
          Scenario := Scenario & DB.String_Vectors.Element (Line, 2);
          Status   := Status & DB.String_Vectors.Element (Line, 3);
          Date     := Date & DB.String_Vectors.Element (Line, 4);
+         Job_Id   := Job_Id & DB.String_Vectors.Element (Line, 4);
 
          Line.Clear;
       end loop;
@@ -149,6 +155,7 @@ package body Savadur.Database is
       Templates.Insert (Set, Templates.Assoc ("SCENARIO", Scenario));
       Templates.Insert (Set, Templates.Assoc ("STATUS", Status));
       Templates.Insert (Set, Templates.Assoc ("DATE", Date));
+      Templates.Insert (Set, Templates.Assoc ("JOB_ID", Job_Id));
 
       return Set;
    end Get_Final_Status;
@@ -169,6 +176,7 @@ package body Savadur.Database is
       Action   : Templates.Tag;
       Status   : Templates.Tag;
       Date     : Templates.Tag;
+      Job_Id   : Templates.Tag;
 
       --  Remember last client and his scenarios
 
@@ -177,12 +185,14 @@ package body Savadur.Database is
       Status_Client   : Templates.Tag;
       Date_Client     : Templates.Tag;
       Action_Client   : Templates.Tag;
+      Job_Id_Client   : Templates.Tag;
 
    begin
       Connect (DBH);
 
       DBH.Handle.Prepare_Select
-        (Iter, "select client, scenario, status, date, action from logs "
+        (Iter, "select client, scenario, status, "
+           & "date, action, job_id from logs "
            & "where project = " & DB.Tools.Q (Project_Name)
            & " order by client ASC, date DESC");
 
@@ -199,12 +209,14 @@ package body Savadur.Database is
             Status   := Status   & Status_Client;
             Date     := Date     & Date_Client;
             Action   := Action   & Action_Client;
+            Job_Id   := Job_Id   & Job_Id_Client;
 
             --  Clear temp tag
             Templates.Clear (Scenario_Client);
             Templates.Clear (Status_Client);
             Templates.Clear (Date_Client);
             Templates.Clear (Action_Client);
+            Templates.Clear (Job_Id_Client);
 
          end if;
 
@@ -216,6 +228,8 @@ package body Savadur.Database is
            DB.String_Vectors.Element (Line, 4);
          Action_Client   := Action_Client &
            DB.String_Vectors.Element (Line, 5);
+         Job_Id_Client   := Job_Id_Client &
+           DB.String_Vectors.Element (Line, 6);
 
          Last_Client := To_Unbounded_String
            (DB.String_Vectors.Element (Line, 1));
@@ -230,6 +244,7 @@ package body Savadur.Database is
             Status   := Status & Status_Client;
             Date     := Date & Date_Client;
             Action   := Action & Action_Client;
+            Job_Id   := Job_Id & Job_Id_Client;
       end if;
 
       Iter.End_Select;
@@ -239,6 +254,7 @@ package body Savadur.Database is
       Templates.Insert (Set, Templates.Assoc ("LOGS_STATUS", Status));
       Templates.Insert (Set, Templates.Assoc ("LOGS_DATE", Date));
       Templates.Insert (Set, Templates.Assoc ("LOGS_ACTION", Action));
+      Templates.Insert (Set, Templates.Assoc ("LOGS_JOB_ID", Job_Id));
 
       return Set;
    end Get_Logs;
@@ -253,15 +269,18 @@ package body Savadur.Database is
       Scenario     : in String;
       Action       : in String;
       Output       : in String;
-      Result       : in Boolean)
+      Result       : in Boolean;
+      Job_Id       : in Natural)
    is
       use DB.Tools;
 
       DBH : constant TLS_DBH_Access := TLS_DBH_Access (DBH_TLS.Reference);
       SQL : constant String := "insert into logs (project, client, scenario,"
-        & "action, log, status) values (" & Q (Project_Name) & ", " & Q (Key)
+        & "action, log, status, job_id) values ("
+        & Q (Project_Name) & ", " & Q (Key)
         & ", " & Q (Scenario) & ", " & Q (Action)
-        & ", " & Q (Output) & ", " & Q (Result) & ")";
+        & ", " & Q (Output) & ", " & Q (Result)
+        & ", " & I (Job_Id) & ")";
    begin
       Connect (DBH);
       DBH.Handle.Execute (SQL);

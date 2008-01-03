@@ -21,6 +21,7 @@ create table lastbuilt (
 "project"  varchar(50) not null,
 "scenario" varchar(50) not null,
 "status" boolean,
+"job_id" integer,
 "date" date default current_timestamp
 );
 
@@ -31,6 +32,7 @@ create table logs (
 "action" varchar(50) not null,
 "log" longtext,
 "status" boolean,
+"job_id" integer,
 "date" date default current_timestamp
 );
 

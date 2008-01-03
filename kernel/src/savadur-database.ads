@@ -33,7 +33,8 @@ package Savadur.Database is
       Scenario     : in String;
       Action       : in String;
       Output       : in String;
-      Result       : in Boolean);
+      Result       : in Boolean;
+      Job_Id       : in Natural);
    --  Adds log to database
 
    function Get_Logs
@@ -44,7 +45,8 @@ package Savadur.Database is
      (Key          : in String;
       Project_Name : in String;
       Scenario     : in String;
-      Result       : in Boolean);
+      Result       : in Boolean;
+      Job_Id       : in Natural);
    --  Adds final status to database
 
    function Get_Final_Status
