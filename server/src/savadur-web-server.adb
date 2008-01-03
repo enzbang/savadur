@@ -170,6 +170,8 @@ package body Savadur.Web.Server is
       Templates.Insert (Set,
                         Templates.Assoc ("PROJECT_NAME", Project_Name));
 
+      Templates.Insert (Set, Savadur.Database.Get_Logs (Project_Name));
+
       return AWS.Response.Build
         (Content_Type => MIME.Text_HTML,
          Message_Body => AWS.Templates.Parse

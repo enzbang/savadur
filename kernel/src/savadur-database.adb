@@ -19,8 +19,9 @@
 --  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.       --
 ------------------------------------------------------------------------------
 
-with Ada.Task_Attributes;
 with Ada.Directories;
+with Ada.Strings.Unbounded;
+with Ada.Task_Attributes;
 
 with DB.SQLite;
 with DB.Tools;
@@ -33,6 +34,7 @@ package body Savadur.Database is
 
    use Ada;
    use Ada.Exceptions;
+   use Ada.Strings.Unbounded;
 
    Module : constant Logs.Handler.Module_Name := "DB";
 
@@ -126,9 +128,9 @@ package body Savadur.Database is
       Connect (DBH);
 
       DBH.Handle.Prepare_Select
-        (Iter, "select client, scenario, status, date from lastbuilt "
+        (Iter, "select client, scenario, status, max(date) from lastbuilt "
            & "where project = " & DB.Tools.Q (Project_Name)
-           & " order by date DESC limit 50");
+           & " group by client order by client");
 
       while Iter.More loop
          Iter.Get_Line (Line);
@@ -150,6 +152,96 @@ package body Savadur.Database is
 
       return Set;
    end Get_Final_Status;
+
+   ----------------
+   --  Get_Logs  --
+   ----------------
+
+   function Get_Logs
+     (Project_Name : in String) return Templates.Translate_Set is
+      use type Templates.Tag;
+      DBH      : constant TLS_DBH_Access := TLS_DBH_Access (DBH_TLS.Reference);
+      Iter     : DB.SQLite.Iterator;
+      Line     : DB.String_Vectors.Vector;
+      Set      : Templates.Translate_Set;
+      Client   : Templates.Tag;
+      Scenario : Templates.Tag;
+      Action   : Templates.Tag;
+      Status   : Templates.Tag;
+      Date     : Templates.Tag;
+
+      --  Remember last client and his scenarios
+
+      Last_Client     : Unbounded_String;
+      Scenario_Client : Templates.Tag;
+      Status_Client   : Templates.Tag;
+      Date_Client     : Templates.Tag;
+      Action_Client   : Templates.Tag;
+
+   begin
+      Connect (DBH);
+
+      DBH.Handle.Prepare_Select
+        (Iter, "select client, scenario, status, date, action from logs "
+           & "where project = " & DB.Tools.Q (Project_Name)
+           & " order by client ASC, date DESC");
+
+      while Iter.More loop
+         Iter.Get_Line (Line);
+
+         if To_String (Last_Client) /= ""
+           and then To_String
+           (Last_Client) /= DB.String_Vectors.Element (Line, 1)
+         then
+            --  New client column
+            Client   := Client   & Last_Client;
+            Scenario := Scenario & Scenario_Client;
+            Status   := Status   & Status_Client;
+            Date     := Date     & Date_Client;
+            Action   := Action   & Action_Client;
+
+            --  Clear temp tag
+            Templates.Clear (Scenario_Client);
+            Templates.Clear (Status_Client);
+            Templates.Clear (Date_Client);
+            Templates.Clear (Action_Client);
+
+         end if;
+
+         Scenario_Client := Scenario_Client &
+           DB.String_Vectors.Element (Line, 2);
+         Status_Client   := Status_Client &
+           DB.String_Vectors.Element (Line, 3);
+         Date_Client     := Date_Client &
+           DB.String_Vectors.Element (Line, 4);
+         Action_Client   := Action_Client &
+           DB.String_Vectors.Element (Line, 5);
+
+         Last_Client := To_Unbounded_String
+           (DB.String_Vectors.Element (Line, 1));
+
+         Line.Clear;
+      end loop;
+
+      if To_String (Last_Client) /= "" then
+            --  New client column
+            Client   := Client & Last_Client;
+            Scenario := Scenario & Scenario_Client;
+            Status   := Status & Status_Client;
+            Date     := Date & Date_Client;
+            Action   := Action & Action_Client;
+      end if;
+
+      Iter.End_Select;
+
+      Templates.Insert (Set, Templates.Assoc ("LOGS_CLIENT", Client));
+      Templates.Insert (Set, Templates.Assoc ("LOGS_SCENARIO", Scenario));
+      Templates.Insert (Set, Templates.Assoc ("LOGS_STATUS", Status));
+      Templates.Insert (Set, Templates.Assoc ("LOGS_DATE", Date));
+      Templates.Insert (Set, Templates.Assoc ("LOGS_ACTION", Action));
+
+      return Set;
+   end Get_Logs;
 
    ---------
    -- Log --
@@ -226,5 +318,4 @@ package body Savadur.Database is
                              Kind    => Logs.Handler.Error);
 
    end Logout;
-
 end Savadur.Database;

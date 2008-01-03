@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+1;1611;0c<?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
           "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -82,6 +82,26 @@
         @@TABLE@@
           <td>@_SCENARIO_@</td>
         @@END_TABLE@@
+        </tr>
+
+        <tr> @@--  Logs
+          <td></td>
+          @@TABLE@@
+          <td>
+            <!-- @_LOGS_CLIENT_@ -->
+            <table>
+            @@TABLE@@
+            <tr>
+              <td>
+                @@IF@@ @_LOGS_ACTION_@ /= ""
+                <abbr title="@_LOGS_DATE_@">@_LOGS_ACTION_@ - @_LOGS_STATUS_@</abbr>
+                @@END_IF@@
+              </td>
+            </tr>
+            @@END_TABLE@@
+            </table>
+          </td>
+          @@END_TABLE@@
         </tr>
       </table>
     </div>

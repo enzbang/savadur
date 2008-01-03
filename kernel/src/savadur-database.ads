@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                                Savadur                                   --
 --                                                                          --
---                           Copyright (C) 2007                             --
+--                        Copyright (C) 2007-2008                           --
 --                      Pascal Obry - Olivier Ramonat                       --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -35,6 +35,10 @@ package Savadur.Database is
       Output       : in String;
       Result       : in Boolean);
    --  Adds log to database
+
+   function Get_Logs
+     (Project_Name : in String) return Templates.Translate_Set;
+   --  Get logs
 
    procedure Final_Status
      (Key          : in String;
