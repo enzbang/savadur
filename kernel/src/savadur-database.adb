@@ -311,6 +311,37 @@ package body Savadur.Database is
       return Set;
    end Get_Logs;
 
+   function Job_Id return Positive is
+      DBH      : constant TLS_DBH_Access := TLS_DBH_Access (DBH_TLS.Reference);
+      Iter     : DB.SQLite.Iterator;
+      Line     : DB.String_Vectors.Vector;
+      Id       : Positive;
+   begin
+      Connect (DBH);
+
+      --  Create new job id
+      --  As job id is "primary key autoincrement" insert a NULL value
+
+      DBH.Handle.Execute ("insert into job_id values (NULL)");
+
+      --  Now select the last value
+
+      DBH.Handle.Prepare_Select
+        (Iter, "select max(id) from job_id");
+
+      if Iter.More then
+         Iter.Get_Line (Line);
+
+         Id := Positive'Value (DB.String_Vectors.Element (Line, 1));
+
+         Line.Clear;
+      end if;
+
+      Iter.End_Select;
+
+      return Id;
+   end Job_Id;
+
    ---------
    -- Log --
    ---------

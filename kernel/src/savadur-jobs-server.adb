@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                                Savadur                                   --
 --                                                                          --
---                           Copyright (C) 2007                             --
+--                         Copyright (C) 2007-2008                          --
 --                      Pascal Obry - Olivier Ramonat                       --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -20,6 +20,7 @@
 ------------------------------------------------------------------------------
 
 with Savadur.Clients;
+with Savadur.Database;
 with Savadur.Logs;
 with Savadur.Project_List;
 with Savadur.Server_Service.Client;
@@ -33,8 +34,6 @@ package body Savadur.Jobs.Server is
 
    protected type Job_Id is
       procedure Get (Id : out Positive);
-   private
-      Counter : Positive := 1;
    end Job_Id;
 
    Current_Job : Job_Id;
@@ -47,8 +46,7 @@ package body Savadur.Jobs.Server is
 
       procedure Get (Id : out Positive) is
       begin
-         Id      := Counter;
-         Counter := Counter + 1;
+         Id := Database.Job_Id;
       end Get;
    end Job_Id;
 

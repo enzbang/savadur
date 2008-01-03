@@ -16,6 +16,10 @@ login_date date default current_timestamp,
 logout_date date default current_timestamp
 );
 
+create table job_id (
+id integer primary key autoincrement
+);
+
 create table lastbuilt (
 "client" varchar(50) not null,
 "project"  varchar(50) not null,

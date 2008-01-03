@@ -59,4 +59,7 @@ package Savadur.Database is
    procedure Logout (Key : in String);
    --  Client has logout
 
+   function Job_Id return Positive;
+   --  Get new job id
+
 end Savadur.Database;
