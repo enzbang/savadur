@@ -72,9 +72,10 @@ install:
 	@$(MKDIR) $(INSTALL)/client-savadurdir/servers
 	@$(MKDIR) $(INSTALL)/server-savadurdir/config
 	@$(MKDIR) $(INSTALL)/server-savadurdir/projects
+	@$(MKDIR) $(INSTALL)/server-savadurdir/scripts
 	@$(MKDIR) $(INSTALL)/server-savadurdir/htdocs/templates
 	@$(MKDIR) $(INSTALL)/server-savadurdir/scm
-	@$(CP) db/data/logs.db $(INSTALL)/server-savadurdir/
+	@$(CP) db/data/create_database.sh $(INSTALL)/server-savadurdir/scripts/
 	@$(CP) config/scm/* $(INSTALL)/server-savadurdir/scm
 	@$(CP) templates/* $(INSTALL)/server-savadurdir/htdocs/templates
 	@$(CP) test/config/*.xml $(INSTALL)/example/

@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                                Savadur                                   --
 --                                                                          --
---                           Copyright (C) 2007                             --
+--                         Copyright (C) 2007-2008                          --
 --                      Pascal Obry - Olivier Ramonat                       --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -72,7 +72,8 @@ package body Savadur.Database is
             Logs.Handler.Write
               (Name    => Module,
                Kind    => Logs.Handler.Error,
-               Content => "ERROR : No database found : " & DB_Path);
+               Content => "ERROR : No database found : " & DB_Path &
+              " Please run ./scripts/create_database");
             raise No_Database
               with "ERROR : No database found : " & DB_Path;
          end if;
