@@ -315,8 +315,9 @@ procedure Savadur.Client is
       Logs.Write ("    -L filename         : use filename for log file");
       Logs.Write ("    -server             : run in server mode");
       Logs.Write ("    -remote -list       : List new remote server");
-      Logs.Write ("    -remote -add        : Add a new remote server");
-      Logs.Write ("    -config -id         : Set client id");
+      Logs.Write ("    -remote -add server_name server_url"
+                    & " : Add a new remote server");
+      Logs.Write ("    -config -id  client_id : Set client id");
    end Usage;
 
 begin
