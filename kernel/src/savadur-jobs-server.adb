@@ -19,6 +19,8 @@
 --  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.       --
 ------------------------------------------------------------------------------
 
+with AWS.Client;
+
 with Savadur.Clients;
 with Savadur.Database;
 with Savadur.Logs;
@@ -94,6 +96,14 @@ package body Savadur.Jobs.Server is
                     (Signed_Files.To_External_Handler (Project.Signature)),
                   Id             => Generated_Job_Id,
                   Endpoint       => -Client.Callback_Endpoint);
+            exception
+               when AWS.Client.Connection_Error =>
+                  --  Client if offline.
+                  --  Removes it from online clients and add logout info
+                  --  into database
+
+                  Database.Logout (-Client.Key);
+                  Clients.Sets.Delete (Clients.Registered, Client);
             end;
 
          else

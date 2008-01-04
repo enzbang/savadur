@@ -408,8 +408,10 @@ package body Savadur.Database is
       use DB.Tools;
 
       DBH : constant TLS_DBH_Access := TLS_DBH_Access (DBH_TLS.Reference);
-      SQL : constant String := "update sessions set logout_date=now where"
-        & " client = " & Q (Key);
+      SQL : constant String := "update sessions set "
+        & "logout_date=current_timestamp where logout_date "
+        & "is NULL and client=" & Q (Key);
+
    begin
       Connect (DBH);
       DBH.Handle.Execute (SQL);
