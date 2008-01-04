@@ -58,11 +58,12 @@ package body Savadur.Jobs.Server is
 
    function Run
      (Project  : access Projects.Project_Config;
+      Server   : in     String;
       Env_Var  : in     Environment_Variables.Maps.Map;
       Scenario : in     Scenarios.Id;
       Id       : in     Natural := 0) return Boolean
    is
-      pragma Unreferenced (Env_Var, Id);
+      pragma Unreferenced (Env_Var, Id, Server);
 
       use Projects.Id_Utils;
       use Scenarios.Id_Utils;
@@ -90,7 +91,8 @@ package body Savadur.Jobs.Server is
             begin
                Logs.Write ("Send job request to " & (-Client.Key));
                Server_Service.Client.Run
-                 (Scenario       => -Scenario,
+                 (Server_Name    => -Client.Server_Name,
+                  Scenario       => -Scenario,
                   Signed_Project =>
                     Web_Services.Server.Signed_Project
                     (Signed_Files.To_External_Handler (Project.Signature)),

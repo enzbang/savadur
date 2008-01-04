@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                                Savadur                                   --
 --                                                                          --
---                           Copyright (C) 2007                             --
+--                         Copyright (C) 2007-2008                          --
 --                      Pascal Obry - Olivier Ramonat                       --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -20,6 +20,7 @@
 ------------------------------------------------------------------------------
 
 with Savadur.Jobs.Client;
+with Savadur.Logs;
 with Savadur.Signed_Files;
 
 package body Savadur.Web_Services.Server is
@@ -29,7 +30,8 @@ package body Savadur.Web_Services.Server is
    ---------
 
    procedure Run
-     (Scenario       : in String;
+     (Server_Name    : in String;
+      Scenario       : in String;
       Signed_Project : in Server.Signed_Project;
       Id             : in Natural) is
    begin
@@ -37,6 +39,7 @@ package body Savadur.Web_Services.Server is
       Jobs.Client.Queue.Add
         (Project  => Signed_Files.To_Handler
            (Signed_Files.External_Handler (Signed_Project)),
+         Server   => Server_Name,
          Scenario => Scenario,
          Id       => Id);
    end Run;

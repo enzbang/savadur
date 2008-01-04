@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                                Savadur                                   --
 --                                                                          --
---                           Copyright (C) 2007                             --
+--                         Copyright (C) 2007-2008                          --
 --                      Pascal Obry - Olivier Ramonat                       --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -24,7 +24,8 @@ package Savadur.Web_Services.Server is
    type Signed_Project is new String;
 
    procedure Run
-     (Scenario       : in String;
+     (Server_Name    : in String;
+      Scenario       : in String;
       Signed_Project : in Server.Signed_Project;
       Id             : in Natural);
    --  Asks a client to run a specific scenario

@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                                Savadur                                   --
 --                                                                          --
---                           Copyright (C) 2007                             --
+--                         Copyright (C) 2007-2008                          --
 --                      Pascal Obry - Olivier Ramonat                       --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -28,6 +28,7 @@ with Savadur.Times;
 generic
    with function Run
      (Project  : access Projects.Project_Config;
+      Server   : in     String;
       Env_Var  : in     Environment_Variables.Maps.Map;
       Scenario : in     Scenarios.Id;
       Id       : in     Natural) return Boolean;
@@ -35,10 +36,11 @@ package Savadur.Jobs.Queue is
 
    procedure Add
      (Project  : in Signed_Files.Handler;
+      Server   : in String;
       Scenario : in String;
       Time     : in Times.Periodic := Times.No_Time;
       Id       : in Natural := 0);
-   --  Schedules a new job
+   --  Schedules a new job from the given server
 
    procedure Add_Periodic_Scenario;
    --  Adds all known periodic scenarios found in loaded projects into the task

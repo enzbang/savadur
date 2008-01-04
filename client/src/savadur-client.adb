@@ -60,7 +60,6 @@ with Savadur.Jobs.Client;
 with Savadur.Logs;
 with Savadur.Projects;
 with Savadur.Scenarios;
-with Savadur.Server_Service;
 with Savadur.Signed_Files;
 with Savadur.SCM;
 with Savadur.Servers;
@@ -188,7 +187,7 @@ procedure Savadur.Client is
             Kind    => Logs.Handler.Information);
 
          Client_Service.Client.Register
-           (Key, Metadata, Endpoint, -Server.URL);
+           (Key, Metadata, -Server.Name, Endpoint, -Server.URL);
 
          Logs.Write (Content => "Done.",
                      Kind    => Logs.Handler.Information);
@@ -263,7 +262,7 @@ procedure Savadur.Client is
             -Project_Name,
             Projects.Project_Filename (Project'Access));
 
-         Jobs.Client.Queue.Add (Signed_Project, -Scenario_Id);
+         Jobs.Client.Queue.Add (Signed_Project, "", -Scenario_Id);
       end Run_Project;
 
       Jobs.Client.Queue.Stop;

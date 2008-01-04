@@ -158,7 +158,7 @@ package body Savadur.Web.Server is
       begin
          Signed_Files.Create (Signed_Project, Project_Name, Project_Filename);
 
-         Jobs.Server.Queue.Add (Signed_Project, Scenario_Id);
+         Jobs.Server.Queue.Add (Signed_Project, "", Scenario_Id);
 
          return Response.Build
            (MIME.Text_HTML,

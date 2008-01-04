@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                                Savadur                                   --
 --                                                                          --
---                           Copyright (C) 2007                             --
+--                         Copyright (C) 2007-2008                          --
 --                      Pascal Obry - Olivier Ramonat                       --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -35,6 +35,7 @@ package Savadur.Clients is
    type Client is record
       Key               : Unbounded_String;
       Metadata          : Clients.Metadata;
+      Server_Name       : Unbounded_String;
       Callback_Endpoint : Unbounded_String;
    end record;
 
@@ -69,6 +70,9 @@ package Savadur.Clients is
 private
 
    Emtpy_Client : constant Client :=
-                    (Key => <>, Metadata => <>, Callback_Endpoint => <>);
+     (Key               => <>,
+      Metadata          => <>,
+      Server_Name       => <>,
+      Callback_Endpoint => <>);
 
 end Savadur.Clients;

@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                                Savadur                                   --
 --                                                                          --
---                           Copyright (C) 2007                             --
+--                         Copyright (C) 2007-2008                          --
 --                      Pascal Obry - Olivier Ramonat                       --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -42,6 +42,7 @@ package body Savadur.Jobs.Queue is
 
    type Job_Data is record
       Project  : aliased Signed_Files.Handler;
+      Server   : Unbounded_String;
       Scenario : Unbounded_String;
       Time     : Times.Periodic;
       Created  : Calendar.Time;
@@ -52,6 +53,7 @@ package body Savadur.Jobs.Queue is
    End_Job : constant Job_Data :=
                (Project  => <>,
                 Scenario => Null_Unbounded_String,
+                Server   => Null_Unbounded_String,
                 Time     => Times.No_Time,
                 Created  => <>,
                 Number   => Integer'First,
@@ -129,6 +131,7 @@ package body Savadur.Jobs.Queue is
 
    procedure Add
      (Project  : in Signed_Files.Handler;
+      Server   : in String;
       Scenario : in String;
       Time     : in Times.Periodic := Times.No_Time;
       Id       : in Natural := 0) is
@@ -136,6 +139,7 @@ package body Savadur.Jobs.Queue is
       Job_Handler.Add
         (Job_Data'(Project  => Project,
                    Scenario => +Scenario,
+                   Server   => +Server,
                    Time     => Time,
                    Created  => Calendar.Clock,
                    Number   => 0,
@@ -173,7 +177,7 @@ package body Savadur.Jobs.Queue is
                          Scenarios.Sets.Element (Position);
          begin
             if Scenario.Periodic /= Times.No_Time then
-               Add (Project.Signature, -Scenario.Id, Scenario.Periodic);
+               Add (Project.Signature, "", -Scenario.Id, Scenario.Periodic);
             end if;
          end Handle_Scenario;
 
@@ -359,6 +363,7 @@ package body Savadur.Jobs.Queue is
 
             if Run
               (Project  => Project'Access,
+               Server   => -Job.Server,
                Env_Var  => Env_Var,
                Scenario => Scenarios.Id (Job.Scenario),
                Id       => Job.Id)

@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                                Savadur                                   --
 --                                                                          --
---                           Copyright (C) 2007                             --
+--                         Copyright (C) 2007-2008                          --
 --                      Pascal Obry - Olivier Ramonat                       --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -33,7 +33,7 @@ package Savadur.Servers is
    end record;
 
    function Hash (Server : in Servers.Server) return Containers.Hash_Type;
-   --  Renames Strings.Hash
+   --  Renames Strings.Hash (on server name)
 
    function Key_Equal (S1, S2 : in Server) return Boolean;
 

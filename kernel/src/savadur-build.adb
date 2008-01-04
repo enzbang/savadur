@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                                Savadur                                   --
 --                                                                          --
---                           Copyright (C) 2007                             --
+--                         Copyright (C) 2007-2008                          --
 --                      Pascal Obry - Olivier Ramonat                       --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -29,14 +29,16 @@ with Ada.Text_IO;
 
 with GNAT.OS_Lib;
 
-with Savadur.Utils;
-with Savadur.SCM;
-with Savadur.Config.SCM;
-with Savadur.Config.Client;
-with Savadur.Variables;
-with Savadur.Logs;
 with Savadur.Build.Notification;
 with Savadur.Client_Service.Client;
+with Savadur.Config.Client;
+with Savadur.Config.SCM;
+with Savadur.Config.Server;
+with Savadur.Logs;
+with Savadur.SCM;
+with Savadur.Servers;
+with Savadur.Utils;
+with Savadur.Variables;
 
 package body Savadur.Build is
 
@@ -396,6 +398,7 @@ package body Savadur.Build is
 
    function Run
      (Project : access Projects.Project_Config;
+      Server  : in     String;
       Env_Var : in     Environment_Variables.Maps.Map;
       Id      : in     Scenarios.Id;
       Job_Id  : in     Natural := 0) return Boolean
@@ -404,7 +407,9 @@ package body Savadur.Build is
       --  Returns the selected scenario and set the environment variables
 
       procedure Send_Status
-        (Action_Id : in Actions.Id; Log_File : in String := "");
+        (Server_Name : in String;
+         Action_Id   : in Actions.Id;
+         Log_File    : in String := "");
       --  Sends the status to savadur server, this must be called only in
       --  client/server mode.
 
@@ -437,7 +442,9 @@ package body Savadur.Build is
       -----------------
 
       procedure Send_Status
-        (Action_Id : in Actions.Id; Log_File : in String := "")
+        (Server_Name : in String;
+         Action_Id   : in Actions.Id;
+         Log_File    : in String := "")
       is
 
          function Log_Content return String;
@@ -458,15 +465,32 @@ package body Savadur.Build is
 
       begin
          if Config.Client_Server then
-            Client_Service.Client.Status
-              (Key          => Config.Client.Get_Key,
-               Project_Name =>
-                 Projects.Id_Utils.To_String (Project.Project_Id),
-               Scenario     => Scenarios.Id_Utils.To_String (Id),
-               Action       => Actions.Id_Utils.To_String (Action_Id),
-               Output       => Log_Content,
-               Result       => Status,
-               Job_Id       => Job_Id);
+
+            Notify_Server : declare
+               Server   : Servers.Server     :=
+                 Servers.Server'(+Server_Name, Null_Unbounded_String);
+               Position : constant Servers.Sets.Cursor := Servers.Sets.Find
+                 (Config.Server.Configurations, Server);
+            begin
+
+               if not Servers.Sets.Has_Element (Position) then
+                  Logs.Write ("Unable to find server endpoint for "
+                                &  Server_Name);
+               end if;
+
+               Server := Servers.Sets.Element (Position);
+
+               Client_Service.Client.Status
+                 (Key          => Config.Client.Get_Key,
+                  Project_Name =>
+                    Projects.Id_Utils.To_String (Project.Project_Id),
+                  Scenario     => Scenarios.Id_Utils.To_String (Id),
+                  Action       => Actions.Id_Utils.To_String (Action_Id),
+                  Output       => Log_Content,
+                  Result       => Status,
+                  Job_Id       => Job_Id,
+                  Endpoint     => -Server.URL);
+            end Notify_Server;
 
          else
             Logs.Write
@@ -513,7 +537,7 @@ package body Savadur.Build is
                   if not Result then
                      Status := False; --  Exit with error
 
-                     Send_Status (Ref.Id);
+                     Send_Status (Server, Ref.Id);
 
                      exit Run_Actions;
                   end if;
@@ -524,7 +548,7 @@ package body Savadur.Build is
                                    Return_Code => Return_Code,
                                    Log_File    => Log_File);
 
-                  Send_Status (Ref.Id, Log_File);
+                  Send_Status (Server, Ref.Id, Log_File);
 
                   if not Status then
 
@@ -577,14 +601,15 @@ package body Savadur.Build is
                        or else not Directories.Exists (Sources_Directory)
                      then
                         Status := False;
-                        Send_Status (Savadur.SCM.SCM_Init.Id);
+                        Send_Status (Server, Savadur.SCM.SCM_Init.Id);
                         raise Command_Parse_Error with "SCM init failed !";
                      end if;
 
-                     Send_Status (Savadur.SCM.SCM_Init.Id,
-                       Directories.Compose
-                         (Containing_Directory => Log_Directory,
-                          Name                 => "init"));
+                     Send_Status (Server,
+                                  Savadur.SCM.SCM_Init.Id,
+                                  Directories.Compose
+                                    (Containing_Directory => Log_Directory,
+                                     Name                 => "init"));
                   end if;
                   --  No Next (Position) to retry the same command
                end if;
@@ -603,7 +628,7 @@ package body Savadur.Build is
 
       --  Final server notification
 
-      Send_Status (Actions.Id_Utils.Nil);
+      Send_Status (Server, Actions.Id_Utils.Nil);
 
       --  Execute notifications hooks
 

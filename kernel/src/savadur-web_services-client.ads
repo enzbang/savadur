@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                                Savadur                                   --
 --                                                                          --
---                           Copyright (C) 2007                             --
+--                         Copyright (C) 2007-2008                          --
 --                      Pascal Obry - Olivier Ramonat                       --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -32,6 +32,7 @@ package Savadur.Web_Services.Client is
    procedure Register
      (Key               : in String;
       Data              : in Metadata;
+      Server_Name       : in String;
       Callback_Endpoint : in String);
    --  Registers a new client whose id is Key and with the given metadata. The
    --  endpoint is the SOAP callback for the server to reach the client.

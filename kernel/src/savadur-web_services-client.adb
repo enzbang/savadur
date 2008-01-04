@@ -138,10 +138,13 @@ package body Savadur.Web_Services.Client is
    procedure Register
      (Key               : in String;
       Data              : in Metadata;
+      Server_Name       : in String;
       Callback_Endpoint : in String) is
    begin
-      Logs.Write ("Register new client : " & Key & '@' & Callback_Endpoint);
-      Clients.Registered.Insert (New_Item => (+Key, Data, +Callback_Endpoint));
+      Logs.Write ("Register new client : " & Key & ":"
+                    & Server_Name & '@' & Callback_Endpoint);
+      Clients.Registered.Insert
+        (New_Item => (+Key, Data, +Server_Name, +Callback_Endpoint));
       Database.Login (Key);
    end Register;
 

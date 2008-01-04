@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                                Savadur                                   --
 --                                                                          --
---                           Copyright (C) 2007                             --
+--                         Copyright (C) 2007-2008                          --
 --                      Pascal Obry - Olivier Ramonat                       --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -28,6 +28,7 @@ package Savadur.Jobs.Server is
 
    function Run
      (Project  : access Projects.Project_Config;
+      Server   : in     String;
       Env_Var  : in     Environment_Variables.Maps.Map;
       Scenario : in     Scenarios.Id;
       Id       : in     Natural := 0) return Boolean;
