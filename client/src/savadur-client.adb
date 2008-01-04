@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                                Savadur                                   --
 --                                                                          --
---                           Copyright (C) 2007                             --
+--                        Copyright (C) 2007-2008                           --
 --                      Pascal Obry - Olivier Ramonat                       --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -24,7 +24,7 @@
 --
 --  savadur-client [OPTIONS] CMD
 --
---- CMD:
+--  CMD:
 --   -project name -sid scenario_id to run a project in standalone mode
 --   -server                        to run in server mode
 --   -remote -list                  to list remote servers
@@ -117,6 +117,12 @@ procedure Savadur.Client is
                       Name                 => -New_Server.Name,
                       Extension            => "xml");
    begin
+
+      if New_Server.Name = "" or else New_Server.URL = "" then
+         Usage ("Can't add new remote server. Wrong arguments");
+         return;
+      end if;
+
       Create (File => File, Mode => Out_File, Name => Filename);
 
       Logs.Write ("Add new remote server : "
