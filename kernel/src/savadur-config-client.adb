@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                                Savadur                                   --
 --                                                                          --
---                           Copyright (C) 2007                             --
+--                         Copyright (C) 2007-2008                          --
 --                      Pascal Obry - Olivier Ramonat                       --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -39,16 +39,18 @@ package body Savadur.Config.Client is
    use Savadur.Utils;
 
    type Config is record
-      Key : Unbounded_String;
+      Key      : Unbounded_String;
+      Endpoint : Unbounded_String;
    end record;
 
    Configuration : Config;
 
-   Empty : constant Config := Config'(Key => Null_Unbounded_String);
+   Empty : constant Config := Config'(Key      => Null_Unbounded_String,
+                                      Endpoint => Null_Unbounded_String);
 
-   type Node_Value is (Client, Name);
+   type Node_Value is (Client, Name, Endpoint);
 
-   type Attribute is (Id);
+   type Attribute is (Id, URL);
 
    function Get_Node_Value (S : in String) return Node_Value;
    --  Returns the node value matching the given string or raise Config_Error
@@ -65,6 +67,9 @@ package body Savadur.Config.Client is
       Local_Name    : in     Unicode.CES.Byte_Sequence := "";
       Qname         : in     Unicode.CES.Byte_Sequence := "";
       Atts          : in     Sax.Attributes.Attributes'Class);
+
+   procedure Parse;
+   --  Parses client configuration file
 
    -------------------
    -- Get_Attribute --
@@ -85,45 +90,24 @@ package body Savadur.Config.Client is
       raise Config_Error with "Unknown node " & S;
    end Get_Attribute;
 
+   --------------------
+   --  Get_Endpoint  --
+   --------------------
+
+   function Get_Endpoint return String is
+   begin
+      if Configuration = Empty then
+         Parse;
+      end if;
+
+      return -Configuration.Endpoint;
+   end Get_Endpoint;
+
    -------------
    -- Get_Key --
    -------------
 
    function Get_Key return String is
-
-      procedure Parse;
-      --  Parses client configuration file
-
-      -----------
-      -- Parse --
-      -----------
-
-      procedure Parse is
-         Filename : constant String := Ada.Directories.Compose
-           (Containing_Directory => Savadur.Config.Savadur_Directory,
-            Name                 => "client",
-            Extension            => "xml");
-         Reader   : Tree_Reader;
-         Source   : Input_Sources.File.File_Input;
-      begin
-         if not Directories.Exists (Filename) then
-            if Savadur.Config.Client_Server then
-               raise Config_Error with "No client.xml file !";
-            else
-               Configuration.Key := +"default";
-            end if;
-
-         else
-            Input_Sources.File.Open
-              (Filename => Filename,
-               Input    => Source);
-
-            Parse (Reader, Source);
-
-            Input_Sources.File.Close (Source);
-         end if;
-      end Parse;
-
    begin
       if Configuration = Empty then
          Parse;
@@ -150,6 +134,36 @@ package body Savadur.Config.Client is
 
       raise Config_Error with "Unknown node " & S;
    end Get_Node_Value;
+
+   -----------
+   -- Parse --
+   -----------
+
+   procedure Parse is
+      Filename : constant String := Ada.Directories.Compose
+        (Containing_Directory => Savadur.Config.Savadur_Directory,
+         Name                 => "client",
+         Extension            => "xml");
+      Reader   : Tree_Reader;
+      Source   : Input_Sources.File.File_Input;
+   begin
+      if not Directories.Exists (Filename) then
+         if Savadur.Config.Client_Server then
+            raise Config_Error with "No client.xml file !";
+         else
+            Configuration.Key := +"default";
+         end if;
+
+      else
+         Input_Sources.File.Open
+           (Filename => Filename,
+            Input    => Source);
+
+         Parse (Reader, Source);
+
+         Input_Sources.File.Close (Source);
+      end if;
+   end Parse;
 
    -------------------
    -- Start_Element --
@@ -179,8 +193,26 @@ package body Savadur.Config.Client is
                case Attr is
                   when Id =>
                      Configuration.Key := +Get_Value (Atts, J);
+
+                  when URL =>
+                     raise Config_Error with "Wrong node attr "
+                       & Attribute'Image (Attr);
                end case;
             end loop;
+
+         when Endpoint =>
+            for J in 0 .. Get_Length (Atts) - 1 loop
+               Attr := Get_Attribute (Get_Qname (Atts, J));
+               case Attr is
+                  when URL =>
+                     Configuration.Endpoint := +Get_Value (Atts, J);
+
+                  when Id =>
+                     raise Config_Error with "Wrong node attr "
+                       & Attribute'Image (Attr);
+               end case;
+            end loop;
+
       end case;
    end Start_Element;
 

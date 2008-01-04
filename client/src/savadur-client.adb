@@ -30,6 +30,7 @@
 --   -remote -list                  to list remote servers
 --   -remote -add                   to add a remote server
 --   -config -id                    set client id
+--   -config -force-endpoint        set client endpoint
 --
 --  OPTIONS :
 --       -savadurdir dirname : Set savadur directory
@@ -78,6 +79,7 @@ procedure Savadur.Client is
 
    Project_Name         : Unbounded_String;
    Client_Id            : Unbounded_String;
+   Client_Endpoint      : Unbounded_String;
    Scenario_Id          : Unbounded_String
      := Scenarios.Id_Utils.To_Unbounded_String (Scenarios.Default_Scenario);
 
@@ -101,8 +103,8 @@ procedure Savadur.Client is
    procedure List_Remote_Server;
    --  Lists remote servers
 
-   procedure Set_Client_Id;
-   --  Sets client id
+   procedure Set_Client_Config;
+   --  Sets client config (id and endpoint)
 
    -----------------------
    -- Add_Remote_Server --
@@ -178,6 +180,7 @@ procedure Savadur.Client is
          Metadata : constant Client_Service.Types.Metadata_Type :=
                       (OS => +"windows");
          Key      : constant String := Config.Client.Get_Key;
+         Endpoint : constant String := Config.Client.Get_Endpoint;
       begin
          Logs.Write
            (Content =>
@@ -185,7 +188,7 @@ procedure Savadur.Client is
             Kind    => Logs.Handler.Information);
 
          Client_Service.Client.Register
-           (Key, Metadata, Server_Service.URL, -Server.URL);
+           (Key, Metadata, Endpoint, -Server.URL);
 
          Logs.Write (Content => "Done.",
                      Kind    => Logs.Handler.Information);
@@ -266,13 +269,17 @@ procedure Savadur.Client is
       Jobs.Client.Queue.Stop;
    end Run_Standalone;
 
-   -------------------
-   -- Set_Client_Id --
-   -------------------
+   -------------------------
+   --  Set_Client_Config  --
+   -------------------------
 
-   procedure Set_Client_Id is
+   procedure Set_Client_Config is
       use Ada.Text_IO;
       File : File_Type;
+      Config_Client_Id       : constant String :=
+        Savadur.Config.Client.Get_Key;
+      Config_Client_Endpoint : constant String :=
+        Savadur.Config.Client.Get_Endpoint;
       Filename : constant String :=
                    Directories.Compose
                      (Containing_Directory => Config.Savadur_Directory,
@@ -281,12 +288,22 @@ procedure Savadur.Client is
    begin
       Create (File => File, Mode => Out_File, Name => Filename);
       Put_Line (File, "<client>");
-      Put_Line (File, "<name id='" & (-Client_Id) & "'/>");
+
+      if -Client_Id /= "" then
+         Put_Line (File, "<name id='" & (-Client_Id) & "'/>");
+      elsif Config_Client_Id /= "" then
+         Put_Line (File, "<name id='" & Config_Client_Id & "'/>");
+      end if;
+
+      if -Client_Endpoint /= "" then
+         Put_Line (File, "<endpoint url='" & (-Client_Endpoint) & "'/>");
+      elsif Config_Client_Endpoint /= "" then
+         Put_Line (File, "<endpoint url='" & Config_Client_Endpoint & "'/>");
+      end if;
+
       Put_Line (File, "</client>");
       Close (File);
-
-      Logs.Write ("Set client id : "  & Savadur.Config.Client.Get_Key);
-   end Set_Client_Id;
+   end Set_Client_Config;
 
    -----------
    -- Usage --
@@ -317,6 +334,8 @@ procedure Savadur.Client is
       Logs.Write ("    -remote -list       : List new remote server");
       Logs.Write ("    -remote -add server_name server_url"
                     & " : Add a new remote server");
+      Logs.Write ("    -config -force-endpoint endpoint :"
+                    & " Set client endpoint");
       Logs.Write ("    -config -id  client_id : Set client id");
    end Usage;
 
@@ -402,7 +421,7 @@ begin
             end Complete_L;
 
          when others =>
-            Usage (Error_Message => "unknown syntax");
+            Usage (Error_Message => "Unknown syntax");
             return;
       end case;
    end loop Iterate_On_Opt;
@@ -427,7 +446,7 @@ begin
             Action := List_Remote_Server'Access;
 
          when others =>
-            Usage (Error_Message => "unknown syntax");
+            Usage (Error_Message => "(remote) unknown syntax");
             return;
 
       end case;
@@ -435,23 +454,34 @@ begin
 
    GNAT.Command_Line.Goto_Section ("config");
    Config_Opt : loop
-      case GNAT.Command_Line.Getopt ("id:") is
+      case GNAT.Command_Line.Getopt ("id: force-endpoint:") is
          when ASCII.NUL =>
             exit Config_Opt;
 
+         when 'f' =>
+            Complete_Config_F : declare
+               Full : constant String := GNAT.Command_Line.Full_Switch;
+            begin
+               if Full = "force-endpoint" then
+                  Action := Set_Client_Config'Access;
+                  Client_Endpoint :=
+                    To_Unbounded_String (GNAT.Command_Line.Parameter);
+               end if;
+            end Complete_Config_F;
+
          when 'i' =>
-            Complete_R : declare
+            Complete_Config_I : declare
                Full : constant String := GNAT.Command_Line.Full_Switch;
             begin
                if Full = "id" then
-                  Action := Set_Client_Id'Access;
+                  Action := Set_Client_Config'Access;
                   Client_Id :=
                     To_Unbounded_String (GNAT.Command_Line.Parameter);
                end if;
-            end Complete_R;
+            end Complete_Config_I;
 
          when others =>
-            Usage (Error_Message => "unknown syntax");
+            Usage (Error_Message => "(config) unknown syntax");
             return;
       end case;
    end loop Config_Opt;
@@ -467,7 +497,7 @@ exception
       | GNAT.Command_Line.Invalid_Switch
       | GNAT.Command_Line.Invalid_Parameter
         =>
-      Usage ("unknown syntax");
+      Usage ("INVALID : unknown syntax");
    when E : Savadur.Config.Config_Error
       | Savadur.Config.Project.Config_Error
       | Savadur.Config.Environment_Variables.Config_Error

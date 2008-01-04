@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                                Savadur                                   --
 --                                                                          --
---                           Copyright (C) 2007                             --
+--                         Copyright (C) 2007-2008                          --
 --                      Pascal Obry - Olivier Ramonat                       --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -25,5 +25,8 @@ package Savadur.Config.Client is
 
    function Get_Key return String;
    --  Returns client key
+
+   function Get_Endpoint return String;
+   --  Returns client endpoint
 
 end Savadur.Config.Client;
