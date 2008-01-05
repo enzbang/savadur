@@ -27,6 +27,8 @@ with Ada.Task_Attributes;
 with DB.SQLite;
 with DB.Tools;
 
+with Morzhol.Strings;
+
 with Savadur.Config;
 with Savadur.Logs;
 
@@ -183,7 +185,9 @@ package body Savadur.Database is
          Get_Content : begin
             Templates.Insert
               (Set, Templates.Assoc
-                 ("LOG_CONTENT", DB.String_Vectors.Element (Line, 1)));
+                 ("LOG_CONTENT",
+                  Morzhol.Strings.HTML_To_Text
+                    (DB.String_Vectors.Element (Line, 1))));
             Templates.Insert
               (Set, Templates.Assoc
                  ("PROJECT_NAME", DB.String_Vectors.Element (Line, 2)));
