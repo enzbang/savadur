@@ -20,6 +20,7 @@
 ------------------------------------------------------------------------------
 
 with Ada.Directories;
+with Ada.Exceptions;
 with Ada.Strings.Unbounded;
 with Ada.Task_Attributes;
 
@@ -28,7 +29,6 @@ with DB.Tools;
 
 with Savadur.Config;
 with Savadur.Logs;
-with Ada.Exceptions;
 
 package body Savadur.Database is
 
@@ -159,6 +159,10 @@ package body Savadur.Database is
 
       return Set;
    end Get_Final_Status;
+
+   -----------------------
+   --  Get_Log_Content  --
+   -----------------------
 
    function Get_Log_Content
      (Id : in Positive) return Templates.Translate_Set is
@@ -370,6 +374,10 @@ package body Savadur.Database is
 
       return Set;
    end Get_Logs;
+
+   --------------
+   --  Job_Id  --
+   --------------
 
    function Job_Id return Positive is
       DBH      : constant TLS_DBH_Access := TLS_DBH_Access (DBH_TLS.Reference);
