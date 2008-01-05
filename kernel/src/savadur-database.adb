@@ -205,7 +205,7 @@ package body Savadur.Database is
         (Iter, "select client, scenario, status, "
            & "date, action, job_id from logs "
            & "where project = " & DB.Tools.Q (Project_Name)
-           & " order by client ASC, date DESC");
+           & " order by client ASC, rowid DESC");
 
       while Iter.More loop
          Iter.Get_Line (Line);
