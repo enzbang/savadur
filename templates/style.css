@@ -28,11 +28,10 @@
          vertical-align:top;
       }
       table.job_id_table {
-         margin:2em 0;
+         margin:1.5em auto;
          border: thin solid #777;
       }
       table.job_id_table td {
-         margin:2em 0;
          padding:0.5em;
          border: thin solid #777;
       }

@@ -56,7 +56,7 @@
         </tr>
 
         <tr> @@--  Logs
-          <td></td>
+          <th>Logs</th>
           @@TABLE@@
           <td>
             <!-- for client @_LOGS_CLIENT_@ -->
