@@ -160,6 +160,52 @@ package body Savadur.Database is
       return Set;
    end Get_Final_Status;
 
+   function Get_Log_Content
+     (Id : in Positive) return Templates.Translate_Set is
+      DBH      : constant TLS_DBH_Access := TLS_DBH_Access (DBH_TLS.Reference);
+      Iter     : DB.SQLite.Iterator;
+      Line     : DB.String_Vectors.Vector;
+      Set      : Templates.Translate_Set;
+   begin
+      Connect (DBH);
+
+      DBH.Handle.Prepare_Select
+        (Iter, "select log, project, scenario, status, date, action"
+           & " from logs where rowid = " & DB.Tools.I (Id));
+
+      if Iter.More then
+         Iter.Get_Line (Line);
+
+         Get_Content : begin
+            Templates.Insert
+              (Set, Templates.Assoc
+                 ("LOG_CONTENT", DB.String_Vectors.Element (Line, 1)));
+            Templates.Insert
+              (Set, Templates.Assoc
+                 ("PROJECT_NAME", DB.String_Vectors.Element (Line, 2)));
+            Templates.Insert
+              (Set, Templates.Assoc
+                 ("SCENARIO", DB.String_Vectors.Element (Line, 3)));
+            Templates.Insert
+              (Set, Templates.Assoc
+                 ("STATUS", DB.String_Vectors.Element (Line, 4)));
+            Templates.Insert
+              (Set, Templates.Assoc
+                 ("DATE", DB.String_Vectors.Element (Line, 5)));
+            Templates.Insert
+              (Set, Templates.Assoc
+                 ("ACTION", DB.String_Vectors.Element (Line, 6)));
+
+            Line.Clear;
+            Iter.End_Select;
+            return Set;
+         end Get_Content;
+      end if;
+
+      Iter.End_Select;
+      return Set;
+   end Get_Log_Content;
+
    ----------------
    --  Get_Logs  --
    ----------------

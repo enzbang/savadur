@@ -65,6 +65,9 @@ package body Savadur.Web.Server is
    function List (Request : in Status.Data) return Response.Data;
    --  Displays the project list
 
+   function Show_Log (Log_Id : in String) return Response.Data;
+   --  Show the selected log content
+
    function Show_Project (Request : in Status.Data) return Response.Data;
    --  Displays the project status
 
@@ -88,11 +91,12 @@ package body Savadur.Web.Server is
          return List (Request);
       elsif URI = "/run" then
          return Run (Request);
-      elsif Savadur.Config.Project.Is_Project_Name
-        (URI (URI'First + 1 .. URI'Last)) then
-         return Show_Project (Request);
-      elsif URI'Length > 4
-        and then URI (URI'First .. URI'First + 3) = "/css"
+      elsif URI'Length > 5
+        and then URI (URI'First .. URI'First + 4) = "/log/"
+      then
+         return Show_Log (URI (URI'First + 5 .. URI'Last));
+      elsif URI'Length > 5
+        and then URI (URI'First .. URI'First + 4) = "/css/"
       then
          Get_CSS : declare
             CSS_File : constant String := Directories.Compose
@@ -109,8 +113,10 @@ package body Savadur.Web.Server is
                   "<p>File " & CSS_File & " not found</p>", Messages.S404);
             end if;
          end Get_CSS;
+      elsif Savadur.Config.Project.Is_Project_Name
+        (URI (URI'First + 1 .. URI'Last)) then
+         return Show_Project (Request);
       end if;
-
       return Response.Build
         (MIME.Text_HTML, "<p>" & URI & " not found</p>", Messages.S404);
    end HTTP_Callback;
@@ -173,6 +179,36 @@ package body Savadur.Web.Server is
                Messages.S404);
       end Run_Project;
    end Run;
+
+   ----------------
+   --  Show_Log  --
+   ----------------
+
+   function Show_Log (Log_Id : in String) return Response.Data is
+      Web_Dir       : constant String := Directories.Compose
+        (Containing_Directory => Savadur.Config.Savadur_Directory,
+         Name                 => "htdocs");
+      Web_Templates : constant String := Directories.Compose
+        (Containing_Directory => Web_Dir,
+         Name                 => "templates");
+   begin
+      Get_Content : declare
+         Id : constant Positive := Positive'Value (Log_Id);
+      begin
+         return AWS.Response.Build
+           (Content_Type => MIME.Text_HTML,
+            Message_Body => AWS.Templates.Parse
+              (Filename     => Directories.Compose
+                 (Containing_Directory => Web_Templates,
+                  Name                 => "log",
+                  Extension            => "thtml"),
+               Translations => Database.Get_Log_Content (Id)));
+      exception
+         when Constraint_Error =>
+            return Response.Build
+              (MIME.Text_HTML, "<p>Wrong request</p>", Messages.S404);
+      end Get_Content;
+   end Show_Log;
 
    --------------------
    --  Show_Project  --

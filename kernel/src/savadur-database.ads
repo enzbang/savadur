@@ -41,6 +41,9 @@ package Savadur.Database is
      (Project_Name : in String) return Templates.Translate_Set;
    --  Get logs
 
+   function Get_Log_Content (Id : in Positive) return Templates.Translate_Set;
+   --  Get log content
+
    procedure Final_Status
      (Key          : in String;
       Project_Name : in String;

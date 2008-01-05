@@ -18,6 +18,10 @@
 
     <h1>@_PROJECT_NAME_@</h1>
 
+    <div id="menu">
+      <ul><li><a href="/">Back to project list</a></li></ul>
+    </div>
+
     <div id="content">
       <table>
         <tr> @@-- Last Status line
