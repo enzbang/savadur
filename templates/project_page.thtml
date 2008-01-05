@@ -76,8 +76,10 @@
                    class="log-success"
                    @@END_IF@@
                    >
-                  <span class="timestamp">@_LOGS_DATE_@</span>
-                  @_LOGS_ACTION_@
+                  <a href="/log/@_LOGS_ID_@">
+                    <span class="timestamp">@_LOGS_DATE_@</span>
+                    @_LOGS_ACTION_@
+                  </a>
                 </td>
               </tr>
               @@END_IF@@

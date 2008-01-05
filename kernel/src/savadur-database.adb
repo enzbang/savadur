@@ -223,6 +223,7 @@ package body Savadur.Database is
       Status   : Templates.Tag;
       Date     : Templates.Tag;
       Job_Id   : Templates.Tag;
+      Rowid    : Templates.Tag;
 
       --  Remember last client and his scenarios
 
@@ -235,11 +236,13 @@ package body Savadur.Database is
       Status_Client   : Templates.Tag;
       Date_Client     : Templates.Tag;
       Action_Client   : Templates.Tag;
+      Rowid_Client    : Templates.Tag;
       Job_Id_Client   : Templates.Tag;
 
       --  Temporay Tag for a job id
 
       Scenario_Job_Id : Templates.Tag;
+      Rowid_Job_Id    : Templates.Tag;
       Status_Job_Id   : Templates.Tag;
       Date_Job_Id     : Templates.Tag;
       Action_Job_Id   : Templates.Tag;
@@ -249,7 +252,7 @@ package body Savadur.Database is
 
       DBH.Handle.Prepare_Select
         (Iter, "select client, scenario, status, "
-           & "date, action, job_id from logs "
+           & "date, action, job_id, rowid from logs "
            & "where project = " & DB.Tools.Q (Project_Name)
            & " order by client ASC, rowid DESC");
 
@@ -270,12 +273,14 @@ package body Savadur.Database is
             Status_Client   := Status_Client   & Status_Job_Id;
             Date_Client     := Date_Client     & Date_Job_Id;
             Action_Client   := Action_Client   & Action_Job_Id;
+            Rowid_Client    := Rowid_Client    & Rowid_Job_Id;
 
             --  Clear temp tag
             Templates.Clear (Scenario_Job_Id);
             Templates.Clear (Status_Job_Id);
             Templates.Clear (Date_Job_Id);
             Templates.Clear (Action_Job_Id);
+            Templates.Clear (Rowid_Job_Id);
 
             --  New client column
             Client   := Client   & Last_Client;
@@ -283,6 +288,7 @@ package body Savadur.Database is
             Status   := Status   & Status_Client;
             Date     := Date     & Date_Client;
             Action   := Action   & Action_Client;
+            Rowid    := Rowid    & Rowid_Client;
             Job_Id   := Job_Id   & Job_Id_Client;
 
             --  Clear temp tag
@@ -290,6 +296,7 @@ package body Savadur.Database is
             Templates.Clear (Status_Client);
             Templates.Clear (Date_Client);
             Templates.Clear (Action_Client);
+            Templates.Clear (Rowid_Client);
             Templates.Clear (Job_Id_Client);
          end if;
 
@@ -305,12 +312,14 @@ package body Savadur.Database is
             Status_Client   := Status_Client   & Status_Job_Id;
             Date_Client     := Date_Client     & Date_Job_Id;
             Action_Client   := Action_Client   & Action_Job_Id;
+            Rowid_Client    := Rowid_Client    & Rowid_Job_Id;
 
             --  Clear temp tag
             Templates.Clear (Scenario_Job_Id);
             Templates.Clear (Status_Job_Id);
             Templates.Clear (Date_Job_Id);
             Templates.Clear (Action_Job_Id);
+            Templates.Clear (Rowid_Job_Id);
          end if;
 
          Scenario_Job_Id := Scenario_Job_Id &
@@ -321,6 +330,8 @@ package body Savadur.Database is
            DB.String_Vectors.Element (Line, 4);
          Action_Job_Id   := Action_Job_Id &
            DB.String_Vectors.Element (Line, 5);
+         Rowid_Job_Id    := Rowid_Job_Id &
+           DB.String_Vectors.Element (Line, 7);
 
          Last_Client := To_Unbounded_String
            (DB.String_Vectors.Element (Line, 1));
@@ -335,6 +346,7 @@ package body Savadur.Database is
             Status_Client   := Status_Client   & Status_Job_Id;
             Date_Client     := Date_Client     & Date_Job_Id;
             Action_Client   := Action_Client   & Action_Job_Id;
+            Rowid_Client    := Rowid_Client    & Rowid_Job_Id;
 
             --  New client column
             Client   := Client & Last_Client;
@@ -342,6 +354,7 @@ package body Savadur.Database is
             Status   := Status & Status_Client;
             Date     := Date & Date_Client;
             Action   := Action & Action_Client;
+            Rowid    := Rowid  & Rowid_Client;
             Job_Id   := Job_Id & Job_Id_Client;
       end if;
 
@@ -352,6 +365,7 @@ package body Savadur.Database is
       Templates.Insert (Set, Templates.Assoc ("LOGS_STATUS", Status));
       Templates.Insert (Set, Templates.Assoc ("LOGS_DATE", Date));
       Templates.Insert (Set, Templates.Assoc ("LOGS_ACTION", Action));
+      Templates.Insert (Set, Templates.Assoc ("LOGS_ID", Rowid));
       Templates.Insert (Set, Templates.Assoc ("LOGS_JOB_ID", Job_Id));
 
       return Set;
