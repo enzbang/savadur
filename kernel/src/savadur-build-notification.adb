@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                                Savadur                                   --
 --                                                                          --
---                           Copyright (C) 2007                             --
+--                         Copyright (C) 2007-2008                          --
 --                      Pascal Obry - Olivier Ramonat                       --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -38,7 +38,6 @@ package body Savadur.Build.Notification is
    is
       Log_Directory : constant String :=
                         Projects.Project_Log_Directory (Project);
-
    begin
       if Success then
          for K in 1 .. Project.Notifications.On_Success.Length loop

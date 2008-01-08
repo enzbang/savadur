@@ -51,10 +51,10 @@ package body Savadur.Web.Server is
    use AWS;
    use SOAP;
 
-   HTTP          : AWS.Server.HTTP;
-   Config        : AWS.Config.Object := AWS.Config.Get_Current;
-   Dispatcher    : Client_Service.CB.Handler;
-   Address       : URL.Object;
+   HTTP       : AWS.Server.HTTP;
+   Config     : AWS.Config.Object := AWS.Config.Get_Current;
+   Dispatcher : Client_Service.CB.Handler;
+   Address    : URL.Object;
 
    function HTTP_Callback (Request : in Status.Data) return Response.Data;
    --  Callbacks used for HTTP requests
@@ -76,25 +76,31 @@ package body Savadur.Web.Server is
    -------------------
 
    function HTTP_Callback (Request : in Status.Data) return Response.Data is
-      Web_Dir       : constant String := Directories.Compose
-        (Containing_Directory => Savadur.Config.Savadur_Directory,
-         Name                 => "htdocs");
-      Web_CSS       : constant String := Directories.Compose
-        (Containing_Directory => Web_Dir,
-         Name                 => "css");
-      URI           : constant String := Status.URI (Request);
+      Web_Dir : constant String :=
+                  Directories.Compose
+                    (Containing_Directory => Savadur.Config.Savadur_Directory,
+                     Name                 => "htdocs");
+      Web_CSS : constant String :=
+                  Directories.Compose
+                    (Containing_Directory => Web_Dir,
+                     Name                 => "css");
+      URI     : constant String := Status.URI (Request);
    begin
       Logs.Write
         (Content => "Calling => " & URI,
          Kind    => Logs.Handler.Very_Verbose);
+
       if URI = "/" then
          return List (Request);
+
       elsif URI = "/run" then
          return Run (Request);
+
       elsif URI'Length > 5
         and then URI (URI'First .. URI'First + 4) = "/log/"
       then
          return Show_Log (URI (URI'First + 5 .. URI'Last));
+
       elsif URI'Length > 5
         and then URI (URI'First .. URI'First + 4) = "/css/"
       then
@@ -113,10 +119,12 @@ package body Savadur.Web.Server is
                   "<p>File " & CSS_File & " not found</p>", Messages.S404);
             end if;
          end Get_CSS;
+
       elsif Savadur.Config.Project.Is_Project_Name
         (URI (URI'First + 1 .. URI'Last)) then
          return Show_Project (Request);
       end if;
+
       return Response.Build
         (MIME.Text_HTML, "<p>" & URI & " not found</p>", Messages.S404);
    end HTTP_Callback;
@@ -170,7 +178,6 @@ package body Savadur.Web.Server is
            (MIME.Text_HTML,
             "<p>Running " & Project_Name & "...</p>",
             Messages.S404);
-
       exception
          when IO_Exceptions.Name_Error =>
             return Response.Build
@@ -221,14 +228,13 @@ package body Savadur.Web.Server is
       Web_Templates : constant String := Directories.Compose
         (Containing_Directory => Web_Dir,
          Name                 => "templates");
-      URI          : constant String := Status.URI (Request);
-      Project_Name : constant String := URI (URI'First + 1 .. URI'Last);
-      Set          : Templates.Translate_Set :=
-        Savadur.Database.Get_Final_Status (Project_Name);
+      URI           : constant String := Status.URI (Request);
+      Project_Name  : constant String := URI (URI'First + 1 .. URI'Last);
+      Set           : Templates.Translate_Set :=
+                        Savadur.Database.Get_Final_Status (Project_Name);
    begin
-
-      Templates.Insert (Set,
-                        Templates.Assoc ("PROJECT_NAME", Project_Name));
+      Templates.Insert
+        (Set, Templates.Assoc ("PROJECT_NAME", Project_Name));
 
       Templates.Insert (Set, Savadur.Database.Get_Logs (Project_Name));
 
@@ -240,7 +246,6 @@ package body Savadur.Web.Server is
                Name                 => "project_page",
                Extension            => "thtml"),
             Translations => Set));
-
    end Show_Project;
 
    -----------

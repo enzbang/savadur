@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                                Savadur                                   --
 --                                                                          --
---                           Copyright (C) 2007                             --
+--                         Copyright (C) 2007-2008                          --
 --                      Pascal Obry - Olivier Ramonat                       --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -30,5 +30,6 @@ package Savadur.Logs is
    procedure Write
      (Content : in String;
       Kind    : in Handler.Log_Level := Handler.Information);
+   --  Record Content into log file
 
 end Savadur.Logs;

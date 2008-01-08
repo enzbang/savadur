@@ -61,10 +61,11 @@ package body Savadur.Database is
    -------------
 
    procedure Connect (DBH : in TLS_DBH_Access) is
-      DB_Path : constant String := Directories.Compose
-        (Containing_Directory => Config.Savadur_Directory,
-         Name                 => "logs",
-         Extension            => "db");
+      DB_Path : constant String :=
+                  Directories.Compose
+                    (Containing_Directory => Config.Savadur_Directory,
+                     Name                 => "logs",
+                     Extension            => "db");
    begin
       if not DBH.Connected then
          if Directories.Exists (Name => DB_Path) then
@@ -111,7 +112,6 @@ package body Savadur.Database is
          Logs.Handler.Write (Name    => Module,
                              Content => Exception_Message (E),
                              Kind    => Logs.Handler.Error);
-
    end Final_Status;
 
    ------------------------
@@ -119,7 +119,8 @@ package body Savadur.Database is
    ------------------------
 
    function Get_Final_Status
-     (Project_Name : in String) return Templates.Translate_Set is
+     (Project_Name : in String) return Templates.Translate_Set
+   is
       use type Templates.Tag;
       DBH      : constant TLS_DBH_Access := TLS_DBH_Access (DBH_TLS.Reference);
       Iter     : DB.SQLite.Iterator;
@@ -167,11 +168,12 @@ package body Savadur.Database is
    -----------------------
 
    function Get_Log_Content
-     (Id : in Positive) return Templates.Translate_Set is
-      DBH      : constant TLS_DBH_Access := TLS_DBH_Access (DBH_TLS.Reference);
-      Iter     : DB.SQLite.Iterator;
-      Line     : DB.String_Vectors.Vector;
-      Set      : Templates.Translate_Set;
+     (Id : in Positive) return Templates.Translate_Set
+   is
+      DBH  : constant TLS_DBH_Access := TLS_DBH_Access (DBH_TLS.Reference);
+      Iter : DB.SQLite.Iterator;
+      Line : DB.String_Vectors.Vector;
+      Set  : Templates.Translate_Set;
    begin
       Connect (DBH);
 
@@ -219,7 +221,8 @@ package body Savadur.Database is
    ----------------
 
    function Get_Logs
-     (Project_Name : in String) return Templates.Translate_Set is
+     (Project_Name : in String) return Templates.Translate_Set
+   is
       use type Templates.Tag;
       DBH      : constant TLS_DBH_Access := TLS_DBH_Access (DBH_TLS.Reference);
       Iter     : DB.SQLite.Iterator;
@@ -269,7 +272,7 @@ package body Savadur.Database is
 
          if To_String (Last_Client) /= ""
            and then To_String
-           (Last_Client) /= DB.String_Vectors.Element (Line, 1)
+             (Last_Client) /= DB.String_Vectors.Element (Line, 1)
          then
 
             Job_Id_Client := Job_Id_Client & Last_Job_Id;
@@ -310,7 +313,8 @@ package body Savadur.Database is
 
          if Last_Job_Id /= 0
            and then Last_Job_Id /=
-           Natural'Value (DB.String_Vectors.Element (Line, 6)) then
+             Natural'Value (DB.String_Vectors.Element (Line, 6))
+         then
             Job_Id_Client := Job_Id_Client & Last_Job_Id;
 
             --  Reset last Job_ID
@@ -349,21 +353,22 @@ package body Savadur.Database is
       end loop;
 
       if To_String (Last_Client) /= "" then
-            Job_Id_Client := Job_Id_Client & Last_Job_Id;
-            Scenario_Client := Scenario_Client & Scenario_Job_Id;
-            Status_Client   := Status_Client   & Status_Job_Id;
-            Date_Client     := Date_Client     & Date_Job_Id;
-            Action_Client   := Action_Client   & Action_Job_Id;
-            Rowid_Client    := Rowid_Client    & Rowid_Job_Id;
+         Job_Id_Client   := Job_Id_Client   & Last_Job_Id;
+         Scenario_Client := Scenario_Client & Scenario_Job_Id;
+         Status_Client   := Status_Client   & Status_Job_Id;
+         Date_Client     := Date_Client     & Date_Job_Id;
+         Action_Client   := Action_Client   & Action_Job_Id;
+         Rowid_Client    := Rowid_Client    & Rowid_Job_Id;
 
-            --  New client column
-            Client   := Client & Last_Client;
-            Scenario := Scenario & Scenario_Client;
-            Status   := Status & Status_Client;
-            Date     := Date & Date_Client;
-            Action   := Action & Action_Client;
-            Rowid    := Rowid  & Rowid_Client;
-            Job_Id   := Job_Id & Job_Id_Client;
+         --  New client column
+
+         Client   := Client   & Last_Client;
+         Scenario := Scenario & Scenario_Client;
+         Status   := Status   & Status_Client;
+         Date     := Date     & Date_Client;
+         Action   := Action   & Action_Client;
+         Rowid    := Rowid    & Rowid_Client;
+         Job_Id   := Job_Id   & Job_Id_Client;
       end if;
 
       Iter.End_Select;
@@ -384,10 +389,10 @@ package body Savadur.Database is
    --------------
 
    function Job_Id return Positive is
-      DBH      : constant TLS_DBH_Access := TLS_DBH_Access (DBH_TLS.Reference);
-      Iter     : DB.SQLite.Iterator;
-      Line     : DB.String_Vectors.Vector;
-      Id       : Positive;
+      DBH  : constant TLS_DBH_Access := TLS_DBH_Access (DBH_TLS.Reference);
+      Iter : DB.SQLite.Iterator;
+      Line : DB.String_Vectors.Vector;
+      Id   : Positive;
    begin
       Connect (DBH);
 
@@ -444,7 +449,6 @@ package body Savadur.Database is
          Logs.Handler.Write (Name    => Module,
                              Content => Exception_Message (E),
                              Kind    => Logs.Handler.Error);
-
    end Log;
 
    -----------
@@ -458,9 +462,8 @@ package body Savadur.Database is
       SQL : constant String := "insert into sessions (client, logout_date)"
         & " values (" & Q (Key) & ", NULL)";
    begin
-
       --  Login date is set by default to current_timestamp
-      --  Set logout_date to null
+      --  Set logout_date to null.
 
       Connect (DBH);
       DBH.Handle.Execute (SQL);
@@ -469,7 +472,6 @@ package body Savadur.Database is
          Logs.Handler.Write (Name    => Module,
                              Content => Exception_Message (E),
                              Kind    => Logs.Handler.Error);
-
    end Login;
 
    ------------
@@ -483,7 +485,6 @@ package body Savadur.Database is
       SQL : constant String := "update sessions set "
         & "logout_date=current_timestamp where logout_date "
         & "is NULL and client=" & Q (Key);
-
    begin
       Connect (DBH);
       DBH.Handle.Execute (SQL);
@@ -492,6 +493,6 @@ package body Savadur.Database is
          Logs.Handler.Write (Name    => Module,
                              Content => Exception_Message (E),
                              Kind    => Logs.Handler.Error);
-
    end Logout;
+
 end Savadur.Database;
