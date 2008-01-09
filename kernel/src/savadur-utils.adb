@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                                Savadur                                   --
 --                                                                          --
---                           Copyright (C) 2007                             --
+--                         Copyright (C) 2007-2008                          --
 --                      Pascal Obry - Olivier Ramonat                       --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -32,28 +32,38 @@ package body Savadur.Utils is
    -- Content --
    -------------
 
-   function Content (Filename : in String) return String is
-      Max_Content : constant := 4_096; --  ??? Should be in conf file
-      Buffer_Len  : constant := 1_024;
+   function Content
+     (Filename    : in String;
+      Max_Content : in Positive := Max_Characters;
+      From_Top    : in Boolean := True) return String
+   is
+      Buffer_Len  : constant := 4_096;
       File        : Stream_IO.File_Type;
       Content     : Unbounded_String;
       Buffer      : Stream_Element_Array (1 .. Buffer_Len);
       Last        : Stream_Element_Offset;
-      Count       : Natural := 0;
    begin
       Stream_IO.Open
         (File => File, Mode => Stream_IO.In_File, Name => Filename);
 
-      while not Stream_IO.End_Of_File (File) loop
+      Read_File : while not Stream_IO.End_Of_File (File) loop
          Stream_IO.Read (File, Buffer, Last);
-         exit when Last = 0;
+         exit Read_File when Last = 0;
+
          Append (Content, Translator.To_String (Buffer (1 .. Last)));
 
          --  Check max size
 
-         Count := Count + 1;
-         exit when Count * Buffer_Len = Max_Content;
-      end loop;
+         if Length (Content) >= Max_Content then
+            if From_Top then
+               Delete (Content, Max_Content, Length (Content));
+               exit Read_File;
+
+            else
+               Delete (Content, 1, Length (Content) - Max_Content);
+            end if;
+         end if;
+      end loop Read_File;
 
       Stream_IO.Close (File);
       return -Content;

@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                                Savadur                                   --
 --                                                                          --
---                           Copyright (C) 2007                             --
+--                         Copyright (C) 2007-2008                          --
 --                      Pascal Obry - Olivier Ramonat                       --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -54,8 +54,15 @@ package Savadur.Utils is
       Nil : constant Source := Source (Null_Unbounded_String);
    end Generic_Utils;
 
-   function Content (Filename : in String) return String;
-   --  Returns a file content. Limits to 4 KB
+   Max_Characters : constant := 4_096;
+   --  Maximum number of characters returned by the content routine below
+
+   function Content
+     (Filename    : in String;
+      Max_Content : in Positive := Max_Characters;
+      From_Top    : in Boolean := True) return String;
+   --  Returns a file content. Limits to 4 KB by default. If From_Top is
+   --  set to False then the last Max_Characters are returned.
 
    procedure Set_Content (Filename, Content : in String);
    --  Sets the content of the given file
