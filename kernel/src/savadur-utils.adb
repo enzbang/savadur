@@ -37,11 +37,11 @@ package body Savadur.Utils is
       Max_Content : in Positive := Max_Characters;
       From_Top    : in Boolean := True) return String
    is
-      Buffer_Len  : constant := 4_096;
-      File        : Stream_IO.File_Type;
-      Content     : Unbounded_String;
-      Buffer      : Stream_Element_Array (1 .. Buffer_Len);
-      Last        : Stream_Element_Offset;
+      Buffer_Len : constant := 4_096;
+      File       : Stream_IO.File_Type;
+      Content    : Unbounded_String;
+      Buffer     : Stream_Element_Array (1 .. Buffer_Len);
+      Last       : Stream_Element_Offset;
    begin
       Stream_IO.Open
         (File => File, Mode => Stream_IO.In_File, Name => Filename);

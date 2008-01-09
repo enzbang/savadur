@@ -477,7 +477,7 @@ package body Savadur.Build is
          if Config.Client_Server then
 
             Notify_Server : declare
-               Server   : Servers.Server     :=
+               Server   : Servers.Server :=
                  Servers.Server'(+Server_Name, Null_Unbounded_String);
                Position : constant Servers.Sets.Cursor := Servers.Sets.Find
                  (Config.Server.Configurations, Server);
