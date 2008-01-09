@@ -20,7 +20,6 @@
 ------------------------------------------------------------------------------
 
 with Ada.Directories;
-with Ada.Environment_Variables;
 with Ada.Exceptions;
 with Ada.Integer_Text_IO;
 with Ada.Strings.Fixed;
@@ -28,6 +27,8 @@ with Ada.Strings.Unbounded;
 with Ada.Text_IO;
 
 with GNAT.OS_Lib;
+
+with Morzhol.OS;
 
 with Savadur.Build.Notification;
 with Savadur.Client_Service.Client;
@@ -67,11 +68,6 @@ package body Savadur.Build is
       Ref         : in     Actions.Ref_Action;
       Return_Code : in     Integer;
       Log_File    : in     String) return Boolean;
-
-   package EV renames Ada.Environment_Variables;
-
-   Windows_Host : constant Boolean :=
-                    EV.Exists ("OS") and then EV.Value ("OS") = "Windows_NT";
 
    -----------
    -- Check --
@@ -214,7 +210,7 @@ package body Savadur.Build is
 
       --  On Windows we must launch scripts using the shell
 
-      if Windows_Host
+      if Morzhol.OS.Is_Windows
         and then
           (Exec_Path.all'Length < 5
            or else
