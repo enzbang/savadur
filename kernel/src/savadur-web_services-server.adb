@@ -20,7 +20,6 @@
 ------------------------------------------------------------------------------
 
 with Savadur.Jobs.Client;
-with Savadur.Logs;
 with Savadur.Signed_Files;
 
 package body Savadur.Web_Services.Server is
