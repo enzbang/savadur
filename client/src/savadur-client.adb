@@ -30,7 +30,7 @@
 --   -remote -list                  to list remote servers
 --   -remote -add                   to add a remote server
 --   -config -id                    set client id
---   -config -force-endpoint        set client endpoint
+--   -config -endpoint              set client endpoint
 --
 --  OPTIONS :
 --       -savadurdir dirname : Set savadur directory
@@ -333,7 +333,7 @@ procedure Savadur.Client is
       Logs.Write ("    -remote -list       : List new remote server");
       Logs.Write ("    -remote -add server_name server_url"
                     & " : Add a new remote server");
-      Logs.Write ("    -config -force-endpoint endpoint :"
+      Logs.Write ("    -config -endpoint endpoint :"
                     & " Set client endpoint");
       Logs.Write ("    -config -id  client_id : Set client id");
    end Usage;
@@ -453,7 +453,7 @@ begin
 
    GNAT.Command_Line.Goto_Section ("config");
    Config_Opt : loop
-      case GNAT.Command_Line.Getopt ("id: force-endpoint:") is
+      case GNAT.Command_Line.Getopt ("id: endpoint:") is
          when ASCII.NUL =>
             exit Config_Opt;
 
@@ -461,7 +461,7 @@ begin
             Complete_Config_F : declare
                Full : constant String := GNAT.Command_Line.Full_Switch;
             begin
-               if Full = "force-endpoint" then
+               if Full = "endpoint" then
                   Action := Set_Client_Config'Access;
                   Client_Endpoint :=
                     To_Unbounded_String (GNAT.Command_Line.Parameter);
