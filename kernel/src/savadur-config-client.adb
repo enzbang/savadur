@@ -29,6 +29,7 @@ with Sax.Attributes;
 with Input_Sources.File;
 with Unicode.CES;
 
+with Savadur.Server_Service;
 with Savadur.Utils;
 
 package body Savadur.Config.Client is
@@ -147,6 +148,10 @@ package body Savadur.Config.Client is
       Reader   : Tree_Reader;
       Source   : Input_Sources.File.File_Input;
    begin
+      --  Set endpoint to the default value found in the WSDL
+      Configuration.Endpoint :=
+        To_Unbounded_String (Savadur.Server_Service.URL);
+
       if not Directories.Exists (Filename) then
          if Savadur.Config.Client_Server then
             raise Config_Error with "No client.xml file !";
