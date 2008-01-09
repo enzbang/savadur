@@ -192,9 +192,12 @@ package body Savadur.Build is
       Prog_Name       : Unbounded_String;
    begin
       Logs.Write
-        (Content => "Execute "
+        (Content => "Execute: "
          & Actions.Command_Utils.To_String (Exec_Action.Cmd),
          Kind    => Logs.Handler.Verbose);
+      Logs.Write
+        (Content => "Log file: " & Log_Filename,
+         Kind    => Logs.Handler.Very_Verbose);
 
       Get_Arguments (Exec_Action.Cmd, Prog_Name, Argument_String);
 
@@ -236,6 +239,13 @@ package body Savadur.Build is
             raise Command_Parse_Error
               with "No sh shell found, can't run scripts";
          end if;
+
+         Logs.Write
+           (Content => "Execute using sh: "
+              & Exec_Path.all
+              & ' ' & Argument_String (1).all
+              & ' ' & Argument_String (2).all,
+            Kind    => Logs.Handler.Very_Verbose);
 
          Spawn (Program_Name => Exec_Path.all,
                 Args         => Argument_String.all,
