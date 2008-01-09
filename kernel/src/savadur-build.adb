@@ -469,7 +469,7 @@ package body Savadur.Build is
             if Log_File = "" then
                return "";
             else
-               return Content (Log_File);
+               return Content (Log_File, From_Top => False);
             end if;
          end Log_Content;
 
