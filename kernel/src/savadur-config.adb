@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                                Savadur                                   --
 --                                                                          --
---                           Copyright (C) 2007                             --
+--                         Copyright (C) 2007-2008                          --
 --                      Pascal Obry - Olivier Ramonat                       --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -22,6 +22,8 @@
 with Ada.Strings.Unbounded;
 with Ada.Environment_Variables;
 with Ada.Directories;
+
+with Morzhol.OS;
 
 with Savadur.Utils;
 
@@ -126,7 +128,7 @@ package body Savadur.Config is
 
    procedure Set_Savadur_Directory (Dir : in String) is
    begin
-      Directory := +Dir;
+      Directory := +Morzhol.OS.Compose (Directories.Current_Directory, Dir);
    end Set_Savadur_Directory;
 
    --------------------
