@@ -1,5 +1,8 @@
 <project>
   <name id="regtests" />
+  <description>
+    <![CDATA[An in-depth look at creating applications with XML, using <, >,]]>
+  </description>
   <scm id="git" />
 
   <variable id="url" value="../../../../" />

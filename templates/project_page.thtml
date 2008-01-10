@@ -18,6 +18,8 @@
 
     <h1>@_PROJECT_NAME_@</h1>
 
+    <p class="desc">@_PROJECT_DESCRIPTION_@</p>
+
     <div id="menu">
       <ul><li><a href="/">Back to project list</a></li></ul>
     </div>

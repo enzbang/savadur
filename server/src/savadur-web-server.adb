@@ -42,6 +42,7 @@ with Savadur.Database;
 with Savadur.Jobs.Server;
 with Savadur.Projects;
 with Savadur.Project_List;
+with Savadur.Remote_Files;
 with Savadur.Signed_Files;
 with Savadur.Logs;
 
@@ -230,11 +231,17 @@ package body Savadur.Web.Server is
          Name                 => "templates");
       URI           : constant String := Status.URI (Request);
       Project_Name  : constant String := URI (URI'First + 1 .. URI'Last);
+      Configuration : constant Projects.Project_Config :=
+                        Savadur.Remote_Files.Load_Project (Project_Name);
       Set           : Templates.Translate_Set :=
                         Savadur.Database.Get_Final_Status (Project_Name);
    begin
       Templates.Insert
         (Set, Templates.Assoc ("PROJECT_NAME", Project_Name));
+      Templates.Insert
+        (Set, Templates.Assoc
+           ("PROJECT_DESCRIPTION",
+            Projects.Desc_Utils.To_String (Configuration.Description)));
 
       Templates.Insert (Set, Savadur.Database.Get_Logs (Project_Name));
 

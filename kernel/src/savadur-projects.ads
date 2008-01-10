@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                                Savadur                                   --
 --                                                                          --
---                           Copyright (C) 2007                             --
+--                         Copyright (C) 2007-2008                          --
 --                      Pascal Obry - Olivier Ramonat                       --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -34,8 +34,12 @@ package Savadur.Projects is
    use Ada.Strings.Unbounded;
 
    type Project_Id is new Unbounded_String;
+   type Project_Description is new Unbounded_String;
 
    package Id_Utils is new Utils.Generic_Utils (Source => Project_Id);
+
+   package Desc_Utils is
+     new Utils.Generic_Utils (Source => Project_Description);
 
    type Project_Directories is private;
 
@@ -48,6 +52,7 @@ package Savadur.Projects is
       Notifications : Savadur.Notifications.Hooks;
       Variables     : Savadur.Variables.Sets.Set;
       Directories   : Project_Directories;
+      Description   : Project_Description;
    end record;
 
    procedure Set_Filename

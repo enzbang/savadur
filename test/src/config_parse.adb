@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                                Savadur                                   --
 --                                                                          --
---                           Copyright (C) 2007                             --
+--                         Copyright (C) 2007-2008                          --
 --                      Pascal Obry - Olivier Ramonat                       --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -103,6 +103,11 @@ package body Config_Parse is
       Assertions.Assert
         (-Unbounded_String (Project.Project_Id) = "regtests",
          "Project Name error");
+
+      Assertions.Assert
+        (-Unbounded_String (Project.Description) = "An in-depth look at "
+         & "creating applications with XML, using <, >,",
+         "Project description error");
 
       Assertions.Assert
         (-Unbounded_String (Project.SCM_Id) = "git",

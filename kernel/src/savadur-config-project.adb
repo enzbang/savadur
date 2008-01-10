@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                                Savadur                                   --
 --                                                                          --
---                           Copyright (C) 2007                             --
+--                         Copyright (C) 2007-2008                          --
 --                      Pascal Obry - Olivier Ramonat                       --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -54,7 +54,7 @@ package body Savadur.Config.Project is
      (SCM, Variable, SCM_Action,
       Action, Scenario, Cmd,
       Notifications, On_Failure, On_Success,
-      Project, Name);
+      Project, Name, Description);
 
    type Attribute is (Id, Value, Result, Require_Change, On_Error, Periodic);
 
@@ -83,6 +83,7 @@ package body Savadur.Config.Project is
                                                     others   => False),
                     Cmd           => XML_Attribute'(others => False),
                     Project       => XML_Attribute'(others => False),
+                    Description   => XML_Attribute'(others => False),
                     Notifications => XML_Attribute'(others => False),
                     On_Failure    => XML_Attribute'(others => False),
                     On_Success    => XML_Attribute'(others => False),
@@ -108,6 +109,7 @@ package body Savadur.Config.Project is
       Action               : Actions.Action;
       Ref_Action           : Actions.Ref_Action;
       Scenario             : Scenarios.Scenario;
+      Description          : Projects.Project_Description;
       Inside_Scenario      : Boolean := False;
       Inside_Notifications : Boolean := False;
       Current_Project      : aliased Projects.Project_Config;
@@ -207,6 +209,10 @@ package body Savadur.Config.Project is
 
          when Cmd =>
             Handler.Action.Cmd := Actions.Command (Handler.Content_Value);
+
+         when Description =>
+            Handler.Current_Project.Description :=
+              Projects.Project_Description (Handler.Content_Value);
 
          when SCM | Project | Name =>
             null;
