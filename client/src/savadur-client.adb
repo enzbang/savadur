@@ -74,17 +74,17 @@ procedure Savadur.Client is
 
    use Savadur.Utils;
 
-   Syntax_Error         : exception;
+   Syntax_Error    : exception;
 
-   Project_Name         : Unbounded_String;
-   Client_Id            : Unbounded_String;
-   Client_Endpoint      : Unbounded_String;
-   Scenario_Id          : Unbounded_String
+   Project_Name    : Unbounded_String;
+   Client_Id       : Unbounded_String;
+   Client_Endpoint : Unbounded_String;
+   Scenario_Id     : Unbounded_String
      := Scenarios.Id_Utils.To_Unbounded_String (Scenarios.Default_Scenario);
 
-   New_Server           : Savadur.Servers.Server;
+   New_Server      : Savadur.Servers.Server;
 
-   Action               : access procedure;
+   Action          : access procedure;
    --  Action to execute after Command Line parsing
 
    procedure Usage (Error_Message : in String := "");
@@ -111,14 +111,13 @@ procedure Savadur.Client is
 
    procedure Add_Remote_Server is
       use Ada.Text_IO;
-      File : File_Type;
       Filename : constant String :=
                    Directories.Compose
                      (Containing_Directory => Config.Server_Directory,
                       Name                 => -New_Server.Name,
                       Extension            => "xml");
+      File     : File_Type;
    begin
-
       if New_Server.Name = "" or else New_Server.URL = "" then
          Usage ("Can't add new remote server. Wrong arguments");
          return;
@@ -274,16 +273,15 @@ procedure Savadur.Client is
 
    procedure Set_Client_Config is
       use Ada.Text_IO;
-      File : File_Type;
+      File                   : File_Type;
       Config_Client_Id       : constant String :=
-        Savadur.Config.Client.Get_Key;
+                                 Savadur.Config.Client.Get_Key;
       Config_Client_Endpoint : constant String :=
-        Savadur.Config.Client.Get_Endpoint;
-      Filename : constant String :=
-                   Directories.Compose
-                     (Containing_Directory => Config.Savadur_Directory,
-                      Name                 => "client",
-                      Extension            => "xml");
+                                 Savadur.Config.Client.Get_Endpoint;
+      Filename               : constant String := Directories.Compose
+        (Containing_Directory => Config.Savadur_Directory,
+         Name                 => "client",
+         Extension            => "xml");
    begin
       Create (File => File, Mode => Out_File, Name => Filename);
       Put_Line (File, "<client>");
