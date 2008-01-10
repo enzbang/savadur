@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                                Savadur                                   --
 --                                                                          --
---                           Copyright (C) 2007                             --
+--                         Copyright (C) 2007-2008                          --
 --                      Pascal Obry - Olivier Ramonat                       --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -68,41 +68,34 @@ procedure Savadur.Server is
       Logs.Write ("Savadur server " & Version.Simple);
       Logs.Write ("usage : savadur-server [OPTIONS]");
       Logs.Write ("OPTIONS :");
-      Logs.Write ("    -savadurdir dirname : set savadur directory");
+      Logs.Write ("    --savadurdir dirname : set savadur directory");
       Logs.Write ("          ($SAVADUR_DIR or $HOME/.savadur by default)");
-      Logs.Write ("    -v|-version");
-      Logs.Write ("    -V|-verbose");
-      Logs.Write ("    -VV|-very_verbose");
-      Logs.Write ("    -L filename         : use filename for log file");
+      Logs.Write ("    -v  | --version");
+      Logs.Write ("    -V  | --verbose");
+      Logs.Write ("    -VV | --very_verbose");
+      Logs.Write ("    -L filename          : use filename for log file");
    end Usage;
 
 begin
    Iterate_On_Opt : loop
       case GNAT.Command_Line.Getopt
-           ("V verbose VV very_verbose L: version v savadurdir:")
-         is
+           ("V -verbose VV -very_verbose L: -version v -savadurdir:")
+      is
          when ASCII.NUL =>
             exit Iterate_On_Opt;
 
-         when 's' =>
-            Complete_S : declare
+         when '-' =>
+            Long_Options : declare
                Full : constant String := GNAT.Command_Line.Full_Switch;
             begin
-               if Full = "savadurdir" then
-                  Config.Set_Savadur_Directory
-                    (GNAT.Command_Line.Parameter);
-               end if;
-            end Complete_S;
+               if Full = "-savadurdir" then
+                  Config.Set_Savadur_Directory (GNAT.Command_Line.Parameter);
 
-         when 'v' | 'V' =>
-            Complete_V : declare
-               Full : constant String := GNAT.Command_Line.Full_Switch;
-            begin
-               if Full = "verbose" or else Full = "V"  then
+               elsif Full = "-verbose"  then
                   Logs.Handler.Set
                     (Kind => Logs.Handler.Verbose, Activated => True);
 
-               elsif Full = "very_verbose" or else Full = "VV" then
+               elsif Full = "-very_verbose" then
                   Logs.Handler.Set
                     (Kind      => Logs.Handler.Verbose,
                      Activated => True);
@@ -110,9 +103,35 @@ begin
                     (Kind      => Logs.Handler.Very_Verbose,
                      Activated => True);
 
-               elsif Full = "version" or else Full = "v" then
-                  Logs.Write (Content => "Savadur "
-                              & Savadur.Version.Complete);
+               elsif Full = "-version" then
+                  Logs.Write
+                    (Content => "Savadur " & Savadur.Version.Complete);
+                  return;
+
+               else
+                  raise Syntax_Error with "Unknown option " & Full;
+               end if;
+            end Long_Options;
+
+         when 'v' | 'V' =>
+            Complete_V : declare
+               Full : constant String := GNAT.Command_Line.Full_Switch;
+            begin
+               if Full = "V"  then
+                  Logs.Handler.Set
+                    (Kind => Logs.Handler.Verbose, Activated => True);
+
+               elsif Full = "VV" then
+                  Logs.Handler.Set
+                    (Kind      => Logs.Handler.Verbose,
+                     Activated => True);
+                  Logs.Handler.Set
+                    (Kind      => Logs.Handler.Very_Verbose,
+                     Activated => True);
+
+               elsif Full = "v" then
+                  Logs.Write
+                    (Content => "Savadur " & Savadur.Version.Complete);
                   return;
 
                else

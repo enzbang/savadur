@@ -2,14 +2,13 @@
 
 cd $(dirname $0)
 
-SAVADUR_DIR=$PWD/test-dir/server ./bin/savadur-server -VV &
-PID_SERVER=$!
+SAVADUR_DIR=$PWD/test-dir/server ./bin/savadur-server -VV & PID_SERVER=$!
 sleep 1
-SAVADUR_DIR=$PWD/test-dir/client ./bin/savadur-client -VV -server \
--config -id me
-SAVADUR_DIR=$PWD/test-dir/client ./bin/savadur-client -VV -server \
--config -endpoint http://localhost:8282
-SAVADUR_DIR=$PWD/test-dir/client ./bin/savadur-client -VV -server &
+SAVADUR_DIR=$PWD/test-dir/client ./bin/savadur-client -VV --server \
+  --config --id me
+SAVADUR_DIR=$PWD/test-dir/client ./bin/savadur-client -VV --server \
+  --config --endpoint http://localhost:8282
+SAVADUR_DIR=$PWD/test-dir/client ./bin/savadur-client -VV --server &
 PID_CLIENT=$!
 
 sleep 5

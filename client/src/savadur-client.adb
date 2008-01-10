@@ -25,20 +25,20 @@
 --  savadur-client [OPTIONS] CMD
 --
 --  CMD:
---   -project name -sid scenario_id to run a project in standalone mode
---   -server                        to run in server mode
---   -remote -list                  to list remote servers
---   -remote -add                   to add a remote server
---   -config -id                    set client id
---   -config -endpoint              set client endpoint
+--   --project name --sid scenario_id   to run a project in standalone mode
+--   --server                           to run in server mode
+--   --remote -list                     to list remote servers
+--   --remote -add                      to add a remote server
+--   --config -id                       set client id
+--   --config -endpoint                 set client endpoint
 --
 --  OPTIONS :
---       -savadurdir dirname : Set savadur directory
---                             ($SAVADUR_DIR or $HOME / .savadur by default)
---       -v|-version
---       -V|-verbose
---       -VV|-very_verbose
---       -L filename         : use filename for log file
+--       --savadurdir dirname : Set savadur directory
+--                              ($SAVADUR_DIR or $HOME / .savadur by default)
+--       -v  | --version
+--       -V  | --verbose
+--       -VV | --very_verbose
+--       -L filename          : use filename for log file
 
 with Ada.Command_Line;
 with Ada.Containers;
@@ -320,41 +320,84 @@ procedure Savadur.Client is
       end if;
 
       Logs.Write ("Savadur " & Version.Simple);
-      Logs.Write ("usage : savadur-client [OPTIONS] -p|-project name"
-                  & " -s|-sid scenario_id");
+      Logs.Write ("usage : savadur-client [OPTIONS] -p|--project name"
+                  & " -s|--sid scenario_id");
       Logs.Write ("OPTIONS :");
-      Logs.Write ("    -savadurdir dirname : set savadur directory");
-      Logs.Write ("          ($SAVADUR_DIR or $HOME/.savadur by default)");
-      Logs.Write ("    -v|-version");
-      Logs.Write ("    -V|-verbose");
-      Logs.Write ("    -VV|-very_verbose");
-      Logs.Write ("    -L filename         : use filename for log file");
-      Logs.Write ("    -server             : run in server mode");
-      Logs.Write ("    -remote -list       : List new remote server");
-      Logs.Write ("    -remote -add server_name server_url"
+      Logs.Write ("    --savadurdir dirname : set savadur directory");
+      Logs.Write ("           ($SAVADUR_DIR or $HOME/.savadur by default)");
+      Logs.Write ("    -v  | --version");
+      Logs.Write ("    -V  | --verbose");
+      Logs.Write ("    -VV | --very_verbose");
+      Logs.Write ("    -L filename          : use filename for log file");
+      Logs.Write ("    --server             : run in server mode");
+      Logs.Write ("    --remote --list      : List new remote server");
+      Logs.Write ("    --remote --add server_name server_url"
                     & " : Add a new remote server");
-      Logs.Write ("    -config -endpoint endpoint :"
+      Logs.Write ("    --config --endpoint endpoint :"
                     & " Set client endpoint");
-      Logs.Write ("    -config -id  client_id : Set client id");
+      Logs.Write ("    --config --id  client_id : Set client id");
    end Usage;
 
 begin
    GNAT.Command_Line.Initialize_Option_Scan
-     (Section_Delimiters => "remote config");
+     (Section_Delimiters => "-remote -config");
+
+   --  Main section
 
    Iterate_On_Opt : loop
       case GNAT.Command_Line.Getopt
-           ("V verbose VV very_verbose L: version v "
-            & "p: project: savadurdir: s: sid: server")
-         is
+        ("V -verbose VV -very_verbose L: -version v "
+         & "p: -project: -savadurdir: s: -sid: -server")
+      is
          when ASCII.NUL =>
             exit Iterate_On_Opt;
 
-            when 'p' =>
+         when '-' =>
+            --  Handle all log commands
+            Long_Options : declare
+               Full : constant String := GNAT.Command_Line.Full_Switch;
+            begin
+               if Full = "-project" then
+                  Project_Name :=
+                    To_Unbounded_String (GNAT.Command_Line.Parameter);
+                  Logs.Write (GNAT.Command_Line.Parameter);
+                  Action := Run_Standalone'Access;
+
+               elsif Full = "-savadurdir" then
+                  Config.Set_Savadur_Directory (GNAT.Command_Line.Parameter);
+
+               elsif Full = "-sid" then
+                  Scenario_Id :=
+                    To_Unbounded_String (GNAT.Command_Line.Parameter);
+
+               elsif Full = "-server" then
+                  Action := Run_Server_Mode'Access;
+
+               elsif Full = "-verbose" then
+                  Logs.Handler.Set
+                    (Kind      => Logs.Handler.Verbose,
+                     Activated => True);
+
+               elsif Full = "-very_verbose" then
+                  Logs.Handler.Set
+                    (Kind      => Logs.Handler.Verbose,
+                     Activated => True);
+                  Logs.Handler.Set
+                    (Kind      => Logs.Handler.Very_Verbose,
+                     Activated => True);
+
+               elsif Full = "-version" then
+                  Logs.Write
+                    (Content => "Savadur " & Savadur.Version.Complete);
+                  return;
+               end if;
+            end Long_Options;
+
+         when 'p' =>
             Complete_P : declare
                Full : constant String := GNAT.Command_Line.Full_Switch;
             begin
-               if Full = "project" or else Full = "p" then
+               if Full = "p" then
                   Project_Name :=
                     To_Unbounded_String (GNAT.Command_Line.Parameter);
                   Logs.Write (GNAT.Command_Line.Parameter);
@@ -369,16 +412,9 @@ begin
             Complete_S : declare
                Full : constant String := GNAT.Command_Line.Full_Switch;
             begin
-               if Full = "savadurdir" then
-                  Config.Set_Savadur_Directory
-                    (GNAT.Command_Line.Parameter);
-
-               elsif Full = "sid" or else Full = "s" then
+               if Full = "s" then
                   Scenario_Id :=
                     To_Unbounded_String (GNAT.Command_Line.Parameter);
-
-               elsif Full = "server" then
-                  Action := Run_Server_Mode'Access;
                else
                   raise Syntax_Error with "Unknown option " & Full;
                end if;
@@ -388,19 +424,22 @@ begin
             Complete_V : declare
                Full : constant String := GNAT.Command_Line.Full_Switch;
             begin
-               if Full = "verbose" or else Full = "V"  then
-                  Logs.Handler.Set (Kind      => Logs.Handler.Verbose,
-                                    Activated => True);
+               if Full = "V"  then
+                  Logs.Handler.Set
+                    (Kind      => Logs.Handler.Verbose,
+                     Activated => True);
 
-               elsif Full = "very_verbose" or else Full = "VV" then
-                  Logs.Handler.Set (Kind      => Logs.Handler.Verbose,
-                                    Activated => True);
-                  Logs.Handler.Set (Kind      => Logs.Handler.Very_Verbose,
-                                    Activated => True);
+               elsif Full = "VV" then
+                  Logs.Handler.Set
+                    (Kind      => Logs.Handler.Verbose,
+                     Activated => True);
+                  Logs.Handler.Set
+                    (Kind      => Logs.Handler.Very_Verbose,
+                     Activated => True);
 
-               elsif Full = "version" or else Full = "v" then
-                  Logs.Write (Content => "Savadur "
-                              & Savadur.Version.Complete);
+               elsif Full = "v" then
+                  Logs.Write
+                    (Content => "Savadur " & Savadur.Version.Complete);
                   return;
 
                else
@@ -425,11 +464,29 @@ begin
       end case;
    end loop Iterate_On_Opt;
 
-   GNAT.Command_Line.Goto_Section ("remote");
+   --  Remote section
+
+   GNAT.Command_Line.Goto_Section ("-remote");
+
    Remote_Opt : loop
-      case GNAT.Command_Line.Getopt ("* add list") is
+      case GNAT.Command_Line.Getopt ("* -add -list") is
          when ASCII.NUL =>
             exit Remote_Opt;
+
+         when '-' =>
+            Long_Options_Remote : declare
+               Full : constant String := GNAT.Command_Line.Full_Switch;
+            begin
+               if Full = "-add" then
+                  Action := Add_Remote_Server'Access;
+
+               elsif Full = "-list" then
+                  Action := List_Remote_Server'Access;
+
+               else
+                  raise Syntax_Error with "Unknown option " & Full;
+               end if;
+            end Long_Options_Remote;
 
          when '*' =>
             if New_Server.Name = Null_Unbounded_String then
@@ -438,46 +495,39 @@ begin
                New_Server.URL  := +GNAT.Command_Line.Full_Switch;
             end if;
 
-         when 'a' =>
-            Action := Add_Remote_Server'Access;
-
-         when 'l' =>
-            Action := List_Remote_Server'Access;
-
          when others =>
             Usage (Error_Message => "(remote) unknown syntax");
             return;
-
       end case;
    end loop Remote_Opt;
 
-   GNAT.Command_Line.Goto_Section ("config");
+   --  Config section
+
+   GNAT.Command_Line.Goto_Section ("-config");
+
    Config_Opt : loop
-      case GNAT.Command_Line.Getopt ("id: endpoint:") is
+      case GNAT.Command_Line.Getopt ("-id: -endpoint:") is
          when ASCII.NUL =>
             exit Config_Opt;
 
-         when 'f' =>
-            Complete_Config_F : declare
+         when '-' =>
+            Long_Options_Config : declare
                Full : constant String := GNAT.Command_Line.Full_Switch;
             begin
-               if Full = "endpoint" then
+               if Full = "-endpoint" then
                   Action := Set_Client_Config'Access;
                   Client_Endpoint :=
                     To_Unbounded_String (GNAT.Command_Line.Parameter);
-               end if;
-            end Complete_Config_F;
 
-         when 'i' =>
-            Complete_Config_I : declare
-               Full : constant String := GNAT.Command_Line.Full_Switch;
-            begin
-               if Full = "id" then
+               elsif Full = "-id" then
                   Action := Set_Client_Config'Access;
                   Client_Id :=
                     To_Unbounded_String (GNAT.Command_Line.Parameter);
+
+               else
+                  raise Syntax_Error with "Unknown option " & Full;
                end if;
-            end Complete_Config_I;
+            end Long_Options_Config;
 
          when others =>
             Usage (Error_Message => "(config) unknown syntax");
