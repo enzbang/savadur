@@ -40,4 +40,10 @@ create table logs (
 "date" date default current_timestamp
 );
 
+create table notify (
+"project" varchar(50) not null,
+"email" varchar(255) unique,
+"xmpp" varchar(255) unique
+);
+
 EOF

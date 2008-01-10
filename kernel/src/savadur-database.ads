@@ -65,4 +65,27 @@ package Savadur.Database is
    function Job_Id return Positive;
    --  Get new job id
 
+   -------------------
+   -- Notifications --
+   -------------------
+
+   type Send_Mail is
+     access procedure (Project_Name : in String;
+                       Email        : in String;
+                       Subject      : in String;
+                       Content      : in String);
+
+   type Send_XMPP is
+     access procedure (Project_Name : in String;
+                       XMPP         : in String;
+                       Content      : in String);
+
+   procedure Send_Notifications
+     (Project_Name   : in String;
+      Send_Mail_Hook : in Send_Mail;
+      Send_XMPP_Hook : in Send_XMPP;
+      Subject        : in String;
+      Content        : in String);
+   --  Sends notifications using given hooks procedures
+
 end Savadur.Database;

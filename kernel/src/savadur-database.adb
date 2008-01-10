@@ -495,4 +495,49 @@ package body Savadur.Database is
                              Kind    => Logs.Handler.Error);
    end Logout;
 
+   ------------------------
+   -- Send_Notifications --
+   ------------------------
+
+   procedure Send_Notifications
+     (Project_Name   : in String;
+      Send_Mail_Hook : in Send_Mail;
+      Send_XMPP_Hook : in Send_XMPP;
+      Subject        : in String;
+      Content        : in String)
+   is
+      DBH  : constant TLS_DBH_Access := TLS_DBH_Access (DBH_TLS.Reference);
+      Iter : DB.SQLite.Iterator;
+      Line : DB.String_Vectors.Vector;
+   begin
+      Connect (DBH);
+
+      DBH.Handle.Prepare_Select
+        (Iter, "select email, xmpp"
+         & " from notify where project = " & DB.Tools.Q (Project_Name));
+
+      if Iter.More then
+         Iter.Get_Line (Line);
+
+         Run_Hooks : declare
+            Email : constant String := DB.String_Vectors.Element (Line, 1);
+            XMPP  : constant String := DB.String_Vectors.Element (Line, 2);
+         begin
+
+            if Email /= "" then
+               Send_Mail_Hook (Project_Name, Email, Subject, Content);
+            end if;
+
+            if XMPP /= "" then
+               Send_XMPP_Hook (Project_Name, XMPP, Content);
+            end if;
+
+            Line.Clear;
+            Iter.End_Select;
+         end Run_Hooks;
+      end if;
+
+      Iter.End_Select;
+   end Send_Notifications;
+
 end Savadur.Database;
