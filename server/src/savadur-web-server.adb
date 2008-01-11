@@ -177,8 +177,7 @@ package body Savadur.Web.Server is
 
          return Response.Build
            (MIME.Text_HTML,
-            "<p>Running " & Project_Name & "...</p>",
-            Messages.S404);
+            "<p>Running " & Project_Name & "...</p>");
       exception
          when IO_Exceptions.Name_Error =>
             return Response.Build
