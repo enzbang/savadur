@@ -27,17 +27,17 @@
 --  CMD:
 --   --project name --sid scenario_id   to run a project in standalone mode
 --   --server                           to run in server mode
---   --remote -list                     to list remote servers
---   --remote -add                      to add a remote server
---   --config -id                       set client id
---   --config -endpoint                 set client endpoint
+--   --remote --list                    to list remote servers
+--   --remote --add                     to add a remote server
+--   --config --id                      set client id
+--   --config --endpoint                set client endpoint
 --
 --  OPTIONS :
 --       --savadurdir dirname : Set savadur directory
 --                              ($SAVADUR_DIR or $HOME / .savadur by default)
 --       -v  | --version
 --       -V  | --verbose
---       -VV | --very_verbose
+--       -VV | --very-verbose
 --       -L filename          : use filename for log file
 
 with Ada.Command_Line;
@@ -325,7 +325,7 @@ procedure Savadur.Client is
       Logs.Write ("           ($SAVADUR_DIR or $HOME/.savadur by default)");
       Logs.Write ("    -v  | --version");
       Logs.Write ("    -V  | --verbose");
-      Logs.Write ("    -VV | --very_verbose");
+      Logs.Write ("    -VV | --very-verbose");
       Logs.Write ("    -L filename          : use filename for log file");
       Logs.Write ("    --server             : run in server mode");
       Logs.Write ("    --remote --list      : List new remote server");
@@ -344,7 +344,7 @@ begin
 
    Iterate_On_Opt : loop
       case GNAT.Command_Line.Getopt
-        ("V -verbose VV -very_verbose L: -version v "
+        ("V -verbose VV -very-verbose L: -version v "
          & "p: -project: -savadurdir: s: -sid: -server")
       is
          when ASCII.NUL =>
@@ -376,7 +376,7 @@ begin
                     (Kind      => Logs.Handler.Verbose,
                      Activated => True);
 
-               elsif Full = "-very_verbose" then
+               elsif Full = "-very-verbose" then
                   Logs.Handler.Set
                     (Kind      => Logs.Handler.Verbose,
                      Activated => True);
