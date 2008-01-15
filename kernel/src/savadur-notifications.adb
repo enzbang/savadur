@@ -46,12 +46,11 @@ package body Savadur.Notifications is
    ---------------
 
    procedure Send_Mail
-     (Project_Name : in String;
-      Email        : in String;
+     (Email        : in String;
       Subject      : in String;
       Content      : in String)
    is
-      pragma Unreferenced (Project_Name, Email, Subject, Content);
+      pragma Unreferenced (Email, Subject, Content);
    begin
       null;
    end Send_Mail;
@@ -61,8 +60,8 @@ package body Savadur.Notifications is
    ---------------
 
    procedure XMPP_Send
-     (Project_Name : in String;
-      JID          : in String;
+     (JID          : in String;
+      Subject      : in String;
       Content      : in String)
    is
       Server : AWS.Jabber.Server;
@@ -77,7 +76,7 @@ package body Savadur.Notifications is
       AWS.Jabber.Send_Message
         (Server => Server,
          JID    => JID,
-         Subject => "savadur - " & Project_Name,
+         Subject => Subject,
          Content => Content);
 
       AWS.Jabber.Close (Server);

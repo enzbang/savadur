@@ -32,14 +32,13 @@ package Savadur.Notifications is
    --  Returns notification hooks image
 
    procedure XMPP_Send
-     (Project_Name : in String;
-      JID          : in String;
+     (JID          : in String;
+      Subject      : in String;
       Content      : in String);
    --  Send jabber message to JID
 
    procedure Send_Mail
-     (Project_Name : in String;
-      Email        : in String;
+     (Email        : in String;
       Subject      : in String;
       Content      : in String);
    --  Send mail message to Email address

@@ -524,11 +524,17 @@ package body Savadur.Database is
          begin
 
             if Email /= "" then
-               Send_Mail_Hook (Project_Name, Email, Subject, Content);
+               Logs.Handler.Write (Name    => Module,
+                                   Content => "Send mail to " & Email,
+                                   Kind    => Logs.Handler.Very_Verbose);
+               Send_Mail_Hook (Email, Subject, Content);
             end if;
 
             if XMPP /= "" then
-               Send_XMPP_Hook (Project_Name, XMPP, Content);
+               Logs.Handler.Write (Name    => Module,
+                                   Content => "Send jabber message to " & XMPP,
+                                   Kind    => Logs.Handler.Very_Verbose);
+               Send_XMPP_Hook (XMPP, Subject, Content);
             end if;
 
             Line.Clear;

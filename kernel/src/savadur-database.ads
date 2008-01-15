@@ -70,14 +70,13 @@ package Savadur.Database is
    -------------------
 
    type Send_Mail is
-     access procedure (Project_Name : in String;
-                       Email        : in String;
+     access procedure (Email        : in String;
                        Subject      : in String;
                        Content      : in String);
 
    type Send_XMPP is
-     access procedure (Project_Name : in String;
-                       XMPP         : in String;
+     access procedure (XMPP         : in String;
+                       Subject      : in String;
                        Content      : in String);
 
    procedure Send_Notifications

@@ -35,6 +35,7 @@ with Ada.Command_Line;
 with Ada.Exceptions;
 with GNAT.Command_Line;
 
+with Savadur.Config.Notifications;
 with Savadur.Config.Project;
 with Savadur.Config.Project_List;
 with Savadur.Config.SCM;
@@ -160,6 +161,7 @@ begin
    Config.SCM.Parse;
    Config.Project.Parse;
    Config.Project_List.Parse;
+   Config.Notifications.Parse;
 
    Web.Server.Start;
 

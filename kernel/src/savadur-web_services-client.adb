@@ -26,6 +26,7 @@ with Savadur.Config.SCM;
 with Savadur.Config.Project;
 with Savadur.Database;
 with Savadur.Logs;
+with Savadur.Notifications;
 with Savadur.Projects.Sets;
 with Savadur.SCM;
 with Savadur.Signed_Files;
@@ -184,6 +185,16 @@ package body Savadur.Web_Services.Client is
       else
          --  End of scenario. Final status
          Database.Final_Status (Key, Project_Name, Scenario, Result, Job_Id);
+
+         --  Send notification messages
+
+         Savadur.Database.Send_Notifications
+           (Project_Name   => Project_Name,
+            Send_Mail_Hook => Savadur.Notifications.Send_Mail'Access,
+            Send_XMPP_Hook => Savadur.Notifications.XMPP_Send'Access,
+            Subject        => "Running " & Project_Name,
+            Content        => "End with " & Boolean'Image (Result)
+            & " when running scenario " & Scenario);
       end if;
    end Status;
 
