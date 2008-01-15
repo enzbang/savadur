@@ -37,7 +37,7 @@ package Savadur.Servers is
 
    function Key_Equal (S1, S2 : in Server) return Boolean;
 
-   Emtpy_Server : constant Server;
+   Empty_Server : constant Server;
 
    ----------
    -- Sets --
@@ -53,7 +53,7 @@ package Savadur.Servers is
 
 private
 
-   Emtpy_Server : constant Server :=
+   Empty_Server : constant Server :=
                     (Name => Null_Unbounded_String,
                      Url  => Null_Unbounded_String);
 

@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                                Savadur                                   --
 --                                                                          --
---                           Copyright (C) 2007                             --
+--                         Copyright (C) 2007-2008                          --
 --                      Pascal Obry - Olivier Ramonat                       --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -124,7 +124,7 @@ package body Savadur.Config.Server is
             Filename : constant String := Full_Name (D);
          begin
             Text_IO.Put_Line (Filename);
-            Reader.Server := Servers.Emtpy_Server;
+            Reader.Server := Servers.Empty_Server;
 
             Input_Sources.File.Open (Filename => Filename, Input => Source);
             Parse (Reader, Source);

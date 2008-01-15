@@ -44,7 +44,7 @@ package Savadur.Clients is
 
    function Key_Equal (C1, C2 : in Client) return Boolean;
 
-   Emtpy_Client : constant Client;
+   Empty_Client : constant Client;
 
    ----------
    -- Sets --
@@ -69,7 +69,7 @@ package Savadur.Clients is
 
 private
 
-   Emtpy_Client : constant Client :=
+   Empty_Client : constant Client :=
      (Key               => <>,
       Metadata          => <>,
       Server_Name       => <>,
