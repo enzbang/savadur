@@ -49,6 +49,8 @@ with Ada.Directories;
 
 with GNAT.Command_Line;
 
+with SOAP;
+
 with Savadur.Client_Service.Client;
 with Savadur.Client_Service.Types;
 with Savadur.Config.Environment_Variables;
@@ -190,6 +192,10 @@ procedure Savadur.Client is
 
          Logs.Write (Content => "Done.",
                      Kind    => Logs.Handler.Information);
+      exception
+         when SOAP.SOAP_Error =>
+            Logs.Write (Content => "Register to " & (-Server.Name)
+                        & " failed !");
       end Register;
 
    begin
@@ -550,4 +556,6 @@ exception
       | Savadur.Config.Environment_Variables.Config_Error
         =>
       Usage (Error_Message => Exceptions.Exception_Message (E));
+   when others =>
+      Usage ("Unknown error - should have been catch before !!!");
 end Savadur.Client;
