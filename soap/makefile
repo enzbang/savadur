@@ -19,7 +19,6 @@
 ##  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.       ##
 ##############################################################################
 
-
 setup: client.wsdl server.wsdl
 
 client.wsdl: ../kernel/src/savadur-web_services-client.ads
@@ -34,3 +33,4 @@ server.wsdl: ../kernel/src/savadur-web_services-server.ads
 
 clean:
 	$(RM) -f client.wsdl server.wsdl
+	$(RM) *.ads *.adb

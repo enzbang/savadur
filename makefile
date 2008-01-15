@@ -59,7 +59,8 @@ regtests_clientserver:
 	$(MAKE) -C test regtests_clientserver $(OPTIONS)
 
 clean:
-	$(GNATCLEAN) -P savadur
+	$(GNATCLEAN) -XPRJ_BUILD=$(MODE) -P server/savadur-server
+	$(GNATCLEAN) -XPRJ_BUILD=$(MODE) -P client/savadur-client
 	make -C test clean $(OPTIONS)
 	$(MAKE) -C soap clean
 
