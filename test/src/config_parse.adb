@@ -22,8 +22,11 @@
 with Ada.Strings.Unbounded;
 with Ada.Directories;
 
+with AWS.Jabber;
+
 with Savadur.Actions;
 with Savadur.Config.Environment_Variables;
+with Savadur.Config.Notifications;
 with Savadur.Config.Project;
 with Savadur.Config.Project_List;
 with Savadur.Config.SCM;
@@ -63,6 +66,9 @@ package body Config_Parse is
    procedure Check_Project_List
      (T : in out AUnit.Test_Cases.Test_Case'Class);
 
+   procedure Check_Notify
+     (T : in out AUnit.Test_Cases.Test_Case'Class);
+
    --------------------------
    -- Check_Env_Var_Config --
    --------------------------
@@ -89,6 +95,34 @@ package body Config_Parse is
          & "]"),
          "Wrong env variable list");
    end Check_Env_Var_Config;
+
+   ------------------
+   -- Check_Notify --
+   ------------------
+
+   procedure Check_Notify
+     (T : in out AUnit.Test_Cases.Test_Case'Class)
+   is
+      pragma Unreferenced (T);
+      use type AWS.Jabber.Authentication_Type;
+   begin
+      Savadur.Config.Notifications.Parse;
+      Assertions.Assert
+        (Savadur.Config.Notifications.Jabber_Server = "server.example.com",
+         "Wrong jabber server");
+
+      Assertions.Assert
+        (Savadur.Config.Notifications.Jabber_JID = "savadur",
+        "Wrong jabber JID");
+
+      Assertions.Assert
+        (Savadur.Config.Notifications.Jabber_Password = "myPaSsW0rd",
+         "Wrong jabber password");
+
+      Assertions.Assert
+        (Savadur.Config.Notifications.Jabber_Auth_Type = AWS.Jabber.PLAIN,
+        "Wrong jabber authentication type");
+   end Check_Notify;
 
    --------------------------
    -- Check_Project_Config --
@@ -284,6 +318,8 @@ package body Config_Parse is
         (T, Check_Server_Config'Access, "check server configuration");
       Registration.Register_Routine
         (T, Check_Project_List'Access, "check project list");
+      Registration.Register_Routine
+        (T, Check_Notify'Access, "check notify configuration");
    end Register_Tests;
 
    -----------------

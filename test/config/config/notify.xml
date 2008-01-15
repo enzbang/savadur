@@ -1,0 +1,6 @@
+<jabber>
+  <server value="server.example.com" />
+  <jid    value="savadur" />
+  <password value="myPaSsW0rd" />
+  <auth_type value="PLAIN" />
+</jabber>
