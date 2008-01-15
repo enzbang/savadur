@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                                Savadur                                   --
 --                                                                          --
---                           Copyright (C) 2007                             --
+--                         Copyright (C) 2007-2008                          --
 --                      Pascal Obry - Olivier Ramonat                       --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -19,7 +19,16 @@
 --  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.       --
 ------------------------------------------------------------------------------
 
+with Ada.Exceptions;
+
+with AWS.Jabber;
+
+with Savadur.Config.Notifications;
+with Savadur.Logs;
+
 package body Savadur.Notifications is
+
+   use Ada;
 
    -----------
    -- Image --
@@ -31,5 +40,51 @@ package body Savadur.Notifications is
         & "On Success = " & Actions.Image (H.On_Success) & ASCII.LF
         & "On Failure = " & Actions.Image (H.On_Failure);
    end Image;
+
+   ---------------
+   -- Send_Mail --
+   ---------------
+
+   procedure Send_Mail
+     (Project_Name : in String;
+      Email        : in String;
+      Subject      : in String;
+      Content      : in String)
+   is
+      pragma Unreferenced (Project_Name, Email, Subject, Content);
+   begin
+      null;
+   end Send_Mail;
+
+   ---------------
+   -- XMPP_Send --
+   ---------------
+
+   procedure XMPP_Send
+     (Project_Name : in String;
+      JID          : in String;
+      Content      : in String)
+   is
+      Server : AWS.Jabber.Server;
+   begin
+
+      AWS.Jabber.Connect (Server    => Server,
+                          Host      => Config.Notifications.Jabber_Server,
+                          User      => Config.Notifications.Jabber_JID,
+                          Password  => Config.Notifications.Jabber_Password,
+                          Auth_Type => Config.Notifications.Jabber_Auth_Type);
+
+      AWS.Jabber.Send_Message
+        (Server => Server,
+         JID    => JID,
+         Subject => "savadur - " & Project_Name,
+         Content => Content);
+
+      AWS.Jabber.Close (Server);
+   exception
+      when E : others =>
+         Logs.Write ("Unknown_Error " & Exceptions.Exception_Information (E),
+                     Logs.Handler.Error);
+   end XMPP_Send;
 
 end Savadur.Notifications;
