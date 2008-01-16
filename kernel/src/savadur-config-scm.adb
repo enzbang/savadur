@@ -149,7 +149,7 @@ package body Savadur.Config.SCM is
          return Savadur.SCM.Sets.Element (C);
       else
          raise IO_Exceptions.Name_Error
-         with "Try loading unknown scm " & SCM_Name;
+           with "Try loading unknown scm " & SCM_Name;
       end if;
    end Get;
 
@@ -315,7 +315,7 @@ package body Savadur.Config.SCM is
                   when Name =>
                      Handler.SCM.Id :=
                        Savadur.SCM.Id_Utils.Value (Get_Value (Atts, J));
-                  when SCM | Cmd => null;
+                  when others => null;
                end case;
 
             when Result =>

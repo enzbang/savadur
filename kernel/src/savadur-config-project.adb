@@ -191,7 +191,7 @@ package body Savadur.Config.Project is
                if not Handler.Inside_Scenario then
                   --  Append this action to actions map
                   Handler.Current_Project.Actions.Insert
-                    (New_Item    => Handler.Action);
+                    (New_Item => Handler.Action);
 
                   --  Reset Handler Action
                   Handler.Action := Actions.Null_Action;
@@ -202,6 +202,7 @@ package body Savadur.Config.Project is
                   Handler.Ref_Action := Actions.Null_Ref_Action;
                end if;
             end if;
+
          when SCM_Action =>
             --  Append this action to scenario actions vector
 
