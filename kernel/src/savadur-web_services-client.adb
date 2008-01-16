@@ -131,6 +131,15 @@ package body Savadur.Web_Services.Client is
       end if;
    end Load_SCM;
 
+   ----------
+   -- Ping --
+   ----------
+
+   function Ping return String is
+   begin
+      return "Pong";
+   end Ping;
+
    --------------
    -- Register --
    --------------

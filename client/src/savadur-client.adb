@@ -172,9 +172,17 @@ procedure Savadur.Client is
       use type Containers.Count_Type;
 
       task Keep_Alive;
+      --  Schedule ping and register calls
+
+      procedure Ping (Cursor : in Servers.Cursor);
+      --  Ping a server
 
       procedure Register (Cursor : in Servers.Cursor);
       --  Registers client to the pointer server
+
+      ----------------
+      -- Keep_Alive --
+      ----------------
 
       task body Keep_Alive is
          use type Calendar.Time;
@@ -201,15 +209,47 @@ procedure Savadur.Client is
 
             delay until Next_Time;
 
+            --  Run and reschedule
+
             if Run = Connect then
+
+               --  Try to connect offline servers
+
                Savadur.Servers.Offline_Iterate (Register'Access);
-               --  reschedule next try
                Next_Connect := Calendar.Clock + Retry_Delay;
             else
+
+               --  Try to ping online servers
+
+               Savadur.Servers.Online_Iterate (Ping'Access);
                Next_Ping := Calendar.Clock + Ping_Delay;
             end if;
          end loop Keep_Alive_Loop;
       end Keep_Alive;
+
+      ----------
+      -- Ping --
+      ----------
+
+      procedure Ping (Cursor : in Servers.Cursor) is
+         Server_Name : constant String := Servers.Name (Cursor);
+         Server_URL  : constant String := Servers.URL (Cursor);
+      begin
+         Logs.Write
+           (Content =>
+              "Ping " & Server_Name & " at " & Server_URL,
+            Kind    => Logs.Handler.Very_Verbose);
+
+         Logs.Write
+           (Content => "Receive " & Client_Service.Client.Ping (Server_URL),
+            Kind    => Logs.Handler.Very_Verbose);
+
+      exception
+         when SOAP.SOAP_Error =>
+            Logs.Write (Content => "Ping " & Server_Name & " failed !",
+                        Kind    => Logs.Handler.Warnings);
+            Savadur.Servers.Go_Offline (+Server_Name);
+      end Ping;
 
       --------------
       -- Register --

@@ -66,6 +66,9 @@ package Savadur.Web_Services.Client is
    --  Status is called by the client to register status of each action in the
    --  given scenario.
 
+   function Ping return String;
+   --  Returns pong if server is alive
+
 private
 
    No_File : constant File_Data :=
