@@ -4,4 +4,9 @@
          <client key="me"/>
       </scenario>
   </project>
+  <project id="morzhol">
+      <scenario id="default">
+         <client key="me"/>
+      </scenario>
+  </project>
 </project_list>

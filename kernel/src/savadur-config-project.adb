@@ -56,7 +56,8 @@ package body Savadur.Config.Project is
       Notifications, On_Failure, On_Success,
       Project, Name, Description);
 
-   type Attribute is (Id, Value, Result, Require_Change, On_Error, Periodic);
+   type Attribute
+     is (Id, Value, Result, Require_Change, On_Error, Periodic, Regexp);
 
    type XML_Attribute is array (Attribute) of Boolean;
 
@@ -81,7 +82,8 @@ package body Savadur.Config.Project is
                     Scenario      => XML_Attribute'(Id       => True,
                                                     Periodic => True,
                                                     others   => False),
-                    Cmd           => XML_Attribute'(others => False),
+                    Cmd           => XML_Attribute'(Regexp => True,
+                                                    others => False),
                     Project       => XML_Attribute'(others => False),
                     Description   => XML_Attribute'(others => False),
                     Notifications => XML_Attribute'(others => False),
@@ -208,7 +210,8 @@ package body Savadur.Config.Project is
             Handler.Ref_Action := Actions.Null_Ref_Action;
 
          when Cmd =>
-            Handler.Action.Cmd := Actions.Command (Handler.Content_Value);
+            Handler.Action.Cmd.Cmd :=
+              Actions.External_Command (Handler.Content_Value);
 
          when Description =>
             Handler.Current_Project.Description :=
@@ -581,6 +584,18 @@ package body Savadur.Config.Project is
 
                   when others => null;
                end case;
+
+            when Regexp =>
+               case NV is
+                  when Cmd =>
+                     if Get_Value (Atts, Position) /= "" then
+                        Handler.Action.Cmd.Output :=
+                          Actions.Output_Pattern (+Get_Value (Atts, Position));
+                     end if;
+
+                  when others => null;
+               end case;
+
          end case;
       end Get_Attribute_Value;
 

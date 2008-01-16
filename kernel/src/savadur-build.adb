@@ -27,6 +27,7 @@ with Ada.Strings.Unbounded;
 with Ada.Text_IO;
 
 with GNAT.OS_Lib;
+with GNAT.Regpat;
 
 with Morzhol.OS;
 
@@ -58,7 +59,7 @@ package body Savadur.Build is
 
    function Parse
      (Project : in Projects.Project_Config;
-      Cmd     : in Actions.Command) return Actions.Command;
+      Cmd     : in Actions.External_Command) return Actions.External_Command;
    --  Replaces strings beginning with $
    --  by the correponding entry in project <variable> section
 
@@ -157,7 +158,8 @@ package body Savadur.Build is
 
       if not Result then
          Logs.Write
-           (Actions.Command_Utils.To_String (Exec_Action.Cmd) & " failed");
+           (Actions.External_Command_Utils.To_String
+              (Exec_Action.Cmd.Cmd) & " failed");
       else
          Logs.Write (Content => "... success", Kind => Logs.Handler.Verbose);
       end if;
@@ -181,19 +183,26 @@ package body Savadur.Build is
       Result       :    out Boolean)
    is
       use type Actions.Result_Type;
-      use Actions.Command_Utils;
+      use type Actions.Output_Pattern;
+      use Actions.External_Command_Utils;
       use GNAT.OS_Lib;
+
       Exec_Path       : OS_Lib.String_Access;
       Argument_String : Argument_List_Access;
       Prog_Name       : Unbounded_String;
+      Output_Filename : Unbounded_String := +Log_Filename;
    begin
       Logs.Write
         (Content => "Execute: "
-         & Actions.Command_Utils.To_String (Exec_Action.Cmd),
+         & Actions.External_Command_Utils.To_String (Exec_Action.Cmd.Cmd),
          Kind    => Logs.Handler.Verbose);
       Logs.Write
         (Content => "Log file: " & Log_Filename,
          Kind    => Logs.Handler.Very_Verbose);
+
+      if Exec_Action.Cmd.Output /= Actions.Output_Pattern_Utils.Nil then
+         Output_Filename := Output_Filename & "-tmp";
+      end if;
 
       Get_Arguments (Exec_Action.Cmd, Prog_Name, Argument_String);
 
@@ -226,7 +235,8 @@ package body Savadur.Build is
 
          Argument_String := new Argument_List (1 .. 2);
          Argument_String (1) := new String'("-c");
-         Argument_String (2) := new String'('"' & (-Exec_Action.Cmd) & '"');
+         Argument_String (2) :=
+           new String'('"' & (-Exec_Action.Cmd.Cmd) & '"');
 
          Free (Exec_Path);
          Exec_Path := Locate_Exec_On_Path ("sh");
@@ -245,7 +255,7 @@ package body Savadur.Build is
 
          Spawn (Program_Name => Exec_Path.all,
                 Args         => Argument_String.all,
-                Output_File  => Log_Filename,
+                Output_File  => To_String (Output_Filename),
                 Success      => Result,
                 Return_Code  => Return_Code,
                 Err_To_Out   => True);
@@ -253,10 +263,48 @@ package body Savadur.Build is
       else
          Spawn (Program_Name => Exec_Path.all,
                 Args         => Argument_String.all,
-                Output_File  => Log_Filename,
+                Output_File  => To_String (Output_Filename),
                 Success      => Result,
                 Return_Code  => Return_Code,
                 Err_To_Out   => True);
+      end if;
+
+      if Exec_Action.Cmd.Output /= Actions.Output_Pattern_Utils.Nil then
+         --  We need to get the content of the log and match it against the
+         --  regular expression.
+         Parse_Content : declare
+            use type Regpat.Match_Location;
+
+            Content : constant String :=
+                        Utils.Content (To_String (Output_Filename));
+            Matches : Regpat.Match_Array (0 .. 1);
+         begin
+            Regpat.Match
+              (Regpat.Compile
+                 (Actions.Output_Pattern_Utils.To_String
+                    (Exec_Action.Cmd.Output)),
+               Content, Matches);
+
+            if Matches (0) = Regpat.No_Match then
+               --  No match, just rename the output file
+               if Directories.Exists (Log_Filename) then
+                  Directories.Delete_File (Log_Filename);
+               end if;
+
+               Directories.Rename
+                 (Old_Name => To_String (Output_Filename),
+                  New_Name => Log_Filename);
+
+            else
+               Utils.Set_Content
+                 (Log_Filename,
+                  Content (Matches (1).First .. Matches (1).Last));
+
+               --  And delete the previous file
+
+               Directories.Delete_File (To_String (Output_Filename));
+            end if;
+         end Parse_Content;
       end if;
 
       if not Result then
@@ -264,7 +312,7 @@ package body Savadur.Build is
          --  Do not read the return code
          Logs.Write
            (Content => "Can not execute "
-            & Actions.Command_Utils.To_String (Exec_Action.Cmd),
+            & Actions.External_Command_Utils.To_String (Exec_Action.Cmd.Cmd),
             Kind    => Logs.Handler.Error);
       end if;
 
@@ -306,7 +354,8 @@ package body Savadur.Build is
       end if;
 
       --  Parse command
-      Get_Action.Cmd := Parse (Project, Get_Action.Cmd);
+
+      Get_Action.Cmd.Cmd := Parse (Project, Get_Action.Cmd.Cmd);
 
       return Get_Action;
    end Get_Action;
@@ -321,7 +370,7 @@ package body Savadur.Build is
       Argument_String :    out OS_Lib.Argument_List_Access)
    is
       use GNAT.OS_Lib;
-      Command_String : constant String := -Unbounded_String (Command);
+      Command_String : constant String := -Unbounded_String (Command.Cmd);
    begin
       Extract_Program_Name : for K in Command_String'Range loop
          if Command_String (K) = ' ' then
@@ -344,7 +393,7 @@ package body Savadur.Build is
 
    function Parse
      (Project : in Projects.Project_Config;
-      Cmd     : in Actions.Command) return Actions.Command
+      Cmd     : in Actions.External_Command) return Actions.External_Command
    is
       Source     : constant String := -Unbounded_String (Cmd);
       Start      : Positive := Source'First;
@@ -390,7 +439,7 @@ package body Savadur.Build is
          Append (Result, Source (Start .. Source'Last));
       end if;
 
-      return Actions.Command (Result);
+      return Actions.External_Command (Result);
    exception
       when E : others => Logs.Write
            (Content => Exception_Information (E),

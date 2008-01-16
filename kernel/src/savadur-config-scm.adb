@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                                Savadur                                   --
 --                                                                          --
---                           Copyright (C) 2007                             --
+--                         Copyright (C) 2007-2008                          --
 --                      Pascal Obry - Olivier Ramonat                       --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -43,7 +43,7 @@ package body Savadur.Config.SCM is
 
    type Node_Value is (SCM, Name, Action, Cmd);
 
-   type Attribute is (Id, Result);
+   type Attribute is (Id, Result, Regexp);
 
    type XML_Attribute is array (Attribute) of Boolean;
 
@@ -52,10 +52,11 @@ package body Savadur.Config.SCM is
    Schema : constant XML_Schema :=
               XML_Schema'(SCM    => XML_Attribute'(Id => False,
                                                    others => False),
-                          Cmd    => XML_Attribute'(Id     => False,
+                          Cmd    => XML_Attribute'(Regexp => True,
                                                    others => False),
                           Action => XML_Attribute'(Id     => True,
-                                                   Result => True),
+                                                   Result => True,
+                                                   Regexp => False),
                           Name   => XML_Attribute'(Id     => True,
                                                    others => False));
 
@@ -121,11 +122,12 @@ package body Savadur.Config.SCM is
    begin
       case NV is
          when Action =>
-            Handler.SCM.Actions.Insert
-              (New_Item => Handler.Action);
+            Handler.SCM.Actions.Insert (New_Item => Handler.Action);
+            Handler.Action := Actions.Null_Action;
 
          when Cmd =>
-            Handler.Action.Cmd := Actions.Command (Handler.Content_Value);
+            Handler.Action.Cmd.Cmd :=
+              Actions.External_Command (Handler.Content_Value);
 
          when SCM | Name =>
             null;
@@ -321,6 +323,15 @@ package body Savadur.Config.SCM is
                   when Action =>
                      Handler.Action.Result :=
                        Actions.Result_Type'Value (Get_Value (Atts, J));
+
+                  when others => null;
+               end case;
+
+            when Regexp =>
+               case NV is
+                  when Cmd =>
+                     Handler.Action.Cmd.Output :=
+                       Actions.Output_Pattern (+Get_Value (Atts, J));
 
                   when others => null;
                end case;

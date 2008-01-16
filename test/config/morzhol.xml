@@ -1,0 +1,22 @@
+<project>
+  <name id="morzhol" />
+  <scm id="subversion" />
+
+  <variable id="url"
+     value="http://morzhol.googlecode.com/svn/trunk" />
+
+  <action id="make">
+    <cmd>make</cmd>
+  </action>
+
+  <action id="regtests">
+    <cmd>make regtests</cmd>
+  </action>
+
+  <scenario id="default">
+    <scm_action id="version" require_change="true" on_error="quit" />
+    <scm_action id="update" />
+    <action id="make" />
+    <action id="regtests" />
+  </scenario>
+</project>

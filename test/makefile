@@ -1,7 +1,7 @@
 ##############################################################################
 ##                                Savadur                                   ##
 ##                                                                          ##
-##                           Copyright (C) 2007                             ##
+##                        Copyright (C) 2007-2008                           ##
 ##                     Pascal Obry - Olivier Ramonat                        ##
 ##                                                                          ##
 ##  This library is free software; you can redistribute it and/or modify    ##
@@ -56,5 +56,6 @@ setup_clientserver:
 	@$(MKDIR) test-dir/server/config
 	@$(CP) -r ../config/scm/ test-dir/server
 	@$(CP) config/style_checker.xml test-dir/server/projects/
+	@$(CP) config/morzhol.xml test-dir/server/projects/
 	@$(CP) config/servers/localhost.xml test-dir/client/servers/
 	@$(CP) test-dir/project_list.xml test-dir/server/config/

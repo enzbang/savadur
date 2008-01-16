@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                                Savadur                                   --
 --                                                                          --
---                           Copyright (C) 2007                             --
+--                         Copyright (C) 2007-2008                          --
 --                      Pascal Obry - Olivier Ramonat                       --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -35,8 +35,18 @@ package Savadur.Actions is
    type Id is new Unbounded_String;
    package Id_Utils is new Generic_Utils (Source => Id);
 
-   type Command is new Unbounded_String;
-   package Command_Utils is new Generic_Utils (Source => Command);
+   type External_Command is new Unbounded_String;
+   package External_Command_Utils is
+     new Generic_Utils (Source => External_Command);
+
+   type Output_Pattern is new Unbounded_String;
+   package Output_Pattern_Utils is
+     new Generic_Utils (Source => Output_Pattern);
+
+   type Command is record
+      Cmd    : External_Command;
+      Output : Output_Pattern;
+   end record;
 
    type Kind is (SCM, Default);
 
@@ -109,15 +119,19 @@ package Savadur.Actions is
 
 private
 
-   Null_Action : constant Action :=
-                   Action'(Id     => Id_Utils.Nil,
-                           Cmd    => Command_Utils.Nil,
-                           Result => <>);
+   Null_Command          : constant Command :=
+                             (External_Command_Utils.Nil,
+                              Output_Pattern_Utils.Nil);
 
-   Null_Ref_Action : constant Ref_Action :=
-                       Ref_Action'(Id             => Id_Utils.Nil,
-                                   Action_Type    => <>,
-                                   Value          => <>,
-                                   Require_Change => <>,
-                                   On_Error       => <>);
+   Null_Action           : constant Action :=
+                             Action'(Id     => Id_Utils.Nil,
+                                     Cmd    => Null_Command,
+                                     Result => <>);
+
+   Null_Ref_Action      : constant Ref_Action :=
+                            Ref_Action'(Id             => Id_Utils.Nil,
+                                        Action_Type    => <>,
+                                        Value          => <>,
+                                        Require_Change => <>,
+                                        On_Error       => <>);
 end Savadur.Actions;

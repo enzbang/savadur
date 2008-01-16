@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                                Savadur                                   --
 --                                                                          --
---                           Copyright (C) 2007                             --
+--                         Copyright (C) 2007-2008                          --
 --                      Pascal Obry - Olivier Ramonat                       --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -45,10 +45,18 @@ package body Savadur.Actions is
    -----------
 
    function Image (Action : in Actions.Action) return String is
+      R : Unbounded_String;
    begin
-      return To_String (Action.Id) & " => "
-        & To_String (Action.Cmd) & " " & " result type : "
+      R := R & To_String (Action.Id) & " => " & To_String (Action.Cmd.Cmd);
+
+      if Action.Cmd.Output /= Actions.Output_Pattern_Utils.Nil then
+         R := R & " (" & To_String (Action.Cmd.Output) & ')';
+      end if;
+
+      R := R & " " & " result type : "
         & Result_Type'Image (Action.Result) & ASCII.LF;
+
+      return To_String (R);
    end Image;
 
    -----------
