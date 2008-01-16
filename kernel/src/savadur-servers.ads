@@ -29,17 +29,13 @@ package Savadur.Servers is
 
    type Online_Status is (Online, Offline);
 
-   type Server is private;
-
    type Cursor is private;
-
-   Empty_Server : constant Server;
 
    ----------------------------
    -- Online/Offline servers --
    ----------------------------
 
-   function Get_URL (Server_Name : in String) return String;
+   function URL (Server_Name : in String) return String;
    --  Returns server endpoint (or empty string is server is offline)
 
    function Name (Position : in Cursor) return String;

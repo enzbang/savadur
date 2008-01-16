@@ -472,7 +472,7 @@ package body Savadur.Build is
          if Config.Client_Server then
 
             Notify_Server : declare
-               Server_URL : constant String := Servers.Get_URL (Server_Name);
+               Server_URL : constant String := Servers.URL (Server_Name);
             begin
 
                if Server_URL = "" then

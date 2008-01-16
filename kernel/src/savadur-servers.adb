@@ -33,28 +33,6 @@ package body Savadur.Servers is
 
    All_Servers : Sets.Set;
 
-   -------------
-   -- Get_URL --
-   -------------
-
-   function Get_URL (Server_Name : in String) return String is
-      Position : constant Sets.Cursor :=
-                   Sets.Find
-                     (Container => All_Servers,
-                      Item      => Server'(Name  => +Server_Name,
-                                           URL    => <>,
-                                           Status => <>));
-      Element  : Server := Sets.Element (Position);
-   begin
-      if Element.Status = Online then
-         return -Element.URL;
-      end if;
-
-      --  Else return empty string
-
-      return "";
-   end Get_URL;
-
    ----------------
    -- Go_Offline --
    ----------------
@@ -218,6 +196,28 @@ package body Savadur.Servers is
       Element  : constant Server := Sets.Element (Sets.Cursor (Position));
    begin
       return -Element.URL;
+   end URL;
+
+   ---------
+   -- URL --
+   ---------
+
+   function URL (Server_Name : in String) return String is
+      Position : constant Sets.Cursor :=
+                   Sets.Find
+                     (Container => All_Servers,
+                      Item      => Server'(Name   => +Server_Name,
+                                           URL    => <>,
+                                           Status => <>));
+      Element  : Server := Sets.Element (Position);
+   begin
+      if Element.Status = Online then
+         return -Element.URL;
+      end if;
+
+      --  Else return empty string
+
+      return "";
    end URL;
 
 end Savadur.Servers;
