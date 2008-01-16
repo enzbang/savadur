@@ -128,6 +128,13 @@ package body Savadur.Web.Server is
 
       return Response.Build
         (MIME.Text_HTML, "<p>" & URI & " not found</p>", Messages.S404);
+
+   exception
+      when others =>
+         return Response.Build
+           (MIME.Text_HTML,
+            "<p>" & URI & " error returned</p>",
+            Messages.S200);
    end HTTP_Callback;
 
    ----------
@@ -178,13 +185,13 @@ package body Savadur.Web.Server is
          return Response.Build
            (MIME.Text_HTML,
             "<p>Running " & Project_Name & "...</p>");
-      exception
-         when IO_Exceptions.Name_Error =>
-            return Response.Build
-              (MIME.Text_HTML,
-               "<p>Project " & Project_Name & " Not found</p>",
-               Messages.S404);
       end Run_Project;
+   exception
+      when IO_Exceptions.Name_Error =>
+         return Response.Build
+           (MIME.Text_HTML,
+            "<p>Project " & Project_Name & " Not found</p>",
+            Messages.S200);
    end Run;
 
    ----------------
@@ -213,7 +220,7 @@ package body Savadur.Web.Server is
       exception
          when Constraint_Error =>
             return Response.Build
-              (MIME.Text_HTML, "<p>Wrong request</p>", Messages.S404);
+              (MIME.Text_HTML, "<p>Wrong request</p>", Messages.S200);
       end Get_Content;
    end Show_Log;
 
