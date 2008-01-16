@@ -29,6 +29,48 @@ package Savadur.Servers is
 
    type Online_Status is (Online, Offline);
 
+   type Server is private;
+
+   type Cursor is private;
+
+   Empty_Server : constant Server;
+
+   ----------------------------
+   -- Online/Offline servers --
+   ----------------------------
+
+   function Get_URL (Server_Name : in String) return String;
+   --  Returns server endpoint (or empty string is server is offline)
+
+   function Name (Position : in Cursor) return String;
+   --  Returns server name
+
+   function URL (Position : in Cursor) return String;
+   --  Returns server url
+
+   procedure Go_Offline (Server_Name : Unbounded_String);
+   --  Marks a server as offline
+
+   procedure Go_Online (Server_Name : Unbounded_String);
+   --  Marks a server as online
+
+   procedure Offline_Iterate
+     (Process   : not null access procedure (Position : Cursor));
+   --  Iterates on offline servers
+
+   procedure Online_Iterate
+     (Process   : not null access procedure (Position : Cursor));
+   --  Iterates on offline servers
+
+   function Image return String;
+   --  Returns the servers set image
+
+   function Length return Natural;
+   --  Returns the servers set length
+
+   procedure Insert (Name, URL : in String);
+   --  Insert a new server
+private
    type Server is record
       Name   : Unbounded_String;
       URL    : Unbounded_String;
@@ -39,8 +81,6 @@ package Savadur.Servers is
    --  Renames Strings.Hash (on server name)
 
    function Key_Equal (S1, S2 : in Server) return Boolean;
-
-   Empty_Server : constant Server;
 
    ----------
    -- Sets --
@@ -54,36 +94,8 @@ package Savadur.Servers is
    function Image (Servers_Set : in Sets.Set) return String;
    --  Returns the Servers_Set image
 
-   ----------------------------
-   -- Online/Offline servers --
-   ----------------------------
+   type Cursor is new Sets.Cursor;
 
-   function Get_URL (Server_Name : in String) return String;
-   --  Returns server endpoint (or empty string is server is offline)
-
-   procedure Go_Offline (Server_Name : Unbounded_String);
-   --  Marks a server as offline
-
-   procedure Go_Online (Server_Name : Unbounded_String);
-   --  Marks a server as online
-
-   procedure Offline_Iterate
-     (Process   : not null access procedure (Position : Sets.Cursor));
-   --  Iterates on offline servers
-
-   procedure Online_Iterate
-     (Process   : not null access procedure (Position : Sets.Cursor));
-   --  Iterates on offline servers
-
-   function Image return String;
-   --  Returns the servers set image
-
-   function Length return Natural;
-   --  Returns the servers set length
-
-   procedure Insert (New_Item : in Server);
-   --  Insert a new server
-private
    Empty_Server : constant Server :=
                     (Name   => Null_Unbounded_String,
                      Url    => Null_Unbounded_String,

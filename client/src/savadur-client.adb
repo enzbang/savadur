@@ -84,10 +84,8 @@ procedure Savadur.Client is
    Scenario_Id     : Unbounded_String
      := Scenarios.Id_Utils.To_Unbounded_String (Scenarios.Default_Scenario);
 
-   New_Server      : Savadur.Servers.Server :=
-                       Savadur.Servers.Server'(Name   => Null_Unbounded_String,
-                                               URL    => Null_Unbounded_String,
-                                               Status => Servers.Offline);
+   New_Server_Name : Unbounded_String;
+   New_Server_URL  : Unbounded_String;
 
    Action          : access procedure;
    --  Action to execute after Command Line parsing
@@ -119,11 +117,13 @@ procedure Savadur.Client is
       Filename : constant String :=
                    Directories.Compose
                      (Containing_Directory => Config.Server_Directory,
-                      Name                 => -New_Server.Name,
+                      Name                 => -New_Server_Name,
                       Extension            => "xml");
       File     : File_Type;
    begin
-      if New_Server.Name = "" or else New_Server.URL = "" then
+      if New_Server_Name = Null_Unbounded_String
+        or else New_Server_URL = Null_Unbounded_String
+      then
          Usage ("Can't add new remote server. Wrong arguments");
          return;
       end if;
@@ -131,11 +131,11 @@ procedure Savadur.Client is
       Create (File => File, Mode => Out_File, Name => Filename);
 
       Logs.Write ("Add new remote server : "
-                  & (-New_Server.Name) & " " & (-New_Server.URL));
+                  & (-New_Server_Name) & " " & (-New_Server_URL));
 
       Put_Line (File, "<server>");
-      Put_Line (File, "<name value='" & (-New_Server.Name) & "'/>");
-      Put_Line (File, "<location url='" & (-New_Server.URL) & "'/>");
+      Put_Line (File, "<name value='" & (-New_Server_Name) & "'/>");
+      Put_Line (File, "<location url='" & (-New_Server_URL) & "'/>");
       Put_Line (File, "</server>");
 
       Close (File);
@@ -170,38 +170,38 @@ procedure Savadur.Client is
 
       use type Containers.Count_Type;
 
-      procedure Register (Cursor : in Servers.Sets.Cursor);
+      procedure Register (Cursor : in Servers.Cursor);
       --  Registers client to the pointer server
 
       --------------
       -- Register --
       --------------
 
-      procedure Register (Cursor : in Servers.Sets.Cursor) is
-         Server   : constant Savadur.Servers.Server :=
-                      Servers.Sets.Element (Cursor);
-         Metadata : constant Client_Service.Types.Metadata_Type :=
-                      (OS => +"windows");
-         Key      : constant String := Config.Client.Get_Key;
-         Endpoint : constant String := Config.Client.Get_Endpoint;
+      procedure Register (Cursor : in Servers.Cursor) is
+         Server_Name : constant String := Servers.Name (Cursor);
+         Server_URL  : constant String := Servers.URL (Cursor);
+         Metadata    : constant Client_Service.Types.Metadata_Type :=
+                         (OS => +"windows");
+         Key         : constant String := Config.Client.Get_Key;
+         Endpoint    : constant String := Config.Client.Get_Endpoint;
       begin
          Logs.Write
            (Content =>
-              "Register to " & (-Server.Name) & " at " & (-Server.URL),
+              "Register to " & Server_Name & " at " & Server_URL,
             Kind    => Logs.Handler.Information);
 
          Client_Service.Client.Register
-           (Key, Metadata, -Server.Name, Endpoint, -Server.URL);
+           (Key, Metadata, Server_Name, Endpoint, Server_URL);
 
          Logs.Write (Content => "Done.",
                      Kind    => Logs.Handler.Information);
 
-         Savadur.Servers.Go_Online (Server.Name);
+         Savadur.Servers.Go_Online (+Server_Name);
       exception
          when SOAP.SOAP_Error =>
-            Logs.Write (Content => "Register to " & (-Server.Name)
+            Logs.Write (Content => "Register to " & Server_Name
                         & " failed !");
-            Savadur.Servers.Go_Offline (Server.Name);
+            Savadur.Servers.Go_Offline (+Server_Name);
       end Register;
 
    begin
@@ -504,10 +504,10 @@ begin
             end Long_Options_Remote;
 
          when '*' =>
-            if New_Server.Name = Null_Unbounded_String then
-               New_Server.Name := +GNAT.Command_Line.Full_Switch;
+            if New_Server_Name = Null_Unbounded_String then
+               New_Server_Name := +GNAT.Command_Line.Full_Switch;
             else
-               New_Server.URL  := +GNAT.Command_Line.Full_Switch;
+               New_Server_URL  := +GNAT.Command_Line.Full_Switch;
             end if;
 
          when others =>

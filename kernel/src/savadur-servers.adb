@@ -23,6 +23,10 @@ with Ada.Strings.Hash;
 
 with Savadur.Utils;
 
+---------------------
+-- Savadur.Servers --
+---------------------
+
 package body Savadur.Servers is
 
    use Savadur.Utils;
@@ -137,7 +141,8 @@ package body Savadur.Servers is
    -- Insert --
    ------------
 
-   procedure Insert (New_Item : in Server) is
+   procedure Insert (Name, URL : in String) is
+      New_Item : Server := Server'(+Name, +URL, Offline);
    begin
       Sets.Insert (Container => All_Servers,
                    New_Item  => New_Item);
@@ -161,18 +166,28 @@ package body Savadur.Servers is
       return Natural (Sets.Length (All_Servers));
    end Length;
 
+   ----------
+   -- Name --
+   ----------
+
+   function Name (Position : in Cursor) return String is
+      Element  : constant Server := Sets.Element (Sets.Cursor (Position));
+   begin
+      return -Element.Name;
+   end Name;
+
    ---------------------
    -- Offline_Iterate --
    ---------------------
 
    procedure Offline_Iterate
-     (Process   : not null access procedure (Position : Sets.Cursor))
+     (Process   : not null access procedure (Position : Cursor))
    is
       Position : Sets.Cursor := Sets.First (All_Servers);
    begin
       while Sets.Has_Element (Position) loop
          if Sets.Element (Position).Status = Offline then
-            Process (Position);
+            Process (Cursor (Position));
          end if;
          Sets.Next (Position);
       end loop;
@@ -183,16 +198,26 @@ package body Savadur.Servers is
    --------------------
 
    procedure Online_Iterate
-     (Process   : not null access procedure (Position : Sets.Cursor))
+     (Process   : not null access procedure (Position : Cursor))
    is
       Position : Sets.Cursor := Sets.First (All_Servers);
    begin
       while Sets.Has_Element (Position) loop
          if Sets.Element (Position).Status = Online then
-            Process (Position);
+            Process (Cursor (Position));
          end if;
          Sets.Next (Position);
       end loop;
    end Online_Iterate;
+
+   ---------
+   -- URL --
+   ---------
+
+   function URL (Position : in Cursor) return String is
+      Element  : constant Server := Sets.Element (Sets.Cursor (Position));
+   begin
+      return -Element.URL;
+   end URL;
 
 end Savadur.Servers;
