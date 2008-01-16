@@ -30,6 +30,7 @@ with Sax.Attributes;
 with Input_Sources.File;
 with Unicode.CES;
 
+with Savadur.Servers;
 with Savadur.Utils;
 
 package body Savadur.Config.Server is
@@ -130,9 +131,7 @@ package body Savadur.Config.Server is
             Parse (Reader, Source);
             Input_Sources.File.Close (Source);
 
-            Savadur.Servers.Sets.Insert
-              (Container => Configurations,
-               New_Item  => Reader.Server);
+            Savadur.Servers.Insert (New_Item  => Reader.Server);
          end Load_Config;
       end loop Walk_Directories;
    exception

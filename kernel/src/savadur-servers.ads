@@ -27,9 +27,12 @@ package Savadur.Servers is
    use Ada;
    use Ada.Strings.Unbounded;
 
+   type Online_Status is (Online, Offline);
+
    type Server is record
-      Name : Unbounded_String;
-      URL  : Unbounded_String;
+      Name   : Unbounded_String;
+      URL    : Unbounded_String;
+      Status : Online_Status;
    end record;
 
    function Hash (Server : in Servers.Server) return Containers.Hash_Type;
@@ -51,10 +54,38 @@ package Savadur.Servers is
    function Image (Servers_Set : in Sets.Set) return String;
    --  Returns the Servers_Set image
 
+   ----------------------------
+   -- Online/Offline servers --
+   ----------------------------
+
+   function Get_URL (Server_Name : in String) return String;
+   --  Returns server endpoint (or empty string is server is offline)
+
+   procedure Go_Offline (Server_Name : Unbounded_String);
+   --  Marks a server as offline
+
+   procedure Go_Online (Server_Name : Unbounded_String);
+   --  Marks a server as online
+
+   procedure Offline_Iterate
+     (Process   : not null access procedure (Position : Sets.Cursor));
+   --  Iterates on offline servers
+
+   procedure Online_Iterate
+     (Process   : not null access procedure (Position : Sets.Cursor));
+   --  Iterates on offline servers
+
+   function Image return String;
+   --  Returns the servers set image
+
+   function Length return Natural;
+   --  Returns the servers set length
+
+   procedure Insert (New_Item : in Server);
+   --  Insert a new server
 private
-
    Empty_Server : constant Server :=
-                    (Name => Null_Unbounded_String,
-                     Url  => Null_Unbounded_String);
-
+                    (Name   => Null_Unbounded_String,
+                     Url    => Null_Unbounded_String,
+                     Status => Offline);
 end Savadur.Servers;

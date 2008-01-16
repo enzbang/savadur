@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                                Savadur                                   --
 --                                                                          --
---                           Copyright (C) 2007                             --
+--                         Copyright (C) 2007-2008                          --
 --                      Pascal Obry - Olivier Ramonat                       --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -24,7 +24,6 @@ with Ada.Directories;
 
 with Savadur.Config.SCM;
 with Savadur.Config.Project;
-with Savadur.Config.Server;
 with Savadur.Logs;
 with Savadur.Projects.Sets;
 with Savadur.Servers;
@@ -113,7 +112,7 @@ package body Savadur.Remote_Files is
 
       --  Download the project from the servers if not up-to-date
 
-      Config.Server.Configurations.Iterate (Download'Access);
+      Servers.Online_Iterate (Download'Access);
 
       if Found or else Loaded then
          return Config.Project.Get (Project_Name);
@@ -188,7 +187,7 @@ package body Savadur.Remote_Files is
 
       --  Download the project from the servers if not up-to-date
 
-      Config.Server.Configurations.Iterate (Download'Access);
+      Servers.Online_Iterate (Download'Access);
 
       if Found or else Loaded then
          return Config.SCM.Get (SCM_Name);

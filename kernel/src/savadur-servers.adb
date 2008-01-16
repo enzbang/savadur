@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                                Savadur                                   --
 --                                                                          --
---                           Copyright (C) 2007                             --
+--                         Copyright (C) 2007-2008                          --
 --                      Pascal Obry - Olivier Ramonat                       --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -27,6 +27,68 @@ package body Savadur.Servers is
 
    use Savadur.Utils;
 
+   All_Servers : Sets.Set;
+
+   -------------
+   -- Get_URL --
+   -------------
+
+   function Get_URL (Server_Name : in String) return String is
+      Position : constant Sets.Cursor :=
+                   Sets.Find
+                     (Container => All_Servers,
+                      Item      => Server'(Name  => +Server_Name,
+                                           URL    => <>,
+                                           Status => <>));
+      Element  : Server := Sets.Element (Position);
+   begin
+      if Element.Status = Online then
+         return -Element.URL;
+      end if;
+
+      --  Else return empty string
+
+      return "";
+   end Get_URL;
+
+   ----------------
+   -- Go_Offline --
+   ----------------
+
+   procedure Go_Offline (Server_Name : Unbounded_String) is
+      Position : constant Sets.Cursor :=
+                   Sets.Find
+                     (Container => All_Servers,
+                      Item      => Server'(Name  => Server_Name,
+                                           URL    => <>,
+                                           Status => <>));
+      Element  : Server := Sets.Element (Position);
+   begin
+      Element.Status := Offline;
+      Sets.Replace_Element (Container => All_Servers,
+                            Position  => Position,
+                            New_Item  => Element);
+   end Go_Offline;
+
+   ---------------
+   -- Go_Online --
+   ---------------
+
+   procedure Go_Online (Server_Name : Unbounded_String) is
+      Position : constant Sets.Cursor :=
+                   Sets.Find
+                     (Container => All_Servers,
+                      Item      => Server'(Name   => Server_Name,
+                                           URL    => <>,
+                                           Status => <>));
+      Element  : Server := Sets.Element (Position);
+   begin
+      Element.Status := Online;
+      Sets.Replace_Element (Container => All_Servers,
+                            Position  => Position,
+                            New_Item  => Element);
+   end Go_Online;
+
    ----------
    -- Hash --
    ----------
@@ -35,6 +97,15 @@ package body Savadur.Servers is
    begin
       return Strings.Hash (To_String (Server.Name));
    end Hash;
+
+   -----------
+   -- Image --
+   -----------
+
+   function Image return String is
+   begin
+      return Image (All_Servers);
+   end Image;
 
    -----------
    -- Image --
@@ -62,6 +133,16 @@ package body Savadur.Servers is
       return -Result;
    end Image;
 
+   ------------
+   -- Insert --
+   ------------
+
+   procedure Insert (New_Item : in Server) is
+   begin
+      Sets.Insert (Container => All_Servers,
+                   New_Item  => New_Item);
+   end Insert;
+
    ---------------
    -- Key_Equal --
    ---------------
@@ -70,5 +151,48 @@ package body Savadur.Servers is
    begin
       return S1.Name = S2.Name;
    end Key_Equal;
+
+   ------------
+   -- Length --
+   ------------
+
+   function Length return Natural is
+   begin
+      return Natural (Sets.Length (All_Servers));
+   end Length;
+
+   ---------------------
+   -- Offline_Iterate --
+   ---------------------
+
+   procedure Offline_Iterate
+     (Process   : not null access procedure (Position : Sets.Cursor))
+   is
+      Position : Sets.Cursor := Sets.First (All_Servers);
+   begin
+      while Sets.Has_Element (Position) loop
+         if Sets.Element (Position).Status = Offline then
+            Process (Position);
+         end if;
+         Sets.Next (Position);
+      end loop;
+   end Offline_Iterate;
+
+   --------------------
+   -- Online_Iterate --
+   --------------------
+
+   procedure Online_Iterate
+     (Process   : not null access procedure (Position : Sets.Cursor))
+   is
+      Position : Sets.Cursor := Sets.First (All_Servers);
+   begin
+      while Sets.Has_Element (Position) loop
+         if Sets.Element (Position).Status = Online then
+            Process (Position);
+         end if;
+         Sets.Next (Position);
+      end loop;
+   end Online_Iterate;
 
 end Savadur.Servers;

@@ -84,7 +84,10 @@ procedure Savadur.Client is
    Scenario_Id     : Unbounded_String
      := Scenarios.Id_Utils.To_Unbounded_String (Scenarios.Default_Scenario);
 
-   New_Server      : Savadur.Servers.Server;
+   New_Server      : Savadur.Servers.Server :=
+                       Savadur.Servers.Server'(Name   => Null_Unbounded_String,
+                                               URL    => Null_Unbounded_String,
+                                               Status => Servers.Offline);
 
    Action          : access procedure;
    --  Action to execute after Command Line parsing
@@ -149,13 +152,13 @@ procedure Savadur.Client is
 
       Config.Server.Parse;
 
-      if Config.Server.Configurations.Length = 0 then
+      if Servers.Length = 0 then
          Logs.Write
            (Content => "No server configured",
             Kind    => Logs.Handler.Error);
 
       else
-         Logs.Write (Savadur.Servers.Image (Config.Server.Configurations));
+         Logs.Write (Savadur.Servers.Image);
       end if;
    end List_Remote_Server;
 
@@ -192,10 +195,13 @@ procedure Savadur.Client is
 
          Logs.Write (Content => "Done.",
                      Kind    => Logs.Handler.Information);
+
+         Savadur.Servers.Go_Online (Server.Name);
       exception
          when SOAP.SOAP_Error =>
             Logs.Write (Content => "Register to " & (-Server.Name)
                         & " failed !");
+            Savadur.Servers.Go_Offline (Server.Name);
       end Register;
 
    begin
@@ -212,7 +218,7 @@ procedure Savadur.Client is
          & ASCII.LF,
          Kind    => Logs.Handler.Very_Verbose);
 
-      if Config.Server.Configurations.Length = 0 then
+      if Servers.Length = 0 then
          Logs.Write
            (Content => "No server configured",
             Kind    => Logs.Handler.Error);
@@ -223,8 +229,13 @@ procedure Savadur.Client is
          Web.Client.Start;
 
          --  Register this client to all known server
+         --  Loop every 5s trying to reconnect
 
-         Config.Server.Configurations.Iterate (Register'Access);
+         Try_Connect : loop
+            delay 5.0;
+            Savadur.Servers.Offline_Iterate (Register'Access);
+         end loop Try_Connect;
+
       end if;
    end Run_Server_Mode;
 
