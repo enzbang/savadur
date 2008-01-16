@@ -40,6 +40,7 @@
 --       -VV | --very-verbose
 --       -L filename          : use filename for log file
 
+with Ada.Calendar;
 with Ada.Command_Line;
 with Ada.Containers;
 with Ada.Exceptions;
@@ -170,8 +171,45 @@ procedure Savadur.Client is
 
       use type Containers.Count_Type;
 
+      task Keep_Alive;
+
       procedure Register (Cursor : in Servers.Cursor);
       --  Registers client to the pointer server
+
+      task body Keep_Alive is
+         use type Calendar.Time;
+
+         Ping_Delay  : constant Duration := 10.0;
+         Retry_Delay : constant Duration := 5.0;
+
+         type To_Run is (Connect, Ping);
+         Run : To_Run := Ping;
+
+         Next_Ping    : Calendar.Time := Calendar.Clock + Ping_Delay;
+         Next_Connect : Calendar.Time := Calendar.Clock;
+         Next_Time    : Calendar.Time;
+      begin
+         Keep_Alive_Loop : loop
+
+            if Next_Ping < Next_Connect then
+               Next_Time := Next_Ping;
+               Run := Ping;
+            else
+               Next_Time := Next_Connect;
+               Run := Connect;
+            end if;
+
+            delay until Next_Time;
+
+            if Run = Connect then
+               Savadur.Servers.Offline_Iterate (Register'Access);
+               --  reschedule next try
+               Next_Connect := Calendar.Clock + Retry_Delay;
+            else
+               Next_Ping := Calendar.Clock + Ping_Delay;
+            end if;
+         end loop Keep_Alive_Loop;
+      end Keep_Alive;
 
       --------------
       -- Register --
@@ -230,12 +268,7 @@ procedure Savadur.Client is
 
          --  Register this client to all known server
          --  Loop every 5s trying to reconnect
-
-         Try_Connect : loop
-            delay 5.0;
-            Savadur.Servers.Offline_Iterate (Register'Access);
-         end loop Try_Connect;
-
+         --  Ping servers every 10s to check if all is working
       end if;
    end Run_Server_Mode;
 
