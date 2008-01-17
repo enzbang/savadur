@@ -29,6 +29,7 @@ with Sax.Attributes;
 with Input_Sources.File;
 with Unicode.CES;
 
+with Savadur.Client_Service;
 with Savadur.Server_Service;
 with Savadur.Utils;
 
@@ -181,8 +182,15 @@ package body Savadur.Config.Client is
       Source   : Input_Sources.File.File_Input;
    begin
       --  Set endpoint to the default value found in the WSDL
-      Configuration.Endpoint :=
-        To_Unbounded_String (Savadur.Server_Service.URL);
+
+      if Savadur.Config.Is_Server then
+         Configuration.Endpoint :=
+           To_Unbounded_String (Savadur.Client_Service.URL);
+
+      else
+         Configuration.Endpoint :=
+           To_Unbounded_String (Savadur.Server_Service.URL);
+      end if;
 
       if not Directories.Exists (Filename) then
          if Savadur.Config.Client_Server or Savadur.Config.Is_Server then
