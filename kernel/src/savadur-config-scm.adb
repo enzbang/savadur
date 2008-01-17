@@ -315,7 +315,7 @@ package body Savadur.Config.SCM is
                   when Name =>
                      Handler.SCM.Id :=
                        Savadur.SCM.Id_Utils.Value (Get_Value (Atts, J));
-                  when others => null;
+                  when SCM | Cmd => null;
                end case;
 
             when Result =>
