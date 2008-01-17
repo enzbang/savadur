@@ -23,6 +23,9 @@ package Savadur.Web_Services.Server is
 
    type Signed_Project is new String;
 
+   function Ping return String;
+   --  Pings a client
+
    procedure Run
      (Server_Name    : in String;
       Scenario       : in String;

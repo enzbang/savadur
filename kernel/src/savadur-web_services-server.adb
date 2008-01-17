@@ -24,6 +24,15 @@ with Savadur.Signed_Files;
 
 package body Savadur.Web_Services.Server is
 
+   ----------
+   -- Ping --
+   ----------
+
+   function Ping return String is
+   begin
+      return "pong";
+   end Ping;
+
    ---------
    -- Run --
    ---------
