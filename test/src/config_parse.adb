@@ -213,8 +213,15 @@ package body Config_Parse is
          & "pull => git-pull  result type : EXIT_STATUS"
          & "version => git-show-ref -s refs/heads/master  "
          & "result type : VALUE"
+         & "]"
+         & "* subversion"
+         & "["
+         & "update => svn update  result type : EXIT_STATUS"
+         & "init => svn checkout $url $sources  result type : EXIT_STATUS"
+         & "version => svn info (Revision: (.*))  result type : VALUE"
          & "]"),
-         "Wrong SCM parse");
+         "Wrong SCM parse" & Savadur.SCM.Image
+         (Savadur.Config.SCM.Configurations));
    end Check_SCM_Config;
 
    -------------------------
