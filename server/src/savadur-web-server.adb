@@ -42,6 +42,7 @@ with Savadur.Config.Project;
 with Savadur.Config.Project_List;
 with Savadur.Database;
 with Savadur.Jobs.Server;
+with Savadur.Notifications;
 with Savadur.Projects;
 with Savadur.Project_List;
 with Savadur.Remote_Files;
@@ -119,6 +120,14 @@ package body Savadur.Web.Server is
                  Name                 => "all",
                  Extension            => "xml");
          begin
+            if Directories.Exists (RSS_File) then
+               return Response.File (MIME.Text_XML, RSS_File);
+            end if;
+
+            --  Try to generate RSS
+
+            Savadur.Notifications.Update_RSS;
+
             if Directories.Exists (RSS_File) then
                return Response.File (MIME.Text_XML, RSS_File);
             else
