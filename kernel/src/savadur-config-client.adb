@@ -41,10 +41,12 @@ package body Savadur.Config.Client is
    use Savadur.Utils;
 
    type Config is record
-      Key                    : Unbounded_String;
-      Endpoint               : Unbounded_String;
-      Ping_Delay             : Duration;
+      Client_Metadata        : Metadata;
       Connection_Retry_Delay : Duration;
+      Description            : Unbounded_String;
+      Endpoint               : Unbounded_String;
+      Key                    : Unbounded_String;
+      Ping_Delay             : Duration;
    end record;
 
    Empty : constant Config :=

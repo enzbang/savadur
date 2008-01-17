@@ -29,6 +29,8 @@ package Savadur.Web_Services.Client is
       OS : Unbounded_String;
    end record;
 
+   No_Metadata : constant Metadata;
+
    procedure Register
      (Key               : in String;
       Data              : in Metadata;
@@ -73,5 +75,8 @@ private
 
    No_File : constant File_Data :=
                (Null_Unbounded_String, Null_Unbounded_String);
+
+   No_Metadata : constant Metadata :=
+                   Metadata'(OS => Null_Unbounded_String);
 
 end Savadur.Web_Services.Client;
