@@ -74,7 +74,8 @@ package Savadur.Web_Services.Client is
 private
 
    No_File : constant File_Data :=
-               (Null_Unbounded_String, Null_Unbounded_String);
+               File_Data'(Filename => Null_Unbounded_String,
+                          Content  => Null_Unbounded_String);
 
    No_Metadata : constant Metadata :=
                    Metadata'(OS => Null_Unbounded_String);
