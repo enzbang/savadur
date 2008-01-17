@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                                Savadur                                   --
 --                                                                          --
---                           Copyright (C) 2007                             --
+--                         Copyright (C) 2007-2008                          --
 --                      Pascal Obry - Olivier Ramonat                       --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -24,7 +24,6 @@ with Ada.Directories;
 
 with Savadur.Config.SCM;
 with Savadur.Config.Project;
-with Savadur.Config.Server;
 with Savadur.Logs;
 with Savadur.Projects.Sets;
 with Savadur.Servers;
@@ -49,7 +48,7 @@ package body Savadur.Remote_Files is
    is
       use type Signed_Files.Signature;
 
-      procedure Download (Cursor : in Servers.Sets.Cursor);
+      procedure Download (Cursor : in Servers.Cursor);
       --  Tries downloading Project from this server
 
       Signed_Project   : aliased Signed_Files.Handler;
@@ -61,19 +60,19 @@ package body Savadur.Remote_Files is
       -- Download --
       --------------
 
-      procedure Download (Cursor : in Servers.Sets.Cursor) is
+      procedure Download (Cursor : in Servers.Cursor) is
          use type Web_Services.Client.File_Data;
-         Server : constant Servers.Server := Servers.Sets.Element (Cursor);
+         Server : constant String := Servers.URL (Cursor);
          Data   : Web_Services.Client.File_Data;
       begin
          if not Loaded then
             Logs.Write
-              ("Try loading " & Project_Name & " from " & (-Server.URL));
+              ("Try loading " & Project_Name & " from " & Server);
 
             Data := Client_Service.Client.Load_Project
               (Web_Services.Client.Signed_Project
                  (Signed_Files.To_External_Handler (Signed_Project)),
-                  -Server.URL);
+                  Server);
 
             if Data /= Web_Services.Client.No_File then
                Logs.Write ("   found new or updated");
@@ -113,7 +112,7 @@ package body Savadur.Remote_Files is
 
       --  Download the project from the servers if not up-to-date
 
-      Config.Server.Configurations.Iterate (Download'Access);
+      Servers.Online_Iterate (Download'Access);
 
       if Found or else Loaded then
          return Config.Project.Get (Project_Name);
@@ -129,7 +128,7 @@ package body Savadur.Remote_Files is
    function Load_SCM (SCM_Name : in String) return SCM.SCM is
       use SCM.Id_Utils;
 
-      procedure Download (Cursor : in Servers.Sets.Cursor);
+      procedure Download (Cursor : in Servers.Cursor);
       --  Tries downloading SCM from this server
 
       Signed_SCM : aliased Signed_Files.Handler;
@@ -140,19 +139,19 @@ package body Savadur.Remote_Files is
       -- Download --
       --------------
 
-      procedure Download (Cursor : in Servers.Sets.Cursor) is
+      procedure Download (Cursor : in Servers.Cursor) is
          use type Web_Services.Client.File_Data;
-         Server : constant Servers.Server := Servers.Sets.Element (Cursor);
+         Server : constant String := Servers.URL (Cursor);
          Data   : Web_Services.Client.File_Data;
       begin
          if not Loaded then
             Logs.Write
-              ("Try loading " & SCM_Name & " from " & (-Server.URL));
+              ("Try loading " & SCM_Name & " from " & Server);
 
             Data := Client_Service.Client.Load_SCM
               (Web_Services.Client.Signed_SCM
                  (Signed_Files.To_External_Handler (Signed_SCM)),
-                  -Server.URL);
+                  Server);
 
             if Data /= Web_Services.Client.No_File then
                Logs.Write ("   found new or updated");
@@ -188,7 +187,7 @@ package body Savadur.Remote_Files is
 
       --  Download the project from the servers if not up-to-date
 
-      Config.Server.Configurations.Iterate (Download'Access);
+      Servers.Online_Iterate (Download'Access);
 
       if Found or else Loaded then
          return Config.SCM.Get (SCM_Name);

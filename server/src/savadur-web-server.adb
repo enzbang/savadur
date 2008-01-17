@@ -22,6 +22,7 @@
 with IO_Exceptions;
 
 with Ada.Directories;
+with Ada.Strings.Unbounded;
 
 with AWS.Config.Set;
 with AWS.Messages;
@@ -36,6 +37,7 @@ with AWS.URL;
 with SOAP.Dispatchers.Callback;
 
 with Savadur.Client_Service.CB;
+with Savadur.Clients;
 with Savadur.Config.Project;
 with Savadur.Config.Project_List;
 with Savadur.Database;
@@ -43,7 +45,9 @@ with Savadur.Jobs.Server;
 with Savadur.Projects;
 with Savadur.Project_List;
 with Savadur.Remote_Files;
+with Savadur.Server_Service.Client;
 with Savadur.Signed_Files;
+with Savadur.Utils;
 with Savadur.Logs;
 
 package body Savadur.Web.Server is
@@ -65,6 +69,9 @@ package body Savadur.Web.Server is
 
    function List (Request : in Status.Data) return Response.Data;
    --  Displays the project list
+
+   function Ping return Response.Data;
+   --  Pings clients
 
    function Show_Log (Log_Id : in String) return Response.Data;
    --  Show the selected log content
@@ -96,6 +103,9 @@ package body Savadur.Web.Server is
 
       elsif URI = "/run" then
          return Run (Request);
+
+      elsif URI = "/ping" then
+         return Ping;
 
       elsif URI'Length > 5
         and then URI (URI'First .. URI'First + 4) = "/log/"
@@ -160,6 +170,46 @@ package body Savadur.Web.Server is
             Translations => Project_List.To_Set
               (Savadur.Config.Project_List.Configurations)));
    end List;
+
+   ----------
+   -- Ping --
+   ----------
+
+   function Ping return Response.Data is
+      use Ada.Strings.Unbounded;
+      use Savadur.Utils;
+      P_Client        : Clients.Sets.Cursor := Clients.Registered.First;
+      Offline_Clients : Unbounded_String;
+      Online_Clients  : Unbounded_String;
+   begin
+      while Clients.Sets.Has_Element (P_Client) loop
+         declare
+            Client : constant Clients.Client :=
+                       Clients.Sets.Element (P_Client);
+         begin
+            Clients.Sets.Next (P_Client);
+
+            Logs.Write ("Ping client " & (-Client.Key));
+            Logs.Write ("Get " & Server_Service.Client.Ping
+                        (-Client.Callback_Endpoint));
+            Append (Online_Clients, Client.Key);
+         exception
+            when SOAP.SOAP_Error =>
+               --  Client if offline.
+               --  Removes it from online clients and add logout info
+               --  into database
+
+               Database.Logout (-Client.Key);
+               Clients.Sets.Delete (Clients.Registered, Client);
+               Append (Offline_Clients, Client.Key);
+         end;
+      end loop;
+
+         return Response.Build
+           (MIME.Text_HTML,
+            "<p>Online clients : " & Online_Clients & "...</p>"
+            & "<p>Offline clients : " & Offline_Clients & "...</p>");
+   end Ping;
 
    ---------
    -- Run --

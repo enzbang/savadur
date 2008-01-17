@@ -35,7 +35,6 @@ with Savadur.Build.Notification;
 with Savadur.Client_Service.Client;
 with Savadur.Config.Client;
 with Savadur.Config.SCM;
-with Savadur.Config.Server;
 with Savadur.Logs;
 with Savadur.SCM;
 with Savadur.Servers;
@@ -522,18 +521,13 @@ package body Savadur.Build is
          if Config.Client_Server then
 
             Notify_Server : declare
-               Server   : Servers.Server :=
-                 Servers.Server'(+Server_Name, Null_Unbounded_String);
-               Position : constant Servers.Sets.Cursor := Servers.Sets.Find
-                 (Config.Server.Configurations, Server);
+               Server_URL : constant String := Servers.URL (Server_Name);
             begin
 
-               if not Servers.Sets.Has_Element (Position) then
+               if Server_URL = "" then
                   Logs.Write ("Unable to find server endpoint for "
                                 &  Server_Name);
                end if;
-
-               Server := Servers.Sets.Element (Position);
 
                Client_Service.Client.Status
                  (Key          => Config.Client.Get_Key,
@@ -544,7 +538,7 @@ package body Savadur.Build is
                   Output       => Log_Content,
                   Result       => Status,
                   Job_Id       => Job_Id,
-                  Endpoint     => -Server.URL);
+                  Endpoint     => Server_URL);
             end Notify_Server;
 
          else

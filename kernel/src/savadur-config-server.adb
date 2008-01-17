@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                                Savadur                                   --
 --                                                                          --
---                           Copyright (C) 2007                             --
+--                         Copyright (C) 2007-2008                          --
 --                      Pascal Obry - Olivier Ramonat                       --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -22,6 +22,7 @@
 with Ada.Text_IO;
 with Ada.IO_Exceptions;
 with Ada.Directories;
+with Ada.Strings.Unbounded;
 
 with GNAT.Case_Util;
 
@@ -30,11 +31,13 @@ with Sax.Attributes;
 with Input_Sources.File;
 with Unicode.CES;
 
+with Savadur.Servers;
 with Savadur.Utils;
 
 package body Savadur.Config.Server is
 
    use Ada;
+   use Ada.Strings.Unbounded;
    use Savadur.Utils;
 
    type Node_Value is (Server, Name, Location);
@@ -49,7 +52,8 @@ package body Savadur.Config.Server is
    --  Config_Error.
 
    type Tree_Reader is new Sax.Readers.Reader with record
-      Server : Savadur.Servers.Server;
+      Server_Name : Unbounded_String;
+      Server_URL  : Unbounded_String;
    end record;
 
    procedure Start_Element
@@ -124,15 +128,13 @@ package body Savadur.Config.Server is
             Filename : constant String := Full_Name (D);
          begin
             Text_IO.Put_Line (Filename);
-            Reader.Server := Servers.Emtpy_Server;
 
             Input_Sources.File.Open (Filename => Filename, Input => Source);
             Parse (Reader, Source);
             Input_Sources.File.Close (Source);
 
-            Savadur.Servers.Sets.Insert
-              (Container => Configurations,
-               New_Item  => Reader.Server);
+            Savadur.Servers.Insert (Name  => -Reader.Server_Name,
+                                    URL   => -Reader.Server_URL);
          end Load_Config;
       end loop Walk_Directories;
    exception
@@ -168,7 +170,7 @@ package body Savadur.Config.Server is
                Attr := Get_Attribute (Get_Qname (Atts, J));
                case Attr is
                   when Value =>
-                     Handler.Server.Name := +Get_Value (Atts, J);
+                     Handler.Server_Name := +Get_Value (Atts, J);
                   when URL =>
                      raise Config_Error with "Unexpected URL attribute";
                end case;
@@ -179,7 +181,7 @@ package body Savadur.Config.Server is
                Attr := Get_Attribute (Get_Qname (Atts, J));
                case Attr is
                   when URL =>
-                     Handler.Server.URL := +Get_Value (Atts, J);
+                     Handler.Server_URL := +Get_Value (Atts, J);
                   when Value =>
                      raise Config_Error with "Unexpected Value attribute";
                end case;

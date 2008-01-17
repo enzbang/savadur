@@ -238,8 +238,7 @@ package body Config_Parse is
 
       Savadur.Config.Server.Parse;
       Assertions.Assert
-        (Savadur.Servers.Image
-           (Savadur.Config.Server.Configurations) =
+        (Savadur.Servers.Image =
            "* a_fast_server" & ASCII.LF
          & "[" & ASCII.LF
          & "Name => a_fast_server"  & ASCII.LF
@@ -256,8 +255,7 @@ package body Config_Parse is
          & "URL => http://localhost:8181" & ASCII.LF
          & "]" & ASCII.LF,
          "Wrong Servers parse, expected : " & ASCII.LF
-         & ''' & Savadur.Servers.Image
-           (Savadur.Config.Server.Configurations) & ''');
+         & ''' & Savadur.Servers.Image & ''');
    end Check_Server_Config;
 
    ----------

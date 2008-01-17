@@ -40,6 +40,7 @@
 --       -VV | --very-verbose
 --       -L filename          : use filename for log file
 
+with Ada.Calendar;
 with Ada.Command_Line;
 with Ada.Containers;
 with Ada.Exceptions;
@@ -48,6 +49,8 @@ with Ada.Text_IO;
 with Ada.Directories;
 
 with GNAT.Command_Line;
+
+with SOAP;
 
 with Savadur.Client_Service.Client;
 with Savadur.Client_Service.Types;
@@ -82,7 +85,8 @@ procedure Savadur.Client is
    Scenario_Id     : Unbounded_String
      := Scenarios.Id_Utils.To_Unbounded_String (Scenarios.Default_Scenario);
 
-   New_Server      : Savadur.Servers.Server;
+   New_Server_Name : Unbounded_String;
+   New_Server_URL  : Unbounded_String;
 
    Action          : access procedure;
    --  Action to execute after Command Line parsing
@@ -114,11 +118,13 @@ procedure Savadur.Client is
       Filename : constant String :=
                    Directories.Compose
                      (Containing_Directory => Config.Server_Directory,
-                      Name                 => -New_Server.Name,
+                      Name                 => -New_Server_Name,
                       Extension            => "xml");
       File     : File_Type;
    begin
-      if New_Server.Name = "" or else New_Server.URL = "" then
+      if New_Server_Name = Null_Unbounded_String
+        or else New_Server_URL = Null_Unbounded_String
+      then
          Usage ("Can't add new remote server. Wrong arguments");
          return;
       end if;
@@ -126,11 +132,11 @@ procedure Savadur.Client is
       Create (File => File, Mode => Out_File, Name => Filename);
 
       Logs.Write ("Add new remote server : "
-                  & (-New_Server.Name) & " " & (-New_Server.URL));
+                  & (-New_Server_Name) & " " & (-New_Server_URL));
 
       Put_Line (File, "<server>");
-      Put_Line (File, "<name value='" & (-New_Server.Name) & "'/>");
-      Put_Line (File, "<location url='" & (-New_Server.URL) & "'/>");
+      Put_Line (File, "<name value='" & (-New_Server_Name) & "'/>");
+      Put_Line (File, "<location url='" & (-New_Server_URL) & "'/>");
       Put_Line (File, "</server>");
 
       Close (File);
@@ -147,13 +153,13 @@ procedure Savadur.Client is
 
       Config.Server.Parse;
 
-      if Config.Server.Configurations.Length = 0 then
+      if Servers.Length = 0 then
          Logs.Write
            (Content => "No server configured",
             Kind    => Logs.Handler.Error);
 
       else
-         Logs.Write (Savadur.Servers.Image (Config.Server.Configurations));
+         Logs.Write (Savadur.Servers.Image);
       end if;
    end List_Remote_Server;
 
@@ -165,31 +171,117 @@ procedure Savadur.Client is
 
       use type Containers.Count_Type;
 
-      procedure Register (Cursor : in Servers.Sets.Cursor);
+      task Keep_Alive;
+      --  Schedule ping and register calls
+
+      procedure Ping (Cursor : in Servers.Cursor);
+      --  Ping a server
+
+      procedure Register (Cursor : in Servers.Cursor);
       --  Registers client to the pointer server
+
+      ----------------
+      -- Keep_Alive --
+      ----------------
+
+      task body Keep_Alive is
+         use type Calendar.Time;
+
+         Ping_Delay  : constant Duration := Config.Client.Get_Ping_Delay;
+         Retry_Delay : constant Duration :=
+                         Config.Client.Get_Connection_Retry_Delay;
+
+         type To_Run is (Connect, Ping);
+         Run : To_Run := Ping;
+
+         Next_Ping    : Calendar.Time := Calendar.Clock + Ping_Delay;
+         Next_Connect : Calendar.Time := Calendar.Clock + Retry_Delay;
+         Next_Time    : Calendar.Time;
+      begin
+
+         Keep_Alive_Loop : loop
+
+            if Next_Ping < Next_Connect then
+               Next_Time := Next_Ping;
+               Run := Ping;
+            else
+               Next_Time := Next_Connect;
+               Run := Connect;
+            end if;
+
+            delay until Next_Time;
+
+            --  Run and reschedule
+
+            if Run = Connect then
+
+               --  Try to connect offline servers
+
+               Savadur.Servers.Offline_Iterate (Register'Access);
+               Next_Connect := Calendar.Clock + Retry_Delay;
+            else
+
+               --  Try to ping online servers
+
+               Savadur.Servers.Online_Iterate (Ping'Access);
+               Next_Ping := Calendar.Clock + Ping_Delay;
+            end if;
+         end loop Keep_Alive_Loop;
+      end Keep_Alive;
+
+      ----------
+      -- Ping --
+      ----------
+
+      procedure Ping (Cursor : in Servers.Cursor) is
+         Server_Name : constant String := Servers.Name (Cursor);
+         Server_URL  : constant String := Servers.URL (Cursor);
+      begin
+         Logs.Write
+           (Content =>
+              "Ping " & Server_Name & " at " & Server_URL,
+            Kind    => Logs.Handler.Very_Verbose);
+
+         Logs.Write
+           (Content => "Receive " & Client_Service.Client.Ping (Server_URL),
+            Kind    => Logs.Handler.Very_Verbose);
+
+      exception
+         when SOAP.SOAP_Error =>
+            Logs.Write (Content => "Ping " & Server_Name & " failed !",
+                        Kind    => Logs.Handler.Warnings);
+            Savadur.Servers.Go_Offline (+Server_Name);
+      end Ping;
 
       --------------
       -- Register --
       --------------
 
-      procedure Register (Cursor : in Servers.Sets.Cursor) is
-         Server   : constant Savadur.Servers.Server :=
-                      Servers.Sets.Element (Cursor);
-         Metadata : constant Client_Service.Types.Metadata_Type :=
-                      (OS => +"windows");
-         Key      : constant String := Config.Client.Get_Key;
-         Endpoint : constant String := Config.Client.Get_Endpoint;
+      procedure Register (Cursor : in Servers.Cursor) is
+         Server_Name : constant String := Servers.Name (Cursor);
+         Server_URL  : constant String := Servers.URL (Cursor);
+         Metadata    : constant Client_Service.Types.Metadata_Type :=
+                         (OS => +"windows");
+         Key         : constant String := Config.Client.Get_Key;
+         Endpoint    : constant String := Config.Client.Get_Endpoint;
       begin
          Logs.Write
            (Content =>
-              "Register to " & (-Server.Name) & " at " & (-Server.URL),
+              "Register to " & Server_Name & " at " & Server_URL,
             Kind    => Logs.Handler.Information);
 
          Client_Service.Client.Register
-           (Key, Metadata, -Server.Name, Endpoint, -Server.URL);
+           (Key, Metadata, Server_Name, Endpoint, Server_URL);
 
          Logs.Write (Content => "Done.",
                      Kind    => Logs.Handler.Information);
+
+         Savadur.Servers.Go_Online (+Server_Name);
+      exception
+         when SOAP.SOAP_Error =>
+            Logs.Write (Content => "Register to " & Server_Name
+                        & " failed !");
+            Savadur.Servers.Go_Offline (+Server_Name);
       end Register;
 
    begin
@@ -206,7 +298,7 @@ procedure Savadur.Client is
          & ASCII.LF,
          Kind    => Logs.Handler.Very_Verbose);
 
-      if Config.Server.Configurations.Length = 0 then
+      if Servers.Length = 0 then
          Logs.Write
            (Content => "No server configured",
             Kind    => Logs.Handler.Error);
@@ -218,7 +310,11 @@ procedure Savadur.Client is
 
          --  Register this client to all known server
 
-         Config.Server.Configurations.Iterate (Register'Access);
+         Savadur.Servers.Offline_Iterate (Register'Access);
+
+         --  Loop every 5 minutes trying to reconnect
+         --  Ping servers every 10 minutes to check if all is working
+
       end if;
    end Run_Server_Mode;
 
@@ -487,10 +583,10 @@ begin
             end Long_Options_Remote;
 
          when '*' =>
-            if New_Server.Name = Null_Unbounded_String then
-               New_Server.Name := +GNAT.Command_Line.Full_Switch;
+            if New_Server_Name = Null_Unbounded_String then
+               New_Server_Name := +GNAT.Command_Line.Full_Switch;
             else
-               New_Server.URL  := +GNAT.Command_Line.Full_Switch;
+               New_Server_URL  := +GNAT.Command_Line.Full_Switch;
             end if;
 
          when others =>
@@ -550,4 +646,6 @@ exception
       | Savadur.Config.Environment_Variables.Config_Error
         =>
       Usage (Error_Message => Exceptions.Exception_Message (E));
+   when others =>
+      Usage ("Unknown error - should have been catch before !!!");
 end Savadur.Client;

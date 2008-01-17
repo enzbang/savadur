@@ -40,18 +40,24 @@ package body Savadur.Config.Client is
    use Savadur.Utils;
 
    type Config is record
-      Key      : Unbounded_String;
-      Endpoint : Unbounded_String;
+      Key                    : Unbounded_String;
+      Endpoint               : Unbounded_String;
+      Ping_Delay             : Duration;
+      Connection_Retry_Delay : Duration;
    end record;
 
-   Configuration : Config;
+   Empty : constant Config :=
+             Config'(Key                    => Null_Unbounded_String,
+                     Endpoint               => Null_Unbounded_String,
+                     Ping_Delay             => 600.0,
+                     Connection_Retry_Delay => 300.0);
 
-   Empty : constant Config := Config'(Key      => Null_Unbounded_String,
-                                      Endpoint => Null_Unbounded_String);
+   Configuration : Config := Empty;
 
-   type Node_Value is (Client, Name, Endpoint);
+   type Node_Value is (Client, Name, Endpoint,
+                       Ping_Delay, Connection_Retry_Delay);
 
-   type Attribute is (Id, URL);
+   type Attribute is (Id, URL, Seconds);
 
    function Get_Node_Value (S : in String) return Node_Value;
    --  Returns the node value matching the given string or raise Config_Error
@@ -90,6 +96,19 @@ package body Savadur.Config.Client is
 
       raise Config_Error with "Unknown node " & S;
    end Get_Attribute;
+
+   --------------------------------
+   -- Get_Connection_Retry_Delay --
+   --------------------------------
+
+   function Get_Connection_Retry_Delay return Standard.Duration is
+   begin
+      if Configuration = Empty then
+            Parse;
+      end if;
+
+      return Configuration.Connection_Retry_Delay;
+   end Get_Connection_Retry_Delay;
 
    --------------------
    --  Get_Endpoint  --
@@ -135,6 +154,19 @@ package body Savadur.Config.Client is
 
       raise Config_Error with "Unknown node " & S;
    end Get_Node_Value;
+
+   --------------------
+   -- Get_Ping_Delay --
+   --------------------
+
+   function Get_Ping_Delay return Standard.Duration is
+   begin
+      if Configuration = Empty then
+         Parse;
+      end if;
+
+      return Configuration.Ping_Delay;
+   end Get_Ping_Delay;
 
    -----------
    -- Parse --
@@ -199,9 +231,10 @@ package body Savadur.Config.Client is
                   when Id =>
                      Configuration.Key := +Get_Value (Atts, J);
 
-                  when URL =>
+                  when URL | Seconds =>
                      raise Config_Error with "Wrong node attr "
                        & Attribute'Image (Attr);
+
                end case;
             end loop;
 
@@ -212,12 +245,51 @@ package body Savadur.Config.Client is
                   when URL =>
                      Configuration.Endpoint := +Get_Value (Atts, J);
 
-                  when Id =>
+                  when Id | Seconds =>
                      raise Config_Error with "Wrong node attr "
                        & Attribute'Image (Attr);
                end case;
             end loop;
 
+         when Ping_Delay =>
+            Ping_Delay_In_Seconds : begin
+               for J in 0 .. Get_Length (Atts) - 1 loop
+                  Attr := Get_Attribute (Get_Qname (Atts, J));
+                  if Attr = Seconds then
+                     Configuration.Ping_Delay :=
+                       Duration'Value (Get_Value (Atts, J));
+
+                  else
+                     raise Config_Error with "Wrong node attr "
+                       & Attribute'Image (Attr);
+                  end if;
+               end loop;
+
+            exception
+               when Constraint_Error =>
+                  raise Config_Error with "Wrong node value for attr "
+                    & Attribute'Image (Attr);
+            end Ping_Delay_In_Seconds;
+
+         when Connection_Retry_Delay =>
+            Connection_Retry_Delay_In_Seconds : begin
+               for J in 0 .. Get_Length (Atts) - 1 loop
+                  Attr := Get_Attribute (Get_Qname (Atts, J));
+                  if Attr = Seconds then
+                     Configuration.Connection_Retry_Delay :=
+                       Duration'Value (Get_Value (Atts, J));
+
+                  else
+                     raise Config_Error with "Wrong node attr "
+                       & Attribute'Image (Attr);
+                  end if;
+               end loop;
+
+            exception
+               when Constraint_Error =>
+                  raise Config_Error with "Wrong node value for attr "
+                    & Attribute'Image (Attr);
+            end Connection_Retry_Delay_In_Seconds;
       end case;
    end Start_Element;
 
