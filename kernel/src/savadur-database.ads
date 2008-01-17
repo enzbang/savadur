@@ -53,7 +53,7 @@ package Savadur.Database is
    --  Adds final status to database
 
    function Get_Final_Status
-     (Project_Name : in String) return Templates.Translate_Set;
+     (Project_Name : in String := "") return Templates.Translate_Set;
    --  Get final status
 
    procedure Login (Key : in String);

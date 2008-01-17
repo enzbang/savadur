@@ -88,6 +88,9 @@ package body Savadur.Web.Server is
                   Directories.Compose
                     (Containing_Directory => Savadur.Config.Savadur_Directory,
                      Name                 => "htdocs");
+      RSS_DIR : constant String := Directories.Compose
+        (Containing_Directory => Web_Dir,
+         Name                 => "rss");
       Web_CSS : constant String :=
                   Directories.Compose
                     (Containing_Directory => Web_Dir,
@@ -108,6 +111,22 @@ package body Savadur.Web.Server is
 
       elsif URI = "/ping" then
          return Ping;
+
+      elsif URI = "/rss/all" then
+         Get_RSS : declare
+            RSS_File : constant String := Directories.Compose
+                (Containing_Directory => RSS_DIR,
+                 Name                 => "all",
+                 Extension            => "xml");
+         begin
+            if Directories.Exists (RSS_File) then
+               return Response.File (MIME.Text_XML, RSS_File);
+            else
+               return Response.Build
+                 (MIME.Text_HTML,
+                  "<p>File " & RSS_File & " not found</p>", Messages.S404);
+            end if;
+         end Get_RSS;
 
       elsif URI'Length > Log_URI'Length
         and then URI (URI'First .. URI'First + Log_URI'Length - 1) = Log_URI

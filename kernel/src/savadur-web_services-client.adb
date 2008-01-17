@@ -195,6 +195,10 @@ package body Savadur.Web_Services.Client is
             Subject        => "Running " & Project_Name,
             Content        => "End with " & Boolean'Image (Result)
             & " when running scenario " & Scenario);
+
+         --  Update RSS file
+
+         Notifications.Update_RSS;
       end if;
    end Status;
 

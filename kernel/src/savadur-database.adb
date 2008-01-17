@@ -119,26 +119,35 @@ package body Savadur.Database is
    ------------------------
 
    function Get_Final_Status
-     (Project_Name : in String) return Templates.Translate_Set
+     (Project_Name : in String := "") return Templates.Translate_Set
    is
       use type Templates.Tag;
-      DBH      : constant TLS_DBH_Access := TLS_DBH_Access (DBH_TLS.Reference);
-      Iter     : DB.SQLite.Iterator;
-      Line     : DB.String_Vectors.Vector;
-      Set      : Templates.Translate_Set;
-      Client   : Templates.Tag;
-      Scenario : Templates.Tag;
-      Status   : Templates.Tag;
-      Date     : Templates.Tag;
-      Job_Id   : Templates.Tag;
+      DBH       : constant TLS_DBH_Access :=
+                    TLS_DBH_Access (DBH_TLS.Reference);
+      SQL_Sel   : constant String :=
+                   "select client, scenario, status, "
+                     & "max(date), job_id, project from lastbuilt ";
+      SQL_Group : constant String := " group by client order by client";
+      Iter      : DB.SQLite.Iterator;
+      Line      :  DB.String_Vectors.Vector;
+      Set       :  Templates.Translate_Set;
+      Name      :  Templates.Tag;
+      Client    :  Templates.Tag;
+      Scenario  :  Templates.Tag;
+      Status    :  Templates.Tag;
+      Date      :  Templates.Tag;
+      Job_Id    : Templates.Tag;
    begin
       Connect (DBH);
 
-      DBH.Handle.Prepare_Select
-        (Iter, "select client, scenario, status, "
-           & "max(date), job_id from lastbuilt "
-           & "where project = " & DB.Tools.Q (Project_Name)
-           & " group by client order by client");
+      if Project_Name /= "" then
+         DBH.Handle.Prepare_Select
+           (Iter, SQL_Sel & "where project = " & DB.Tools.Q (Project_Name)
+            & SQL_Group);
+      else
+         DBH.Handle.Prepare_Select
+           (Iter, SQL_Sel & SQL_Group);
+      end if;
 
       while Iter.More loop
          Iter.Get_Line (Line);
@@ -147,7 +156,8 @@ package body Savadur.Database is
          Scenario := Scenario & DB.String_Vectors.Element (Line, 2);
          Status   := Status & DB.String_Vectors.Element (Line, 3);
          Date     := Date & DB.String_Vectors.Element (Line, 4);
-         Job_Id   := Job_Id & DB.String_Vectors.Element (Line, 4);
+         Job_Id   := Job_Id & DB.String_Vectors.Element (Line, 5);
+         Name     := Name & DB.String_Vectors.Element (Line, 6);
 
          Line.Clear;
       end loop;
@@ -159,6 +169,7 @@ package body Savadur.Database is
       Templates.Insert (Set, Templates.Assoc ("STATUS", Status));
       Templates.Insert (Set, Templates.Assoc ("DATE", Date));
       Templates.Insert (Set, Templates.Assoc ("JOB_ID", Job_Id));
+      Templates.Insert (Set, Templates.Assoc ("NAME", Name));
 
       return Set;
    end Get_Final_Status;

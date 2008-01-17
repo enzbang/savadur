@@ -20,11 +20,15 @@
 ------------------------------------------------------------------------------
 
 with Ada.Exceptions;
+with Ada.Directories;
+with Ada.Text_IO;
 
 with AWS.Jabber;
 with AWS.SMTP.Client;
+with AWS.Templates;
 
 with Savadur.Config.Notifications;
+with Savadur.Database;
 with Savadur.Logs;
 
 package body Savadur.Notifications is
@@ -43,6 +47,57 @@ package body Savadur.Notifications is
         & "On Failure = " & Actions.Image (H.On_Failure);
    end Image;
 
+   ----------------
+   -- Update_RSS --
+   ----------------
+
+   procedure Update_RSS is
+      use Ada.Text_IO;
+      use AWS;
+      Web_Dir       : constant String := Directories.Compose
+        (Containing_Directory => Savadur.Config.Savadur_Directory,
+         Name                 => "htdocs");
+      RSS_DIR       : constant String := Directories.Compose
+        (Containing_Directory => Web_Dir,
+         Name                 => "rss");
+      Web_Templates : constant String := Directories.Compose
+        (Containing_Directory => Web_Dir,
+         Name                 => "templates");
+      Set  : Templates.Translate_Set := Savadur.Database.Get_Final_Status;
+      File : File_Type;
+   begin
+      Templates.Insert
+        (Set, Templates.Assoc ("CHANNEL_TITLE", "Savadur, last news"));
+      Templates.Insert
+        (Set, Templates.Assoc ("CHANNEL_DESCRIPTION",
+         "Savadur, last built information for all registered projects"));
+      Templates.Insert
+        (Set, Templates.Assoc ("CHANNEL_LINK", "http://localhost:8080"));
+
+      Ada.Text_IO.Put_Line
+        (Directories.Compose
+           (Containing_Directory => RSS_DIR,
+            Name                 => "all",
+            Extension            => "xml"));
+
+      Create (File => File,
+              Mode => Out_File,
+              Name => Directories.Compose
+                (Containing_Directory => RSS_DIR,
+                 Name                 => "all",
+                 Extension            => "xml"));
+
+      Put (File => File,
+           Item => Templates.Parse
+             (Filename     => Directories.Compose
+                (Containing_Directory => Web_Templates,
+                 Name                 => "rss2",
+                 Extension            => "txml"),
+              Translations  => Set));
+
+      Close (File);
+   end Update_RSS;
+
    ---------------
    -- Send_Mail --
    ---------------
@@ -56,7 +111,6 @@ package body Savadur.Notifications is
                     SMTP.Client.Initialize ("localhost");
       Result    : SMTP.Status;
    begin
-
          SMTP.Client.Send
            (Server  => Localhost,
             From    => SMTP.E_Mail ("savadur", "no-reply"),

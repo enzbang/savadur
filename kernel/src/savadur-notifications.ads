@@ -43,4 +43,7 @@ package Savadur.Notifications is
       Content      : in String);
    --  Send mail message to Email address
 
+   procedure Update_RSS;
+   --  Update RSS file
+
 end Savadur.Notifications;
