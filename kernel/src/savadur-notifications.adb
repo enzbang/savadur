@@ -28,6 +28,7 @@ with AWS.SMTP.Client;
 with AWS.Templates;
 
 with Savadur.Config.Notifications;
+with Savadur.Config.Syndication;
 with Savadur.Database;
 with Savadur.Logs;
 
@@ -67,12 +68,14 @@ package body Savadur.Notifications is
       File : File_Type;
    begin
       Templates.Insert
-        (Set, Templates.Assoc ("CHANNEL_TITLE", "Savadur, last news"));
+        (Set, Templates.Assoc ("CHANNEL_TITLE",
+         Savadur.Config.Syndication.Channel_Title));
       Templates.Insert
         (Set, Templates.Assoc ("CHANNEL_DESCRIPTION",
          "Savadur, last built information for all registered projects"));
       Templates.Insert
-        (Set, Templates.Assoc ("CHANNEL_LINK", "http://localhost:8080"));
+        (Set, Templates.Assoc ("CHANNEL_LINK",
+         Savadur.Config.Syndication.Channel_Link));
 
       Ada.Text_IO.Put_Line
         (Directories.Compose

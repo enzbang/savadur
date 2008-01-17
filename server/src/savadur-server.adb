@@ -158,6 +158,8 @@ begin
       end case;
    end loop Iterate_On_Opt;
 
+   Config.Is_Server := True;
+
    Config.SCM.Parse;
    Config.Project.Parse;
    Config.Project_List.Parse;

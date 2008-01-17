@@ -60,4 +60,7 @@ package Savadur.Config is
    Client_Server : Boolean := False;
    --  Set to true if the client is configured to work with a server
 
+   Is_Server : Boolean := False;
+   --  Set to true if the client is a server
+
 end Savadur.Config;
