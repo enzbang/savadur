@@ -263,7 +263,7 @@ procedure Savadur.Client is
          Server_Name : constant String := Servers.Name (Cursor);
          Server_URL  : constant String := Servers.URL (Cursor);
          Metadata    : constant Client_Service.Types.Metadata_Type :=
-                         Client_Service.Types.Metadata_Type'(OS => +"windows");
+                         Savadur.Config.Client.Get_Metadata;
          Key         : constant String := Config.Client.Get_Key;
          Endpoint    : constant String := Config.Client.Get_Endpoint;
       begin

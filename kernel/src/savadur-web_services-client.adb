@@ -152,7 +152,10 @@ package body Savadur.Web_Services.Client is
       Callback_Endpoint : in String) is
    begin
       Logs.Write ("Register new client : " & Key & ":"
-                    & Server_Name & '@' & Callback_Endpoint);
+                  & Server_Name & '@' & Callback_Endpoint);
+      Logs.Write ("Client Metadata are OS = " & (-Data.OS),
+                  Logs.Handler.Very_Verbose);
+
       Clients.Registered.Insert
         (New_Item => (+Key, Data, +Server_Name, +Callback_Endpoint));
       Database.Login (Key);

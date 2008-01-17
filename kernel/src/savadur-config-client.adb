@@ -148,6 +148,10 @@ package body Savadur.Config.Client is
 
    function Get_Metadata return Web_Services.Client.Metadata is
    begin
+      if Savadur.Config.Is_Server then
+         raise Config_Error with "Metadata are not defined for server";
+      end if;
+
       if Configuration = Empty then
             Parse;
       end if;
