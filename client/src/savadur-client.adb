@@ -187,8 +187,8 @@ procedure Savadur.Client is
       task body Keep_Alive is
          use type Calendar.Time;
 
-         Ping_Delay  : constant Duration := 10.0;
-         Retry_Delay : constant Duration := 5.0;
+         Ping_Delay  : constant Duration := 10.0 * 60.0;
+         Retry_Delay : constant Duration := 5.0 * 60.0;
 
          type To_Run is (Connect, Ping);
          Run : To_Run := Ping;
@@ -307,8 +307,8 @@ procedure Savadur.Client is
          Web.Client.Start;
 
          --  Register this client to all known server
-         --  Loop every 5s trying to reconnect
-         --  Ping servers every 10s to check if all is working
+         --  Loop every 5 minutes trying to reconnect
+         --  Ping servers every 10 minutes to check if all is working
       end if;
    end Run_Server_Mode;
 
