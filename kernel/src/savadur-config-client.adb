@@ -255,6 +255,26 @@ package body Savadur.Config.Client is
          when Client | Metadata =>
             null;
 
+         when Connection_Retry_Delay =>
+            Connection_Retry_Delay_In_Seconds : begin
+               for J in 0 .. Get_Length (Atts) - 1 loop
+                  Attr := Get_Attribute (Get_Qname (Atts, J));
+                  if Attr = Seconds then
+                     Configuration.Connection_Retry_Delay :=
+                       Duration'Value (Get_Value (Atts, J));
+
+                  else
+                     raise Config_Error with "Wrong node attr "
+                       & Attribute'Image (Attr);
+                  end if;
+               end loop;
+
+            exception
+               when Constraint_Error =>
+                  raise Config_Error with "Wrong node value for attr "
+                    & Attribute'Image (Attr);
+            end Connection_Retry_Delay_In_Seconds;
+
          when Description =>
             for J in 0 .. Get_Length (Atts) - 1 loop
                Attr := Get_Attribute (Get_Qname (Atts, J));
@@ -269,17 +289,16 @@ package body Savadur.Config.Client is
                end case;
             end loop;
 
-         when OS =>
+         when Endpoint =>
             for J in 0 .. Get_Length (Atts) - 1 loop
                Attr := Get_Attribute (Get_Qname (Atts, J));
                case Attr is
-                  when Value =>
-                     Configuration.Client_Metadata.OS := +Get_Value (Atts, J);
+                  when URL =>
+                     Configuration.Endpoint := +Get_Value (Atts, J);
 
-                  when Id | URL | Seconds =>
+                  when Value | Id | Seconds =>
                      raise Config_Error with "Wrong node attr "
                        & Attribute'Image (Attr);
-
                end case;
             end loop;
 
@@ -297,16 +316,17 @@ package body Savadur.Config.Client is
                end case;
             end loop;
 
-         when Endpoint =>
+         when OS =>
             for J in 0 .. Get_Length (Atts) - 1 loop
                Attr := Get_Attribute (Get_Qname (Atts, J));
                case Attr is
-                  when URL =>
-                     Configuration.Endpoint := +Get_Value (Atts, J);
+                  when Value =>
+                     Configuration.Client_Metadata.OS := +Get_Value (Atts, J);
 
-                  when Value | Id | Seconds =>
+                  when Id | URL | Seconds =>
                      raise Config_Error with "Wrong node attr "
                        & Attribute'Image (Attr);
+
                end case;
             end loop;
 
@@ -330,25 +350,6 @@ package body Savadur.Config.Client is
                     & Attribute'Image (Attr);
             end Ping_Delay_In_Seconds;
 
-         when Connection_Retry_Delay =>
-            Connection_Retry_Delay_In_Seconds : begin
-               for J in 0 .. Get_Length (Atts) - 1 loop
-                  Attr := Get_Attribute (Get_Qname (Atts, J));
-                  if Attr = Seconds then
-                     Configuration.Connection_Retry_Delay :=
-                       Duration'Value (Get_Value (Atts, J));
-
-                  else
-                     raise Config_Error with "Wrong node attr "
-                       & Attribute'Image (Attr);
-                  end if;
-               end loop;
-
-            exception
-               when Constraint_Error =>
-                  raise Config_Error with "Wrong node value for attr "
-                    & Attribute'Image (Attr);
-            end Connection_Retry_Delay_In_Seconds;
       end case;
    end Start_Element;
 
