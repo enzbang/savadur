@@ -19,6 +19,8 @@
 --  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.       --
 ------------------------------------------------------------------------------
 
+with Savadur.Web_Services.Client;
+
 package Savadur.Config.Client is
 
    Config_Error : exception;
@@ -28,6 +30,9 @@ package Savadur.Config.Client is
 
    function Get_Endpoint return String;
    --  Returns client endpoint
+
+   function Get_Metadata return Savadur.Web_Services.Client.Metadata;
+   --  Returns metadata (OS, ...)
 
    function Get_Ping_Delay return Duration;
    --  Returns ping delay or 600.0 (10 minutes) if not specified

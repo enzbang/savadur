@@ -41,7 +41,7 @@ package body Savadur.Config.Client is
    use Savadur.Utils;
 
    type Config is record
-      Client_Metadata        : Metadata;
+      Client_Metadata        : Web_Services.Client.Metadata;
       Connection_Retry_Delay : Duration;
       Description            : Unbounded_String;
       Endpoint               : Unbounded_String;
@@ -50,17 +50,20 @@ package body Savadur.Config.Client is
    end record;
 
    Empty : constant Config :=
-             Config'(Key                    => Null_Unbounded_String,
+             Config'(Client_Metadata        => Web_Services.Client.No_Metadata,
+                     Connection_Retry_Delay => 300.0,
+                     Description            => Null_Unbounded_String,
                      Endpoint               => Null_Unbounded_String,
-                     Ping_Delay             => 600.0,
-                     Connection_Retry_Delay => 300.0);
+                     Key                    => Null_Unbounded_String,
+                     Ping_Delay             => 600.0);
 
    Configuration : Config := Empty;
 
-   type Node_Value is (Client, Name, Endpoint,
-                       Ping_Delay, Connection_Retry_Delay);
+   type Node_Value is (Client, Connection_Retry_Delay,
+                       Description,  Endpoint, Metadata,
+                       Name, OS, Ping_Delay);
 
-   type Attribute is (Id, URL, Seconds);
+   type Attribute is (Id, URL, Seconds, Value);
 
    function Get_Node_Value (S : in String) return Node_Value;
    --  Returns the node value matching the given string or raise Config_Error
@@ -138,6 +141,19 @@ package body Savadur.Config.Client is
 
       return -Configuration.Key;
    end Get_Key;
+
+   ------------------
+   -- Get_Metadata --
+   ------------------
+
+   function Get_Metadata return Web_Services.Client.Metadata is
+   begin
+      if Configuration = Empty then
+            Parse;
+      end if;
+
+      return Configuration.Client_Metadata;
+   end Get_Metadata;
 
    --------------------
    -- Get_Node_Value --
@@ -232,7 +248,36 @@ package body Savadur.Config.Client is
 
    begin
       case NV is
-         when Client => null;
+         when Client | Metadata =>
+            null;
+
+         when Description =>
+            for J in 0 .. Get_Length (Atts) - 1 loop
+               Attr := Get_Attribute (Get_Qname (Atts, J));
+               case Attr is
+                  when Value =>
+                     Configuration.Description := +Get_Value (Atts, J);
+
+                  when Id | URL | Seconds =>
+                     raise Config_Error with "Wrong node attr "
+                       & Attribute'Image (Attr);
+
+               end case;
+            end loop;
+
+         when OS =>
+            for J in 0 .. Get_Length (Atts) - 1 loop
+               Attr := Get_Attribute (Get_Qname (Atts, J));
+               case Attr is
+                  when Value =>
+                     Configuration.Client_Metadata.OS := +Get_Value (Atts, J);
+
+                  when Id | URL | Seconds =>
+                     raise Config_Error with "Wrong node attr "
+                       & Attribute'Image (Attr);
+
+               end case;
+            end loop;
 
          when Name =>
             for J in 0 .. Get_Length (Atts) - 1 loop
@@ -241,7 +286,7 @@ package body Savadur.Config.Client is
                   when Id =>
                      Configuration.Key := +Get_Value (Atts, J);
 
-                  when URL | Seconds =>
+                  when Value | URL | Seconds =>
                      raise Config_Error with "Wrong node attr "
                        & Attribute'Image (Attr);
 
@@ -255,7 +300,7 @@ package body Savadur.Config.Client is
                   when URL =>
                      Configuration.Endpoint := +Get_Value (Atts, J);
 
-                  when Id | Seconds =>
+                  when Value | Id | Seconds =>
                      raise Config_Error with "Wrong node attr "
                        & Attribute'Image (Attr);
                end case;
