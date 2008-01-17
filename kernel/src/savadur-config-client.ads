@@ -29,4 +29,10 @@ package Savadur.Config.Client is
    function Get_Endpoint return String;
    --  Returns client endpoint
 
+   function Get_Ping_Delay return Duration;
+   --  Returns ping delay or 600.0 (10 minutes) if not specified
+
+   function Get_Connection_Retry_Delay return Duration;
+   --  Returns connection retry delay or 300.0  (5 minutes) if not specified
+
 end Savadur.Config.Client;

@@ -187,16 +187,18 @@ procedure Savadur.Client is
       task body Keep_Alive is
          use type Calendar.Time;
 
-         Ping_Delay  : constant Duration := 10.0 * 60.0;
-         Retry_Delay : constant Duration := 5.0 * 60.0;
+         Ping_Delay  : constant Duration := Config.Client.Get_Ping_Delay;
+         Retry_Delay : constant Duration :=
+                         Config.Client.Get_Connection_Retry_Delay;
 
          type To_Run is (Connect, Ping);
          Run : To_Run := Ping;
 
          Next_Ping    : Calendar.Time := Calendar.Clock + Ping_Delay;
-         Next_Connect : Calendar.Time := Calendar.Clock;
+         Next_Connect : Calendar.Time := Calendar.Clock + Retry_Delay;
          Next_Time    : Calendar.Time;
       begin
+
          Keep_Alive_Loop : loop
 
             if Next_Ping < Next_Connect then
@@ -307,8 +309,12 @@ procedure Savadur.Client is
          Web.Client.Start;
 
          --  Register this client to all known server
+
+         Savadur.Servers.Offline_Iterate (Register'Access);
+
          --  Loop every 5 minutes trying to reconnect
          --  Ping servers every 10 minutes to check if all is working
+
       end if;
    end Run_Server_Mode;
 
