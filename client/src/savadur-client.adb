@@ -379,6 +379,10 @@ procedure Savadur.Client is
          Name                 => "client",
          Extension            => "xml");
    begin
+      if not Directories.Exists (Config.Savadur_Directory) then
+         Directories.Create_Directory (Config.Savadur_Directory);
+      end if;
+
       Create (File => File, Mode => Out_File, Name => Filename);
       Put_Line (File, "<client>");
 
