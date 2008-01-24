@@ -1,0 +1,128 @@
+Savadur is a light build bot for triggering a build when commits are
+done and to scheduling periodicals build.
+
+It's a client-server based application. The normal way to use it is to
+have a server that deliver orders to build clients. But having only
+one client is fully supported.
+
+It's SCM agnostic. Savadur does not know anything about Subversion,
+CVS or Git. But it is very easy to teach him a new SCM.
+
+For example, adding support for git is simple as adding a file
+scm/git.xml in the server savadur directory.
+
+===============================================================================
+$ cat scm/git.xml
+<scm>
+  <name id="git" />
+
+  <action id="init">
+    <cmd>git-clone $url $sources</cmd>
+  </action>
+
+  <action id="pull">
+    <cmd>git-pull</cmd>
+  </action>
+
+  <action id="version" result="value">
+    <cmd>git show-ref -s refs/heads/master</cmd>
+  </action>
+
+</scm>
+===============================================================================
+
+
+For example, if you want to use savadur to build savadur with only one
+default scenario : run every day on two clients (turbo and enzbang)
+and compile if there are some new commits. You'll need to :
+
+- Create a server savadur directory :
+
+$ ls server-savadurdir/
+config  htdocs  logs.db  projects  scm  scripts
+
+Where config contains a file named project_list.xml
+
+===============================================================================
+$ cat config/project_list.xml
+<project_list>
+   <project id="savadur">
+      <scenario id="default">
+         <client key="enzbang"/>
+         <client key="turbo"/>
+      </scenario>
+   </project>
+</project_list>
+===============================================================================
+
+server-savadurdir/htdocs contains some css and templates for webpages
+
+server-savadurdir/logs.db is the database where ALL logs and built
+status are collected
+
+server-savadurdir/scm/ contains all SCM description. Here savadur use
+git.
+
+server-savadurdir/projects contains all project description. Here only
+one project file savadur.xml
+
+===============================================================================
+<project>
+  <name id="savadur" />
+  <scm id="git" />
+
+  <variable id="url"
+     value="http://repo.or.cz/r/savadur.git" />
+
+  <action id="make">
+    <cmd>make setup all</cmd>
+  </action>
+
+  <action id="regtests">
+    <cmd>make regtests</cmd>
+  </action>
+
+  <scenario id="default">
+    <scm_action id="pull" />
+    <scm_action id="version" require_change="true" on_error="quit" />
+    <action id="make" />
+    <action id="regtests" />
+  </scenario>
+</project>
+===============================================================================
+
+This project file describe :
+ - the project name "savadur"
+ - the scm type "git", all scm_action will references action in the
+   scm xml file (here server-savadurdir/scm/git.xml)
+ - The action list. For this small project only two actions : make and
+   regtests
+ - The scenario list. Here only a "default" scenario, referencing 4
+   actions. The scm_action "version" is a special action that require
+   changes (we want to compile only if there is a new commit) and quit
+   the build process if no changes.
+
+Now if we have a server running on my_server_machine.my_company.com
+and we'll want to add the two clients turbo (machine turbo_server) and
+enzbang (machine enzbang_server) do :
+
+turbo_server$  ./savadur-client --config --id turbo
+turbo_server$  ./savadur-client --remote \
+               --add my_server_machine \
+                     http://my_server_machine.my_company.com
+
+enzbang_server$ ./savadur-client --config --id enzbang
+enzbang_server$ ./savadur-client --remote \
+               --add the_server \
+                     http://my_server_machine.my_company.com
+
+Note that the server name does not has to be equal. It's only a client
+side reference.
+
+Now you just have to launch the server : ./savadur-server
+and start the two clients :
+turbo_server$ ./savadur-client --server
+enzbang_server$ ./savadur-client --server
+
+and you're done !
+
