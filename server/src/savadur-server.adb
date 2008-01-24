@@ -32,6 +32,7 @@
 --       -L filename         : use filename for log file
 
 with Ada.Command_Line;
+with Ada.Exceptions;
 with GNAT.Command_Line;
 
 with Savadur.Config.Project;
