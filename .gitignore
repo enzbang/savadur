@@ -7,10 +7,11 @@
 .build
 .gpsrcs
 bin
+db/data/logs.db
+kernel/src/savadur-version.ads
 savadur.tar.gz
 soap/*.ad?
 soap/*.wsdl
-src/savadur-version.ads
 test/bin
 test/harness
 test/test-dir
