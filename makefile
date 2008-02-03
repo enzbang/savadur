@@ -65,7 +65,10 @@ clean:
 	$(MAKE) -C soap clean
 
 check:
-	$(GNATCHECK) -dd -Psavadur -rules -from=savadur.check
+	$(GNATCHECK) -dd -XPRJ_BUILD=$(MODE) -P server/savadur-server \
+		-rules -from=savadur.check
+	$(GNATCHECK) -dd -XPRJ_BUILD=$(MODE) -P client/savadur-client \
+		-rules -from=savadur.check
 
 install:
 	@$(MKDIR) $(INSTALL)/example
