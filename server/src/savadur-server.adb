@@ -172,8 +172,9 @@ begin
 exception
    when GNAT.Command_Line.Invalid_Section
       | GNAT.Command_Line.Invalid_Switch
-      | GNAT.Command_Line.Invalid_Parameter =>
-      Usage ("unknown syntax");
+      | GNAT.Command_Line.Invalid_Parameter
+      | Syntax_Error =>
+      Usage (Error_Message => "unknown syntax");
    when E : Savadur.Config.Config_Error
       | Savadur.Config.Project.Config_Error =>
       Usage (Error_Message => Exceptions.Exception_Message (E));

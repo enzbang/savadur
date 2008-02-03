@@ -52,7 +52,8 @@ package body Savadur.Web.Client is
       pragma Unreferenced (Request);
    begin
       return Response.Build
-        (MIME.Text_HTML, "<p>Not found</p>", Messages.S404);
+        (MIME.Text_HTML, "<p>Not found</p>",
+         Status_Code => Messages.S404);
    end HTTP_Callback;
 
    -----------

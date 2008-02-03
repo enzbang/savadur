@@ -125,7 +125,8 @@ procedure Savadur.Client is
       if New_Server_Name = Null_Unbounded_String
         or else New_Server_URL = Null_Unbounded_String
       then
-         Usage ("Can't add new remote server. Wrong arguments");
+         Usage
+           (Error_Message => "Can't add new remote server. Wrong arguments");
          return;
       end if;
 
@@ -243,7 +244,8 @@ procedure Savadur.Client is
             Kind    => Logs.Handler.Very_Verbose);
 
          Logs.Write
-           (Content => "Receive " & Client_Service.Client.Ping (Server_URL),
+           (Content => "Receive " & Client_Service.Client.Ping
+              (Endpoint => Server_URL),
             Kind    => Logs.Handler.Very_Verbose);
 
       exception
@@ -261,7 +263,7 @@ procedure Savadur.Client is
          Server_Name : constant String := Servers.Name (Cursor);
          Server_URL  : constant String := Servers.URL (Cursor);
          Metadata    : constant Client_Service.Types.Metadata_Type :=
-                         (OS => +"windows");
+                         Client_Service.Types.Metadata_Type'(OS => +"windows");
          Key         : constant String := Config.Client.Get_Key;
          Endpoint    : constant String := Config.Client.Get_Endpoint;
       begin
@@ -271,7 +273,11 @@ procedure Savadur.Client is
             Kind    => Logs.Handler.Information);
 
          Client_Service.Client.Register
-           (Key, Metadata, Server_Name, Endpoint, Server_URL);
+           (Key               => Key,
+            Data              => Metadata,
+            Server_Name       => Server_Name,
+            Callback_Endpoint => Endpoint,
+            Endpoint          => Server_URL);
 
          Logs.Write (Content => "Done.",
                      Kind    => Logs.Handler.Information);
@@ -564,7 +570,7 @@ begin
 
    --  Remote section
 
-   GNAT.Command_Line.Goto_Section ("-remote");
+   GNAT.Command_Line.Goto_Section (Name => "-remote");
 
    Remote_Opt : loop
       case GNAT.Command_Line.Getopt ("* -add -list") is
@@ -601,7 +607,7 @@ begin
 
    --  Config section
 
-   GNAT.Command_Line.Goto_Section ("-config");
+   GNAT.Command_Line.Goto_Section (Name => "-config");
 
    Config_Opt : loop
       case GNAT.Command_Line.Getopt ("-id: -endpoint:") is
@@ -644,12 +650,13 @@ exception
       | GNAT.Command_Line.Invalid_Switch
       | GNAT.Command_Line.Invalid_Parameter
         =>
-      Usage ("INVALID : unknown syntax");
+      Usage (Error_Message => "INVALID : unknown syntax");
    when E : Savadur.Config.Config_Error
       | Savadur.Config.Project.Config_Error
       | Savadur.Config.Environment_Variables.Config_Error
         =>
       Usage (Error_Message => Exceptions.Exception_Message (E));
    when others =>
-      Usage ("Unknown error - should have been catch before !!!");
+      Usage (Error_Message =>
+             "Unknown error - should have been catch before !!!");
 end Savadur.Client;
