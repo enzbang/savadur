@@ -14,6 +14,9 @@ It's SCM agnostic. Savadur does not know anything about Subversion,
 CVS or Git. But it is very easy to teach him how to interact with a new
 SCM.
 
+Configuration
+-------------
+
 Adding support for git is simple as adding a file scm/git.xml in the server
 savadur directory. Note that the specific action named "init" is mandatory
 and is expected to retreive the sources from the given SCM. If present the
@@ -144,3 +147,16 @@ And start the two clients:
    enzbang_server$ ./savadur-client --server
 
 And you're done!
+
+Trigger a build
+---------------
+
+To trigger a build it is possible to send a simple HTTP request to the server
+for a specific project and scenario.
+
+   $ wget --no-proxy http://<server>:<port>/run?p=<project>\&s=<scenario>
+
+Following the example above:
+
+   $ wget --no-proxy \
+     http://my_server_machine.my_company.com:8181/run?p=savadur\&s=default
