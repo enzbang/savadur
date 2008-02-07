@@ -30,7 +30,7 @@
   </action>
 
   <action id="version" result="value">
-    <cmd regexp="Revision: (.*)">svn info</cmd>
+    <cmd regexp="Revision: (.*)">svn info $url</cmd>
   </action>
 
 </scm>
