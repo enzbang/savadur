@@ -125,8 +125,7 @@ package body Savadur.Web.Server is
          begin
             if Directories.Exists (CSS_File) then
                Logs.Write (CSS_File);
-               return Response.File
-                 (MIME.Text_CSS, CSS_File);
+               return Response.File (MIME.Text_CSS, CSS_File);
             else
                return Response.Build
                  (MIME.Text_HTML,
@@ -136,7 +135,8 @@ package body Savadur.Web.Server is
          end Get_CSS;
 
       elsif Savadur.Config.Project.Is_Project_Name
-        (URI (URI'First + 1 .. URI'Last)) then
+        (URI (URI'First + 1 .. URI'Last))
+      then
          return Show_Project (Request);
       end if;
 

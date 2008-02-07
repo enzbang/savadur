@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                                Savadur                                   --
 --                                                                          --
---                           Copyright (C) 2007                             --
+--                         Copyright (C) 2007-2008                          --
 --                      Pascal Obry - Olivier Ramonat                       --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -26,8 +26,11 @@ package Savadur.Config is
    function Savadur_Directory return String;
    --  Returns Savadur directory or raise Config_Error
    --  Savadur directory containing :
-   --      client.xml
+   --      client.xml   (client side only)
+   --      config/
+   --      htdocs/      (server side only)
    --      projects/
+   --      scripts/     (server side only)
    --      scm/
    --      env/
    --      servers/

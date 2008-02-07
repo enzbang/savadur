@@ -68,6 +68,7 @@ package body Savadur.Build is
       Ref         : in     Actions.Ref_Action;
       Return_Code : in     Integer;
       Log_File    : in     String) return Boolean;
+   --  ???
 
    -----------
    -- Check --
@@ -83,7 +84,6 @@ package body Savadur.Build is
       use type Actions.Result_Type;
       State_Directory : constant String :=
                           Projects.Project_State_Directory (Project);
-
       Result          : Boolean := True;
    begin
       if Exec_Action.Result = Actions.Exit_Status then
@@ -96,62 +96,67 @@ package body Savadur.Build is
 
       if Ref.Require_Change then
          Check_Last_State : declare
-            State_Filename   : constant String
-              := Directories.Compose
-                (Containing_Directory => State_Directory,
-                 Name                 =>
-                   Actions.Id_Utils.To_String (Ref.Id));
+            State_Filename   : constant String :=
+                                 Directories.Compose
+                                   (Containing_Directory => State_Directory,
+                                    Name                 =>
+                                      Actions.Id_Utils.To_String (Ref.Id));
             State_File       : Text_IO.File_Type;
             Last_Exit_Status : Integer;
          begin
-            if Exec_Action.Result = Actions.Exit_Status then
+            case Exec_Action.Result is
+               when Actions.Exit_Status =>
+                  --  This is a case were we check the exit status, Check with
+                  --  last recored state.
 
-               --  Check with last state
+                  if Directories.Exists (State_Filename) then
+                     Text_IO.Open (File => State_File,
+                                   Name => State_Filename,
+                                   Mode => Text_IO.Out_File);
 
-               if Directories.Exists (State_Filename) then
-                  Text_IO.Open (File => State_File,
-                                Name => State_Filename,
-                                Mode => Text_IO.Out_File);
+                     Integer_Text_IO.Get
+                       (File => State_File, Item => Last_Exit_Status);
 
-                  Integer_Text_IO.Get (File  => State_File,
-                                       Item  => Last_Exit_Status);
+                     if Last_Exit_Status = Return_Code then
+                        --  No change. Report error
+                        Result := False;
+                        Logs.Write
+                          (Content => Actions.Id_Utils.To_String (Ref.Id)
+                           & " has no change",
+                           Kind    => Logs.Handler.Verbose);
+                     end if;
 
-                  if Last_Exit_Status = Return_Code then
+                     Text_IO.Reset (File => State_File);
+
+                  else
+                     Text_IO.Create
+                       (File => State_File, Name => State_Filename);
+                  end if;
+
+                  --  Write new state
+
+                  Integer_Text_IO.Put
+                    (File => State_File, Item => Return_Code);
+                  Text_IO.Close (State_File);
+
+               when Actions.Value =>
+                  --  This is the case were we check for return value
+
+                  if Directories.Exists (State_Filename)
+                    and then Content (Log_File) = Content (State_Filename)
+                  then
                      --  No changes. Report error
+
                      Result := False;
                      Logs.Write (Content => Actions.Id_Utils.To_String (Ref.Id)
-                                   & " has no changes",
+                                 & " has no change " & State_Filename,
                                  Kind    => Logs.Handler.Verbose);
                   end if;
 
-                  Text_IO.Reset (File => State_File);
-               else
-                  Text_IO.Create (File => State_File, Name => State_Filename);
-               end if;
+                  --  Write new state
 
-               --  Write new state
-
-               Integer_Text_IO.Put (File => State_File, Item => Return_Code);
-               Text_IO.Close (State_File);
-
-            else
-               --  ??? Filter this result
-
-               if Directories.Exists (State_Filename)
-                 and then Content (Log_File) = Content (State_Filename)
-               then
-                  --  No changes. Report error
-
-                  Result := False;
-                  Logs.Write (Content => Actions.Id_Utils.To_String (Ref.Id)
-                                 & " has no changes " & State_Filename,
-                              Kind    => Logs.Handler.Verbose);
-               end if;
-
-               --  Write new state
-
-               Directories.Copy_File (Log_File, State_Filename);
-            end if;
+                  Directories.Copy_File (Log_File, State_Filename);
+            end case;
          end Check_Last_State;
       end if;
 
@@ -605,6 +610,7 @@ package body Savadur.Build is
                         when Actions.Quit =>
                            Status := True;
                            exit Run_Actions;
+
                         when Actions.Error =>
                            Project.Variables.Insert
                              (New_Item =>
@@ -614,6 +620,7 @@ package body Savadur.Build is
                                  Value => Actions.Id_Utils.
                                    To_Unbounded_String (Ref.Id)));
                            exit Run_Actions;
+
                         when Actions.Continue =>
                            null;
                      end case;
