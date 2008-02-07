@@ -68,6 +68,9 @@ package body Savadur.Jobs.Queue is
    package Job_Set is new Containers.Ordered_Sets (Job_Data);
    --  Job ordered on time
 
+   function Image (Job : in Job_Data) return String;
+   --  Returns Job_Data string representation
+
    protected Job_Handler is
 
       procedure Add (Job : in Job_Data);
@@ -190,6 +193,19 @@ package body Savadur.Jobs.Queue is
       Config.Project.Configurations.Iterate (Handle_Project'Access);
    end Add_Periodic_Scenario;
 
+   -----------
+   -- Image --
+   -----------
+
+   function Image (Job : in Job_Data) return String is
+   begin
+      return "(server:" & To_String (Job.Server)
+        & ", scenario:" & To_String (Job.Scenario)
+        & ", project: "
+        & String (Signed_Files.To_External_Handler (Job.Project))
+        & ")";
+   end Image;
+
    -----------------
    -- Job_Handler --
    -----------------
@@ -206,8 +222,14 @@ package body Savadur.Jobs.Queue is
          Local_Job : Job_Data := Job;
       begin
          --  Ensure the job task is created
+         Logs.Write
+           ("Add job protected "  & Image (Job),
+            Kind => Logs.Handler.Very_Verbose);
 
          if Runner = null then
+            Logs.Write
+              ("Start Job runner tasks",
+               Kind => Logs.Handler.Very_Verbose);
             Runner := new Run_Jobs;
          end if;
 
@@ -243,6 +265,9 @@ package body Savadur.Jobs.Queue is
          Job := Jobs.First_Element;
          Jobs.Delete_First;
          Size := Size - 1;
+         Logs.Write
+           ("Pop to Job" & Image (Job),
+            Kind => Logs.Handler.Very_Verbose);
       end Get;
 
       ----------
