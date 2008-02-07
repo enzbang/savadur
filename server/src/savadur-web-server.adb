@@ -228,6 +228,14 @@ package body Savadur.Web.Server is
       Project_Name : constant String := Parameters.Get (P, "p");
       Scenario_Id  : constant String := Parameters.Get (P, "s");
    begin
+      if Project_Name = "" or else Scenario_Id = "" then
+         return Response.Build
+           (MIME.Text_HTML,
+            "<p>A project and a scenario must be specified</p>"
+            & "<p>http://server:port/run?p=project&s=scenario</p>",
+            Status_Code => Messages.S200);
+      end if;
+
       Run_Project : declare
          Project          : aliased Projects.Project_Config :=
                               Savadur.Config.Project.Get (Project_Name);
