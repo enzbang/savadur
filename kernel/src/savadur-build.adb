@@ -104,6 +104,15 @@ package body Savadur.Build is
             State_File       : Text_IO.File_Type;
             Last_Exit_Status : Integer;
          begin
+            --  First copy previous state if it exists, this will be needed to
+            --  be able to send the blame list to notification hooks. In this
+            --  case we want to be able to compute all diffs from previous run.
+
+            if Directories.Exists (State_Filename) then
+               Directories.Copy_File
+                 (State_Filename, State_Filename & ".previous");
+            end if;
+
             case Exec_Action.Result is
                when Actions.Exit_Status =>
                   --  This is a case were we check the exit status, Check with
