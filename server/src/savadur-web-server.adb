@@ -94,7 +94,7 @@ package body Savadur.Web.Server is
                      Name                 => "css");
       URI     : constant String := Status.URI (Request);
       Log_URI : constant String := "/log/";
-      CSS_URI : constant String := "/css";
+      CSS_URI : constant String := "/css/";
    begin
       Logs.Write
         (Content => "Calling => " & URI,
