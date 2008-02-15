@@ -301,8 +301,15 @@ package body Savadur.Jobs.Queue is
             end;
 
          else
+            --  This is periodic job, replace existing one if present
+
             Position := Jobs.Find (Local_Job);
-            Jobs.Replace_Element (Position, Local_Job);
+
+            if Position /= Job_Set.No_Element then
+               Jobs.Replace_Element (Position, Local_Job);
+            else
+               Jobs.Insert (Local_Job);
+            end if;
          end if;
 
          New_Job := True;
