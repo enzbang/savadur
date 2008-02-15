@@ -227,6 +227,7 @@ package body Savadur.Web.Server is
                        Status.Parameters (Request);
       Project_Name : constant String := Parameters.Get (P, "p");
       Scenario_Id  : constant String := Parameters.Get (P, "s");
+      Latency      : constant String := Parameters.Get (P, "l");
    begin
       if Project_Name = "" or else Scenario_Id = "" then
          return Response.Build
@@ -245,7 +246,13 @@ package body Savadur.Web.Server is
       begin
          Signed_Files.Create (Signed_Project, Project_Name, Project_Filename);
 
-         Jobs.Server.Queue.Add (Signed_Project, "", Scenario_Id);
+         if Latency = "" then
+            Jobs.Server.Queue.Add (Signed_Project, "", Scenario_Id);
+         else
+            Jobs.Server.Queue.Add
+              (Signed_Project, "", Scenario_Id,
+               Latency => Duration'Value (Latency));
+         end if;
 
          return Response.Build
            (MIME.Text_HTML,

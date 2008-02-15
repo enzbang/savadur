@@ -24,6 +24,8 @@ with Ada.Containers.Ordered_Sets;
 with Ada.Exceptions;
 with Ada.Strings.Unbounded;
 
+with AWS.Utils;
+
 with Savadur.Actions;
 with Savadur.Config.Environment_Variables;
 with Savadur.Config.Project;
@@ -44,7 +46,8 @@ package body Savadur.Jobs.Queue is
       Project  : aliased Signed_Files.Handler;
       Server   : Unbounded_String;
       Scenario : Unbounded_String;
-      Time     : Times.Periodic;
+      Time     : Times.Periodic;  -- periodic job
+      Start    : Duration;        -- non periodic job start delay
       Created  : Calendar.Time;
       Number   : Integer;
       Id       : Natural;
@@ -55,6 +58,7 @@ package body Savadur.Jobs.Queue is
                 Scenario => Null_Unbounded_String,
                 Server   => Null_Unbounded_String,
                 Time     => Times.No_Time,
+                Start    => 0.0,
                 Created  => <>,
                 Number   => Integer'First,
                 Id       => 0);
@@ -70,6 +74,9 @@ package body Savadur.Jobs.Queue is
 
    function Image (Job : in Job_Data) return String;
    --  Returns Job_Data string representation
+
+   function Run_In (Job : in Job_Data) return Duration;
+   --  Returns the number of second before the job starts
 
    protected Job_Handler is
 
@@ -112,10 +119,10 @@ package body Savadur.Jobs.Queue is
          return False;
       elsif J2 = End_Job then
          return True;
-      elsif Times.Next_Run_In (J1.Time) = Times.Next_Run_In (J2.Time) then
+      elsif Run_In (J1) = Run_In (J2) then
          return J1.Number < J2.Number;
       else
-         return Times.Next_Run_In (J1.Time) < Times.Next_Run_In (J2.Time);
+         return Run_In (J1) < Run_In (J2);
       end if;
    end "<";
 
@@ -137,6 +144,7 @@ package body Savadur.Jobs.Queue is
       Server   : in String;
       Scenario : in String;
       Time     : in Times.Periodic := Times.No_Time;
+      Latency  : in Duration := 10.0 * 60.0;
       Id       : in Natural := 0) is
    begin
       Job_Handler.Add
@@ -144,6 +152,7 @@ package body Savadur.Jobs.Queue is
                    Scenario => +Scenario,
                    Server   => +Server,
                    Time     => Time,
+                   Start    => Latency,
                    Created  => Calendar.Clock,
                    Number   => 0,
                    Id       => Id));
@@ -198,12 +207,22 @@ package body Savadur.Jobs.Queue is
    -----------
 
    function Image (Job : in Job_Data) return String is
+      use type Times.Periodic;
+      Res : Unbounded_String;
    begin
-      return "(server:" & To_String (Job.Server)
+      if Job.Time = Times.No_Time then
+         Res := +"(start in " & AWS.Utils.Significant_Image (Job.Start, 2);
+      else
+         Res := +"(periodic";
+      end if;
+
+      Res := Res & " | server:" & To_String (Job.Server)
         & ", scenario:" & To_String (Job.Scenario)
-        & ", project: "
+        & ", project:"
         & String (Signed_Files.To_External_Handler (Job.Project))
         & ")";
+
+      return To_String (Res);
    end Image;
 
    -----------------
@@ -218,6 +237,9 @@ package body Savadur.Jobs.Queue is
 
       procedure Add (Job : in Job_Data) is
          use type Times.Periodic;
+         use type Job_Set.Cursor;
+         use type Signed_Files.Handler;
+
          Position  : Job_Set.Cursor;
          Local_Job : Job_Data := Job;
       begin
@@ -242,11 +264,41 @@ package body Savadur.Jobs.Queue is
          --  happen when reloading projects. We want to replace the existing
          --  job as the period could have been changed.
 
-         if Local_Job.Time = Times.No_Time
-           or else not Jobs.Contains (Local_Job)
-         then
-            Jobs.Insert (Local_Job);
-            Size := Size + 1;
+         if Local_Job.Time = Times.No_Time then
+
+            --  Remove current non periodic job that could have already been
+            --  sceduled.
+
+            declare
+               Pos : Job_Set.Cursor := Jobs.First;
+            begin
+               Delete_Current_Job : while Pos /= Job_Set.No_Element loop
+                  declare
+                     J : constant Job_Data := Job_Set.Element (Pos);
+                  begin
+                     if J.Project = Job.Project
+                       and then J.Server = Job.Server
+                       and then J.Scenario = Job.Scenario
+                       and then J.Time = Times.No_Time
+                     then
+                        exit Delete_Current_Job;
+                     end if;
+                  end;
+                  Pos := Job_Set.Next (Pos);
+               end loop Delete_Current_Job;
+
+               if Pos =  Job_Set.No_Element then
+                  Size := Size + 1;
+               else
+                  Logs.Write
+                    ("Delete already scheduled job for this scenario: "
+                     & Image (Job_Set.Element (Pos)),
+                     Kind => Logs.Handler.Very_Verbose);
+                  Jobs.Delete (Pos);
+               end if;
+
+               Jobs.Insert (Local_Job);
+            end;
 
          else
             Position := Jobs.Find (Local_Job);
@@ -275,8 +327,9 @@ package body Savadur.Jobs.Queue is
       ----------
 
       entry Next (Seconds : out Duration) when Size > 0 is
+         Job : constant Job_Data := Jobs.First_Element;
       begin
-         Seconds := Times.Next_Run_In (Jobs.First_Element.Time);
+         Seconds := Run_In (Job);
          New_Job := False;
       end Next;
 
@@ -301,6 +354,20 @@ package body Savadur.Jobs.Queue is
       end Stop;
 
    end Job_Handler;
+
+   ------------
+   -- Run_In --
+   ------------
+
+   function Run_In (Job : in Job_Data) return Duration is
+      use type Times.Periodic;
+   begin
+      if Job.Time = Times.No_Time then
+         return Job.Start;
+      else
+         return Times.Next_Run_In (Job.Time);
+      end if;
+   end Run_In;
 
    --------------
    -- Run_Jobs --

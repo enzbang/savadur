@@ -43,13 +43,15 @@ package body Savadur.Web_Services.Server is
       Signed_Project : in Server.Signed_Project;
       Id             : in Natural) is
    begin
-      --  This is run on the client side
+      --  This is run on the client side, no latency as this is already dealt
+      --  by the server.
       Jobs.Client.Queue.Add
         (Project  => Signed_Files.To_Handler
            (Signed_Files.External_Handler (Signed_Project)),
          Server   => Server_Name,
          Scenario => Scenario,
-         Id       => Id);
+         Id       => Id,
+         Latency  => 0.0);
    end Run;
 
 end Savadur.Web_Services.Server;

@@ -154,7 +154,11 @@ Trigger a build
 To trigger a build it is possible to send a simple HTTP request to the server
 for a specific project and scenario.
 
-   $ wget --no-proxy http://<server>:<port>/run?p=<project>\&s=<scenario>
+   $ wget --no-proxy http://<server>:<port>/run?p=<project>\&s=<scenario>\&l=<latency>
+
+     <project>  : the project name
+     <scenario> : the specific scenario to run
+     <latency>  : seconds to wait before launching the run
 
 Following the example above:
 
