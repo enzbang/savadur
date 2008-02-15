@@ -325,7 +325,7 @@ package body Savadur.Jobs.Queue is
          Jobs.Delete_First;
          Size := Size - 1;
          Logs.Write
-           ("Pop to Job" & Image (Job),
+           ("Pop to Job " & Image (Job),
             Kind => Logs.Handler.Very_Verbose);
       end Get;
 
