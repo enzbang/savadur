@@ -168,8 +168,7 @@ package body Savadur.Web_Services.Client is
       Action       : in String;
       Output       : in String;
       Result       : in Boolean;
-      Job_Id       : in Natural)
-   is
+      Job_Id       : in Natural) is
    begin
       Logs.Write (Key & ":" & Project_Name);
       Logs.Write ("Running Job Id" & Natural'Image (Job_Id)
@@ -179,8 +178,8 @@ package body Savadur.Web_Services.Client is
 
       if Action /= "" then
          --  This is the action log. Scenario is in progress
-         Database.Log (Key, Project_Name, Scenario,
-                       Action, Output, Result, Job_Id);
+         Database.Log
+           (Key, Project_Name, Scenario, Action, Output, Result, Job_Id);
 
       else
          --  End of scenario. Final status

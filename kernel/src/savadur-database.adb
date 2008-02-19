@@ -403,8 +403,7 @@ package body Savadur.Database is
 
       --  Now select the last value
 
-      DBH.Handle.Prepare_Select
-        (Iter, "select max(id) from job_id");
+      DBH.Handle.Prepare_Select (Iter, "select max(id) from job_id");
 
       if Iter.More then
          Iter.Get_Line (Line);

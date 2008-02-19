@@ -50,6 +50,7 @@ package body Savadur.Jobs.Server is
       begin
          Id := Database.Job_Id;
       end Get;
+
    end Job_Id;
 
    ---------
@@ -102,7 +103,7 @@ package body Savadur.Jobs.Server is
                when AWS.Client.Connection_Error =>
                   --  Client if offline.
                   --  Removes it from online clients and add logout info
-                  --  into database
+                  --  into database.
 
                   Database.Logout (-Client.Key);
                   Clients.Sets.Delete (Clients.Registered, Client);
@@ -118,7 +119,6 @@ package body Savadur.Jobs.Server is
                   Project_List.Get_Clients (-Project.Project_Id, -Scenario);
 
    begin
-
       --  Generate job id for all clients
 
       Current_Job.Get (Generated_Job_Id);
