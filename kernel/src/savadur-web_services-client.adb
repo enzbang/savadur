@@ -157,8 +157,18 @@ package body Savadur.Web_Services.Client is
       Logs.Write ("Client Metadata are OS = " & (-Data.OS),
                   Logs.Handler.Very_Verbose);
 
-      Clients.Registered.Insert
-        (New_Item => (+Key, Data, +Server_Name, +Callback_Endpoint));
+      Insert_Or_Update : begin
+         Clients.Registered.Insert
+           (New_Item => (+Key, Data, +Server_Name, +Callback_Endpoint));
+      exception
+         when Constraint_Error =>
+            --  If the client has been deconnected and try to register again
+            --  replace the old configuration by the new one
+            Logs.Write ("Client exits... update it");
+            Clients.Registered.Replace
+              (New_Item => (+Key, Data, +Server_Name, +Callback_Endpoint));
+      end Insert_Or_Update;
+
       Database.Login (Key);
    end Register;
 
