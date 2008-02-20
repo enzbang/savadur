@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>@_CHANNEL_TITLE_@</title>
+    <link>@_CHANNEL_LINK_@</link>
+    <description>@_CHANNEL_DESCRIPTION_@</description>
+    <generator>Savadur</generator>
+
+    @@TABLE@@
+    <item>
+      <title>@_NAME_@
+      @@IF@@ @_STATUS_@ = FALSE
+      failed
+      @@ELSE@@
+      succeed
+      @@END_IF@@
+      </title>
+      <description>
+        @_NAME_@
+        @@IF@@ @_STATUS_@ = FALSE
+        failed
+        @@ELSE@@
+        succeed
+        @@END_IF@@
+        to build with scenario @_SCENARIO_@ on client @_CLIENT_@
+        See @_CHANNEL_LINK_@/@_NAME_@
+      </description>
+      <pubDate>@_FORMAT_DATE("%a, %d %b %Y %T EST"):DATE_@</pubDate>
+      <guid>@_CHANNEL_LINK_@/@_NAME_@?c=@_CLIENT_@&amp;jid=@_JOB_ID_@</guid>
+    </item>
+    @@END_TABLE@@
+    <atom:link href="@_CHANNEL_LINK_@/rss/all"
+               rel="self" type="application/rss+xml" />
+  </channel>
+</rss>
