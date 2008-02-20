@@ -28,8 +28,9 @@ with AWS.Status;
 with AWS.URL;
 with SOAP.Dispatchers.Callback;
 
-with Savadur.Server_Service.CB;
+with Savadur.Config.Client;
 with Savadur.Logs;
+with Savadur.Server_Service.CB;
 
 package body Savadur.Web.Client is
 
@@ -62,7 +63,7 @@ package body Savadur.Web.Client is
 
    procedure Start is
    begin
-      Address := URL.Parse (Server_Service.URL);
+      Address := URL.Parse (Savadur.Config.Client.Get_Endpoint);
       AWS.Config.Set.Server_Port (Config, URL.Port (Address));
 
       Dispatcher := Dispatchers.Callback.Create
