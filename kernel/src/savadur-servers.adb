@@ -120,7 +120,7 @@ package body Savadur.Servers is
    ------------
 
    procedure Insert (Name, URL : in String) is
-      New_Item : Server := Server'(+Name, +URL, Offline);
+      New_Item : constant Server := Server'(+Name, +URL, Offline);
    begin
       Sets.Insert (Container => All_Servers,
                    New_Item  => New_Item);
@@ -209,7 +209,7 @@ package body Savadur.Servers is
                       Item      => Server'(Name   => +Server_Name,
                                            URL    => <>,
                                            Status => <>));
-      Element  : Server := Sets.Element (Position);
+      Element  : constant Server := Sets.Element (Position);
    begin
       if Element.Status = Online then
          return -Element.URL;

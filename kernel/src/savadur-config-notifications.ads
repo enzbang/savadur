@@ -22,7 +22,7 @@
 with AWS.Jabber;
 
 package Savadur.Config.Notifications is
-   Config_Error : exception;
+   Config_Error : exception renames Savadur.Config.Config_Error;
 
    procedure Parse;
    --  Parses all projects

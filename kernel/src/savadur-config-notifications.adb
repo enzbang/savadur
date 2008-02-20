@@ -60,14 +60,14 @@ package body Savadur.Config.Notifications is
    function Get_Node_Value (S : in String) return Node_Value;
    --  Returns the node value matching the given string or raise Config_Error
 
-   procedure Start_Element
+   overriding procedure Start_Element
      (Handler       : in out Tree_Reader;
       Namespace_URI : in     Unicode.CES.Byte_Sequence := "";
       Local_Name    : in     Unicode.CES.Byte_Sequence := "";
       Qname         : in     Unicode.CES.Byte_Sequence := "";
       Atts          : in     Sax.Attributes.Attributes'Class);
 
-   procedure End_Element
+   overriding procedure End_Element
      (Handler       : in out Tree_Reader;
       Namespace_URI : in     Unicode.CES.Byte_Sequence := "";
       Local_Name    : in     Unicode.CES.Byte_Sequence := "";
@@ -77,7 +77,7 @@ package body Savadur.Config.Notifications is
    -- End_Element --
    -----------------
 
-   procedure End_Element
+   overriding procedure End_Element
      (Handler       : in out Tree_Reader;
       Namespace_URI : in     Unicode.CES.Byte_Sequence := "";
       Local_Name    : in     Unicode.CES.Byte_Sequence := "";
@@ -193,7 +193,7 @@ package body Savadur.Config.Notifications is
    -- Start_Element --
    -------------------
 
-   procedure Start_Element
+   overriding procedure Start_Element
      (Handler       : in out Tree_Reader;
       Namespace_URI : in     Unicode.CES.Byte_Sequence := "";
       Local_Name    : in     Unicode.CES.Byte_Sequence := "";

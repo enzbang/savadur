@@ -106,7 +106,8 @@ package body Savadur.Web_Services.Client is
         (Config.SCM.Configurations, Value (SCM_Name))
       then
          declare
-            S            : aliased constant SCM.SCM := Config.SCM.Get (SCM_Name);
+            S            : aliased constant SCM.SCM :=
+                             Config.SCM.Get (SCM_Name);
             SCM_Filename : constant String := -S.Filename;
             Local_SCM    : aliased Signed_Files.Handler;
          begin

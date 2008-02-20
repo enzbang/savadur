@@ -56,7 +56,7 @@ package body Savadur.Config.Server is
       Server_URL  : Unbounded_String;
    end record;
 
-   procedure Start_Element
+   overriding procedure Start_Element
      (Handler       : in out Tree_Reader;
       Namespace_URI : in     Unicode.CES.Byte_Sequence := "";
       Local_Name    : in     Unicode.CES.Byte_Sequence := "";
@@ -146,7 +146,7 @@ package body Savadur.Config.Server is
    -- Start_Element --
    -------------------
 
-   procedure Start_Element
+   overriding procedure Start_Element
      (Handler       : in out Tree_Reader;
       Namespace_URI : in     Unicode.CES.Byte_Sequence := "";
       Local_Name    : in     Unicode.CES.Byte_Sequence := "";

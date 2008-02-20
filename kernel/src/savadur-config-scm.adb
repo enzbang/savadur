@@ -78,20 +78,20 @@ package body Savadur.Config.SCM is
       SCM           : Savadur.SCM.SCM;
    end record;
 
-   procedure Start_Element
+   overriding procedure Start_Element
      (Handler       : in out Tree_Reader;
       Namespace_URI : in     Unicode.CES.Byte_Sequence := "";
       Local_Name    : in     Unicode.CES.Byte_Sequence := "";
       Qname         : in     Unicode.CES.Byte_Sequence := "";
       Atts          : in     Sax.Attributes.Attributes'Class);
 
-   procedure End_Element
+   overriding procedure End_Element
      (Handler       : in out Tree_Reader;
       Namespace_URI : in     Unicode.CES.Byte_Sequence := "";
       Local_Name    : in     Unicode.CES.Byte_Sequence := "";
       Qname         : in     Unicode.CES.Byte_Sequence := "");
 
-   procedure Characters
+   overriding procedure Characters
      (Handler : in out Tree_Reader;
       Ch      : in     Unicode.CES.Byte_Sequence);
 
@@ -99,7 +99,7 @@ package body Savadur.Config.SCM is
    -- Characters --
    ----------------
 
-   procedure Characters
+   overriding procedure Characters
      (Handler : in out Tree_Reader;
       Ch      : in     Unicode.CES.Byte_Sequence) is
    begin
@@ -110,7 +110,7 @@ package body Savadur.Config.SCM is
    -- End_Element --
    -----------------
 
-   procedure End_Element
+   overriding procedure End_Element
      (Handler       : in out Tree_Reader;
       Namespace_URI : in     Unicode.CES.Byte_Sequence := "";
       Local_Name    : in     Unicode.CES.Byte_Sequence := "";
@@ -283,7 +283,7 @@ package body Savadur.Config.SCM is
    -- Start_Element --
    -------------------
 
-   procedure Start_Element
+   overriding procedure Start_Element
      (Handler       : in out Tree_Reader;
       Namespace_URI : in     Unicode.CES.Byte_Sequence := "";
       Local_Name    : in     Unicode.CES.Byte_Sequence := "";
