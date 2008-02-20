@@ -22,6 +22,7 @@
 with Ada.Exceptions;
 
 with AWS.Jabber;
+with AWS.SMTP.Client;
 
 with Savadur.Config.Notifications;
 with Savadur.Logs;
@@ -29,6 +30,7 @@ with Savadur.Logs;
 package body Savadur.Notifications is
 
    use Ada;
+   use AWS;
 
    -----------
    -- Image --
@@ -50,9 +52,24 @@ package body Savadur.Notifications is
       Subject      : in String;
       Content      : in String)
    is
-      pragma Unreferenced (Email, Subject, Content);
+      Localhost : constant SMTP.Receiver :=
+                    SMTP.Client.Initialize ("localhost");
+      Result    : SMTP.Status;
    begin
-      null;
+
+         SMTP.Client.Send
+           (Server  => Localhost,
+            From    => SMTP.E_Mail ("savadur", "no-reply"),
+            To      => SMTP.E_Mail (Email, Email),
+            Subject => Subject,
+            Message => Content,
+            Status  => Result);
+
+      if not SMTP.Is_Ok (Result) then
+         Logs.Write ("Send_Mail error : (TO=" & Email
+                     & ", subject=" & Subject & ")",
+                     Logs.Handler.Error);
+      end if;
    end Send_Mail;
 
    ---------------
