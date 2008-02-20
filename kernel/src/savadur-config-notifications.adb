@@ -182,10 +182,11 @@ package body Savadur.Config.Notifications is
          Logs.Write
            (Content => "Can not parse notify.xml : file does no exist",
             Kind    => Logs.Handler.Warnings);
+      else
+         Input_Sources.File.Open (Filename => Filename, Input => Source);
+         Parse (Reader, Source);
+         Input_Sources.File.Close (Source);
       end if;
-      Input_Sources.File.Open (Filename => Filename, Input => Source);
-      Parse (Reader, Source);
-      Input_Sources.File.Close (Source);
    end Parse;
 
    -------------------
