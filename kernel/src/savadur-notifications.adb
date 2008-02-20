@@ -48,13 +48,40 @@ package body Savadur.Notifications is
         & "On Failure = " & Actions.Image (H.On_Failure);
    end Image;
 
+      ---------------
+   -- Send_Mail --
+   ---------------
+
+   procedure Send_Mail
+     (Email        : in String;
+      Subject      : in String;
+      Content      : in String)
+   is
+      Localhost : constant SMTP.Receiver :=
+                    SMTP.Client.Initialize ("localhost");
+      Result    : SMTP.Status;
+   begin
+         SMTP.Client.Send
+           (Server  => Localhost,
+            From    => SMTP.E_Mail ("savadur", "no-reply"),
+            To      => SMTP.E_Mail (Email, Email),
+            Subject => Subject,
+            Message => Content,
+            Status  => Result);
+
+      if not SMTP.Is_Ok (Result) then
+         Logs.Write ("Send_Mail error : (TO=" & Email
+                     & ", subject=" & Subject & ")",
+                     Logs.Handler.Error);
+      end if;
+   end Send_Mail;
+
    ----------------
    -- Update_RSS --
    ----------------
 
    procedure Update_RSS is
       use Ada.Text_IO;
-      use AWS;
       Web_Dir       : constant String := Directories.Compose
         (Containing_Directory => Savadur.Config.Savadur_Directory,
          Name                 => "htdocs");
@@ -100,34 +127,6 @@ package body Savadur.Notifications is
 
       Close (File);
    end Update_RSS;
-
-   ---------------
-   -- Send_Mail --
-   ---------------
-
-   procedure Send_Mail
-     (Email        : in String;
-      Subject      : in String;
-      Content      : in String)
-   is
-      Localhost : constant SMTP.Receiver :=
-                    SMTP.Client.Initialize ("localhost");
-      Result    : SMTP.Status;
-   begin
-         SMTP.Client.Send
-           (Server  => Localhost,
-            From    => SMTP.E_Mail ("savadur", "no-reply"),
-            To      => SMTP.E_Mail (Email, Email),
-            Subject => Subject,
-            Message => Content,
-            Status  => Result);
-
-      if not SMTP.Is_Ok (Result) then
-         Logs.Write ("Send_Mail error : (TO=" & Email
-                     & ", subject=" & Subject & ")",
-                     Logs.Handler.Error);
-      end if;
-   end Send_Mail;
 
    ---------------
    -- XMPP_Send --
