@@ -83,6 +83,7 @@ install:
 	@$(CP) db/data/create_database.sh $(INSTALL)/server-savadurdir/scripts/
 	@$(CP) config/scm/* $(INSTALL)/server-savadurdir/scm
 	@$(CP) templates/*.thtml $(INSTALL)/server-savadurdir/htdocs/templates
+	@$(CP) templates/*.txml $(INSTALL)/server-savadurdir/htdocs/templates
 	@$(CP) templates/*.css $(INSTALL)/server-savadurdir/htdocs/css
 	@$(CP) test/config/*.xml $(INSTALL)/example/
 	cp client/$(BIN_DIR)/savadur-client $(INSTALL)
