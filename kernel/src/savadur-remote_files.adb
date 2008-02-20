@@ -173,7 +173,8 @@ package body Savadur.Remote_Files is
       if SCM.Keys.Contains (Config.SCM.Configurations, Value (SCM_Name)) then
          Logs.Write ("   SCM exists");
          declare
-            S            : aliased SCM.SCM := Config.SCM.Get (SCM_Name);
+            S            : aliased constant SCM.SCM :=
+                             Config.SCM.Get (SCM_Name);
             SCM_Filename : constant String := -S.Filename;
          begin
             Signed_Files.Create (Signed_SCM, SCM_Name, SCM_Filename);

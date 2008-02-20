@@ -113,7 +113,7 @@ package body Savadur.Projects is
 
       if Project.Directories.Project_Sources_Directory = +"" then
          declare
-            Var : Savadur.Variables.Variable :=
+            Var : constant Savadur.Variables.Variable :=
                     Savadur.Variables.Keys.Element
                       (Container  => Project.Variables,
                        Key        => Savadur.Variables.Name_Utils.Value

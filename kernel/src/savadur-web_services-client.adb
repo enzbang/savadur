@@ -46,7 +46,7 @@ package body Savadur.Web_Services.Client is
    is
       use type Signed_Files.Signature;
 
-      Project      : aliased Signed_Files.Handler :=
+      Project      : aliased constant Signed_Files.Handler :=
                        Signed_Files.To_Handler
                          (Signed_Files.External_Handler (Signed_Project));
       Project_Name : constant String := Signed_Files.Name (Project);
@@ -95,7 +95,7 @@ package body Savadur.Web_Services.Client is
       use SCM.Id_Utils;
       use type Signed_Files.Signature;
 
-      S_SCM    : aliased Signed_Files.Handler :=
+      S_SCM    : aliased constant Signed_Files.Handler :=
                    Signed_Files.To_Handler
                      (Signed_Files.External_Handler (Signed_SCM));
       SCM_Name : constant String := Signed_Files.Name (S_SCM);
@@ -106,7 +106,7 @@ package body Savadur.Web_Services.Client is
         (Config.SCM.Configurations, Value (SCM_Name))
       then
          declare
-            S            : aliased SCM.SCM := Config.SCM.Get (SCM_Name);
+            S            : aliased constant SCM.SCM := Config.SCM.Get (SCM_Name);
             SCM_Filename : constant String := -S.Filename;
             Local_SCM    : aliased Signed_Files.Handler;
          begin

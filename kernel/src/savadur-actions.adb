@@ -125,7 +125,7 @@ package body Savadur.Actions is
       -----------
 
       procedure Image (Position : in Vectors.Cursor) is
-         Element : Ref_Action := Vectors.Element (Position);
+         Element : constant Ref_Action := Vectors.Element (Position);
       begin
          Append (Result, Image (Element) & ASCII.LF);
       end Image;
