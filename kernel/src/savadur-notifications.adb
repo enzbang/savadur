@@ -24,10 +24,12 @@ with Ada.Directories;
 with Ada.Text_IO;
 
 with AWS.Jabber;
+with AWS.SMTP.Authentication.Plain;
 with AWS.SMTP.Client;
 with AWS.Templates;
 
-with Savadur.Config.Notifications;
+with Savadur.Config.Notifications.SMTP;
+with Savadur.Config.Notifications.XMPP;
 with Savadur.Config.Syndication;
 with Savadur.Database;
 with Savadur.Logs;
@@ -57,12 +59,25 @@ package body Savadur.Notifications is
       Subject : in String;
       Content : in String)
    is
-      Localhost : constant SMTP.Receiver :=
-                    SMTP.Client.Initialize ("localhost");
-      Result    : SMTP.Status;
+      SMTP_Server : SMTP.Receiver;
+      Auth        : aliased SMTP.Authentication.Plain.Credential;
+      Result      : SMTP.Status;
    begin
+      if Config.Notifications.SMTP.User /= "" then
+         Auth := SMTP.Authentication.Plain.Initialize
+           (Config.Notifications.SMTP.User,
+            Config.Notifications.SMTP.Password);
+
+         SMTP_Server := SMTP.Client.Initialize
+           (Config.Notifications.SMTP.Server, Credential => Auth'Access);
+
+      else
+         SMTP_Server := SMTP.Client.Initialize
+           (Config.Notifications.SMTP.Server);
+      end if;
+
       SMTP.Client.Send
-        (Server  => Localhost,
+        (Server  => SMTP_Server,
          From    => SMTP.E_Mail ("savadur", "no-reply"),
          To      => SMTP.E_Mail (Email, Email),
          Subject => Subject,
@@ -141,10 +156,10 @@ package body Savadur.Notifications is
    begin
       Jabber.Connect
         (Server    => Server,
-         Host      => Config.Notifications.Jabber_Server,
-         User      => Config.Notifications.Jabber_JID,
-         Password  => Config.Notifications.Jabber_Password,
-         Auth_Type => Config.Notifications.Jabber_Auth_Type);
+         Host      => Config.Notifications.XMPP.Jabber_Server,
+         User      => Config.Notifications.XMPP.Jabber_JID,
+         Password  => Config.Notifications.XMPP.Jabber_Password,
+         Auth_Type => Config.Notifications.XMPP.Jabber_Auth_Type);
 
       Jabber.Send_Message
         (Server => Server,

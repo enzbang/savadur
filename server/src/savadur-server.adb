@@ -35,7 +35,8 @@ with Ada.Command_Line;
 with Ada.Exceptions;
 with GNAT.Command_Line;
 
-with Savadur.Config.Notifications;
+with Savadur.Config.Notifications.SMTP;
+with Savadur.Config.Notifications.XMPP;
 with Savadur.Config.Project;
 with Savadur.Config.Project_List;
 with Savadur.Config.SCM;
@@ -163,7 +164,8 @@ begin
    Config.SCM.Parse;
    Config.Project.Parse;
    Config.Project_List.Parse;
-   Config.Notifications.Parse;
+   Config.Notifications.XMPP.Parse;
+   Config.Notifications.SMTP.Parse;
 
    Web.Server.Start;
 

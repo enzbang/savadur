@@ -32,25 +32,26 @@ with Unicode.CES;
 with Savadur.Logs;
 with Savadur.Utils;
 
-package body Savadur.Config.Notifications is
+package body Savadur.Config.Notifications.SMTP is
 
    use Ada;
    use Ada.Strings.Unbounded;
    use Savadur.Utils;
 
-   type Jabber_Config is record
+   type SMTP_Config is record
       Server    : Unbounded_String;
-      JID       : Unbounded_String;
+      User      : Unbounded_String;
       Password  : Unbounded_String;
-      Auth_Type : AWS.Jabber.Authentication_Type;
    end record;
 
-   Jabber_Conf : Jabber_Config;
+   SMTP_Conf : SMTP_Config :=
+                 (+"localhost", Null_Unbounded_String, Null_Unbounded_String);
+   --  Default using localhost as mail server
 
-   type Node_Value is (Jabber, Server, JID, Password, Auth_Type);
+   type Node_Value is (SMTP, Server, User, Password);
 
    type Tree_Reader is new Sax.Readers.Reader with record
-      Jabber_Node   : Boolean;
+      SMTP_Node     : Boolean;
       Content_Value : Unbounded_String;
    end record;
 
@@ -86,20 +87,16 @@ package body Savadur.Config.Notifications is
    begin
       case NV is
          when Server =>
-            Jabber_Conf.Server := Handler.Content_Value;
+            SMTP_Conf.Server := Handler.Content_Value;
 
-         when JID =>
-            Jabber_Conf.JID := Handler.Content_Value;
+         when User =>
+            SMTP_Conf.User := Handler.Content_Value;
 
          when Password =>
-            Jabber_Conf.Password := Handler.Content_Value;
+            SMTP_Conf.Password := Handler.Content_Value;
 
-         when Auth_Type =>
-            Jabber_Conf.Auth_Type :=
-              AWS.Jabber.Authentication_Type'Value (-Handler.Content_Value);
-
-         when Jabber =>
-            Handler.Jabber_Node := False;
+         when SMTP =>
+            Handler.SMTP_Node := False;
       end case;
    end End_Element;
 
@@ -122,42 +119,6 @@ package body Savadur.Config.Notifications is
       raise Config_Error with "Unknown node " & S;
    end Get_Node_Value;
 
-   ----------------------
-   -- Jabber_Auth_Type --
-   ----------------------
-
-   function Jabber_Auth_Type return AWS.Jabber.Authentication_Type is
-   begin
-      return Jabber_Conf.Auth_Type;
-   end Jabber_Auth_Type;
-
-   ----------------
-   -- Jabber_JID --
-   ----------------
-
-   function Jabber_JID return String is
-   begin
-      return -Jabber_Conf.JID;
-   end Jabber_JID;
-
-   ---------------------
-   -- Jabber_Password --
-   ---------------------
-
-   function Jabber_Password return String is
-   begin
-      return -Jabber_Conf.Password;
-   end Jabber_Password;
-
-   -------------------
-   -- Jabber_Server --
-   -------------------
-
-   function Jabber_Server return String is
-   begin
-      return -Jabber_Conf.Server;
-   end Jabber_Server;
-
    -----------
    -- Parse --
    -----------
@@ -170,14 +131,14 @@ package body Savadur.Config.Notifications is
       Filename   : constant String :=
                      Directories.Compose
                        (Containing_Directory => Config_Dir,
-                        Name                 => "notify.xml");
+                        Name                 => "notify_smtp.xml");
 
       Reader     : Tree_Reader;
       Source     : Input_Sources.File.File_Input;
    begin
       if not Directories.Exists (Filename) then
          Logs.Write
-           (Content => "Can not parse notify.xml : file does no exist",
+           (Content => "Can not parse notify_smtp.xml : file does no exist",
             Kind    => Logs.Handler.Warnings);
       else
          Input_Sources.File.Open (Filename => Filename, Input => Source);
@@ -185,6 +146,24 @@ package body Savadur.Config.Notifications is
          Input_Sources.File.Close (Source);
       end if;
    end Parse;
+
+   --------------
+   -- Password --
+   --------------
+
+   function Password return String is
+   begin
+      return -SMTP_Conf.Password;
+   end Password;
+
+   ------------
+   -- Server --
+   ------------
+
+   function Server return String is
+   begin
+      return -SMTP_Conf.Server;
+   end Server;
 
    -------------------
    -- Start_Element --
@@ -201,18 +180,27 @@ package body Savadur.Config.Notifications is
       pragma Unreferenced (Qname);
 
       use Sax.Attributes;
-      NV   : constant Node_Value := Get_Node_Value (Local_Name);
+      NV : constant Node_Value := Get_Node_Value (Local_Name);
 
    begin
       case NV is
-         when Jabber =>
-            Handler.Jabber_Node := True;
+         when SMTP =>
+            Handler.SMTP_Node := True;
 
-         when Server | JID | Password | Auth_Type =>
+         when Server | User | Password =>
             --  Always take the first attribute value as there is only one
             --  attribute.
             Handler.Content_Value := +Get_Value (Atts, 0);
       end case;
    end Start_Element;
 
-end Savadur.Config.Notifications;
+   ----------
+   -- User --
+   ----------
+
+   function User return String is
+   begin
+      return -SMTP_Conf.User;
+   end User;
+
+end Savadur.Config.Notifications.SMTP;

@@ -19,8 +19,25 @@
 --  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.       --
 ------------------------------------------------------------------------------
 
-package Savadur.Config.Notifications is
+with AWS.Jabber;
 
-   --  Root package for notification configuration protocol
+package Savadur.Config.Notifications.XMPP is
 
-end Savadur.Config.Notifications;
+   Config_Error : exception renames Savadur.Config.Config_Error;
+
+   procedure Parse;
+   --  Parses notifications
+
+   function Jabber_Server return String;
+   --  Returns configured jabber server
+
+   function Jabber_JID return String;
+   --  Returns configured jabber jid
+
+   function Jabber_Password return String;
+   --  Returns configured jabber password
+
+   function Jabber_Auth_Type return AWS.Jabber.Authentication_Type;
+   --  Returns configured jabber auth_type
+
+end Savadur.Config.Notifications.XMPP;

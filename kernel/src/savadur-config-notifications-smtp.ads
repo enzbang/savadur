@@ -19,8 +19,20 @@
 --  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.       --
 ------------------------------------------------------------------------------
 
-package Savadur.Config.Notifications is
+package Savadur.Config.Notifications.SMTP is
 
-   --  Root package for notification configuration protocol
+   Config_Error : exception renames Savadur.Config.Config_Error;
 
-end Savadur.Config.Notifications;
+   procedure Parse;
+   --  Parses notifications
+
+   function Server return String;
+   --  Returns configured jabber server
+
+   function User return String;
+   --  Returns configured jabber password
+
+   function Password return String;
+   --  Returns configured jabber password
+
+end Savadur.Config.Notifications.SMTP;
