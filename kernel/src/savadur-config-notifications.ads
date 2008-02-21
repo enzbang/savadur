@@ -22,6 +22,7 @@
 with AWS.Jabber;
 
 package Savadur.Config.Notifications is
+
    Config_Error : exception renames Savadur.Config.Config_Error;
 
    procedure Parse;
@@ -38,4 +39,5 @@ package Savadur.Config.Notifications is
 
    function Jabber_Auth_Type return AWS.Jabber.Authentication_Type;
    --  Returns configured jabber auth_type
+
 end Savadur.Config.Notifications;

@@ -215,7 +215,7 @@ package body Savadur.Config.Client is
       end if;
 
       if not Directories.Exists (Filename) then
-         if Savadur.Config.Client_Server or Savadur.Config.Is_Server then
+         if Savadur.Config.Client_Server or else Savadur.Config.Is_Server then
             raise Config_Error with "No client.xml file !";
          else
             Configuration.Key := +"default";

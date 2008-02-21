@@ -48,31 +48,31 @@ package body Savadur.Notifications is
         & "On Failure = " & Actions.Image (H.On_Failure);
    end Image;
 
-      ---------------
+   ---------------
    -- Send_Mail --
    ---------------
 
    procedure Send_Mail
-     (Email        : in String;
-      Subject      : in String;
-      Content      : in String)
+     (Email   : in String;
+      Subject : in String;
+      Content : in String)
    is
       Localhost : constant SMTP.Receiver :=
                     SMTP.Client.Initialize ("localhost");
       Result    : SMTP.Status;
    begin
-         SMTP.Client.Send
-           (Server  => Localhost,
-            From    => SMTP.E_Mail ("savadur", "no-reply"),
-            To      => SMTP.E_Mail (Email, Email),
-            Subject => Subject,
-            Message => Content,
-            Status  => Result);
+      SMTP.Client.Send
+        (Server  => Localhost,
+         From    => SMTP.E_Mail ("savadur", "no-reply"),
+         To      => SMTP.E_Mail (Email, Email),
+         Subject => Subject,
+         Message => Content,
+         Status  => Result);
 
       if not SMTP.Is_Ok (Result) then
-         Logs.Write ("Send_Mail error : (TO=" & Email
-                     & ", subject=" & Subject & ")",
-                     Logs.Handler.Error);
+         Logs.Write
+           ("Send_Mail error : (TO=" & Email & ", subject=" & Subject & ")",
+            Logs.Handler.Error);
       end if;
    end Send_Mail;
 
@@ -81,7 +81,6 @@ package body Savadur.Notifications is
    ----------------
 
    procedure Update_RSS is
-      use Ada.Text_IO;
       Web_Dir       : constant String := Directories.Compose
         (Containing_Directory => Savadur.Config.Savadur_Directory,
          Name                 => "htdocs");
@@ -92,7 +91,7 @@ package body Savadur.Notifications is
         (Containing_Directory => Web_Dir,
          Name                 => "templates");
       Set  : Templates.Translate_Set := Savadur.Database.Get_Final_Status;
-      File : File_Type;
+      File : Text_IO.File_Type;
    begin
       Templates.Insert
         (Set, Templates.Assoc ("CHANNEL_TITLE",
@@ -104,28 +103,29 @@ package body Savadur.Notifications is
         (Set, Templates.Assoc ("CHANNEL_LINK",
          Savadur.Config.Syndication.Channel_Link));
 
-      Ada.Text_IO.Put_Line
+      Text_IO.Put_Line
         (Directories.Compose
            (Containing_Directory => RSS_DIR,
             Name                 => "all",
             Extension            => "xml"));
 
-      Create (File => File,
-              Mode => Out_File,
+      Text_IO.Create (File => File,
+              Mode => Text_IO.Out_File,
               Name => Directories.Compose
                 (Containing_Directory => RSS_DIR,
                  Name                 => "all",
                  Extension            => "xml"));
 
-      Put (File => File,
-           Item => Templates.Parse
-             (Filename     => Directories.Compose
-                (Containing_Directory => Web_Templates,
-                 Name                 => "rss2",
-                 Extension            => "txml"),
-              Translations  => Set));
+      Text_IO.Put
+        (File => File,
+         Item => Templates.Parse
+           (Filename     => Directories.Compose
+              (Containing_Directory => Web_Templates,
+               Name                 => "rss2",
+               Extension            => "txml"),
+            Translations  => Set));
 
-      Close (File);
+      Text_IO.Close (File);
    end Update_RSS;
 
    ---------------
@@ -133,26 +133,26 @@ package body Savadur.Notifications is
    ---------------
 
    procedure XMPP_Send
-     (JID          : in String;
-      Subject      : in String;
-      Content      : in String)
+     (JID     : in String;
+      Subject : in String;
+      Content : in String)
    is
       Server : AWS.Jabber.Server;
    begin
+      Jabber.Connect
+        (Server    => Server,
+         Host      => Config.Notifications.Jabber_Server,
+         User      => Config.Notifications.Jabber_JID,
+         Password  => Config.Notifications.Jabber_Password,
+         Auth_Type => Config.Notifications.Jabber_Auth_Type);
 
-      AWS.Jabber.Connect (Server    => Server,
-                          Host      => Config.Notifications.Jabber_Server,
-                          User      => Config.Notifications.Jabber_JID,
-                          Password  => Config.Notifications.Jabber_Password,
-                          Auth_Type => Config.Notifications.Jabber_Auth_Type);
-
-      AWS.Jabber.Send_Message
+      Jabber.Send_Message
         (Server => Server,
          JID    => JID,
          Subject => Subject,
          Content => Content);
 
-      AWS.Jabber.Close (Server);
+      Jabber.Close (Server);
    exception
       when E : others =>
          Logs.Write ("Unknown_Error " & Exceptions.Exception_Information (E),

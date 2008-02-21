@@ -25,14 +25,12 @@ with Ada.Strings.Unbounded;
 with GNAT.Case_Util;
 
 with Input_Sources.File;
-
 with Sax.Readers;
 with Sax.Attributes;
+with Unicode.CES;
 
 with Savadur.Logs;
 with Savadur.Utils;
-
-with Unicode.CES;
 
 package body Savadur.Config.Notifications is
 
@@ -49,8 +47,7 @@ package body Savadur.Config.Notifications is
 
    Jabber_Conf : Jabber_Config;
 
-   type Node_Value is
-     (Jabber, Server, JID, Password, Auth_Type);
+   type Node_Value is (Jabber, Server, JID, Password, Auth_Type);
 
    type Tree_Reader is new Sax.Readers.Reader with record
       Jabber_Node   : Boolean;
