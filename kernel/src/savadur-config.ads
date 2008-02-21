@@ -49,7 +49,7 @@ package Savadur.Config is
 
    function Project_File_Directory return String;
    --  Returns project file directory $(savadur_dir)/projects
-   --  Creates it if it does not exist
+   --  Creates it if it does not exist.
 
    function Project_Env_Directory return String;
    --  Returns project file directory $(savadur_dir)/env

@@ -162,8 +162,8 @@ package body Savadur.Notifications is
          Auth_Type => Config.Notifications.XMPP.Jabber_Auth_Type);
 
       Jabber.Send_Message
-        (Server => Server,
-         JID    => JID,
+        (Server  => Server,
+         JID     => JID,
          Subject => Subject,
          Content => Content);
 

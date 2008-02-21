@@ -533,7 +533,6 @@ package body Savadur.Database is
             Email : constant String := DB.String_Vectors.Element (Line, 1);
             XMPP  : constant String := DB.String_Vectors.Element (Line, 2);
          begin
-
             if Email /= "" then
                Logs.Handler.Write (Name    => Module,
                                    Content => "Send mail to " & Email,
