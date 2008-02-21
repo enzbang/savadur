@@ -138,7 +138,7 @@ package body Savadur.Config.Notifications.SMTP is
    begin
       if not Directories.Exists (Filename) then
          Logs.Write
-           (Content => "Can not parse notify_smtp.xml : file does no exist",
+           (Content => "Can not parse " & Filename & " : file does no exist",
             Kind    => Logs.Handler.Warnings);
       else
          Input_Sources.File.Open (Filename => Filename, Input => Source);

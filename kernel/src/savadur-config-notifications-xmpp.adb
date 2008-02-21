@@ -177,7 +177,7 @@ package body Savadur.Config.Notifications.XMPP is
    begin
       if not Directories.Exists (Filename) then
          Logs.Write
-           (Content => "Can not parse notify_xmpp.xml : file does no exist",
+           (Content => "Can not parse " & Filename & " : file does no exist",
             Kind    => Logs.Handler.Warnings);
       else
          Input_Sources.File.Open (Filename => Filename, Input => Source);
