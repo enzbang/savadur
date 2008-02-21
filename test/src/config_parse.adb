@@ -281,7 +281,7 @@ package body Config_Parse is
          & "["
          & "update => svn update  result type : EXIT_STATUS"
          & "init => svn checkout $url $sources  result type : EXIT_STATUS"
-         & "version => svn info (Revision: (.*))  result type : VALUE"
+         & "version => svn info $url (Revision: (.*))  result type : VALUE"
          & "]"),
          "Wrong SCM parse" & Savadur.SCM.Image
          (Savadur.Config.SCM.Configurations));
