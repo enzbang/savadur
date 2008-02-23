@@ -2,4 +2,5 @@
    <server value="smtp.example.com"/>
    <user value="savadur@here.com"/>
    <password value="secret_smtp_pwd"/>
+   <sender value="savadur@example.net"/>
 </smtp>

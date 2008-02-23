@@ -42,13 +42,17 @@ package body Savadur.Config.Notifications.SMTP is
       Server    : Unbounded_String;
       User      : Unbounded_String;
       Password  : Unbounded_String;
+      Sender      : Unbounded_String;
    end record;
 
    SMTP_Conf : SMTP_Config :=
-                 (+"localhost", Null_Unbounded_String, Null_Unbounded_String);
+                 (+"localhost",
+                  Null_Unbounded_String,
+                  Null_Unbounded_String,
+                  Null_Unbounded_String);
    --  Default using localhost as mail server
 
-   type Node_Value is (SMTP, Server, User, Password);
+   type Node_Value is (SMTP, Server, User, Password, Sender);
 
    type Tree_Reader is new Sax.Readers.Reader with record
       SMTP_Node     : Boolean;
@@ -86,6 +90,9 @@ package body Savadur.Config.Notifications.SMTP is
       NV : constant Node_Value := Get_Node_Value (Local_Name);
    begin
       case NV is
+         when Sender =>
+            SMTP_Conf.Sender := Handler.Content_Value;
+
          when Server =>
             SMTP_Conf.Server := Handler.Content_Value;
 
@@ -157,6 +164,15 @@ package body Savadur.Config.Notifications.SMTP is
    end Password;
 
    ------------
+   -- Sender --
+   ------------
+
+   function Sender return String is
+   begin
+      return -SMTP_Conf.Sender;
+   end Sender;
+
+   ------------
    -- Server --
    ------------
 
@@ -187,7 +203,7 @@ package body Savadur.Config.Notifications.SMTP is
          when SMTP =>
             Handler.SMTP_Node := True;
 
-         when Server | User | Password =>
+         when Sender | Server | User | Password =>
             --  Always take the first attribute value as there is only one
             --  attribute.
             Handler.Content_Value := +Get_Value (Atts, 0);

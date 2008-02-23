@@ -123,6 +123,10 @@ package body Config_Parse is
       Assertions.Assert
         (Config.Notifications.SMTP.Password = "secret_smtp_pwd",
          "Wrong SMTP password");
+
+      Assertions.Assert
+        (Config.Notifications.SMTP.Sender = "savadur@example.net",
+         "Wrong SMTP Sender");
    end Check_Notify_SMTP;
 
    -----------------------

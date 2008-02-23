@@ -35,4 +35,7 @@ package Savadur.Config.Notifications.SMTP is
    function Password return String;
    --  Returns configured jabber password
 
+   function Sender return String;
+   --  Returns configured from address
+
 end Savadur.Config.Notifications.SMTP;
