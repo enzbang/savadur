@@ -78,7 +78,8 @@ package body Savadur.Notifications is
 
       SMTP.Client.Send
         (Server  => SMTP_Server,
-         From    => SMTP.E_Mail ("savadur", "no-reply"),
+         From    => SMTP.E_Mail (Config.Notifications.SMTP.Sender,
+           Config.Notifications.SMTP.Sender),
          To      => SMTP.E_Mail (Email, Email),
          Subject => Subject,
          Message => Content,
