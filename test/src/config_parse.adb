@@ -84,7 +84,7 @@ package body Config_Parse is
       pragma Unreferenced (T);
       use Ada.Strings.Unbounded;
 
-      Env_Var : Savadur.Environment_Variables.Maps.Map :=
+      Env_Var : constant Savadur.Environment_Variables.Maps.Map :=
                   Savadur.Config.
                     Environment_Variables.Parse (Project'Access);
    begin
