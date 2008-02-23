@@ -19,6 +19,7 @@
 --  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.       --
 ------------------------------------------------------------------------------
 
+with Ada.Containers.Ordered_Sets;
 with Ada.Directories;
 
 with Savadur.Clients;
@@ -36,6 +37,49 @@ package body Savadur.Web_Services.Client is
 
    use Ada;
    use Savadur.Utils;
+
+   task type Update_Status;
+
+   Status_Updater : access Update_Status := null;
+
+   type Report_Data is record
+      Key          : Unbounded_String;
+      Project_Name : Unbounded_String;
+      Scenario     : Unbounded_String;
+      Action       : Unbounded_String;
+      Output       : Unbounded_String;
+      Result       : Boolean;
+      Job_Id       : Natural;
+      Number       : Natural := 0;
+   end record;
+
+   function "<" (R1, R2 : in Report_Data) return Boolean;
+   --  Returns True if R1 has been created before R2
+
+   package Report_Set is new Containers.Ordered_Sets (Report_Data);
+
+   protected Report_Handler is
+
+      procedure Add (Report : in Report_Data);
+      --  Adds a new report into the queue
+
+      entry Get (Report : in out Report_Data);
+      --  Gets the first report in the queue
+
+   private
+      Reports : Report_Set.Set;
+      Size    : Natural := 0;
+      Number  : Natural := 0;
+   end Report_Handler;
+
+   ---------
+   -- "<" --
+   ---------
+
+   function "<" (R1, R2 : in Report_Data) return Boolean is
+   begin
+      return R1.Number < R2.Number;
+   end "<";
 
    ------------------
    -- Load_Project --
@@ -172,6 +216,37 @@ package body Savadur.Web_Services.Client is
       Database.Login (Key);
    end Register;
 
+   --------------------
+   -- Report_Handler --
+   --------------------
+
+   protected body Report_Handler is
+
+      ---------
+      -- Add --
+      ---------
+
+      procedure Add (Report : in Report_Data) is
+         New_Report : Report_Data := Report;
+      begin
+         Number := Number + 1;
+         New_Report.Number := Number;
+         Reports.Insert (New_Report);
+         Size := Size + 1;
+      end Add;
+
+      ---------
+      -- Get --
+      ---------
+
+      entry Get (Report : in out Report_Data) when Size > 0 is
+      begin
+         Report := Reports.First_Element;
+         Reports.Delete_First;
+         Size := Size - 1;
+      end Get;
+   end Report_Handler;
+
    ------------
    -- Status --
    ------------
@@ -185,35 +260,72 @@ package body Savadur.Web_Services.Client is
       Result       : in Boolean;
       Job_Id       : in Natural) is
    begin
-      Logs.Write (Key & ":" & Project_Name);
-      Logs.Write ("Running Job Id" & Natural'Image (Job_Id)
-                    & " :: " & Scenario & "/" & Action);
-      Logs.Write ("Output is " & Output);
-      Logs.Write (Boolean'Image (Result));
-
-      if Action /= "" then
-         --  This is the action log. Scenario is in progress
-         Database.Log
-           (Key, Project_Name, Scenario, Action, Output, Result, Job_Id);
-
-      else
-         --  End of scenario. Final status
-         Database.Final_Status (Key, Project_Name, Scenario, Result, Job_Id);
-
-         --  Send notification messages
-
-         Savadur.Database.Send_Notifications
-           (Project_Name   => Project_Name,
-            Send_Mail_Hook => Savadur.Notifications.Send_Mail'Access,
-            Send_XMPP_Hook => Savadur.Notifications.XMPP_Send'Access,
-            Subject        => "Running " & Project_Name,
-            Content        => "End with " & Boolean'Image (Result)
-            & " when running scenario " & Scenario);
-
-         --  Update RSS file
-
-         Notifications.Update_RSS;
+      if Status_Updater = null then
+         Status_Updater := new Update_Status;
       end if;
+
+      Report_Handler.Add
+        (Report_Data'(Key => +Key,
+                      Project_Name => +Project_Name,
+                      Scenario     => +Scenario,
+                      Action       => +Action,
+                      Output       => +Output,
+                      Result       => Result,
+                      Job_Id       => Job_Id,
+                      Number       => <>));
    end Status;
+
+   -------------------
+   -- Update_Status --
+   -------------------
+
+   task body Update_Status is
+      Last_Report : Report_Data;
+   begin
+      loop
+         Report_Handler.Get (Last_Report);
+         Logs.Write (-Last_Report.Key & ":" & (-Last_Report.Project_Name));
+         Logs.Write ("Running Job Id" & Natural'Image (Last_Report.Job_Id)
+                     & " :: " & (-Last_Report.Scenario)
+                     & "/" & (-Last_Report.Action));
+         Logs.Write ("Output is " & (-Last_Report.Output));
+         Logs.Write (Boolean'Image (Last_Report.Result));
+
+         if Last_Report.Action /= "" then
+            --  This is the action log. Scenario is in progress
+            Database.Log
+              (-Last_Report.Key,
+               -Last_Report.Project_Name,
+               -Last_Report.Scenario,
+               -Last_Report.Action,
+               -Last_Report.Output,
+               Last_Report.Result,
+               Last_Report.Job_Id);
+
+         else
+            --  End of scenario. Final status
+            Database.Final_Status (-Last_Report.Key,
+                                   -Last_Report.Project_Name,
+                                   -Last_Report.Scenario,
+                                   Last_Report.Result,
+                                   Last_Report.Job_Id);
+
+            --  Send notification messages
+
+            Savadur.Database.Send_Notifications
+              (Project_Name   => -Last_Report.Project_Name,
+               Send_Mail_Hook => Savadur.Notifications.Send_Mail'Access,
+               Send_XMPP_Hook => Savadur.Notifications.XMPP_Send'Access,
+               Subject        => "Running " & (-Last_Report.Project_Name),
+               Content        => "End with "
+               & Boolean'Image (Last_Report.Result)
+               & " when running scenario " & (-Last_Report.Scenario));
+
+            --  Update RSS file
+
+            Notifications.Update_RSS;
+         end if;
+      end loop;
+   end Update_Status;
 
 end Savadur.Web_Services.Client;
