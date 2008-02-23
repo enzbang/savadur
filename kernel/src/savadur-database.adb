@@ -548,7 +548,6 @@ package body Savadur.Database is
             end if;
 
             Line.Clear;
-            Iter.End_Select;
          end Run_Hooks;
       end if;
 
