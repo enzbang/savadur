@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                                Savadur                                   --
 --                                                                          --
---                           Copyright (C) 2007                             --
+--                         Copyright (C) 2007-2008                          --
 --                      Pascal Obry - Olivier Ramonat                       --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -34,7 +34,13 @@ package Savadur.SCM is
 
    --  Special actions references
 
-   SCM_Init : constant Actions.Ref_Action;
+   Init         : constant Actions.Ref_Action;
+   --  Mandatory, needed to initialize the repository
+
+   Committers_1 : constant Actions.Ref_Action;
+   Committers_N : constant Actions.Ref_Action;
+   --  Optional, used to get the committers list (blame list) for a single
+   --  revision or a set of revisions.
 
    type Id is new Unbounded_String;
 
@@ -81,12 +87,28 @@ package Savadur.SCM is
 
 private
 
-   SCM_Init : constant Actions.Ref_Action :=
-     Actions.Ref_Action'(Action_Type    => Actions.SCM,
-                         Id             => Actions.Id (+"init"),
-                         Value          => <>,
-                         Require_Change => <>,
-                         On_Error       => <>);
+   Init     : constant Actions.Ref_Action :=
+                Actions.Ref_Action'(Action_Type    => Actions.SCM,
+                                    Id             => Actions.Id (+"init"),
+                                    Value          => <>,
+                                    Require_Change => <>,
+                                    On_Error       => <>);
+
+   Committers_1 : constant Actions.Ref_Action :=
+                    Actions.Ref_Action'(Action_Type    => Actions.SCM,
+                                        Id             =>
+                                          Actions.Id (+"committers_1"),
+                                        Value          => <>,
+                                        Require_Change => <>,
+                                        On_Error       => <>);
+
+   Committers_N : constant Actions.Ref_Action :=
+                    Actions.Ref_Action'(Action_Type    => Actions.SCM,
+                                        Id             =>
+                                          Actions.Id (+"committers_n"),
+                                        Value          => <>,
+                                        Require_Change => <>,
+                                        On_Error       => <>);
 
    Null_Id : constant Id := Id (Null_Unbounded_String);
 

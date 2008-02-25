@@ -1,7 +1,7 @@
-<!--                               Savadur
+<!--                          Savadur
 
-                              Copyright (C) 2007
-                               Olivier Ramonat
+		       Copyright (C) 2007-2008
+		    Pascal Obry - Olivier Ramonat
 
      This library is free software; you can redistribute it and/or modify
      it under the terms of the GNU General Public License as published by
@@ -31,6 +31,14 @@
 
   <action id="version" result="value">
     <cmd>git-show-ref -s refs/heads/master</cmd>
+  </action>
+
+  <action id="committers_1" result="value">
+    <cmd regexp="Author: (.*)">git-show --pretty=short $v1</cmd>
+  </action>
+
+  <action id="committers_n" result="value">
+    <cmd regexp="Author: (.*)">git-log $v1..$v2</cmd>
   </action>
 
 </scm>

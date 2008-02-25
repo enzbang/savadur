@@ -39,7 +39,7 @@ with Savadur.Logs;
 with Savadur.SCM;
 with Savadur.Servers;
 with Savadur.Utils;
-with Savadur.Variables;
+with Savadur.Web_Services.Client;
 
 package body Savadur.Build is
 
@@ -56,18 +56,14 @@ package body Savadur.Build is
       Argument_String :    out OS_Lib.Argument_List_Access);
    --  Returns the programme name and the argument list
 
-   function Parse
-     (Project : in Projects.Project_Config;
-      Cmd     : in Actions.External_Command) return Actions.External_Command;
-   --  Replaces strings beginning with $
-   --  by the correponding entry in project <variable> section
-
    function Check
-     (Project     : access Projects.Project_Config;
-      Exec_Action : in     Actions.Action;
-      Ref         : in     Actions.Ref_Action;
-      Return_Code : in     Integer;
-      Log_File    : in     String) return Boolean;
+     (Project     : not null access Projects.Project_Config;
+      Exec_Action : in Actions.Action;
+      Ref         : in Actions.Ref_Action;
+      Return_Code : in Integer;
+      Log_File    : in String;
+      Diff_Data   : not null access Web_Services.Client.Diff_Data)
+      return Boolean;
    --  ???
 
    -----------
@@ -75,11 +71,13 @@ package body Savadur.Build is
    -----------
 
    function Check
-     (Project     : access Projects.Project_Config;
-      Exec_Action : in     Actions.Action;
-      Ref         : in     Actions.Ref_Action;
-      Return_Code : in     Integer;
-      Log_File    : in     String) return Boolean
+     (Project     : not null access Projects.Project_Config;
+      Exec_Action : in Actions.Action;
+      Ref         : in Actions.Ref_Action;
+      Return_Code : in Integer;
+      Log_File    : in String;
+      Diff_Data   : not null access Web_Services.Client.Diff_Data)
+      return Boolean
    is
       use type Actions.Result_Type;
       State_Directory : constant String :=
@@ -109,6 +107,7 @@ package body Savadur.Build is
             --  case we want to be able to compute all diffs from previous run.
 
             if Directories.Exists (State_Filename) then
+               Diff_Data.V1 := +Content (State_Filename, Clean => True);
                Directories.Copy_File
                  (State_Filename, State_Filename & ".previous");
             end if;
@@ -166,7 +165,86 @@ package body Savadur.Build is
 
                   Directories.Copy_File (Log_File, State_Filename);
             end case;
+
+            Diff_Data.V2 := +Content (State_Filename, Clean => True);
          end Check_Last_State;
+
+         --  Compute the blame (committers) list
+         --  Diff_Data V1 and V2 contains the version before and after the
+         --  update. Call the special SCM action committers_list to get all
+         --  committers for those specific modifications.
+
+         declare
+            Vars   : Variables.Sets.Set;
+            Action : Actions.Action;
+         begin
+            if Diff_Data.V1 = Null_Unbounded_String then
+               --  First time we initialize/run this project
+               Vars.Insert
+                 (Variables.Variable'
+                    (Variables.Name_Utils.Value ("v1"),
+                     Diff_Data.V2));
+               Action := Get_Action (Project.all, SCM.Committers_1, Vars);
+
+            else
+               Vars.Insert
+                 (Variables.Variable'
+                    (Variables.Name_Utils.Value ("v1"),
+                     Diff_Data.V1));
+               Vars.Insert
+                 (Variables.Variable'
+                    (Variables.Name_Utils.Value ("v2"),
+                     Diff_Data.V2));
+               Action := Get_Action (Project.all, SCM.Committers_N, Vars);
+            end if;
+
+            declare
+               Sources_Directory : constant String :=
+                                     Projects.Project_Sources_Directory
+                                       (Project);
+               Log_Directory     : constant String :=
+                                     Projects.Project_Log_Directory (Project);
+               Log_File          : constant String := Directories.Compose
+                 (Containing_Directory => Log_Directory,
+                  Name                 => Actions.To_String (Action.Id));
+               Return_Code       : Integer;
+               Result            : Boolean;
+               File              : Text_IO.File_Type;
+               Buffer            : String (1 .. 1_024);
+               Last              : Natural;
+               Committers        : Web_Services.Client.Name_Set (1 .. 100);
+               --  Max 100 committers, ??? should not be hard coded
+               K                 : Natural := Committers'First - 1;
+            begin
+               Execute (Exec_Action  => Action,
+                        Directory    => Sources_Directory,
+                        Log_Filename => Log_File,
+                        Return_Code  => Return_Code,
+                        Result       => Result);
+
+               --  Now load the file and create the committers list (we have
+               --  one committer on each line).
+
+               Text_IO.Open (File, Text_IO.In_File, Log_File);
+
+               while not Text_IO.End_Of_File (File) loop
+                  Text_IO.Get_Line (File, Buffer, Last);
+                  if Last > 0 then
+                     K := K + 1;
+                     Committers (K) :=
+                       To_Unbounded_String (Buffer (1 .. Last));
+                  end if;
+               end loop;
+
+               Text_IO.Close (File);
+
+               --  Set committers array
+
+               Diff_Data.Committers :=
+                 Web_Services.Client.Name_Set_Safe_Pointer.To_Safe_Pointer
+                   (Committers (1 .. K));
+            end;
+         end;
       end if;
 
       if not Result then
@@ -179,7 +257,7 @@ package body Savadur.Build is
 
       return Result;
    exception
-      when E : Constraint_Error =>
+      when Constraint_Error =>
          raise Command_Parse_Error
            with "Value " & (-Ref.Value) & " is not an exit status";
    end Check;
@@ -354,9 +432,102 @@ package body Savadur.Build is
 
    function Get_Action
      (Project    : in Projects.Project_Config;
-      Ref_Action : in Actions.Ref_Action) return Actions.Action
+      Ref_Action : in Actions.Ref_Action;
+      Vars       : in Variables.Sets.Set := Variables.Sets.Empty_Set)
+      return Actions.Action
    is
       use Savadur.Actions;
+
+      function Parse
+        (Project : in Projects.Project_Config;
+         Cmd     : in Actions.External_Command)
+         return Actions.External_Command;
+      --  Replaces strings beginning with $
+      --  by the correponding entry in project <variable> section.
+
+      -----------
+      -- Parse --
+      -----------
+
+      function Parse
+        (Project : in Projects.Project_Config;
+         Cmd     : in Actions.External_Command)
+         return Actions.External_Command
+      is
+
+         function Get_Value (Key : in String) return Variables.Variable;
+         --  Returns Key's value by looking into local Vars or project
+         --  variables.
+
+         ---------------
+         -- Get_Value --
+         ---------------
+
+         function Get_Value (Key : in String) return Variables.Variable is
+            Name : constant Variables.Name := Variables.Name_Utils.Value (Key);
+         begin
+            if Variables.Keys.Contains (Vars, Name) then
+               return Variables.Keys.Element
+                 (Container => Vars, Key => Name);
+
+            elsif Variables.Keys.Contains (Project.Variables, Name) then
+               return Variables.Keys.Element
+                 (Container => Project.Variables, Key => Name);
+
+            else
+               return Variables.Variable'
+                 (Name => Name, Value => Null_Unbounded_String);
+            end if;
+         end Get_Value;
+
+         Source     : constant String := -Unbounded_String (Cmd);
+         Start      : Positive := Source'First;
+         Do_Replace : Boolean  := False;
+         Result     : Unbounded_String;
+
+      begin
+         for K in Source'Range loop
+            if Source (K) = '$' then
+               Append (Result, Source (Start .. K - 1));
+               Start      := K;
+               Do_Replace := True;
+
+            elsif Do_Replace and then Source (K) = ' ' then
+               Query_Project_Variables : declare
+                  Key  : constant String := Source (Start + 1 .. K - 1);
+                  Var  : constant Savadur.Variables.Variable :=
+                           Get_Value (Key);
+               begin
+                  Append (Result, To_String (Var.Value));
+
+                  Start      := K;
+                  Do_Replace := False;
+               end Query_Project_Variables;
+            end if;
+         end loop;
+
+         if Do_Replace then
+            Replace_Var : declare
+               Key  : constant String := Source (Start + 1 .. Source'Last);
+               Var  : constant Savadur.Variables.Variable :=
+                        Get_Value (Key);
+            begin
+               Append (Result, To_String (Var.Value));
+            end Replace_Var;
+
+         else
+            Append (Result, Source (Start .. Source'Last));
+         end if;
+
+         return Actions.External_Command (Result);
+      exception
+         when E : others =>
+            Logs.Write
+              (Content => Exception_Information (E),
+               Kind    => Logs.Handler.Error);
+            raise;
+      end Parse;
+
       Action_Id  : constant Id := Ref_Action.Id;
       Get_Action : Action := Actions.Null_Action;
    begin
@@ -416,66 +587,6 @@ package body Savadur.Build is
       end if;
    end Get_Arguments;
 
-   -----------
-   -- Parse --
-   -----------
-
-   function Parse
-     (Project : in Projects.Project_Config;
-      Cmd     : in Actions.External_Command) return Actions.External_Command
-   is
-      Source     : constant String := -Unbounded_String (Cmd);
-      Start      : Positive := Source'First;
-      Do_Replace : Boolean := False;
-      Result     : Unbounded_String;
-   begin
-      for K in Source'Range loop
-         if Source (K) = '$' then
-            Append (Result, Source (Start .. K - 1));
-            Start      := K;
-            Do_Replace := True;
-
-         elsif Do_Replace and then Source (K) = ' ' then
-            Query_Project_Variables : declare
-               Key  : constant String := Source (Start + 1 .. K - 1);
-               Var  : constant Savadur.Variables.Variable :=
-                        Savadur.Variables.Keys.Element
-                          (Container => Project.Variables,
-                           Key       => Savadur.Variables.
-                             Name_Utils.Value (Key));
-            begin
-               Append (Result, To_String (Var.Value));
-
-               Start      := K;
-               Do_Replace := False;
-            end Query_Project_Variables;
-         end if;
-      end loop;
-
-      if Do_Replace then
-         Replace_Var : declare
-            Key  : constant String := Source (Start + 1 .. Source'Last);
-            Var  : constant Savadur.Variables.Variable :=
-                     Savadur.Variables.Keys.Element
-                       (Container => Project.Variables,
-                        Key       => Savadur.Variables.
-                          Name_Utils.Value (Key));
-         begin
-            Append (Result, To_String (Var.Value));
-         end Replace_Var;
-
-      else
-         Append (Result, Source (Start .. Source'Last));
-      end if;
-
-      return Actions.External_Command (Result);
-   exception
-      when E : others => Logs.Write
-           (Content => Exception_Information (E),
-            Kind    => Logs.Handler.Error);
-         raise;
-   end Parse;
-
    ---------
    -- Run --
    ---------
@@ -497,7 +608,8 @@ package body Savadur.Build is
       --  Sends the status to savadur server, this must be called only in
       --  client/server mode.
 
-      Status : Boolean := True;
+      Status    : Boolean := True;
+      Diff_Data : aliased Web_Services.Client.Diff_Data;
 
       ----------
       -- Init --
@@ -567,6 +679,7 @@ package body Savadur.Build is
                   Output       => Log_Content,
                   Result       => Status,
                   Job_Id       => Job_Id,
+                  Diff_Data    => Web_Services.Client.No_Diff_Data,
                   Endpoint     => Server_URL);
             end Notify_Server;
 
@@ -625,7 +738,8 @@ package body Savadur.Build is
                                    Exec_Action => Exec_Action,
                                    Ref         => Ref,
                                    Return_Code => Return_Code,
-                                   Log_File    => Log_File);
+                                   Log_File    => Log_File,
+                                   Diff_Data   => Diff_Data'Access);
 
                   Send_Status (Server, Ref.Id, Log_File);
 
@@ -668,7 +782,7 @@ package body Savadur.Build is
                      Execute
                        (Exec_Action   => Get_Action
                           (Project    => Project.all,
-                           Ref_Action => Savadur.SCM.SCM_Init),
+                           Ref_Action => Savadur.SCM.Init),
                         Directory     =>
                           Projects.Project_Directory (Project),
                         Log_Filename  => Directories.Compose
@@ -681,12 +795,12 @@ package body Savadur.Build is
                        or else not Directories.Exists (Sources_Directory)
                      then
                         Status := False;
-                        Send_Status (Server, Savadur.SCM.SCM_Init.Id);
+                        Send_Status (Server, Savadur.SCM.Init.Id);
                         raise Command_Parse_Error with "SCM init failed !";
                      end if;
 
                      Send_Status (Server,
-                                  Savadur.SCM.SCM_Init.Id,
+                                  Savadur.SCM.Init.Id,
                                   Directories.Compose
                                     (Containing_Directory => Log_Directory,
                                      Name                 => "init"));

@@ -24,6 +24,7 @@ with Savadur.Projects;
 with Savadur.Environment_Variables;
 
 private with Savadur.Actions;
+private with Savadur.Variables;
 
 package Savadur.Build is
 
@@ -55,7 +56,9 @@ private
 
    function Get_Action
      (Project    : in Projects.Project_Config;
-      Ref_Action : in Actions.Ref_Action) return Actions.Action;
+      Ref_Action : in Actions.Ref_Action;
+      Vars       : in Variables.Sets.Set := Variables.Sets.Empty_Set)
+      return Actions.Action;
    --  Returns the action to execute matching the ref_action
 
 end Savadur.Build;

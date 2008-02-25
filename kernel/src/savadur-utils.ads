@@ -60,7 +60,8 @@ package Savadur.Utils is
    function Content
      (Filename    : in String;
       Max_Content : in Positive := Max_Characters;
-      From_Top    : in Boolean := True) return String;
+      From_Top    : in Boolean := True;
+      Clean       : in Boolean := False) return String;
    --  Returns a file content. Limits to 4 KB by default. If From_Top is
    --  set to False then the last Max_Characters are returned.
 

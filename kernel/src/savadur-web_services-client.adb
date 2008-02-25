@@ -35,7 +35,6 @@ with Savadur.Utils;
 
 package body Savadur.Web_Services.Client is
 
-   use Ada;
    use Savadur.Utils;
 
    task type Update_Status;
@@ -51,6 +50,7 @@ package body Savadur.Web_Services.Client is
       Result       : Boolean;
       Job_Id       : Natural;
       Number       : Natural := 0;
+      Diff_Data    : Client.Diff_Data;
    end record;
 
    function "<" (R1, R2 : in Report_Data) return Boolean;
@@ -245,6 +245,7 @@ package body Savadur.Web_Services.Client is
          Reports.Delete_First;
          Size := Size - 1;
       end Get;
+
    end Report_Handler;
 
    ------------
@@ -258,7 +259,8 @@ package body Savadur.Web_Services.Client is
       Action       : in String;
       Output       : in String;
       Result       : in Boolean;
-      Job_Id       : in Natural) is
+      Job_Id       : in Natural;
+      Diff_Data    : in Client.Diff_Data) is
    begin
       if Status_Updater = null then
          Status_Updater := new Update_Status;
@@ -272,7 +274,8 @@ package body Savadur.Web_Services.Client is
                       Output       => +Output,
                       Result       => Result,
                       Job_Id       => Job_Id,
-                      Number       => <>));
+                      Number       => <>,
+                      Diff_Data    => Diff_Data));
    end Status;
 
    -------------------
@@ -280,50 +283,68 @@ package body Savadur.Web_Services.Client is
    -------------------
 
    task body Update_Status is
-      Last_Report : Report_Data;
+      Report : Report_Data;
    begin
       loop
-         Report_Handler.Get (Last_Report);
-         Logs.Write (-Last_Report.Key & ":" & (-Last_Report.Project_Name));
-         Logs.Write ("Running Job Id" & Natural'Image (Last_Report.Job_Id)
-                     & " :: " & (-Last_Report.Scenario)
-                     & "/" & (-Last_Report.Action));
-         Logs.Write ("Output is " & (-Last_Report.Output));
-         Logs.Write (Boolean'Image (Last_Report.Result));
+         --  Wait for a new report data to be ready
+         Report_Handler.Get (Report);
 
-         if Last_Report.Action /= "" then
+         Logs.Write (-Report.Key & ":" & (-Report.Project_Name));
+         Logs.Write ("Running Job Id" & Natural'Image (Report.Job_Id)
+                     & " :: " & (-Report.Scenario)
+                     & "/" & (-Report.Action));
+         Logs.Write ("Output is " & (-Report.Output));
+         Logs.Write (Boolean'Image (Report.Result));
+
+         if Report.Action /= "" then
             --  This is the action log. Scenario is in progress
             Database.Log
-              (-Last_Report.Key,
-               -Last_Report.Project_Name,
-               -Last_Report.Scenario,
-               -Last_Report.Action,
-               -Last_Report.Output,
-               Last_Report.Result,
-               Last_Report.Job_Id);
+              (-Report.Key,
+               -Report.Project_Name,
+               -Report.Scenario,
+               -Report.Action,
+               -Report.Output,
+               Report.Result,
+               Report.Job_Id);
 
          else
             --  End of scenario. Final status
-            Database.Final_Status (-Last_Report.Key,
-                                   -Last_Report.Project_Name,
-                                   -Last_Report.Scenario,
-                                   Last_Report.Result,
-                                   Last_Report.Job_Id);
+            Database.Final_Status (-Report.Key,
+                                   -Report.Project_Name,
+                                   -Report.Scenario,
+                                   Report.Result,
+                                   Report.Job_Id);
 
             --  Send notification messages
 
             Savadur.Database.Send_Notifications
-              (Project_Name   => -Last_Report.Project_Name,
+              (Project_Name   => -Report.Project_Name,
                Send_Mail_Hook => Savadur.Notifications.Send_Mail'Access,
                Send_XMPP_Hook => Savadur.Notifications.XMPP_Send'Access,
-               Subject        => "Running " & (-Last_Report.Project_Name),
+               Subject        => "Running " & (-Report.Project_Name),
                Content        => "End with "
-               & Boolean'Image (Last_Report.Result)
-               & " when running scenario " & (-Last_Report.Scenario));
+               & Boolean'Image (Report.Result)
+               & " when running scenario " & (-Report.Scenario));
 
             --  Update RSS file
 
             Notifications.Update_RSS;
+         end if;
+
+         if not Report.Result then
+            --  In all cases, if result is an error we send an e-amil to all
+            --  committers.
+
+            for K in Report.Diff_Data.Committers.Item'Range loop
+               Savadur.Notifications.Send_Mail
+                 (Email   => To_String (Report.Diff_Data.Committers.Item (K)),
+                  Subject => "Regression on project "
+                    & To_String (Report.Project_Name),
+                  Content =>  "Diff from " & To_String (Report.Diff_Data.V1)
+                    & " to " & To_String (Report.Diff_Data.V2) & ASCII.LF
+                    & "when running scenario "
+                    & To_String (Report.Scenario) & ASCII.LF);
+            end loop;
          end if;
       end loop;
    end Update_Status;

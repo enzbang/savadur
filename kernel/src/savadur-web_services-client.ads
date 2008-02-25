@@ -21,8 +21,11 @@
 
 with Ada.Strings.Unbounded;
 
+with SOAP.Utils;
+
 package Savadur.Web_Services.Client is
 
+   use Ada;
    use Ada.Strings.Unbounded;
 
    type Metadata is record
@@ -57,6 +60,19 @@ package Savadur.Web_Services.Client is
    function Load_SCM (Signed_SCM : in Client.Signed_SCM) return File_Data;
    --  Returns the project content from a server
 
+   type Name_Set is array (Positive range <>) of Unbounded_String;
+   type Name_Set_Access is access Name_Set;
+
+   package Name_Set_Safe_Pointer is
+     new SOAP.Utils.Safe_Pointers (Name_Set, Name_Set_Access);
+
+   type Diff_Data is record
+      V1, V2     : Unbounded_String;
+      Committers : Name_Set_Safe_Pointer.Safe_Pointer;
+   end record;
+
+   No_Diff_Data : constant Diff_Data;
+
    procedure Status
      (Key          : in String;
       Project_Name : in String;
@@ -64,7 +80,8 @@ package Savadur.Web_Services.Client is
       Action       : in String;
       Output       : in String;
       Result       : in Boolean;
-      Job_Id       : in Natural);
+      Job_Id       : in Natural;
+      Diff_Data    : in Client.Diff_Data);
    --  Status is called by the client to register status of each action in the
    --  given scenario.
 
@@ -73,11 +90,17 @@ package Savadur.Web_Services.Client is
 
 private
 
-   No_File : constant File_Data :=
-               File_Data'(Filename => Null_Unbounded_String,
-                          Content  => Null_Unbounded_String);
+   No_File      : constant File_Data :=
+                    File_Data'(Filename => Null_Unbounded_String,
+                               Content  => Null_Unbounded_String);
 
-   No_Metadata : constant Metadata :=
-                   Metadata'(OS => Null_Unbounded_String);
+   No_Metadata  : constant Metadata :=
+                    Metadata'(OS => Null_Unbounded_String);
+
+   No_Diff_Data : constant Diff_Data :=
+                    Diff_Data'(Null_Unbounded_String,
+                               Null_Unbounded_String,
+                               Name_Set_Safe_Pointer.To_Safe_Pointer
+                            (Name_Set'(1 .. 0 => Null_Unbounded_String)));
 
 end Savadur.Web_Services.Client;

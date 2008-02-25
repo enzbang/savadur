@@ -80,6 +80,14 @@ else
     echo NOK: version size is $versize;
 fi;
 
+committer=$(cat $ML/committers_1)
+
+if [ "$committer" == "pascal.obry" ]; then
+    echo OK: committer is pascal.obry;
+else
+    echo NOK: committer is wrong, $committer;
+fi;
+
 echo === Check for $SCP
 
 check_file $SCS/obj style_checker.ali
@@ -96,6 +104,14 @@ if [ "$versize" == "1" ]; then
     echo OK: version has single word;
 else
     echo NOK: version size is $versize;
+fi;
+
+committer=$(cat $SCL/committers_1)
+
+if [ "$committer" == "Pascal Obry <pascal@obry.net>" ]; then
+    echo OK: committer is $committer;
+else
+    echo NOK: committer is wrong, $committer;
 fi;
 
 echo ""

@@ -19,6 +19,7 @@
 --  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.       --
 ------------------------------------------------------------------------------
 
+with Ada.Characters.Handling;
 with Ada.Streams.Stream_IO;
 
 with AWS.Translator;
@@ -35,7 +36,8 @@ package body Savadur.Utils is
    function Content
      (Filename    : in String;
       Max_Content : in Positive := Max_Characters;
-      From_Top    : in Boolean := True) return String
+      From_Top    : in Boolean := True;
+      Clean       : in Boolean := False) return String
    is
       Buffer_Len : constant := 4_096;
       File       : Stream_IO.File_Type;
@@ -66,6 +68,16 @@ package body Savadur.Utils is
       end loop Read_File;
 
       Stream_IO.Close (File);
+
+      if Clean then
+         while Length (Content) > 1
+           and then Characters.Handling.Is_Control
+             (Element (Content, Length (Content)))
+         loop
+            Delete (Content, Length (Content), Length (Content));
+         end loop;
+      end if;
+
       return -Content;
    end Content;
 
