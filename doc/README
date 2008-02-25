@@ -121,15 +121,15 @@ Now if we have a server running on my_server_machine.my_company.com
 and we'll want to add the two clients turbo (machine turbo_server) and
 enzbang (machine enzbang_server) do:
 
-   turbo_server$  ./savadur-client --config --id turbo
+   turbo_server$  ./savadur --client --config --id turbo
 
-   turbo_server$  ./savadur-client --remote \
+   turbo_server$  ./savadur --client --remote \
                         --add my_server_machine \
                         http://my_server_machine.my_company.com
 
-   enzbang_server$ ./savadur-client --config --id enzbang
+   enzbang_server$ ./savadur --client --config --id enzbang
 
-   enzbang_server$ ./savadur-client --remote \
+   enzbang_server$ ./savadur --client --remote \
                         --add the_server \
                         http://my_server_machine.my_company.com
 
@@ -138,13 +138,13 @@ side reference.
 
 Now you just have to launch the server:
 
-   $ ./savadur-server
+   $ ./savadur --server
 
 And start the two clients:
 
-   turbo_server$ ./savadur-client --server
+   turbo_server$ ./savadur --client --server
 
-   enzbang_server$ ./savadur-client --server
+   enzbang_server$ ./savadur --client --server
 
 And you're done!
 

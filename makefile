@@ -37,15 +37,14 @@ VERSION_ALL = $(shell git describe 2>/dev/null)
 all: build
 
 build: setup
-	$(GNATMAKE) -XPRJ_BUILD=$(MODE) -P server/savadur-server
-	$(GNATMAKE) -XPRJ_BUILD=$(MODE) -P client/savadur-client
+	$(GNATMAKE) -XPRJ_BUILD=$(MODE) -P savadur-main
 
 setup:
 # If git is not present then use the version.ads provided in distrib
 ifneq ("$(VERSION)", "")
 	sed -e 's,\$$VERSION\$$,$(VERSION),g' \
 	-e 's,\$$VERSION_ALL\$$,$(VERSION_ALL),g' \
-	kernel/src/savadur-version.tads > kernel/src/savadur-version.ads
+	src/savadur-version.tads > src/savadur-version.ads
 endif
 	$(MAKE) -C soap setup $(OPTIONS)
 
@@ -59,17 +58,13 @@ regtests_clientserver:
 	$(MAKE) -C test regtests_clientserver $(OPTIONS)
 
 clean:
-	$(GNATCLEAN) -XPRJ_BUILD=$(MODE) -P server/savadur-server
-	$(GNATCLEAN) -XPRJ_BUILD=$(MODE) -P client/savadur-client
+	$(GNATCLEAN) -XPRJ_BUILD=$(MODE) -P savadur-main
 	make -C test clean $(OPTIONS)
 	$(MAKE) -C soap clean
 
 check:
-	$(GNATCHECK) -dd -XPRJ_BUILD=$(MODE) -P server/savadur-server \
+	$(GNATCHECK) -dd -XPRJ_BUILD=$(MODE) -P savadur-main \
 		-rules -from=savadur.check
-	$(GNATCHECK) -dd -XPRJ_BUILD=$(MODE) -P client/savadur-client \
-		-rules -from=savadur.check
-
 install:
 	@$(MKDIR) $(INSTALL)/example
 	@$(MKDIR) $(INSTALL)/client-savadurdir/scm
@@ -86,8 +81,7 @@ install:
 	@$(CP) templates/*.txml $(INSTALL)/server-savadurdir/htdocs/templates
 	@$(CP) templates/*.css $(INSTALL)/server-savadurdir/htdocs/css
 	@$(CP) test/config/*.xml $(INSTALL)/example/
-	cp client/$(BIN_DIR)/savadur-client $(INSTALL)
-	cp server/$(BIN_DIR)/savadur-server $(INSTALL)
+	cp $(BIN_DIR)/savadur $(INSTALL)
 	@echo savadur is installed in $(INSTALL)
 
 distrib: setup

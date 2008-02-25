@@ -32,8 +32,9 @@ setup:
 	$(CP) -r ../config/scm test-dir/
 
 regtests_bootstrap: setup
-	$(GNATMAKE) -XPRJ_BUILD=$(MODE) -XIN_TEST=TRUE -P ../client/savadur-client
-	./bin/savadur-client -project bootstrap \
+	$(GNATMAKE) -XPRJ_BUILD=$(MODE) -XIN_TEST=TRUE -P \
+		 ../savadur --client
+	./bin/savadur --client -project bootstrap \
 		-savadurdir $(PWD)/test/test-dir
 
 clean:
@@ -44,8 +45,7 @@ regtests_clientserver: setup_clientserver
 	(cd ../db/data/; sh create_database.sh)
 	$(CP) ../db/data/logs.db test-dir/server/
 	make setup -C ../ MODE=$(MODE)
-	$(GNATMAKE) -XPRJ_BUILD=$(MODE) -XIN_TEST=TRUE -P ../server/savadur-server
-	$(GNATMAKE) -XPRJ_BUILD=$(MODE) -XIN_TEST=TRUE -P ../client/savadur-client
+	$(GNATMAKE) -XPRJ_BUILD=$(MODE) -XIN_TEST=TRUE -P ../savadur-main
 	./clientserver_regtest.sh
 
 setup_clientserver:

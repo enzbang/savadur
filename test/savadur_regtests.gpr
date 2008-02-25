@@ -20,8 +20,8 @@
 ------------------------------------------------------------------------------
 
 with "aunit";
-with "../kernel/savadur";
-with "../kernel/savadur-kernel";
+with "../savadur";
+with "../savadur-main";
 
 project Savadur_Regtests is
 

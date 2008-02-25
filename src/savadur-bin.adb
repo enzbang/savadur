@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                                Savadur                                   --
 --                                                                          --
---                        Copyright (C) 2007-2008                           --
+--                           Copyright (C) 2008                             --
 --                      Pascal Obry - Olivier Ramonat                       --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -22,83 +22,69 @@
 --
 --  Usage :
 --
---  savadur-client [OPTIONS] CMD
---
---  CMD:
---   --project name --sid scenario_id   to run a project in standalone mode
---   --server                           to run in server mode
---   --remote --list                    to list remote servers
---   --remote --add                     to add a remote server
---   --config --id                      set client id
---   --config --endpoint                set client endpoint
---
---  OPTIONS :
---       --savadurdir dirname : Set savadur directory
---                              ($SAVADUR_DIR or $HOME / .savadur by default)
---       -v  | --version
---       -V  | --verbose
---       -VV | --very-verbose
---       -L filename          : use filename for log file
+--  savadur [GENERAL_OPTIONS] --client|--server|--standalone [MODE_OPTIONS]
 
 with Ada.Calendar;
 with Ada.Command_Line;
 with Ada.Containers;
 with Ada.Exceptions;
+with Ada.Directories;
 with Ada.Strings.Unbounded;
 with Ada.Text_IO;
-with Ada.Directories;
-
-with GNAT.Command_Line;
-
-with SOAP;
 
 with Savadur.Client_Service.Client;
 with Savadur.Client_Service.Types;
+with Savadur.Config.Client;
 with Savadur.Config.Environment_Variables;
 with Savadur.Config.Project;
-with Savadur.Config.Client;
+with Savadur.Config.Project_List;
+with Savadur.Config.Notifications.SMTP;
+with Savadur.Config.Notifications.XMPP;
 with Savadur.Config.SCM;
 with Savadur.Config.Server;
 with Savadur.Jobs.Client;
 with Savadur.Logs;
 with Savadur.Projects;
-with Savadur.Scenarios;
-with Savadur.Signed_Files;
-with Savadur.SCM;
-with Savadur.Servers;
 with Savadur.Utils;
 with Savadur.Version;
+with Savadur.SCM;
+with Savadur.Scenarios;
+with Savadur.Servers;
+with Savadur.Signed_Files;
 with Savadur.Web.Client;
+with Savadur.Web.Server;
 
-procedure Savadur.Client is
+with SOAP;
+
+with GNAT.Command_Line;
+
+procedure Savadur.Bin is
 
    use Ada;
    use Ada.Strings.Unbounded;
 
    use Savadur.Utils;
 
+   type Running_Mode is (Savadur_Client, Savadur_Server, Savadur_Standalone);
+   Mode : Running_Mode;
+
    Syntax_Error    : exception;
 
-   Project_Name    : Unbounded_String;
+   Action : access procedure;
+   --  Action to execute after Command Line parsing
+
+   --  client.xml configuration
    Client_Id       : Unbounded_String;
    Client_Endpoint : Unbounded_String;
-   Scenario_Id     : Unbounded_String
-     := Scenarios.Id_Utils.To_Unbounded_String (Scenarios.Default_Scenario);
 
+   --  Savadur-Client remote server
    New_Server_Name : Unbounded_String;
    New_Server_URL  : Unbounded_String;
 
-   Action          : access procedure;
-   --  Action to execute after Command Line parsing
-
-   procedure Usage (Error_Message : in String := "");
-   --  Displays Usage
-
-   procedure Run_Standalone;
-   --  Launches client in standalone mode
-
-   procedure Run_Server_Mode;
-   --  Launches client in server mode
+   --   Standalone mode
+   Project_Name    : Unbounded_String;
+   Scenario_Id     : Unbounded_String
+     := Scenarios.Id_Utils.To_Unbounded_String (Scenarios.Default_Scenario);
 
    procedure Add_Remote_Server;
    --  Add a new remote server
@@ -106,8 +92,20 @@ procedure Savadur.Client is
    procedure List_Remote_Server;
    --  Lists remote servers
 
+   procedure Run_Client_Mode;
+   --  Run client mode
+
+   procedure Run_Server_Mode;
+   --  Run server mode
+
+   procedure Run_Standalone;
+   --  Run standalone
+
    procedure Set_Client_Config;
    --  Sets client config (id and endpoint)
+
+   procedure Usage (Error_Message : in String := "");
+   --  Displays Usage
 
    -----------------------
    -- Add_Remote_Server --
@@ -132,8 +130,8 @@ procedure Savadur.Client is
 
       Create (File => File, Mode => Out_File, Name => Filename);
 
-      Logs.Write ("Add new remote server : "
-                  & (-New_Server_Name) & " " & (-New_Server_URL));
+      Put_Line ("Add new remote server : "
+                & (-New_Server_Name) & " " & (-New_Server_URL));
 
       Put_Line (File, "<server>");
       Put_Line (File, "<name value='" & (-New_Server_Name) & "'/>");
@@ -165,10 +163,10 @@ procedure Savadur.Client is
    end List_Remote_Server;
 
    ---------------------
-   -- Run_Server_Mode --
+   -- Run_Client_Mode --
    ---------------------
 
-   procedure Run_Server_Mode is
+   procedure Run_Client_Mode is
 
       use type Containers.Count_Type;
 
@@ -289,7 +287,6 @@ procedure Savadur.Client is
                         & " failed !");
             Savadur.Servers.Go_Offline (+Server_Name);
       end Register;
-
    begin
       --  Parse configuration files
 
@@ -322,6 +319,29 @@ procedure Savadur.Client is
          --  Ping servers every 10 minutes to check if all is working
 
       end if;
+   end Run_Client_Mode;
+
+   ---------------------
+   -- Run_Server_Mode --
+   ---------------------
+
+   procedure Run_Server_Mode is
+   begin
+      Config.Is_Server := True;
+
+      Config.SCM.Parse;
+      Config.Project.Parse;
+      Config.Project_List.Parse;
+      Config.Notifications.XMPP.Parse;
+      Config.Notifications.SMTP.Parse;
+
+      Web.Server.Start;
+
+      --  Endless loop
+
+      loop
+         delay Duration'Last;
+      end loop;
    end Run_Server_Mode;
 
    --------------------
@@ -413,6 +433,37 @@ procedure Savadur.Client is
    -----------
 
    procedure Usage (Error_Message : in String := "") is
+      procedure Endpoint_Config;
+      --  Prints Usage for configuring endpoint and id
+
+      procedure Global_Options;
+      --  Prints global options
+
+      ---------------------
+      -- Endpoint_Config --
+      ---------------------
+
+      procedure Endpoint_Config is
+      begin
+         Logs.Write ("    --config --endpoint endpoint :"
+                     & " Set client endpoint");
+         Logs.Write ("    --config --id  client_id : Set client id");
+      end Endpoint_Config;
+
+      --------------------
+      -- Global_Options --
+      --------------------
+
+      procedure Global_Options is
+      begin
+         Logs.Write ("OPTIONS :");
+         Logs.Write ("    --savadurdir dirname : set savadur directory");
+         Logs.Write ("        ($SAVADUR_DIR or $HOME/.savadur by default)");
+         Logs.Write ("    -v  | --version");
+         Logs.Write ("    -V  | --verbose");
+         Logs.Write ("    -VV | --very-verbose");
+         Logs.Write ("    -L filename          : filename for log file");
+      end Global_Options;
    begin
       --  Display error message if not null
 
@@ -424,59 +475,79 @@ procedure Savadur.Client is
       end if;
 
       Logs.Write ("Savadur " & Version.Simple);
-      Logs.Write ("usage : savadur-client [OPTIONS] -p|--project name"
-                  & " -s|--sid scenario_id");
-      Logs.Write ("OPTIONS :");
-      Logs.Write ("    --savadurdir dirname : set savadur directory");
-      Logs.Write ("           ($SAVADUR_DIR or $HOME/.savadur by default)");
-      Logs.Write ("    -v  | --version");
-      Logs.Write ("    -V  | --verbose");
-      Logs.Write ("    -VV | --very-verbose");
-      Logs.Write ("    -L filename          : use filename for log file");
-      Logs.Write ("    --server             : run in server mode");
-      Logs.Write ("    --remote --list      : List new remote server");
-      Logs.Write ("    --remote --add server_name server_url"
-                    & " : Add a new remote server");
-      Logs.Write ("    --config --endpoint endpoint :"
-                    & " Set client endpoint");
-      Logs.Write ("    --config --id  client_id : Set client id");
+      case Mode is
+         when Savadur_Client =>
+            Logs.Write ("usage : savadur --client [OPTIONS]");
+            Global_Options;
+            Endpoint_Config;
+            Logs.Write ("    --remote --list      : List new remote server");
+            Logs.Write ("    --remote --add server_name server_url"
+                        & " : Add a new remote server");
+
+         when Savadur_Standalone =>
+            Logs.Write ("usage: savadur --standalone [OPTIONS]");
+            Global_Options;
+            Logs.Write ("    --project PROJECT NAME --scenario SCENARIO");
+
+         when Savadur_Server =>
+            Global_Options;
+            Endpoint_Config;
+            null;
+      end case;
    end Usage;
 
 begin
    GNAT.Command_Line.Initialize_Option_Scan
-     (Section_Delimiters => "-remote -config");
+     (Section_Delimiters => "-remote -config -project");
 
-   --  Main section
+   --  Get running mode
 
-   Iterate_On_Opt : loop
+   case GNAT.Command_Line.Getopt ("-server -client -standalone") is
+      when '-' =>
+         Long_Running_Mode : declare
+            Full : constant String := GNAT.Command_Line.Full_Switch;
+         begin
+            if Full = "-server" then
+               Ada.Text_IO.Put_Line ("Server mode");
+               Mode := Savadur_Server;
+            elsif Full = "-client" then
+               Ada.Text_IO.Put_Line ("Client mode");
+               Mode := Savadur_Client;
+            elsif Full = "-standalone" then
+               Ada.Text_IO.Put_Line ("Standalone mode");
+               Mode := Savadur_Standalone;
+            end if;
+         end Long_Running_Mode;
+
+      when others =>
+         Text_IO.Put_Line
+           ("Usage: savadur --server|--client|--standalone OPTIONS");
+         Text_IO.Put_Line
+           ("Run savadur --MODE --help for specific MODE usage");
+         Command_Line.Set_Exit_Status (Command_Line.Failure);
+         return;
+   end case;
+
+   Main_Section : loop
       case GNAT.Command_Line.Getopt
         ("V -verbose VV -very-verbose L: -version v "
-         & "p: -project: -savadurdir: s: -sid: -server")
+         & "-help -savadurdir:")
       is
          when ASCII.NUL =>
-            exit Iterate_On_Opt;
+            exit Main_Section;
 
          when '-' =>
             --  Handle all log commands
             Long_Options : declare
                Full : constant String := GNAT.Command_Line.Full_Switch;
             begin
-               if Full = "-project" then
-                  Project_Name :=
-                    To_Unbounded_String (GNAT.Command_Line.Parameter);
-                  Logs.Write (GNAT.Command_Line.Parameter);
-                  Action := Run_Standalone'Access;
-
+               if Full = "-version" then
+                  Text_IO.Put_Line ("Savadur " & Savadur.Version.Complete);
+               elsif Full = "-help" then
+                  Usage;
+                  return;
                elsif Full = "-savadurdir" then
                   Config.Set_Savadur_Directory (GNAT.Command_Line.Parameter);
-
-               elsif Full = "-sid" then
-                  Scenario_Id :=
-                    To_Unbounded_String (GNAT.Command_Line.Parameter);
-
-               elsif Full = "-server" then
-                  Action := Run_Server_Mode'Access;
-
                elsif Full = "-verbose" then
                   Logs.Handler.Set
                     (Kind      => Logs.Handler.Verbose,
@@ -489,40 +560,8 @@ begin
                   Logs.Handler.Set
                     (Kind      => Logs.Handler.Very_Verbose,
                      Activated => True);
-
-               elsif Full = "-version" then
-                  Logs.Write
-                    (Content => "Savadur " & Savadur.Version.Complete);
-                  return;
                end if;
             end Long_Options;
-
-         when 'p' =>
-            Complete_P : declare
-               Full : constant String := GNAT.Command_Line.Full_Switch;
-            begin
-               if Full = "p" then
-                  Project_Name :=
-                    To_Unbounded_String (GNAT.Command_Line.Parameter);
-                  Logs.Write (GNAT.Command_Line.Parameter);
-                  Action := Run_Standalone'Access;
-
-               else
-                  raise Syntax_Error with "Unknown option " & Full;
-               end if;
-            end Complete_P;
-
-         when 's' =>
-            Complete_S : declare
-               Full : constant String := GNAT.Command_Line.Full_Switch;
-            begin
-               if Full = "s" then
-                  Scenario_Id :=
-                    To_Unbounded_String (GNAT.Command_Line.Parameter);
-               else
-                  raise Syntax_Error with "Unknown option " & Full;
-               end if;
-            end Complete_S;
 
          when 'v' | 'V' =>
             Complete_V : declare
@@ -566,44 +605,75 @@ begin
             Usage (Error_Message => "Unknown syntax");
             return;
       end case;
-   end loop Iterate_On_Opt;
-
-   --  Remote section
+   end loop Main_Section;
 
    GNAT.Command_Line.Goto_Section (Name => "-remote");
 
-   Remote_Opt : loop
-      case GNAT.Command_Line.Getopt ("* -add -list") is
-         when ASCII.NUL =>
-            exit Remote_Opt;
+   if Mode = Savadur_Client then
+      Remote_Opt : loop
+         case GNAT.Command_Line.Getopt ("* -add -list") is
+            when ASCII.NUL =>
+               exit Remote_Opt;
 
-         when '-' =>
-            Long_Options_Remote : declare
-               Full : constant String := GNAT.Command_Line.Full_Switch;
-            begin
-               if Full = "-add" then
-                  Action := Add_Remote_Server'Access;
+            when '-' =>
+               Long_Options_Remote : declare
+                  Full : constant String := GNAT.Command_Line.Full_Switch;
+               begin
+                  if Full = "-add" then
+                     Action := Add_Remote_Server'Access;
 
-               elsif Full = "-list" then
-                  Action := List_Remote_Server'Access;
+                  elsif Full = "-list" then
+                     Action := List_Remote_Server'Access;
 
+                  else
+                     raise Syntax_Error with "Unknown option " & Full;
+                  end if;
+               end Long_Options_Remote;
+
+            when '*' =>
+               if New_Server_Name = Null_Unbounded_String then
+                  New_Server_Name := +GNAT.Command_Line.Full_Switch;
                else
-                  raise Syntax_Error with "Unknown option " & Full;
+                  New_Server_URL  := +GNAT.Command_Line.Full_Switch;
                end if;
-            end Long_Options_Remote;
 
-         when '*' =>
-            if New_Server_Name = Null_Unbounded_String then
-               New_Server_Name := +GNAT.Command_Line.Full_Switch;
-            else
-               New_Server_URL  := +GNAT.Command_Line.Full_Switch;
-            end if;
+            when others =>
+               Usage (Error_Message => "(remote) unknown syntax");
+               return;
+         end case;
+      end loop Remote_Opt;
+   end if;
 
-         when others =>
-            Usage (Error_Message => "(remote) unknown syntax");
-            return;
-      end case;
-   end loop Remote_Opt;
+   GNAT.Command_Line.Goto_Section (Name => "-project");
+
+   if Mode = Savadur_Standalone then
+      Project_Opt : loop
+         case GNAT.Command_Line.Getopt ("* -scenario:") is
+            when ASCII.Nul =>
+               exit Project_Opt;
+
+            when '*' =>
+               Project_Name :=
+                 To_Unbounded_String (GNAT.Command_Line.Parameter);
+               Logs.Write (GNAT.Command_Line.Parameter);
+               Action := Run_Standalone'Access;
+
+            when '-' =>
+               Long_Options_Standalone : declare
+                  Full : constant String := GNAT.Command_Line.Full_Switch;
+               begin
+                  if Full = "-scenario" then
+                     Scenario_Id :=
+                       To_Unbounded_String (GNAT.Command_Line.Parameter);
+                  end if;
+               end Long_Options_Standalone;
+
+            when others =>
+               Usage (Error_Message => "(remote) unknown syntax");
+               return;
+         end case;
+      end loop Project_Opt;
+   end if;
 
    --  Config section
 
@@ -642,6 +712,16 @@ begin
    if Action /= null then
       Action.all;
    else
+      case Mode is
+         when Savadur_Client =>
+            Run_Client_Mode;
+
+         when Savadur_Server =>
+            Run_Server_Mode;
+
+         when Savadur_Standalone =>
+            null;
+      end case;
       Usage;
    end if;
 
@@ -659,4 +739,4 @@ exception
    when others =>
       Usage (Error_Message =>
              "Unknown error - should have been catch before !!!");
-end Savadur.Client;
+end Savadur.Bin;

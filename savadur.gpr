@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                                Savadur                                   --
 --                                                                          --
---                           Copyright (C) 2007                             --
+--                         Copyright (C) 2007-2008                          --
 --                      Pascal Obry - Olivier Ramonat                       --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -22,7 +22,6 @@
 project Savadur is
 
    for Source_Dirs use ();
-   --  No sources for this project
 
    type Build_Type is ("Debug", "Release", "Profile");
    Build : Build_Type := external ("PRJ_BUILD", "Debug");
@@ -41,9 +40,11 @@ project Savadur is
       case Build is
          when "Debug" | "Release" =>
             for Default_Switches ("Ada") use ("-m", "-s");
+            for Executable ("savadur-bin") use "savadur";
          when "Profile" =>
             for Default_Switches ("Ada") use
               ("-m", "-s", "-fprofile-arcs", "-ftest-coverage");
+            for Executable ("savadur-bin") use "savadur-profile";
       end case;
    end Builder;
 

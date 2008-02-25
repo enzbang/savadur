@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                                Savadur                                   --
 --                                                                          --
---                           Copyright (C) 2008                             --
+--                         Copyright (C) 2007-2008                          --
 --                      Pascal Obry - Olivier Ramonat                       --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -19,13 +19,74 @@
 --  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.       --
 ------------------------------------------------------------------------------
 
-with "kernel/savadur";
-with "server/savadur-server";
-with "client/savadur-client";
+with "aws";
+with "xmlada";
+with "morzhol";
+with "gnadelite";
+with "savadur";
+with "soap/savadur-soap";
 
 project Savadur.Main is
 
-   for Source_Dirs use ();
-   --  No sources for this project
+   for Source_Dirs use ("src");
+   for Main use ("savadur-bin");
 
+   case Savadur.Build is
+      when "Debug" =>
+         for Object_Dir use ".build/debug/savadur/obj";
+         for Exec_Dir use ".build/debug/bin";
+      when "Profile" =>
+         for Object_Dir use ".build/profile/savadur/obj";
+         for Exec_Dir use ".build/profile/bin";
+      when "Release" =>
+         for Object_Dir use ".build/release/savadur/obj";
+         for Exec_Dir use ".build/release/bin";
+   end case;
+
+   case Savadur.In_Test is
+      when "TRUE" =>
+         for Exec_Dir use "test/bin";
+      when "FALSE" =>
+         null;
+   end case;
+
+   ------------
+   -- Binder --
+   ------------
+
+   package Binder renames Savadur.Binder;
+
+   --------------
+   -- Compiler --
+   --------------
+
+   package Compiler is
+      case Savadur.Build is
+         when "Debug" | "Profile" =>
+            for Default_Switches ("Ada") use
+              Savadur.Debug_Options & ("-gnat05");
+
+         when "Release" =>
+            for Default_Switches ("Ada") use
+              Savadur.Release_Options  & ("-gnat05");
+      end case;
+   end Compiler;
+
+   -------------
+   -- Builder --
+   -------------
+
+   package Builder renames Savadur.Builder;
+
+   ------------
+   -- Linker --
+   ------------
+
+   package Linker renames Savadur.Linker;
+
+   ---------
+   -- IDE --
+   ---------
+
+   package IDE renames Savadur.IDE;
 end Savadur.Main;

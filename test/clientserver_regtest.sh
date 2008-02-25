@@ -12,13 +12,13 @@ echo '<endpoint url="http://localhost:8181"/>' >> $SCONF
 echo '</client>' >> $SCONF
 #######
 
-SAVADUR_DIR=$PWD/test-dir/server ./bin/savadur-server -VV & PID_SERVER=$!
+SAVADUR_DIR=$PWD/test-dir/server ./bin/savadur --server -VV & PID_SERVER=$!
 sleep 1
-SAVADUR_DIR=$PWD/test-dir/client ./bin/savadur-client -VV --server \
+SAVADUR_DIR=$PWD/test-dir/client ./bin/savadur --client -VV  \
   --config --id me
-SAVADUR_DIR=$PWD/test-dir/client ./bin/savadur-client -VV --server \
+SAVADUR_DIR=$PWD/test-dir/client ./bin/savadur --client -VV  \
   --config --endpoint http://localhost:8282
-SAVADUR_DIR=$PWD/test-dir/client ./bin/savadur-client -VV --server &
+SAVADUR_DIR=$PWD/test-dir/client ./bin/savadur --client -VV  &
 PID_CLIENT=$!
 
 sleep 5
