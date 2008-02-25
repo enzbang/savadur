@@ -19,11 +19,10 @@
 --  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.       --
 ------------------------------------------------------------------------------
 
+with Ada.Characters.Handling;
 with Ada.IO_Exceptions;
 with Ada.Directories;
 with Ada.Strings.Unbounded;
-
-with GNAT.Case_Util;
 
 with Sax.Readers;
 with Sax.Attributes;
@@ -158,11 +157,8 @@ package body Savadur.Config.SCM is
    -------------------
 
    function Get_Attribute (S : in String) return Attribute is
-      use GNAT;
-      Upper_S : String := S;
+      Upper_S : constant String := Ada.Characters.Handling.To_Upper (S);
    begin
-      Case_Util.To_Upper (Upper_S);
-
       for SA in Attribute'Range loop
          if Attribute'Image (SA) = Upper_S then
             return SA;
@@ -177,11 +173,8 @@ package body Savadur.Config.SCM is
    --------------------
 
    function Get_Node_Value (S : in String) return Node_Value is
-      use GNAT;
-      Upper_S : String := S;
+      Upper_S : constant String := Ada.Characters.Handling.To_Upper (S);
    begin
-      Case_Util.To_Upper (Upper_S);
-
       for NV in Node_Value'Range loop
          if Node_Value'Image (NV) = Upper_S then
             return NV;

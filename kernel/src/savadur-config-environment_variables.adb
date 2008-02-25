@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                                Savadur                                   --
 --                                                                          --
---                           Copyright (C) 2007                             --
+--                         Copyright (C) 2007-2008                          --
 --                      Pascal Obry - Olivier Ramonat                       --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -19,10 +19,9 @@
 --  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.       --
 ------------------------------------------------------------------------------
 
-with Ada.Strings.Unbounded;
+with Ada.Characters.Handling;
 with Ada.Directories;
-
-with GNAT.Case_Util;
+with Ada.Strings.Unbounded;
 
 with Sax.Readers;
 with Sax.Attributes;
@@ -79,11 +78,8 @@ package body Savadur.Config.Environment_Variables is
    -------------------
 
    function Get_Attribute (S : in String) return Attribute is
-      use GNAT;
-      Upper_S : String := S;
+      Upper_S : constant String := Ada.Characters.Handling.To_Upper (S);
    begin
-      Case_Util.To_Upper (Upper_S);
-
       for SA in Attribute'Range loop
          if Attribute'Image (SA) = Upper_S then
             return SA;
@@ -98,11 +94,8 @@ package body Savadur.Config.Environment_Variables is
    --------------------
 
    function Get_Node_Value (S : in String) return Node_Value is
-      use GNAT;
-      Upper_S : String := S;
+      Upper_S : constant String := Ada.Characters.Handling.To_Upper (S);
    begin
-      Case_Util.To_Upper (Upper_S);
-
       for NV in Node_Value'Range loop
          if Node_Value'Image (NV) = Upper_S then
             return NV;
