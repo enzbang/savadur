@@ -179,9 +179,9 @@ package body Savadur.Build is
 
       return Result;
    exception
-      when Constraint_Error =>
-         raise Command_Parse_Error with "Value " & (-Ref.Value)
-           & " is not an exit status";
+      when E : Constraint_Error =>
+         raise Command_Parse_Error
+           with "Value " & (-Ref.Value) & " is not an exit status";
    end Check;
 
    -------------
@@ -353,6 +353,7 @@ package body Savadur.Build is
             SCM_Used : constant Savadur.SCM.SCM := Savadur.SCM.Keys.Element
               (Container => Savadur.Config.SCM.Configurations,
                Key       => Project.SCM_Id);
+
          begin
             Get_Action := Actions.Keys.Element
               (Container => SCM_Used.Actions,
@@ -537,10 +538,9 @@ package body Savadur.Build is
             Notify_Server : declare
                Server_URL : constant String := Servers.URL (Server_Name);
             begin
-
                if Server_URL = "" then
-                  Logs.Write ("Unable to find server endpoint for "
-                                &  Server_Name);
+                  Logs.Write
+                    ("Unable to find server endpoint for " &  Server_Name);
                end if;
 
                Client_Service.Client.Status
@@ -561,6 +561,7 @@ package body Savadur.Build is
                & " [" & Log_Content & ']',
                Kind => Logs.Handler.Very_Verbose);
          end if;
+
       end Send_Status;
 
       Selected_Scenario : constant Savadur.Scenarios.Scenario := Init;
@@ -614,7 +615,6 @@ package body Savadur.Build is
                   Send_Status (Server, Ref.Id, Log_File);
 
                   if not Status then
-
                      case Ref.On_Error is
                         when Actions.Quit =>
                            Status := True;

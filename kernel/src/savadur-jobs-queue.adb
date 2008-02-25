@@ -448,7 +448,7 @@ package body Savadur.Jobs.Queue is
 
             if Project.SCM_Id /= SCM.Null_Id then
                declare
-                  SCM  : Savadur.SCM.SCM;
+                  SCM : Savadur.SCM.SCM;
                   pragma Unreferenced (SCM);
                begin
                   SCM := Remote_Files.Load_SCM (-Project.SCM_Id);
