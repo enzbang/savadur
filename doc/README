@@ -193,3 +193,22 @@ Then for each project an entry must be inserted into the server database:
 
    (sql) insert into notify values
            ("savadur", "mail@here.com", "savadur@jabber.org");
+
+Committers e-mail
+-----------------
+
+In some case there is no direct association between the committer name and
+the commiter e-mail. In Subversion using HTTP protocole, for example, the
+committer e-mail cannot be determined from the name found in the log.
+
+To work around this problem an XML file containing the proper associations
+can be placed on the server side.
+
+   <committers>
+     <set name="obry" value="pascal@obry.net"/>
+     <set name="ramonat" value="olivier@ramonat.fr"/>
+     <set name="*" value="@mydomain.com"/>
+   </committers>
+
+The last association is a catch-all one. For all name not listed the specified
+domain is appended to form the e-mail.

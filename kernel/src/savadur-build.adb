@@ -34,6 +34,7 @@ with Morzhol.OS;
 with Savadur.Build.Notification;
 with Savadur.Client_Service.Client;
 with Savadur.Config.Client;
+with Savadur.Config.Committers;
 with Savadur.Config.SCM;
 with Savadur.Logs;
 with Savadur.SCM;
@@ -231,8 +232,8 @@ package body Savadur.Build is
                   Text_IO.Get_Line (File, Buffer, Last);
                   if Last > 0 then
                      K := K + 1;
-                     Committers (K) :=
-                       To_Unbounded_String (Buffer (1 .. Last));
+                     Committers (K) := To_Unbounded_String
+                       (Config.Committers.Get (Buffer (1 .. Last)));
                   end if;
                end loop;
 
