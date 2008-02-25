@@ -290,15 +290,32 @@ package body Savadur.Build is
 
             Content : constant String :=
                         Utils.Content (To_String (Output_Filename));
+            Pattern : constant Regpat.Pattern_Matcher :=
+                        Regpat.Compile
+                          (Actions.Output_Pattern_Utils.To_String
+                             (Exec_Action.Cmd.Output));
+            First   : Positive := Content'First;
+            Result  : Unbounded_String;
             Matches : Regpat.Match_Array (0 .. 1);
          begin
-            Regpat.Match
-              (Regpat.Compile
-                 (Actions.Output_Pattern_Utils.To_String
-                    (Exec_Action.Cmd.Output)),
-               Content, Matches);
+            while First <= Content'Last loop
+               Regpat.Match (Pattern, Content, Matches, Data_First => First);
 
-            if Matches (0) = Regpat.No_Match then
+               exit when Matches (0) = Regpat.No_Match
+                 or else Matches (1) = Regpat.No_Match;
+
+               --  Each result on a separate line
+
+               if Result /= Null_Unbounded_String then
+                  Append (Result, ASCII.LF);
+               end if;
+
+               Append
+                 (Result, Content (Matches (1).First .. Matches (1).Last));
+               First := Matches (1).Last + 1;
+            end loop;
+
+            if Result = Null_Unbounded_String then
                --  No match, just rename the output file
                if Directories.Exists (Log_Filename) then
                   Directories.Delete_File (Log_Filename);
@@ -309,9 +326,7 @@ package body Savadur.Build is
                   New_Name => Log_Filename);
 
             else
-               Utils.Set_Content
-                 (Log_Filename,
-                  Content (Matches (1).First .. Matches (1).Last));
+               Utils.Set_Content (Log_Filename, To_String (Result));
 
                --  And delete the previous file
 
