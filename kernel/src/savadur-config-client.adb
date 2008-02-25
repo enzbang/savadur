@@ -110,7 +110,7 @@ package body Savadur.Config.Client is
    function Get_Connection_Retry_Delay return Standard.Duration is
    begin
       if Configuration = Empty then
-            Parse;
+         Parse;
       end if;
 
       return Configuration.Connection_Retry_Delay;
@@ -153,7 +153,7 @@ package body Savadur.Config.Client is
       end if;
 
       if Configuration = Empty then
-            Parse;
+         Parse;
       end if;
 
       return Configuration.Client_Metadata;
@@ -196,7 +196,7 @@ package body Savadur.Config.Client is
    -----------
 
    procedure Parse is
-      Filename : constant String := Ada.Directories.Compose
+      Filename : constant String := Directories.Compose
         (Containing_Directory => Savadur.Config.Savadur_Directory,
          Name                 => "client",
          Extension            => "xml");
