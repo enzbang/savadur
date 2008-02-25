@@ -2,6 +2,16 @@
 
 cd $(dirname $0)
 
+#  Write server client.xml configuration file as this is not yet supported
+#  by the application.
+SCONF=$PWD/test-dir/server/client.xml
+
+echo '<client>' > $SCONF
+echo '<name id="theserver"/>' >> $SCONF
+echo '<endpoint url="http://localhost:8181"/>' >> $SCONF
+echo '</client>' >> $SCONF
+#######
+
 SAVADUR_DIR=$PWD/test-dir/server ./bin/savadur-server -VV & PID_SERVER=$!
 sleep 1
 SAVADUR_DIR=$PWD/test-dir/client ./bin/savadur-client -VV --server \
