@@ -269,26 +269,38 @@ package body Config_Parse is
    is
       pragma Unreferenced (T);
       use Ada.Strings.Unbounded;
+      Git_SCM : constant String := "* git"
+        & "["
+        & "init => git-clone $url $sources  result type : EXIT_STATUS"
+        & "pull => git-pull  result type : EXIT_STATUS"
+        & "committers_1 => git-show --pretty=short $v1 (Author:(.*))"
+        & "result type : VALUE"
+        & "version=>git-show-ref -s refs/heads/master "
+        & "result type : VALUE "
+        & "committers_n => git-log $v1..$v2 (Author:(.*))"
+        & "result type : VALUE"
+        & "]";
+      SVN_SCM : constant String := "* subversion [ "
+        & "update => svn update result type : EXIT_STATUS"
+        & "init => svn checkout $url $sources"
+        & "result type : EXIT_STATUS"
+        & "committers_1 => svn log -r $v1 (r[0-9]*[|](.*)[|][^|]*[|])"
+        & "result type : VALUE "
+        & "version => svn info $url (Revision:(.*))"
+        & "result type : VALUE "
+        & "committers_n => svn log -r $v1:$v2 (r[0-9]*[|]"
+        & "(.*)[|][^|]*[|])"
+        & "result type : VALUE "
+        & "]";
    begin
       Savadur.Config.SCM.Parse;
       Assertions.Assert
         (Utils.Strip (Savadur.SCM.Image
-         (Savadur.Config.SCM.Configurations)) =
-           Utils.Strip ("* git"
-         & "["
-         & "init => git-clone $url $sources  result type : EXIT_STATUS"
-         & "pull => git-pull  result type : EXIT_STATUS"
-         & "version => git-show-ref -s refs/heads/master  "
-         & "result type : VALUE"
-         & "]"
-         & "* subversion"
-         & "["
-         & "update => svn update  result type : EXIT_STATUS"
-         & "init => svn checkout $url $sources  result type : EXIT_STATUS"
-         & "version => svn info $url (Revision: (.*))  result type : VALUE"
-         & "]"),
-         "Wrong SCM parse" & Savadur.SCM.Image
-         (Savadur.Config.SCM.Configurations));
+                        (Savadur.Config.SCM.Configurations)) =
+           Utils.Strip (Git_SCM & SVN_SCM),
+         "Wrong SCM parse"
+           & Savadur.SCM.Image (Savadur.Config.SCM.Configurations));
+
    end Check_SCM_Config;
 
    -------------------------
