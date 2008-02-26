@@ -32,9 +32,6 @@ wget --no-proxy "http://localhost:8181/run?p=style_checker&s=default&l=5"
 
 wget --no-proxy "http://localhost:8181/run?p=morzhol&s=default&l=5"
 
-echo "Press any key to stop (when no more activity)"
-read
-
 echo ""
 echo "----------------------------------------------"
 echo "CHECK STATUS"
@@ -62,6 +59,17 @@ ML=$MP/log
 SCP=test-dir/client/work/style_checker
 SCS=$SCP/sources
 SCL=$SCP/log
+
+# Wait for morzhol regtests log
+
+CONTINUE=1
+
+echo 'Press any key to kill'
+
+while [ ! -f $MP/regtests -a "$CONTINUE" = "1" ]; do
+    read -t 1
+    CONTINUE=$?
+done
 
 echo === Check for $MP
 
