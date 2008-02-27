@@ -89,4 +89,5 @@ project Savadur.Main is
    ---------
 
    package IDE renames Savadur.IDE;
+
 end Savadur.Main;
