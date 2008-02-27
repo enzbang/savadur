@@ -39,6 +39,9 @@ package body Savadur.Notifications is
    use Ada;
    use AWS;
 
+   RSS_All_File      : access String := null;
+   RSS_Template_File : access String := null;
+
    -----------
    -- Image --
    -----------
@@ -97,15 +100,6 @@ package body Savadur.Notifications is
    ----------------
 
    procedure Update_RSS is
-      Web_Dir       : constant String := Directories.Compose
-        (Containing_Directory => Savadur.Config.Savadur_Directory,
-         Name                 => "htdocs");
-      RSS_DIR       : constant String := Directories.Compose
-        (Containing_Directory => Web_Dir,
-         Name                 => "rss");
-      Web_Templates : constant String := Directories.Compose
-        (Containing_Directory => Web_Dir,
-         Name                 => "templates");
       Set  : Templates.Translate_Set := Savadur.Database.Get_Final_Status;
       File : Text_IO.File_Type;
    begin
@@ -119,26 +113,30 @@ package body Savadur.Notifications is
         (Set, Templates.Assoc ("CHANNEL_LINK",
          Savadur.Config.Syndication.Channel_Link));
 
-      Text_IO.Put_Line
-        (Directories.Compose
-           (Containing_Directory => RSS_DIR,
-            Name                 => "all",
-            Extension            => "xml"));
+      if RSS_All_File = null then
+         RSS_All_File := new String'
+           (Directories.Compose
+              (Containing_Directory => Config.RSS_Directory,
+               Name                 => "all",
+               Extension            => "xml"));
+      end if;
 
       Text_IO.Create (File => File,
-              Mode => Text_IO.Out_File,
-              Name => Directories.Compose
-                (Containing_Directory => RSS_DIR,
-                 Name                 => "all",
-                 Extension            => "xml"));
+                      Mode => Text_IO.Out_File,
+                      Name => RSS_All_File.all);
+
+      if RSS_Template_File = null then
+         RSS_Template_File := new String'
+           (Directories.Compose
+              (Containing_Directory => Config.Web_Templates_Directory,
+               Name                 => "rss2",
+               Extension            => "txml"));
+      end if;
 
       Text_IO.Put
         (File => File,
          Item => Templates.Parse
-           (Filename     => Directories.Compose
-              (Containing_Directory => Web_Templates,
-               Name                 => "rss2",
-               Extension            => "txml"),
+           (Filename     => RSS_Template_File.all,
             Translations  => Set));
 
       Text_IO.Close (File);

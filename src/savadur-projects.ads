@@ -51,7 +51,7 @@ package Savadur.Projects is
       Scenarios     : Savadur.Scenarios.Sets.Set;
       Notifications : Savadur.Notifications.Hooks;
       Variables     : Savadur.Variables.Sets.Set;
-      Directories   : Project_Directories;
+      Directory     : Project_Directories;
       Description   : Project_Description;
    end record;
 
@@ -87,12 +87,12 @@ package Savadur.Projects is
 private
 
    type Project_Directories is record
-      Project_Directory         : Unbounded_String;
-      Project_Log_Directory     : Unbounded_String;
-      Project_State_Directory   : Unbounded_String;
-      Project_Sources_Directory : Unbounded_String;
-      Project_Filename          : Unbounded_String;
-      Project_Env_Filename      : Unbounded_String;
+      Cached_Project_Directory         : access String := null;
+      Cached_Project_Env_Filename      : access String := null;
+      Cached_Project_Filename          : access String := null;
+      Cached_Project_Log_Directory     : access String := null;
+      Cached_Project_State_Directory   : access String := null;
+      Cached_Project_Sources_Directory : access String := null;
    end record;
 
 end Savadur.Projects;

@@ -50,6 +50,8 @@ package body Savadur.Database is
    Null_DBH : constant TLS_DBH :=
                 TLS_DBH'(Handle => null, Connected => False);
 
+   DB_Path : access String := null;
+
    package DBH_TLS is
      new Task_Attributes (Attribute => TLS_DBH, Initial_Value => Null_DBH);
 
@@ -61,27 +63,30 @@ package body Savadur.Database is
    -------------
 
    procedure Connect (DBH : in TLS_DBH_Access) is
-      DB_Path : constant String :=
-                  Directories.Compose
-                    (Containing_Directory => Config.Savadur_Directory,
-                     Name                 => "logs",
-                     Extension            => "db");
    begin
-      if not DBH.Connected then
-         if Directories.Exists (Name => DB_Path) then
-            DBH.Handle := new DB.SQLite.Handle;
-            DBH.Handle.Connect (DB_Path);
-            DBH.Connected := True;
-            DBH_TLS.Set_Value (DBH.all);
-         else
+      if DB_Path = null then
+         DB_Path := new String'
+           (Directories.Compose
+              (Containing_Directory => Config.Savadur_Directory,
+               Name                 => "logs",
+               Extension            => "db"));
+
+      if not Directories.Exists (Name => DB_Path.all) then
             Logs.Handler.Write
               (Name    => Module,
                Kind    => Logs.Handler.Error,
-               Content => "ERROR : No database found : " & DB_Path &
-              " Please run ./scripts/create_database");
+               Content => "ERROR : No database found : " & DB_Path.all &
+               " Please run ./scripts/create_database");
             raise No_Database
-              with "ERROR : No database found : " & DB_Path;
+              with "ERROR : No database found : " & DB_Path.all;
          end if;
+      end if;
+
+      if not DBH.Connected then
+            DBH.Handle := new DB.SQLite.Handle;
+            DBH.Handle.Connect (DB_Path.all);
+            DBH.Connected := True;
+            DBH_TLS.Set_Value (DBH.all);
       end if;
    end Connect;
 

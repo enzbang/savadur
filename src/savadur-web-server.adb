@@ -86,17 +86,6 @@ package body Savadur.Web.Server is
    -------------------
 
    function HTTP_Callback (Request : in Status.Data) return Response.Data is
-      Web_Dir : constant String :=
-                  Directories.Compose
-                    (Containing_Directory => Savadur.Config.Savadur_Directory,
-                     Name                 => "htdocs");
-      RSS_DIR : constant String := Directories.Compose
-        (Containing_Directory => Web_Dir,
-         Name                 => "rss");
-      Web_CSS : constant String :=
-                  Directories.Compose
-                    (Containing_Directory => Web_Dir,
-                     Name                 => "css");
       URI     : constant String := Status.URI (Request);
       Log_URI : constant String := "/log/";
       CSS_URI : constant String := "/css/";
@@ -116,10 +105,7 @@ package body Savadur.Web.Server is
 
       elsif URI = "/rss/all" then
          Get_RSS : declare
-            RSS_File : constant String := Directories.Compose
-                (Containing_Directory => RSS_DIR,
-                 Name                 => "all",
-                 Extension            => "xml");
+            RSS_File : constant String := Savadur.Config.RSS_Directory;
          begin
             if Directories.Exists (RSS_File) then
                return Response.File (MIME.Text_XML, RSS_File);
@@ -148,7 +134,7 @@ package body Savadur.Web.Server is
       then
          Get_CSS : declare
             CSS_File : constant String := Directories.Compose
-              (Containing_Directory => Web_CSS,
+              (Containing_Directory => Savadur.Config.Web_CSS_Directory,
                Name                 => URI
                  (URI'First + CSS_URI'Length .. URI'Last));
          begin
@@ -187,18 +173,12 @@ package body Savadur.Web.Server is
 
    function List (Request : in Status.Data) return Response.Data is
       pragma Unreferenced (Request);
-      Web_Dir       : constant String := Directories.Compose
-        (Containing_Directory => Savadur.Config.Savadur_Directory,
-         Name                 => "htdocs");
-      Web_Templates : constant String := Directories.Compose
-        (Containing_Directory => Web_Dir,
-         Name                 => "templates");
    begin
       return AWS.Response.Build
         (Content_Type => MIME.Text_HTML,
          Message_Body => AWS.Templates.Parse
            (Filename     => Directories.Compose
-              (Containing_Directory => Web_Templates,
+              (Containing_Directory => Savadur.Config.Web_Templates_Directory,
                Name                 => "list",
                Extension            => "thtml"),
             Translations => Project_List.To_Set
@@ -300,12 +280,6 @@ package body Savadur.Web.Server is
    ----------------
 
    function Show_Log (Log_Id : in String) return Response.Data is
-      Web_Dir       : constant String := Directories.Compose
-        (Containing_Directory => Savadur.Config.Savadur_Directory,
-         Name                 => "htdocs");
-      Web_Templates : constant String := Directories.Compose
-        (Containing_Directory => Web_Dir,
-         Name                 => "templates");
    begin
       Get_Content : declare
          Id : constant Positive := Positive'Value (Log_Id);
@@ -314,7 +288,8 @@ package body Savadur.Web.Server is
            (Content_Type => MIME.Text_HTML,
             Message_Body => AWS.Templates.Parse
               (Filename     => Directories.Compose
-                 (Containing_Directory => Web_Templates,
+                 (Containing_Directory =>
+                    Savadur.Config.Web_Templates_Directory,
                   Name                 => "log",
                   Extension            => "thtml"),
                Translations => Database.Get_Log_Content (Id)));
@@ -331,12 +306,6 @@ package body Savadur.Web.Server is
    --------------------
 
    function Show_Project (Request : in Status.Data) return Response.Data is
-      Web_Dir       : constant String := Directories.Compose
-        (Containing_Directory => Savadur.Config.Savadur_Directory,
-         Name                 => "htdocs");
-      Web_Templates : constant String := Directories.Compose
-        (Containing_Directory => Web_Dir,
-         Name                 => "templates");
       URI           : constant String := Status.URI (Request);
       Project_Name  : constant String := URI (URI'First + 1 .. URI'Last);
       Configuration : constant Projects.Project_Config :=
@@ -357,7 +326,7 @@ package body Savadur.Web.Server is
         (Content_Type => MIME.Text_HTML,
          Message_Body => AWS.Templates.Parse
            (Filename     => Directories.Compose
-              (Containing_Directory => Web_Templates,
+              (Containing_Directory => Savadur.Config.Web_Templates_Directory,
                Name                 => "project_page",
                Extension            => "thtml"),
             Translations => Set));

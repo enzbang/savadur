@@ -35,18 +35,21 @@ package body Savadur.Projects is
    function Project_Directory
      (Project : access Project_Config) return String is
    begin
-      if Project.Directories.Project_Directory = +"" then
-         Project.Directories.Project_Directory := +Directories.Compose
-           (Containing_Directory => Config.Work_Directory,
-            Name                 => -Unbounded_String (Project.Project_Id));
+      if Project.Directory.Cached_Project_Directory = null then
+         Project.Directory.Cached_Project_Directory := new String'
+           (Directories.Compose
+              (Containing_Directory => Config.Work_Directory,
+               Name                 => -Unbounded_String
+                 (Project.Project_Id)));
          if not Directories.Exists
-           (Name => -Project.Directories.Project_Directory)
+           (Name => Project.Directory.Cached_Project_Directory.all)
          then
             Directories.Create_Path
-              (New_Directory => -Project.Directories.Project_Directory);
+              (New_Directory => Project.Directory.Cached_Project_Directory.all);
          end if;
       end if;
-      return -Project.Directories.Project_Directory;
+
+      return Project.Directory.Cached_Project_Directory.all;
    end Project_Directory;
 
    --------------------------
@@ -56,14 +59,16 @@ package body Savadur.Projects is
    function Project_Env_Filename
      (Project : access Project_Config) return String is
    begin
-      if Project.Directories.Project_Env_Filename = +"" then
-         Project.Directories.Project_Env_Filename := +Directories.Compose
-           (Containing_Directory => Config.Project_Env_Directory,
-            Name                 => Id_Utils.To_String
-              (Project.Project_Id),
-            Extension            => "xml");
+      if Project.Directory.Cached_Project_Env_Filename = null then
+         Project.Directory.Cached_Project_Env_Filename := new String'
+           (Directories.Compose
+              (Containing_Directory => Config.Project_Env_Directory,
+               Name                 => Id_Utils.To_String
+                 (Project.Project_Id),
+               Extension            => "xml"));
       end if;
-      return -Project.Directories.Project_Env_Filename;
+
+      return Project.Directory.Cached_Project_Env_Filename.all;
    end Project_Env_Filename;
 
    ----------------------
@@ -73,14 +78,16 @@ package body Savadur.Projects is
    function Project_Filename
      (Project : access Project_Config) return String is
    begin
-      if Project.Directories.Project_Filename = +"" then
-         Project.Directories.Project_Filename := +Directories.Compose
-           (Containing_Directory => Config.Project_File_Directory,
-            Name                 => Id_Utils.To_String
-              (Project.Project_Id),
-            Extension            => "xml");
+      if Project.Directory.Cached_Project_Filename = null then
+         Project.Directory.Cached_Project_Filename := new String'
+           (Directories.Compose
+              (Containing_Directory => Config.Project_File_Directory,
+               Name                 => Id_Utils.To_String
+                 (Project.Project_Id),
+               Extension            => "xml"));
       end if;
-      return -Project.Directories.Project_Filename;
+
+      return Project.Directory.Cached_Project_Filename.all;
    end Project_Filename;
 
    ---------------------------
@@ -90,17 +97,19 @@ package body Savadur.Projects is
    function Project_Log_Directory
      (Project : access Projects.Project_Config) return String is
    begin
-      if Project.Directories.Project_Log_Directory = +"" then
-         Project.Directories.Project_Log_Directory := +Directories.Compose
-           (Containing_Directory => Project_Directory (Project),
-            Name                 => "log");
+      if Project.Directory.Cached_Project_Log_Directory = null then
+         Project.Directory.Cached_Project_Log_Directory := new String'
+           (Directories.Compose
+              (Containing_Directory => Project_Directory (Project),
+               Name                 => "log"));
          if not Directories.Exists
-           (Name => -Project.Directories.Project_Log_Directory) then
+           (Name => Project.Directory.Cached_Project_Log_Directory.all) then
             Directories.Create_Path
-              (New_Directory => -Project.Directories.Project_Log_Directory);
+              (New_Directory => Project.Directory.Cached_Project_Log_Directory.all);
          end if;
       end if;
-      return -Project.Directories.Project_Log_Directory;
+
+      return Project.Directory.Cached_Project_Log_Directory.all;
    end Project_Log_Directory;
 
    -------------------------------
@@ -111,7 +120,7 @@ package body Savadur.Projects is
      (Project : access Project_Config) return String is
    begin
 
-      if Project.Directories.Project_Sources_Directory = +"" then
+      if Project.Directory.Cached_Project_Sources_Directory = null then
          declare
             Var : constant Savadur.Variables.Variable :=
                     Savadur.Variables.Keys.Element
@@ -119,14 +128,14 @@ package body Savadur.Projects is
                        Key        => Savadur.Variables.Name_Utils.Value
                          (Img => "sources"));
          begin
-            Project.Directories.Project_Sources_Directory :=
-              +Directories.Compose
-              (Containing_Directory => Project_Directory (Project),
-               Name                 => To_String (Var.Value));
+            Project.Directory.Cached_Project_Sources_Directory := new String'
+              (Directories.Compose
+                 (Containing_Directory => Project_Directory (Project),
+                  Name                 => To_String (Var.Value)));
          end;
       end if;
 
-      return -Project.Directories.Project_Sources_Directory;
+      return Project.Directory.Cached_Project_Sources_Directory.all;
    end Project_Sources_Directory;
 
    -----------------------------
@@ -136,18 +145,19 @@ package body Savadur.Projects is
    function Project_State_Directory
      (Project : access Projects.Project_Config) return String is
    begin
-      if Project.Directories.Project_State_Directory = +"" then
-         Project.Directories.Project_State_Directory :=
-           +Directories.Compose
-           (Containing_Directory => Project_Directory (Project),
-            Name                 => "state");
+      if Project.Directory.Cached_Project_State_Directory = null then
+         Project.Directory.Cached_Project_State_Directory := new String'
+           (Directories.Compose
+              (Containing_Directory => Project_Directory (Project),
+               Name                 => "state"));
          if not Directories.Exists
-           (Name => -Project.Directories.Project_State_Directory) then
+           (Name => Project.Directory.Cached_Project_State_Directory.all) then
             Directories.Create_Path
-              (New_Directory => -Project.Directories.Project_State_Directory);
+              (New_Directory => Project.Directory.Cached_Project_State_Directory.all);
          end if;
       end if;
-      return -Project.Directories.Project_State_Directory;
+
+      return Project.Directory.Cached_Project_State_Directory.all;
    end Project_State_Directory;
 
    ------------------
@@ -157,7 +167,7 @@ package body Savadur.Projects is
    procedure Set_Filename
      (Project  : access Project_Config; Filename : in String) is
    begin
-      Project.Directories.Project_Filename := +Filename;
+      Project.Directory.Cached_Project_Filename := new String'(Filename);
    end Set_Filename;
 
 end Savadur.Projects;

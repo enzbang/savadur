@@ -57,6 +57,18 @@ package Savadur.Config is
    function Server_Directory return String;
    --  Returns server directory
 
+   function RSS_Directory return String;
+   --  Returns RSS directory
+
+   function Web_CSS_Directory return String;
+   --  Returns CSS directory
+
+   function Web_Directory return String;
+   --  Returns web directory
+
+   function Web_Templates_Directory return String;
+   --  Returns web templates directory
+
    Client_Server : Boolean := False;
    --  Set to true if the client is configured to work with a server
 
