@@ -119,6 +119,10 @@ package body Savadur.Notifications is
               (Containing_Directory => Config.RSS_Directory,
                Name                 => "all",
                Extension            => "xml"));
+
+         if not Directories.Exists (Config.RSS_Directory) then
+            Directories.Create_Directory (Config.RSS_Directory);
+         end if;
       end if;
 
       Text_IO.Create (File => File,
