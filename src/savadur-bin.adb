@@ -749,12 +749,14 @@ exception
       | GNAT.Command_Line.Invalid_Parameter
         =>
       Usage (Error_Message => "INVALID : unknown syntax");
+
    when E : Savadur.Config.Config_Error
       | Savadur.Config.Project.Config_Error
       | Savadur.Config.Environment_Variables.Config_Error
         =>
       Usage (Error_Message => Exceptions.Exception_Message (E));
+
    when others =>
       Usage (Error_Message =>
-             "Unknown error - should have been catch before !!!");
+             "Unknown error - should have been caught before !!!");
 end Savadur.Bin;
