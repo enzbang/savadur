@@ -502,7 +502,21 @@ begin
 
    --  Get running mode
 
-   case GNAT.Command_Line.Getopt ("-server -client -standalone") is
+   Get_Running_Mode : declare
+      procedure Mode_Usage;
+      --  Display mode usage
+
+      procedure Mode_Usage is
+      begin
+         Text_IO.Put_Line
+           ("Usage: savadur --server|--client|--standalone OPTIONS");
+         Text_IO.Put_Line
+           ("Run savadur --MODE --help for specific MODE usage");
+         Command_Line.Set_Exit_Status (Command_Line.Failure);
+      end Mode_Usage;
+
+   begin
+      case GNAT.Command_Line.Getopt ("-server -client -standalone") is
       when '-' =>
          Long_Running_Mode : declare
             Full : constant String := GNAT.Command_Line.Full_Switch;
@@ -520,13 +534,17 @@ begin
          end Long_Running_Mode;
 
       when others =>
-         Text_IO.Put_Line
-           ("Usage: savadur --server|--client|--standalone OPTIONS");
-         Text_IO.Put_Line
-           ("Run savadur --MODE --help for specific MODE usage");
-         Command_Line.Set_Exit_Status (Command_Line.Failure);
+         Mode_Usage;
          return;
-   end case;
+      end case;
+
+   exception
+      when GNAT.Command_Line.Invalid_Section
+         | GNAT.Command_Line.Invalid_Switch
+         | GNAT.Command_Line.Invalid_Parameter =>
+         Mode_Usage;
+         return;
+   end Get_Running_Mode;
 
    Main_Section : loop
       case GNAT.Command_Line.Getopt
