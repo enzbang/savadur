@@ -62,13 +62,12 @@ SCL=$SCP/log
 
 # Wait for morzhol regtests log
 
-CONTINUE=1
+echo 'Press CTRL-C to kill'
 
-echo 'Press any key to kill'
+trap 'kill $PID_SERVER $PID_CLIENT; exit' 2
 
-while [ ! -f $MP/regtests -a "$CONTINUE" = "1" ]; do
-    read -t 1
-    CONTINUE=$?
+while [ ! -f $ML/regtests ]; do
+    sleep 1
 done
 
 echo === Check for $MP
