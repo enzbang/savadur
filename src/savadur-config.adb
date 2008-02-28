@@ -184,7 +184,7 @@ package body Savadur.Config is
          Cached_Web_CSS_Directory := new String'
            (Directories.Compose
               (Containing_Directory => Web_Directory,
-               Name                 => "htdocs"));
+               Name                 => "css"));
       end if;
 
       return Cached_Web_CSS_Directory.all;
