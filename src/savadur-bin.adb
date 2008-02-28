@@ -522,13 +522,10 @@ begin
             Full : constant String := GNAT.Command_Line.Full_Switch;
          begin
             if Full = "-server" then
-               Ada.Text_IO.Put_Line ("Server mode");
                Mode := Savadur_Server;
             elsif Full = "-client" then
-               Ada.Text_IO.Put_Line ("Client mode");
                Mode := Savadur_Client;
             elsif Full = "-standalone" then
-               Ada.Text_IO.Put_Line ("Standalone mode");
                Mode := Savadur_Standalone;
             end if;
          end Long_Running_Mode;
