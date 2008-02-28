@@ -20,7 +20,9 @@
 ------------------------------------------------------------------------------
 
 with Ada.Environment_Variables;
+with Ada.Exceptions;
 
+with Savadur.Logs;
 with Savadur.Utils;
 
 package body Savadur.Environment_Variables is
@@ -84,6 +86,14 @@ package body Savadur.Environment_Variables is
             Maps.Next (Position);
          end Set_Var;
       end loop;
+
+   exception
+      when E : Constraint_Error =>
+         Logs.Write ("Unable to set environment", Logs.Handler.Error);
+         Logs.Write ("Set_Environment failed with " &
+                     Exceptions.Exception_Information (E),
+                     Logs.Handler.Error);
+
    end Set_Environment;
 
 end Savadur.Environment_Variables;
