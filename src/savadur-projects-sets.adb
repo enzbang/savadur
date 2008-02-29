@@ -19,9 +19,13 @@
 --  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.       --
 ------------------------------------------------------------------------------
 
-with Ada.Strings.Unbounded.Hash;
+with Ada.Strings.Hash_Case_Insensitive;
+
+with Savadur.Utils;
 
 package body Savadur.Projects.Sets is
+
+   use Savadur.Utils;
 
    ---------
    -- "=" --
@@ -38,7 +42,8 @@ package body Savadur.Projects.Sets is
 
    function Hash (Project : in Project_Config) return Containers.Hash_Type is
    begin
-      return Hash (Unbounded_String (Project.Project_Id));
+      return Strings.Hash_Case_Insensitive
+        (-Unbounded_String (Project.Project_Id));
    end Hash;
 
    ---------
