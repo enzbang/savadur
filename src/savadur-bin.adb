@@ -668,9 +668,15 @@ begin
                exit Project_Opt;
 
             when '*' =>
-               Project_Name :=
-                 To_Unbounded_String (GNAT.Command_Line.Parameter);
-               Logs.Write (GNAT.Command_Line.Parameter);
+               if Project_Name = +"" then
+                  --  Set project name (take first parameter only)
+
+                  Project_Name :=
+                    To_Unbounded_String (GNAT.Command_Line.Full_Switch);
+               else
+                  Usage (Error_Message => "(project) unknown syntax");
+                  return;
+               end if;
                Action := Run_Standalone'Access;
 
             when '-' =>
@@ -684,7 +690,7 @@ begin
                end Long_Options_Standalone;
 
             when others =>
-               Usage (Error_Message => "(remote) unknown syntax");
+               Usage (Error_Message => "(project) unknown syntax");
                return;
          end case;
       end loop Project_Opt;
