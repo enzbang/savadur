@@ -236,6 +236,8 @@ package body Savadur.Config.Project is
       if Projects.Sets.Sets.Has_Element (C) then
          return Projects.Sets.Sets.Element (C);
       else
+         Logs.Write (Content => "Try loading unknown project " & Project_Name,
+                     Kind    => Logs.Handler.Error);
          raise IO_Exceptions.Name_Error
            with "Try loading unknown project " & Project_Name;
       end if;
