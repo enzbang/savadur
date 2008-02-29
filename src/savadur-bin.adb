@@ -355,8 +355,8 @@ procedure Savadur.Bin is
       --  standalone mode. In this case the project and SCM won't get checked
       --  on the server side.
 
-      Savadur.Config.SCM.Parse;
-      Savadur.Config.Project.Parse;
+      Config.SCM.Parse;
+      Config.Project.Parse;
 
       Logs.Write
         (Content => "SCM Found" & ASCII.LF
@@ -364,7 +364,7 @@ procedure Savadur.Bin is
          & ASCII.LF,
          Kind    => Logs.Handler.Very_Verbose);
 
-      if To_String (Project_Name) = "" then
+      if -Project_Name = "" then
          Usage (Error_Message => "no project name");
          return;
       end if;

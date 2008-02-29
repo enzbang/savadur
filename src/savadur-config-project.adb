@@ -329,8 +329,6 @@ package body Savadur.Config.Project is
    begin
       C := Projects.Sets.Keys.Find (Configurations, Project_Name);
 
-      Ada.Text_IO.Put_Line ("IS project name " & Project_Name);
-
       if Projects.Sets.Sets.Has_Element (C) then
          return True;
       else
