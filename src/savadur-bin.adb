@@ -383,7 +383,13 @@ procedure Savadur.Bin is
             -Project_Name,
             Projects.Project_Filename (Project'Access));
 
-         Jobs.Client.Queue.Add (Signed_Project, "", -Scenario_Id);
+         Logs.Write (Content => "Running " & (-Project_Name),
+                     Kind    => Logs.Handler.Information);
+
+         Jobs.Client.Queue.Add (Project  => Signed_Project,
+                                Server   => "",
+                                Scenario => -Scenario_Id,
+                                Latency  => 0.0);
       end Run_Project;
 
       Jobs.Client.Queue.Stop;
