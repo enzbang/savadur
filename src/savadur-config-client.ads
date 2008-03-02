@@ -34,6 +34,9 @@ package Savadur.Config.Client is
    function Get_Metadata return Savadur.Web_Services.Client.Metadata;
    --  Returns metadata (OS, ...)
 
+   function Get_Description return String;
+   --  Returns client description
+
    function Get_Ping_Delay return Duration;
    --  Returns ping delay or 600.0 (10 minutes) if not specified
 

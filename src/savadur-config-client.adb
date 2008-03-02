@@ -117,6 +117,19 @@ package body Savadur.Config.Client is
       return Configuration.Connection_Retry_Delay;
    end Get_Connection_Retry_Delay;
 
+   ---------------------
+   -- Get_Description --
+   ---------------------
+
+   function Get_Description return String is
+   begin
+      if Configuration = Empty then
+         Parse;
+      end if;
+
+      return -Configuration.Description;
+   end Get_Description;
+
    --------------------
    --  Get_Endpoint  --
    --------------------
@@ -393,6 +406,11 @@ package body Savadur.Config.Client is
                         Item => Templates.Assoc
                           (Variable => "ENDPOINT",
                            Value    => -Configuration.Endpoint));
+
+      Templates.Insert (Set  => Set,
+                        Item => Templates.Assoc
+                          (Variable => "DESCRIPTION",
+                           Value    => -Configuration.Description));
 
       Templates.Insert (Set  => Set,
                         Item => Templates.Assoc
