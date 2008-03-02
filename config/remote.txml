@@ -1,0 +1,4 @@
+<server>
+  <name value="@_SERVER_NAME_@"/>
+  <location url="@_SERVER_URL_@"/>
+</server>

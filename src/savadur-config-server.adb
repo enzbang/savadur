@@ -25,6 +25,8 @@ with Ada.IO_Exceptions;
 with Ada.Directories;
 with Ada.Strings.Unbounded;
 
+with AWS.Templates;
+
 with Sax.Readers;
 with Sax.Attributes;
 with Input_Sources.File;
@@ -37,6 +39,7 @@ package body Savadur.Config.Server is
 
    use Ada;
    use Ada.Strings.Unbounded;
+   use AWS;
    use Savadur.Utils;
 
    type Node_Value is (Server, Name, Location);
@@ -182,4 +185,38 @@ package body Savadur.Config.Server is
       end case;
    end Start_Element;
 
+   -----------
+   -- Write --
+   -----------
+
+   procedure Write (Name, URL : in String) is
+      Filename : constant String :=
+                   Directories.Compose
+                     (Containing_Directory => Config.Server_Directory,
+                      Name                 => Name,
+                      Extension            => "xml");
+      Template  : constant String :=
+                    Directories.Compose
+                      (Containing_Directory => Config.Config_Templates_Directory,
+                       Name                 => "remote",
+                       Extension            => "txml");
+
+      File     : Text_IO.File_Type;
+      Set      : Templates.Translate_Set;
+   begin
+      Templates.Insert (Set  => Set,
+                        Item => Templates.Assoc (Variable => "SERVER_NAME",
+                                                 Value    => Name));
+
+      Templates.Insert (Set  => Set,
+                        Item => Templates.Assoc (Variable => "SERVER_URL",
+                                                 Value    => Url));
+
+      Text_IO.Create (File, Text_IO.Out_File, Filename);
+      Text_IO.Put (File,
+                   Templates.Parse
+                     (Filename     => Template,
+                      Translations => Set));
+      Text_IO.Close (File);
+   end Write;
 end Savadur.Config.Server;

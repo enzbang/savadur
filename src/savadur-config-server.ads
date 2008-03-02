@@ -24,4 +24,7 @@ package Savadur.Config.Server is
    procedure Parse;
    --  Fills the server configuration map
 
+   procedure Write (Name, URL : in String);
+   --  Write the server configuration
+
 end Savadur.Config.Server;

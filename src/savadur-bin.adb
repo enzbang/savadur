@@ -128,17 +128,10 @@ procedure Savadur.Bin is
          return;
       end if;
 
-      Create (File => File, Mode => Out_File, Name => Filename);
-
       Put_Line ("Add new remote server : "
                 & (-New_Server_Name) & " " & (-New_Server_URL));
 
-      Put_Line (File, "<server>");
-      Put_Line (File, "<name value='" & (-New_Server_Name) & "'/>");
-      Put_Line (File, "<location url='" & (-New_Server_URL) & "'/>");
-      Put_Line (File, "</server>");
-
-      Close (File);
+      Config.Server.Write (-New_Server_Name, -New_Server_URL);
    end Add_Remote_Server;
 
    ------------------------
@@ -402,10 +395,6 @@ procedure Savadur.Bin is
    procedure Set_Client_Config is
       use Ada.Text_IO;
       File                   : File_Type;
-      Config_Client_Id       : constant String :=
-                                 Savadur.Config.Client.Get_Key;
-      Config_Client_Endpoint : constant String :=
-                                 Savadur.Config.Client.Get_Endpoint;
       Filename               : constant String := Directories.Compose
         (Containing_Directory => Config.Savadur_Directory,
          Name                 => "client",
@@ -415,23 +404,7 @@ procedure Savadur.Bin is
          Directories.Create_Directory (Config.Savadur_Directory);
       end if;
 
-      Create (File => File, Mode => Out_File, Name => Filename);
-      Put_Line (File, "<client>");
-
-      if -Client_Id /= "" then
-         Put_Line (File, "<name id='" & (-Client_Id) & "'/>");
-      elsif Config_Client_Id /= "" then
-         Put_Line (File, "<name id='" & Config_Client_Id & "'/>");
-      end if;
-
-      if -Client_Endpoint /= "" then
-         Put_Line (File, "<endpoint url='" & (-Client_Endpoint) & "'/>");
-      elsif Config_Client_Endpoint /= "" then
-         Put_Line (File, "<endpoint url='" & Config_Client_Endpoint & "'/>");
-      end if;
-
-      Put_Line (File, "</client>");
-      Close (File);
+      Savadur.Config.Client.Write (-Client_Id, -Client_Endpoint);
    end Set_Client_Config;
 
    -----------

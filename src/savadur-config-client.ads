@@ -40,4 +40,8 @@ package Savadur.Config.Client is
    function Get_Connection_Retry_Delay return Duration;
    --  Returns connection retry delay or 300.0  (5 minutes) if not specified
 
+   procedure Write (Key, Endpoint : in String);
+   --  Writes client configuration file (not that if read the previous version
+   --  to avoid deleting metadata or delays)
+   --  ??? All parameters should be configurable with command line
 end Savadur.Config.Client;

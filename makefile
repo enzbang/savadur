@@ -69,17 +69,21 @@ install:
 	@$(MKDIR) $(INSTALL)/example
 	@$(MKDIR) $(INSTALL)/client-savadurdir/scm
 	@$(MKDIR) $(INSTALL)/client-savadurdir/servers
+	@$(MKDIR) $(INSTALL)/client-savadurdir/share/templates
 	@$(MKDIR) $(INSTALL)/server-savadurdir/config
 	@$(MKDIR) $(INSTALL)/server-savadurdir/projects
 	@$(MKDIR) $(INSTALL)/server-savadurdir/scripts
 	@$(MKDIR) $(INSTALL)/server-savadurdir/htdocs/templates
 	@$(MKDIR) $(INSTALL)/server-savadurdir/htdocs/css
+	@$(MKDIR) $(INSTALL)/server-savadurdir/share/templates
 	@$(MKDIR) $(INSTALL)/server-savadurdir/scm
 	@$(CP) db/data/create_database.sh $(INSTALL)/server-savadurdir/scripts/
 	@$(CP) config/scm/* $(INSTALL)/server-savadurdir/scm
 	@$(CP) templates/*.thtml $(INSTALL)/server-savadurdir/htdocs/templates
 	@$(CP) templates/*.txml $(INSTALL)/server-savadurdir/htdocs/templates
 	@$(CP) templates/*.css $(INSTALL)/server-savadurdir/htdocs/css
+	@$(CP) templates/config/*.txml $(INSTALL)/server-savadurdir/share/templates/
+	@$(CP) templates/config/*.txml $(INSTALL)/client-savadurdir/share/templates/
 	@$(CP) test/config/*.xml $(INSTALL)/example/
 	cp $(BIN_DIR)/savadur $(INSTALL)
 	@echo savadur is installed in $(INSTALL)

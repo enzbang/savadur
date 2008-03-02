@@ -34,16 +34,36 @@ package body Savadur.Config is
 
    use Savadur.Utils;
 
-   Cached_Directory               : access String := null;
-   Cached_Project_Env_Directory   : access String := null;
-   Cached_Project_File_Directory  : access String := null;
-   Cached_RSS_Directory           : access String := null;
-   Cached_SCM_Directory           : access String := null;
-   Cached_Server_Directory        : access String := null;
-   Cached_Web_CSS_Directory       : access String := null;
-   Cached_Web_Directory           : access String := null;
-   Cached_Web_Templates_Directory : access String := null;
-   Cached_Work_Dir                : access String := null;
+   Cached_Config_Templates_Directory : access String := null;
+   Cached_Directory                  : access String := null;
+   Cached_Project_Env_Directory      : access String := null;
+   Cached_Project_File_Directory     : access String := null;
+   Cached_RSS_Directory              : access String := null;
+   Cached_SCM_Directory              : access String := null;
+   Cached_Server_Directory           : access String := null;
+   Cached_Web_CSS_Directory          : access String := null;
+   Cached_Web_Directory              : access String := null;
+   Cached_Web_Templates_Directory    : access String := null;
+   Cached_Work_Dir                   : access String := null;
+
+   --------------------------------
+   -- Config_Templates_Directory --
+   --------------------------------
+
+   function Config_Templates_Directory return String is
+   begin
+      if Cached_Config_Templates_Directory = null then
+         Cached_Config_Templates_Directory := new String'
+           (Directories.Compose
+              (Containing_Directory =>
+                 Directories.Compose
+                   (Containing_Directory => Savadur_directory,
+                    Name                 => "share"),
+               Name                 => "templates"));
+      end if;
+
+      return Cached_Config_Templates_Directory.all;
+   end Config_Templates_Directory;
 
    ---------------------------
    -- Project_Env_Directory --

@@ -22,6 +22,9 @@
 with Ada.Characters.Handling;
 with Ada.Directories;
 with Ada.Strings.Unbounded;
+with Ada.Text_IO;
+
+with AWS.Templates;
 
 with Sax.Readers;
 with Sax.Attributes;
@@ -29,6 +32,7 @@ with Input_Sources.File;
 with Unicode.CES;
 
 with Savadur.Client_Service;
+with Savadur.Config;
 with Savadur.Server_Service;
 with Savadur.Utils;
 
@@ -36,6 +40,7 @@ package body Savadur.Config.Client is
 
    use Ada;
    use Ada.Strings.Unbounded;
+   use AWS;
    use Savadur;
    use Savadur.Utils;
 
@@ -346,4 +351,85 @@ package body Savadur.Config.Client is
       end case;
    end Start_Element;
 
+   -----------
+   -- Write --
+   -----------
+
+   procedure Write (Key, Endpoint : in String) is
+      Filename : constant String := Directories.Compose
+        (Containing_Directory => Savadur.Config.Savadur_Directory,
+         Name                 => "client",
+         Extension            => "xml");
+      Template  : constant String
+        := Directories.Compose
+          (Containing_Directory =>
+               Savadur.Config.Config_Templates_Directory,
+           Name                 => "client",
+           Extension            => "txml");
+      File     : Text_IO.File_Type;
+      Set      : Templates.Translate_Set;
+   begin
+
+      if Configuration = Empty then
+         Parse;
+      end if;
+
+      if Key /= "" then
+         Configuration.Key := +Key;
+      end if;
+
+      if Endpoint /= "" then
+         Configuration.Endpoint := +Endpoint;
+      end if;
+
+      Text_IO.Put_Line ("key is " & Key);
+
+      Templates.Insert (Set  => Set,
+                        Item => Templates.Assoc
+                          (Variable => "KEY",
+                           Value    => -Configuration.Key));
+
+      Templates.Insert (Set  => Set,
+                        Item => Templates.Assoc
+                          (Variable => "ENDPOINT",
+                           Value    => -Configuration.Endpoint));
+
+      Templates.Insert (Set  => Set,
+                        Item => Templates.Assoc
+                          (Variable => "METADATA_OS",
+                           Value    => -Configuration.Client_Metadata.OS));
+
+
+      declare
+         Conn_Retry : constant String :=
+                              Duration'Image
+                          (Configuration.Connection_Retry_Delay);
+         Ping        : constant String :=
+                         Duration'Image
+                           (Configuration.Ping_Delay);
+      begin
+         if Conn_Retry /= "" then
+            Templates.Insert (Set  => Set,
+                              Item => Templates.Assoc
+                                (Variable => "CONNECTION_RETRY",
+                                 Value    => Conn_Retry (Conn_Retry'First + 1
+                                   .. Conn_Retry'Last)));
+         end if;
+
+         if Ping /= "" then
+            Templates.Insert (Set  => Set,
+                              Item => Templates.Assoc
+                                (Variable => "PING",
+                                 Value    => Ping (Ping'First + 1
+                                   .. Ping'Last)));
+         end if;
+      end;
+
+      Text_IO.Create (File, Text_IO.Out_File, Filename);
+      Text_IO.Put (File,
+                   Templates.Parse
+                     (Filename     => Template,
+                      Translations => Set));
+      Text_IO.Close (File);
+   end Write;
 end Savadur.Config.Client;

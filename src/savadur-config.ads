@@ -29,8 +29,10 @@ package Savadur.Config is
    --      client.xml   (client side only)
    --      config/
    --      htdocs/      (server side only)
+   --           templates/
    --      projects/
    --      scripts/     (server side only)
+   --      share/templates/
    --      scm/
    --      env/
    --      servers/
@@ -46,6 +48,9 @@ package Savadur.Config is
 
    function SCM_Directory return String;
    --  Returns SCM directory,  creates it if it does not exist
+
+   function Config_Templates_Directory return String;
+   --  Returns config templates directory
 
    function Project_File_Directory return String;
    --  Returns project file directory $(savadur_dir)/projects
