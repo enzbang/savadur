@@ -25,6 +25,7 @@ with Ada.Exceptions;
 
 with Morzhol.Logs;
 
+with Savadur.Actions;
 with Savadur.Clients;
 with Savadur.Config.SCM;
 with Savadur.Config.Project;
@@ -50,7 +51,7 @@ package body Savadur.Web_Services.Client is
       Key          : Unbounded_String;
       Project_Name : Unbounded_String;
       Scenario     : Unbounded_String;
-      Action       : Unbounded_String;
+      Action       : Actions.Id;
       Output       : Unbounded_String;
       Result       : Boolean;
       Job_Id       : Natural;
@@ -275,7 +276,7 @@ package body Savadur.Web_Services.Client is
         (Report_Data'(Key => +Key,
                       Project_Name => +Project_Name,
                       Scenario     => +Scenario,
-                      Action       => +Action,
+                      Action       => Actions.Id_Utils.Value (Action),
                       Output       => +Output,
                       Result       => Result,
                       Job_Id       => Job_Id,
@@ -288,6 +289,7 @@ package body Savadur.Web_Services.Client is
    -------------------
 
    task body Update_Status is
+      use type Actions.Id;
       Report : Report_Data;
    begin
       For_Every_Report : loop
@@ -296,30 +298,18 @@ package body Savadur.Web_Services.Client is
 
          Handle_Report : begin
             Logs.Write (-Report.Key & ":" & (-Report.Project_Name));
-            Logs.Write ("Running Job Id" & Natural'Image (Report.Job_Id)
-                          & " :: " & (-Report.Scenario)
-                          & "/" & (-Report.Action));
+            Logs.Write
+              ("Running Job Id" & Natural'Image (Report.Job_Id)
+               & " :: " & (-Report.Scenario)
+               & "/" & (Actions.Id_Utils.To_String (Report.Action)));
             Logs.Write ("Output is " & (-Report.Output));
             Logs.Write (Boolean'Image (Report.Result));
 
-            if Report.Action /= "" then
-               --  This is the action log. Scenario is in progress
-               Database.Log
-                 (-Report.Key,
-                  -Report.Project_Name,
-                  -Report.Scenario,
-                  -Report.Action,
-                  -Report.Output,
-                  Report.Result,
-                  Report.Job_Id);
-
-            else
+            if Report.Action = Actions.End_Action.Id then
                --  End of scenario. Final status
-               Database.Final_Status (-Report.Key,
-                                      -Report.Project_Name,
-                                      -Report.Scenario,
-                                      Report.Result,
-                                      Report.Job_Id);
+               Database.Final_Status
+                 (-Report.Key, -Report.Project_Name, -Report.Scenario,
+                  Report.Result, Report.Job_Id);
 
                --  Send notification messages
 
@@ -335,6 +325,13 @@ package body Savadur.Web_Services.Client is
                --  Update RSS file
 
                Notifications.Update_RSS;
+
+            else
+               --  This is the action log. Scenario is in progress
+               Database.Log
+                 (-Report.Key, -Report.Project_Name, -Report.Scenario,
+                  Actions.Id_Utils.To_String (Report.Action), -Report.Output,
+                  Report.Result, Report.Job_Id);
             end if;
 
             if not Report.Result then

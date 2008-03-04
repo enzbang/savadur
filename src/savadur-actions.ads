@@ -60,6 +60,9 @@ package Savadur.Actions is
 
    Null_Action : constant Action;
 
+   End_Action  : constant Action;
+   --  Action sent when last action for a scenario
+
    function Image (Action : in Actions.Action) return String;
    --  Returns action image
 
@@ -125,6 +128,11 @@ private
 
    Null_Action           : constant Action :=
                              Action'(Id     => Id_Utils.Nil,
+                                     Cmd    => Null_Command,
+                                     Result => <>);
+
+   End_Action            : constant Action :=
+                             Action'(Id     => Id_Utils.Value ("@ENDACTION@"),
                                      Cmd    => Null_Command,
                                      Result => <>);
 

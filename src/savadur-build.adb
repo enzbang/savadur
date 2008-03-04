@@ -865,7 +865,7 @@ package body Savadur.Build is
 
       --  Final server notification
 
-      Send_Status (Server, Actions.Id_Utils.Nil);
+      Send_Status (Server, Actions.End_Action.Id);
 
       --  Execute notifications hooks
 
