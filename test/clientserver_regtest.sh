@@ -68,7 +68,7 @@ echo 'Press CTRL-C to kill'
 
 trap 'kill $PID_SERVER $PID_CLIENT; exit' 2
 
-while [ ! -f $ML/regtests ]; do
+while [ ! -f $TL/2-@endaction@ ]; do
     sleep 1
 done
 

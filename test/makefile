@@ -56,6 +56,8 @@ setup_clientserver:
 	@$(MKDIR) test-dir/server/projects
 	@$(MKDIR) test-dir/server/config
 	@$(MKDIR) test-dir/server/htdocs/templates
+	@$(MKDIR) test-dir/client/share/templates
+	@$(MKDIR) test-dir/logs
 	@$(CP) -r ../config/scm/ test-dir/server
 	@$(CP) config/style_checker.xml test-dir/server/projects/
 	@$(CP) config/morzhol.xml test-dir/server/projects/
@@ -63,3 +65,4 @@ setup_clientserver:
 		> test-dir/client/servers/localhost.xml
 	@$(CP) test-dir/project_list.xml test-dir/server/config/
 	@$(CP) ../templates/*.txml test-dir/server/htdocs/templates
+	@$(CP) ../templates/config/*.txml test-dir/client/share/templates
