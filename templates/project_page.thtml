@@ -95,7 +95,7 @@
               </tr>
               @@END_IF@@
               @@END_TABLE@@
-              <th>#@_LOGS_JOB_ID_@</th>
+              <th>#@_LOGS_JOB_ID_@ (@_LOGS_SCENARIO_@)</th>
             </table>
             @@END_IF@@
             @@END_TABLE@@
