@@ -138,6 +138,7 @@ package body Savadur.Config.Server is
                Send_Log => Reader.Send_Log);
          end Load_Config;
       end loop Walk_Directories;
+
    exception
       when IO_Exceptions.Name_Error =>
          raise Config_Error with " No Servers Directory ?";
@@ -225,7 +226,8 @@ package body Savadur.Config.Server is
                       Extension            => "xml");
       Template  : constant String :=
                     Directories.Compose
-                      (Containing_Directory => Config.Config_Templates_Directory,
+                      (Containing_Directory =>
+                                       Config.Config_Templates_Directory,
                        Name                 => "remote",
                        Extension            => "txml");
 
@@ -247,4 +249,5 @@ package body Savadur.Config.Server is
                       Translations => Set));
       Text_IO.Close (File);
    end Write;
+
 end Savadur.Config.Server;

@@ -7,8 +7,8 @@ cd $(dirname $0)
 SCONF=$PWD/test-dir/server/client.xml
 
 echo '<client>' > $SCONF
-echo '<name id="theserver"/>' >> $SCONF
-echo '<endpoint url="http://localhost:8181"/>' >> $SCONF
+echo '   <name id="theserver"/>' >> $SCONF
+echo '   <endpoint url="http://localhost:8181"/>' >> $SCONF
 echo '</client>' >> $SCONF
 #######
 
