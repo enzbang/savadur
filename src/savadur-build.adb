@@ -29,6 +29,7 @@ with Ada.Text_IO;
 with GNAT.OS_Lib;
 with GNAT.Regpat;
 
+with AWS.Utils;
 with Morzhol.OS;
 
 with Savadur.Build.Notification;
@@ -62,6 +63,7 @@ package body Savadur.Build is
       Exec_Action : in Actions.Action;
       Ref         : in Actions.Ref_Action;
       Return_Code : in Integer;
+      Job_Id      : in Natural;
       Log_File    : in String;
       Diff_Data   : not null access Web_Services.Client.Diff_Data)
       return Boolean;
@@ -76,6 +78,7 @@ package body Savadur.Build is
       Exec_Action : in Actions.Action;
       Ref         : in Actions.Ref_Action;
       Return_Code : in Integer;
+      Job_Id      : in Natural;
       Log_File    : in String;
       Diff_Data   : not null access Web_Services.Client.Diff_Data)
       return Boolean
@@ -203,11 +206,8 @@ package body Savadur.Build is
                Sources_Directory : constant String :=
                                      Projects.Project_Sources_Directory
                                        (Project);
-               Log_Directory     : constant String :=
-                                     Projects.Project_Log_Directory (Project);
-               Log_File          : constant String := Directories.Compose
-                 (Containing_Directory => Log_Directory,
-                  Name                 => Actions.To_String (Action.Id));
+               Log_File          : constant String :=
+                                     Log_Filename (Project, Action.Id, Job_Id);
                Return_Code       : Integer;
                Result            : Boolean;
                File              : Text_IO.File_Type;
@@ -588,6 +588,26 @@ package body Savadur.Build is
       end if;
    end Get_Arguments;
 
+   ------------------
+   -- Log_Filename --
+   ------------------
+
+   function Log_Filename
+     (Project   : access Projects.Project_Config;
+      Action_Id : in     Actions.Id;
+      Job_Id    : in     Natural;
+      Prefix    : in     String := "") return String
+   is
+      Log_Directory : constant String :=
+                        Projects.Project_Log_Directory (Project);
+   begin
+      return Directories.Compose
+        (Containing_Directory => Log_Directory,
+         Name                 =>
+           AWS.Utils.Image (Job_Id) & "-" & Prefix
+             & Actions.To_String (Action_Id));
+   end Log_Filename;
+
    ---------
    -- Run --
    ---------
@@ -697,8 +717,6 @@ package body Savadur.Build is
 
       Sources_Directory : constant String :=
                             Projects.Project_Sources_Directory (Project);
-      Log_Directory     : constant String :=
-                            Projects.Project_Log_Directory (Project);
 
    begin
       For_All_Ref_Actions : declare
@@ -710,9 +728,8 @@ package body Savadur.Build is
             Execute_Command : declare
                use type SCM.Id;
                Ref         : constant Actions.Ref_Action := Element (Position);
-               Log_File    : constant String := Directories.Compose
-                 (Containing_Directory => Log_Directory,
-                  Name                 => Actions.To_String (Ref.Id));
+               Log_File    : constant String :=
+                               Log_Filename (Project, Ref.Id, Job_Id);
                Exec_Action : constant Actions.Action :=
                                Get_Action (Project    => Project.all,
                                            Ref_Action => Ref);
@@ -739,6 +756,7 @@ package body Savadur.Build is
                                    Exec_Action => Exec_Action,
                                    Ref         => Ref,
                                    Return_Code => Return_Code,
+                                   Job_Id      => Job_Id,
                                    Log_File    => Log_File,
                                    Diff_Data   => Diff_Data'Access);
 
@@ -786,9 +804,8 @@ package body Savadur.Build is
                            Ref_Action => Savadur.SCM.Init),
                         Directory     =>
                           Projects.Project_Directory (Project),
-                        Log_Filename  => Directories.Compose
-                          (Containing_Directory => Log_Directory,
-                           Name                 => "init"),
+                        Log_Filename  => Log_Filename
+                          (Project, SCM.Init.Id, Job_Id),
                         Return_Code   => Return_Code,
                         Result        => Result);
 
@@ -800,11 +817,10 @@ package body Savadur.Build is
                         raise Command_Parse_Error with "SCM init failed !";
                      end if;
 
-                     Send_Status (Server,
-                                  Savadur.SCM.Init.Id,
-                                  Directories.Compose
-                                    (Containing_Directory => Log_Directory,
-                                     Name                 => "init"));
+                     Send_Status
+                       (Server,
+                        Savadur.SCM.Init.Id,
+                        Log_Filename (Project, SCM.Init.Id, Job_Id));
                   end if;
                   --  No Next (Position) to retry the same command
                end if;
@@ -827,7 +843,7 @@ package body Savadur.Build is
 
       --  Execute notifications hooks
 
-      Build.Notification.Notify (Project, Status);
+      Build.Notification.Notify (Project, Status, Job_Id);
 
       return Status;
    end Run;

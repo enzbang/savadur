@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                                Savadur                                   --
 --                                                                          --
---                           Copyright (C) 2007                             --
+--                         Copyright (C) 2007-2008                          --
 --                      Pascal Obry - Olivier Ramonat                       --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -25,7 +25,8 @@ private package Savadur.Build.Notification is
 
    procedure Notify
      (Project : access Projects.Project_Config;
-      Success : in     Boolean);
+      Success : in     Boolean;
+      Job_Id  : in     Natural);
    --  Runs notify hooks
 
 end Savadur.Build.Notification;

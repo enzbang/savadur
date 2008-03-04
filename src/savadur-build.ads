@@ -61,4 +61,14 @@ private
       return Actions.Action;
    --  Returns the action to execute matching the ref_action
 
+   function Log_Filename
+     (Project   : access Projects.Project_Config;
+      Action_Id : in     Actions.Id;
+      Job_Id    : in     Natural;
+      Prefix    : in     String := "") return String;
+   --  Returns the log filename for the given action and job id. The log
+   --  filename has the format:
+   --
+   --  <project_log_path>/<job_id>-<prefix><action_name>
+
 end Savadur.Build;

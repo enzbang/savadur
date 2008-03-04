@@ -34,7 +34,8 @@ package body Savadur.Build.Notification is
 
    procedure Notify
      (Project : access Projects.Project_Config;
-      Success : in     Boolean)
+      Success : in     Boolean;
+      Job_Id  : in     Natural)
    is
       Log_Directory : constant String :=
                         Projects.Project_Log_Directory (Project);
@@ -49,11 +50,9 @@ package body Savadur.Build.Notification is
                                Build.Get_Action
                                  (Project    => Project.all,
                                   Ref_Action => Ref);
-
-               Log_File    : constant String := Directories.Compose
-                 (Containing_Directory => Log_Directory,
-                  Name                 => "on_success_"
-                  & Actions.Id_Utils.To_String (Ref.Id));
+               Log_File    : constant String :=
+                               Log_Filename
+                                 (Project, Ref.Id, Job_Id, "on_success_");
                Return_Code : Integer;
                Result      : Boolean;
             begin
@@ -74,11 +73,9 @@ package body Savadur.Build.Notification is
                Exec_Action : constant Actions.Action := Get_Action
                  (Project    => Project.all,
                   Ref_Action => Ref);
-
-               Log_File    : constant String := Directories.Compose
-                 (Containing_Directory => Log_Directory,
-                  Name                 => "on_failure_"
-                  & Actions.Id_Utils.To_String (Ref.Id));
+               Log_File    : constant String :=
+                               Log_Filename
+                                 (Project, Ref.Id, Job_Id, "on_failure_");
                Return_Code : Integer;
                Result      : Boolean;
             begin

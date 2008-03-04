@@ -60,7 +60,7 @@ SCP=test-dir/client/work/style_checker
 SCS=$SCP/sources
 SCL=$SCP/log
 
-# Wait for morzhol regtests log
+#  Wait for morzhol regtests log
 
 echo 'Press CTRL-C to kill'
 
@@ -73,13 +73,13 @@ done
 echo === Check for $MP
 
 check_file $MS/.build/debug/lib morzhol.ali
-check_file $ML init
-check_file $ML make
-check_file $ML regtests
-check_file $ML update
-check_file $ML version
+check_file $ML 2-init
+check_file $ML 2-make
+check_file $ML 2-regtests
+check_file $ML 2-update
+check_file $ML 2-version
 
-versize=$(wc -w $ML/version | cut -c1)
+versize=$(wc -w $ML/2-version | cut -c1)
 
 if [ "$versize" == "1" ]; then
     echo OK: version has single word;
@@ -87,7 +87,7 @@ else
     echo NOK: version size is $versize;
 fi;
 
-committer=$(cat $ML/committers_1)
+committer=$(cat $ML/2-committers_1)
 
 if [ "$committer" == "pascal.obry" ]; then
     echo OK: committer is pascal.obry;
@@ -99,13 +99,13 @@ echo === Check for $SCP
 
 check_file $SCS/obj style_checker.ali
 check_file $SCS style_checker$EXEEXT
-check_file $SCL init
-check_file $SCL make
-check_file $SCL regtests
-check_file $SCL pull
-check_file $SCL version
+check_file $SCL 1-init
+check_file $SCL 1-make
+check_file $SCL 1-regtests
+check_file $SCL 1-pull
+check_file $SCL 1-version
 
-versize=$(wc -w $SCL/version | cut -c1)
+versize=$(wc -w $SCL/1-version | cut -c1)
 
 if [ "$versize" == "1" ]; then
     echo OK: version has single word;
@@ -113,7 +113,7 @@ else
     echo NOK: version size is $versize;
 fi;
 
-committer=$(cat $SCL/committers_1)
+committer=$(cat $SCL/1-committers_1)
 
 if [ "$committer" == "Pascal Obry <pascal@obry.net>" ]; then
     echo OK: committer is $committer;
