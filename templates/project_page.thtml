@@ -24,6 +24,15 @@
       <ul><li><a href="/">Back to project list</a></li></ul>
     </div>
 
+    <form action="/run" method="put">
+      <input type="hidden" id="p" name="p" value="@_PROJECT_NAME_@"/>
+      <label for="s">scenario</label>
+      <input type="text" id="s" name="s" value="web"/>
+      <labol for="l">latency (in seconds)</label>
+      <input type="text" id="l" name="l" value="1"/>
+      <input type="submit" value="Envoyer" />
+    </form>
+
     <div id="content">
       <table>
         <tr> @@-- Last Status line
