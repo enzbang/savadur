@@ -33,6 +33,23 @@ package body Savadur.Servers is
 
    All_Servers : Sets.Set;
 
+   ---------
+   -- Get --
+   ---------
+
+   function Get (Name : in String) return Server is
+      Position : constant Sets.Cursor :=
+                   Sets.Find
+                     (Container => All_Servers,
+                      Item      => Server'(Name     => +Name,
+                                           URL      => <>,
+                                           Log_Path => <>,
+                                           Send_Log => <>,
+                                           Status   => <>));
+   begin
+      return Sets.Element (Position);
+   end Get;
+
    ----------------
    -- Go_Offline --
    ----------------
@@ -43,6 +60,8 @@ package body Savadur.Servers is
                      (Container => All_Servers,
                       Item      => Server'(Name  => Server_Name,
                                            URL    => <>,
+                                           Log_Path => <>,
+                                           Send_Log => <>,
                                            Status => <>));
       Element  : Server := Sets.Element (Position);
    begin
@@ -60,9 +79,11 @@ package body Savadur.Servers is
       Position : constant Sets.Cursor :=
                    Sets.Find
                      (Container => All_Servers,
-                      Item      => Server'(Name   => Server_Name,
-                                           URL    => <>,
-                                           Status => <>));
+                      Item      => Server'(Name     => Server_Name,
+                                           URL      => <>,
+                                           Log_Path => <>,
+                                           Send_Log => <>,
+                                           Status   => <>));
       Element  : Server := Sets.Element (Position);
    begin
       Element.Status := Online;
@@ -98,17 +119,25 @@ package body Savadur.Servers is
       Result   : Unbounded_String;
    begin
       while Sets.Has_Element (Position) loop
-         Append
-           (Result, "* "
-            & To_String (Sets.Element (Position).Name) & ASCII.LF);
-         Append (Result, "[" & ASCII.LF);
-         Append
-           (Result,
-            "Name => " & To_String (Sets.Element (Position).Name) & ASCII.LF);
-         Append
-           (Result, "URL => " &
-            To_String (Sets.Element (Position).URL) & ASCII.LF);
-         Append (Result, "]" & ASCII.LF);
+         One_Server : declare
+            S : constant Server := Sets.Element (Position);
+         begin
+            Append
+              (Result, "* " & To_String (S.Name) & ASCII.LF);
+            Append (Result, "[" & ASCII.LF);
+            Append (Result, "Name => " & To_String (S.Name) & ASCII.LF);
+            Append (Result, "URL => " & To_String (S.URL) & ASCII.LF);
+
+            if S.Log_Path /= Null_Unbounded_String then
+               Append
+                 (Result, "Log_Path => " & To_String (S.Log_Path) & ASCII.LF);
+            end if;
+
+            Append
+              (Result, "Send_Log => " & Boolean'Image (S.Send_Log) & ASCII.LF);
+
+            Append (Result, "]" & ASCII.LF);
+         end One_Server;
          Sets.Next (Position);
       end loop;
 
@@ -119,8 +148,9 @@ package body Savadur.Servers is
    -- Insert --
    ------------
 
-   procedure Insert (Name, URL : in String) is
-      New_Item : constant Server := Server'(+Name, +URL, Offline);
+   procedure Insert (Name, URL, Log_Path : in String; Send_Log : in Boolean) is
+      New_Item : constant Server :=
+                   Server'(+Name, +URL, +Log_Path, Send_Log, Offline);
    begin
       Sets.Insert (Container => All_Servers,
                    New_Item  => New_Item);
@@ -143,6 +173,15 @@ package body Savadur.Servers is
    begin
       return Natural (Sets.Length (All_Servers));
    end Length;
+
+   --------------
+   -- Log_Path --
+   --------------
+
+   function Log_Path (Server : in Servers.Server) return String is
+   begin
+      return -Server.Log_Path;
+   end Log_Path;
 
    ----------
    -- Name --
@@ -188,6 +227,15 @@ package body Savadur.Servers is
       end loop;
    end Online_Iterate;
 
+   --------------
+   -- Send_Log --
+   --------------
+
+   function Send_Log (Server : in Servers.Server) return Boolean is
+   begin
+      return Server.Send_Log;
+   end Send_Log;
+
    ---------
    -- URL --
    ---------
@@ -202,22 +250,13 @@ package body Savadur.Servers is
    -- URL --
    ---------
 
-   function URL (Server_Name : in String) return String is
-      Position : constant Sets.Cursor :=
-                   Sets.Find
-                     (Container => All_Servers,
-                      Item      => Server'(Name   => +Server_Name,
-                                           URL    => <>,
-                                           Status => <>));
-      Element  : constant Server := Sets.Element (Position);
+   function URL (Server : in Servers.Server) return String is
    begin
-      if Element.Status = Online then
-         return -Element.URL;
+      if Server.Status = Online then
+         return -Server.URL;
+      else
+         return "";
       end if;
-
-      --  Else return empty string
-
-      return "";
    end URL;
 
 end Savadur.Servers;

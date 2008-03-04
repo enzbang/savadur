@@ -596,16 +596,25 @@ package body Savadur.Build is
      (Project   : access Projects.Project_Config;
       Action_Id : in     Actions.Id;
       Job_Id    : in     Natural;
+      Directory : in     String := "";
       Prefix    : in     String := "") return String
    is
       Log_Directory : constant String :=
                         Projects.Project_Log_Directory (Project);
    begin
-      return Directories.Compose
-        (Containing_Directory => Log_Directory,
-         Name                 =>
-           AWS.Utils.Image (Job_Id) & "-" & Prefix
-             & Actions.To_String (Action_Id));
+      if Directory = "" then
+         return Directories.Compose
+           (Containing_Directory => Log_Directory,
+            Name                 =>
+              AWS.Utils.Image (Job_Id) & "-" & Prefix
+            & Actions.To_String (Action_Id));
+      else
+         return Directories.Compose
+           (Containing_Directory => Directory,
+            Name                 =>
+              AWS.Utils.Image (Job_Id) & "-" & Prefix
+            & Actions.To_String (Action_Id));
+      end if;
    end Log_Filename;
 
    ---------
@@ -664,16 +673,16 @@ package body Savadur.Build is
          Log_File    : in String := "")
       is
 
-         function Log_Content return String;
+         function Log_Content (Activated : in Boolean := True) return String;
          --  Returns log content or empty string
 
          -----------------
          -- Log_Content --
          -----------------
 
-         function Log_Content return String is
+         function Log_Content (Activated : in Boolean := True) return String is
          begin
-            if Log_File = "" then
+            if Log_File = "" or else not Activated then
                return "";
             else
                return Content (Log_File, From_Top => False);
@@ -684,11 +693,28 @@ package body Savadur.Build is
          if Config.Client_Server then
 
             Notify_Server : declare
-               Server_URL : constant String := Servers.URL (Server_Name);
+               Server     : constant Servers.Server :=
+                              Servers.Get (Server_Name);
+               Server_URL : constant String := Servers.URL (Server);
             begin
                if Server_URL = "" then
                   Logs.Write
                     ("Unable to find server endpoint for " &  Server_Name);
+               end if;
+
+               if Servers.Log_Path (Server) /= "" then
+                  --  Write log to this location
+                  if Directories.Exists (Servers.Log_Path (Server)) then
+                     Utils.Set_Content
+                       (Log_Filename
+                          (Project, Action_Id, Job_Id,
+                           Directory => Servers.Log_Path (Server)),
+                        Log_Content);
+                  else
+                     Logs.Write
+                       ("log directory does not exists: "
+                        & Servers.Log_Path (Server), Logs.Handler.Warnings);
+                  end if;
                end if;
 
                Client_Service.Client.Status
@@ -697,7 +723,7 @@ package body Savadur.Build is
                     Projects.Id_Utils.To_String (Project.Project_Id),
                   Scenario     => Scenarios.Id_Utils.To_String (Id),
                   Action       => Actions.Id_Utils.To_String (Action_Id),
-                  Output       => Log_Content,
+                  Output       => Log_Content (Servers.Send_Log (Server)),
                   Result       => Status,
                   Job_Id       => Job_Id,
                   Diff_Data    => Web_Services.Client.No_Diff_Data,

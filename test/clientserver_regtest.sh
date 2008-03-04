@@ -60,6 +60,8 @@ SCP=test-dir/client/work/style_checker
 SCS=$SCP/sources
 SCL=$SCP/log
 
+TL=test-dir/logs
+
 #  Wait for morzhol regtests log
 
 echo 'Press CTRL-C to kill'
@@ -120,6 +122,19 @@ if [ "$committer" == "Pascal Obry <pascal@obry.net>" ]; then
 else
     echo NOK: committer is wrong, $committer;
 fi;
+
+echo === Check log directory $TL
+
+check_file $TL 1-init
+check_file $TL 1-make
+check_file $TL 1-regtests
+check_file $TL 1-pull
+check_file $TL 1-version
+check_file $TL 2-init
+check_file $TL 2-make
+check_file $TL 2-regtests
+check_file $TL 2-update
+check_file $TL 2-version
 
 echo ""
 echo "Exit, kill processes"

@@ -51,6 +51,7 @@ regtests_clientserver: setup_clientserver
 setup_clientserver:
 	@$(RM) -r test-dir/client
 	@$(RM) -r test-dir/server
+	@$(RM) -r test-dir/logs
 	@$(MKDIR) test-dir/client/servers
 	@$(MKDIR) test-dir/server/projects
 	@$(MKDIR) test-dir/server/config
@@ -58,6 +59,7 @@ setup_clientserver:
 	@$(CP) -r ../config/scm/ test-dir/server
 	@$(CP) config/style_checker.xml test-dir/server/projects/
 	@$(CP) config/morzhol.xml test-dir/server/projects/
-	@$(CP) config/servers/localhost.xml test-dir/client/servers/
+	@$(SED) -e "s,@LOGS@,$(PWD),g" config/servers/localhost.xml \
+		> test-dir/client/servers/localhost.xml
 	@$(CP) test-dir/project_list.xml test-dir/server/config/
 	@$(CP) ../templates/*.txml test-dir/server/htdocs/templates

@@ -42,7 +42,7 @@ package body Savadur.Config.Server is
    use AWS;
    use Savadur.Utils;
 
-   type Node_Value is (Server, Name, Location);
+   type Node_Value is (Server, Name, Location, Log_Path, Send_Log);
 
    type Attribute is (Value, URL);
 
@@ -56,6 +56,8 @@ package body Savadur.Config.Server is
    type Tree_Reader is new Sax.Readers.Reader with record
       Server_Name : Unbounded_String;
       Server_URL  : Unbounded_String;
+      Log_Path    : Unbounded_String;
+      Send_Log    : Boolean := True;  -- default, send log
    end record;
 
    overriding procedure Start_Element
@@ -129,8 +131,11 @@ package body Savadur.Config.Server is
             Parse (Reader, Source);
             Input_Sources.File.Close (Source);
 
-            Savadur.Servers.Insert (Name  => -Reader.Server_Name,
-                                    URL   => -Reader.Server_URL);
+            Savadur.Servers.Insert
+              (Name     => -Reader.Server_Name,
+               URL      => -Reader.Server_URL,
+               Log_Path => -Reader.Log_Path,
+               Send_Log => Reader.Send_Log);
          end Load_Config;
       end loop Walk_Directories;
    exception
@@ -182,6 +187,29 @@ package body Savadur.Config.Server is
                      raise Config_Error with "Unexpected Value attribute";
                end case;
             end loop;
+
+         when Log_Path =>
+            for J in 0 .. Get_Length (Atts) - 1 loop
+               Attr := Get_Attribute (Get_Qname (Atts, J));
+               case Attr is
+                  when URL =>
+                     raise Config_Error with "Unexpected Value attribute";
+                  when Value =>
+                     Handler.Log_Path := +Get_Value (Atts, J);
+               end case;
+            end loop;
+
+         when Send_Log =>
+            for J in 0 .. Get_Length (Atts) - 1 loop
+               Attr := Get_Attribute (Get_Qname (Atts, J));
+               case Attr is
+                  when URL =>
+                     raise Config_Error with "Unexpected Value attribute";
+                  when Value =>
+                     Handler.Send_Log := Boolean'Value (Get_Value (Atts, J));
+               end case;
+            end loop;
+
       end case;
    end Start_Element;
 

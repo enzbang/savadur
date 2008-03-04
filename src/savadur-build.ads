@@ -65,10 +65,13 @@ private
      (Project   : access Projects.Project_Config;
       Action_Id : in     Actions.Id;
       Job_Id    : in     Natural;
+      Directory : in     String := "";
       Prefix    : in     String := "") return String;
    --  Returns the log filename for the given action and job id. The log
    --  filename has the format:
    --
-   --  <project_log_path>/<job_id>-<prefix><action_name>
+   --  <directory>/<job_id>-<prefix><action_name>
+   --
+   --  If directory is not set, use the project_log_path
 
 end Savadur.Build;
