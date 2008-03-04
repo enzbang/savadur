@@ -1,0 +1,10 @@
+<client>
+  <name id="@_KEY_@"/>
+  <endpoint url="@_ENDPOINT_@"/>
+  <description value="@_DESCRIPTION_@"/>
+  <metadata>
+    <os value="@_METADATA_OS_@"/>
+  </metadata>
+  <ping_delay seconds="@_PING_@"/>
+  <connection_retry_delay seconds="@_CONNECTION_RETRY_@"/>
+</client>
