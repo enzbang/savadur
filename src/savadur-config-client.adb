@@ -361,7 +361,6 @@ package body Savadur.Config.Client is
                   raise Config_Error with "Wrong node value for attr "
                     & Attribute'Image (Attr);
             end Ping_Delay_In_Seconds;
-
       end case;
    end Start_Element;
 
@@ -370,20 +369,18 @@ package body Savadur.Config.Client is
    -----------
 
    procedure Write (Key, Endpoint : in String) is
-      Filename : constant String := Directories.Compose
+      Filename  : constant String := Directories.Compose
         (Containing_Directory => Savadur.Config.Savadur_Directory,
          Name                 => "client",
          Extension            => "xml");
-      Template  : constant String
-        := Directories.Compose
-          (Containing_Directory =>
-               Savadur.Config.Config_Templates_Directory,
-           Name                 => "client",
-           Extension            => "txml");
-      File     : Text_IO.File_Type;
-      Set      : Templates.Translate_Set;
+      Template  : constant String := Directories.Compose
+        (Containing_Directory =>
+           Savadur.Config.Config_Templates_Directory,
+         Name                 => "client",
+         Extension            => "txml");
+      File      : Text_IO.File_Type;
+      Set       : Templates.Translate_Set;
    begin
-
       if Configuration = Empty then
          Parse;
       end if;
@@ -398,49 +395,52 @@ package body Savadur.Config.Client is
 
       Text_IO.Put_Line ("key is " & Key);
 
-      Templates.Insert (Set  => Set,
-                        Item => Templates.Assoc
-                          (Variable => "KEY",
-                           Value    => -Configuration.Key));
+      Templates.Insert
+        (Set  => Set,
+         Item => Templates.Assoc
+           (Variable => "KEY",
+            Value    => -Configuration.Key));
 
-      Templates.Insert (Set  => Set,
-                        Item => Templates.Assoc
-                          (Variable => "ENDPOINT",
-                           Value    => -Configuration.Endpoint));
+      Templates.Insert
+        (Set  => Set,
+         Item => Templates.Assoc
+           (Variable => "ENDPOINT",
+            Value    => -Configuration.Endpoint));
 
-      Templates.Insert (Set  => Set,
-                        Item => Templates.Assoc
-                          (Variable => "DESCRIPTION",
-                           Value    => -Configuration.Description));
+      Templates.Insert
+        (Set  => Set,
+         Item => Templates.Assoc
+           (Variable => "DESCRIPTION",
+            Value    => -Configuration.Description));
 
-      Templates.Insert (Set  => Set,
-                        Item => Templates.Assoc
-                          (Variable => "METADATA_OS",
-                           Value    => -Configuration.Client_Metadata.OS));
-
+      Templates.Insert
+        (Set  => Set,
+         Item => Templates.Assoc
+           (Variable => "METADATA_OS",
+            Value    => -Configuration.Client_Metadata.OS));
 
       declare
          Conn_Retry : constant String :=
-                              Duration'Image
+                        Duration'Image
                           (Configuration.Connection_Retry_Delay);
-         Ping        : constant String :=
-                         Duration'Image
-                           (Configuration.Ping_Delay);
+         Ping       : constant String :=
+                        Duration'Image (Configuration.Ping_Delay);
       begin
          if Conn_Retry /= "" then
-            Templates.Insert (Set  => Set,
-                              Item => Templates.Assoc
-                                (Variable => "CONNECTION_RETRY",
-                                 Value    => Conn_Retry (Conn_Retry'First + 1
-                                   .. Conn_Retry'Last)));
+            Templates.Insert
+              (Set  => Set,
+               Item => Templates.Assoc
+                 (Variable => "CONNECTION_RETRY",
+                  Value    => Conn_Retry
+                    (Conn_Retry'First + 1 .. Conn_Retry'Last)));
          end if;
 
          if Ping /= "" then
-            Templates.Insert (Set  => Set,
-                              Item => Templates.Assoc
-                                (Variable => "PING",
-                                 Value    => Ping (Ping'First + 1
-                                   .. Ping'Last)));
+            Templates.Insert
+              (Set  => Set,
+               Item => Templates.Assoc
+                 (Variable => "PING",
+                  Value    => Ping (Ping'First + 1 .. Ping'Last)));
          end if;
       end;
 
@@ -456,4 +456,5 @@ package body Savadur.Config.Client is
          Logs.Write ("Missing template file: " & Template, Logs.Handler.Error);
       end if;
    end Write;
+
 end Savadur.Config.Client;
