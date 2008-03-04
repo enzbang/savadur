@@ -74,6 +74,7 @@ install:
 	@$(MKDIR) $(INSTALL)/server-savadurdir/projects
 	@$(MKDIR) $(INSTALL)/server-savadurdir/scripts
 	@$(MKDIR) $(INSTALL)/server-savadurdir/htdocs/templates
+	@$(MKDIR) $(INSTALL)/server-savadurdir/htdocs/img
 	@$(MKDIR) $(INSTALL)/server-savadurdir/htdocs/css
 	@$(MKDIR) $(INSTALL)/server-savadurdir/share/templates
 	@$(MKDIR) $(INSTALL)/server-savadurdir/scm
@@ -82,6 +83,7 @@ install:
 	@$(CP) templates/*.thtml $(INSTALL)/server-savadurdir/htdocs/templates
 	@$(CP) templates/*.txml $(INSTALL)/server-savadurdir/htdocs/templates
 	@$(CP) templates/*.css $(INSTALL)/server-savadurdir/htdocs/css
+	@$(CP) templates/img/*.* $(INSTALL)/server-savadurdir/htdocs/img
 	@$(CP) templates/config/*.txml $(INSTALL)/server-savadurdir/share/templates/
 	@$(CP) templates/config/*.txml $(INSTALL)/client-savadurdir/share/templates/
 	@$(CP) test/config/*.xml $(INSTALL)/example/

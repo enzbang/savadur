@@ -2,6 +2,8 @@ body {
     background:#333;
     color:#888;
     padding:4em 1em 1em;
+    line-height:1.5em;
+    font-size:12px;
 }
 h1 {
     color:#ccc;
@@ -15,7 +17,7 @@ table {
     background-color:white;
     border:5px solid white;
     border-collapse:collapse;
-    margin-bottom:1em;
+    margin:1em 0;
 }
 table td {
     border-color:-moz-use-text-color #99B195 rgb(242, 242, 242);
@@ -23,7 +25,7 @@ table td {
     border-width:medium 1px 1px;
     color:#444444;
     font-size:13px;
-    padding:1px 5px;
+    padding:0.5em;
     text-align:center;
     vertical-align:top;
 }
@@ -32,8 +34,7 @@ table.job_id_table {
     border: thin solid #777;
 }
 table.job_id_table td {
-    padding:0.5em;
-    border: thin solid #777;
+    border:thin solid #777;
 }
 table.list td {
     border:none;
@@ -77,7 +78,6 @@ body#log_page h3 {
     padding-top:1em;
 }
 #menu {
-    float:right;
     padding-bottom:1em;
 }
 #menu li {
@@ -88,4 +88,41 @@ body#log_page h3 {
 }
 #content {
     clear:right;
+}
+a img {
+    border:none;
+    vertical-align:middle;
+}
+
+form {
+    margin:0;
+    padding:0
+}
+
+form p {
+    margin:0.5em 0;
+}
+
+label
+{
+    color:#eee;
+    font-size:1em;
+    width: 12em;
+    float: left;
+    text-align: right;
+    margin:0 0.5em 0 0;
+    display: block
+    position:relative;
+}
+input[type=submit]
+{
+    font-size:1em;
+    margin-left: 12.5em;
+}
+a.restart_job img
+{
+    opacity:0.3;
+}
+a.restart_job img:hover {
+    opacity:1;
 }

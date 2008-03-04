@@ -25,12 +25,12 @@
     </div>
 
     <form action="/run" method="put">
-      <input type="hidden" id="p" name="p" value="@_PROJECT_NAME_@"/>
-      <label for="s">scenario</label>
-      <input type="text" id="s" name="s" value="web"/>
-      <labol for="l">latency (in seconds)</label>
-      <input type="text" id="l" name="l" value="1"/>
-      <input type="submit" value="Envoyer" />
+      <p><input type="hidden" id="p" name="p" value="@_PROJECT_NAME_@"/>
+        <label for="s">scenario</label>
+        <input type="text" id="s" name="s" value="web"/></p>
+      <p><label for="l">latency (in seconds)</label>
+        <input type="text" id="l" name="l" value="1"/></p>
+      <p><input type="submit" value="Envoyer" /></p>
     </form>
 
     <div id="content">
@@ -95,7 +95,12 @@
               </tr>
               @@END_IF@@
               @@END_TABLE@@
-              <th>#@_LOGS_JOB_ID_@ (@_LOGS_SCENARIO_@)</th>
+              <th>#@_LOGS_JOB_ID_@ (@_LOGS_SCENARIO_@)
+                <a class="restart_job"
+                   href="/run?p=@_PROJECT_NAME_@&amp;s=@_LOGS_SCENARIO_@&amp;l=1">
+                  <img src="/img/restart.png" alt="restart job" />
+                </a>
+              </th>
             </table>
             @@END_IF@@
             @@END_TABLE@@

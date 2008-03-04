@@ -43,6 +43,7 @@ package body Savadur.Config is
    Cached_Server_Directory           : access String := null;
    Cached_Web_CSS_Directory          : access String := null;
    Cached_Web_Directory              : access String := null;
+   Cached_Web_Img_Directory          : access String := null;
    Cached_Web_Templates_Directory    : access String := null;
    Cached_Work_Dir                   : access String := null;
 
@@ -225,6 +226,22 @@ package body Savadur.Config is
 
       return Cached_Web_Directory.all;
    end Web_Directory;
+
+   -----------------------
+   -- Web_Img_Directory --
+   -----------------------
+
+   function Web_Img_Directory return String is
+         begin
+      if Cached_Web_Img_Directory = null then
+         Cached_Web_Img_Directory := new String'
+           (Directories.Compose
+              (Containing_Directory => Web_Directory,
+               Name                 => "img"));
+      end if;
+
+      return Cached_Web_Img_Directory.all;
+   end Web_Img_Directory;
 
    -----------------------------
    -- Web_Templates_Directory --

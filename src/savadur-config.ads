@@ -30,6 +30,8 @@ package Savadur.Config is
    --      config/
    --      htdocs/      (server side only)
    --           templates/
+   --           img
+   --           css
    --      projects/
    --      scripts/     (server side only)
    --      share/templates/
@@ -73,6 +75,9 @@ package Savadur.Config is
 
    function Web_Templates_Directory return String;
    --  Returns web templates directory
+
+   function Web_Img_Directory return String;
+   --  Returns web image directory
 
    Client_Server : Boolean := False;
    --  Set to true if the client is configured to work with a server

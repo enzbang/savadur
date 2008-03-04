@@ -89,6 +89,7 @@ package body Savadur.Web.Server is
       URI     : constant String := Status.URI (Request);
       Log_URI : constant String := "/log/";
       CSS_URI : constant String := "/css/";
+      Img_URI : constant String := "/img/";
    begin
       Logs.Write
         (Content => "Calling => " & URI,
@@ -148,6 +149,27 @@ package body Savadur.Web.Server is
                   Status_Code => Messages.S404);
             end if;
          end Get_CSS;
+
+      elsif URI'Length > Img_URI'Length
+        and then URI (URI'First .. URI'First + Img_URI'Length - 1) = Img_URI
+      then
+         Get_Img : declare
+            Img_File : constant String := Directories.Compose
+              (Containing_Directory => Savadur.Config.Web_Img_Directory,
+               Name                 => URI
+                 (URI'First + Img_URI'Length .. URI'Last));
+         begin
+            if Directories.Exists (Img_File) then
+               Logs.Write (Img_File);
+               return Response.File (MIME.Content_Type (Img_File), Img_File);
+            else
+               return Response.Build
+                 (MIME.Text_HTML,
+                  "<p>File " & Img_File & " not found</p>",
+                  Status_Code => Messages.S404);
+            end if;
+         end Get_Img;
+
 
       elsif Savadur.Config.Project.Is_Project_Name
         (URI (URI'First + 1 .. URI'Last))
