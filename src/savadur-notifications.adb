@@ -121,13 +121,9 @@ package body Savadur.Notifications is
                Extension            => "xml"));
 
          if not Directories.Exists (Config.RSS_Directory) then
-            Directories.Create_Directory (Config.RSS_Directory);
+            Directories.Create_Path (Config.RSS_Directory);
          end if;
       end if;
-
-      Text_IO.Create (File => File,
-                      Mode => Text_IO.Out_File,
-                      Name => RSS_All_File.all);
 
       if RSS_Template_File = null then
          RSS_Template_File := new String'
@@ -137,13 +133,25 @@ package body Savadur.Notifications is
                Extension            => "txml"));
       end if;
 
-      Text_IO.Put
-        (File => File,
-         Item => Templates.Parse
-           (Filename     => RSS_Template_File.all,
-            Translations  => Set));
+      if Directories.Exists (RSS_All_File.all) then
+         Text_IO.Create
+           (File => File,
+            Mode => Text_IO.Out_File,
+            Name => RSS_All_File.all);
 
-      Text_IO.Close (File);
+         Text_IO.Put
+           (File => File,
+            Item => Templates.Parse
+              (Filename      => RSS_Template_File.all,
+               Translations  => Set));
+
+         Text_IO.Close (File);
+
+      else
+         Logs.Write
+           ("Cannot find RSS template: " & RSS_All_File.all,
+            Logs.Handler.Warnings);
+      end if;
    end Update_RSS;
 
    ---------------
