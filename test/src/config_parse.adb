@@ -320,18 +320,22 @@ package body Config_Parse is
         (Savadur.Servers.Image =
            "* a_fast_server" & ASCII.LF
          & "[" & ASCII.LF
-         & "Name => a_fast_server"  & ASCII.LF
-         & "URL => localhost"  & ASCII.LF
+         & "Name => a_fast_server" & ASCII.LF
+         & "URL => localhost" & ASCII.LF
+         & "Send_Log => FALSE" & ASCII.LF
          & "]" & ASCII.LF
          & "* myserver" & ASCII.LF
          & "[" & ASCII.LF
-         & "Name => myserver"  & ASCII.LF
+         & "Name => myserver" & ASCII.LF
          & "URL => http://www.myserver.net/" & ASCII.LF
+         & "Send_Log => TRUE" & ASCII.LF
          & "]" & ASCII.LF
          & "* test_server" & ASCII.LF
          & "[" & ASCII.LF
-         & "Name => test_server"  & ASCII.LF
+         & "Name => test_server" & ASCII.LF
          & "URL => http://localhost:8181" & ASCII.LF
+         & "Log_Path => @LOGS@/test/test-dir/logs" & ASCII.LF
+         & "Send_Log => TRUE" & ASCII.LF
          & "]" & ASCII.LF,
          "Wrong Servers parse, expected : " & ASCII.LF
          & ''' & Savadur.Servers.Image & ''');

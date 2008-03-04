@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                                Savadur                                   --
 --                                                                          --
---                           Copyright (C) 2007                             --
+--                         Copyright (C) 2007-2008                          --
 --                      Pascal Obry - Olivier Ramonat                       --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -43,7 +43,7 @@ package body Signed_Files is
       Savadur.Signed_Files.Create (H, Name => "another", Filename => Filename);
       Assertions.Assert
         (Savadur.Signed_Files.SHA1 (H) =
-           "0f3eee5c1cb57be993a14a63091c41aca754f483",
+           "bff41a9ad47479a2a5fd2804ff20d440f13ffea6",
          "Wrong file signature for " & Filename
          & " found '" & String (Savadur.Signed_Files.SHA1 (H)) & ''');
    end Check_Signed_Files;

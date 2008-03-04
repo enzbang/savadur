@@ -1,4 +1,5 @@
 <server>
    <name value="a_fast_server"/>
    <location url="localhost"/>
+   <Send_Log value="FALSE"/>
 </server>

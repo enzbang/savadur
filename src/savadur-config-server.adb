@@ -106,9 +106,6 @@ package body Savadur.Config.Server is
    procedure Parse is
       use Ada.Directories;
 
-      Reader : Tree_Reader;
-      Source : Input_Sources.File.File_Input;
-
       S : Search_Type;
       D : Directory_Entry_Type;
    begin
@@ -125,6 +122,8 @@ package body Savadur.Config.Server is
 
          Load_Config : declare
             Filename : constant String := Full_Name (D);
+            Reader   : Tree_Reader;
+            Source   : Input_Sources.File.File_Input;
          begin
             Text_IO.Put_Line (Filename);
 
