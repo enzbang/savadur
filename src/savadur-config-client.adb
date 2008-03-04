@@ -33,6 +33,7 @@ with Unicode.CES;
 
 with Savadur.Client_Service;
 with Savadur.Config;
+with Savadur.Logs;
 with Savadur.Server_Service;
 with Savadur.Utils;
 
@@ -443,11 +444,16 @@ package body Savadur.Config.Client is
          end if;
       end;
 
-      Text_IO.Create (File, Text_IO.Out_File, Filename);
-      Text_IO.Put (File,
-                   Templates.Parse
-                     (Filename     => Template,
-                      Translations => Set));
-      Text_IO.Close (File);
+      if Directories.Exists (Template) then
+         Text_IO.Create (File, Text_IO.Out_File, Filename);
+         Text_IO.Put (File,
+           Templates.Parse
+             (Filename     => Template,
+              Translations => Set));
+         Text_IO.Close (File);
+
+      else
+         Logs.Write ("Missing template file: " & Template, Logs.Handler.Error);
+      end if;
    end Write;
 end Savadur.Config.Client;
