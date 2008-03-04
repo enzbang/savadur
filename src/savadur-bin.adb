@@ -206,13 +206,12 @@ procedure Savadur.Bin is
             --  Run and reschedule
 
             if Run = Connect then
-
                --  Try to connect offline servers
 
                Savadur.Servers.Offline_Iterate (Register'Access);
                Next_Connect := Calendar.Clock + Retry_Delay;
-            else
 
+            else
                --  Try to ping online servers
 
                Savadur.Servers.Online_Iterate (Ping'Access);
@@ -280,6 +279,7 @@ procedure Savadur.Bin is
                         & " failed !");
             Savadur.Servers.Go_Offline (+Server_Name);
       end Register;
+
    begin
       --  Parse configuration files
 
@@ -310,7 +310,6 @@ procedure Savadur.Bin is
 
          --  Loop every 5 minutes trying to reconnect
          --  Ping servers every 10 minutes to check if all is working
-
       end if;
    end Run_Client_Mode;
 
@@ -412,6 +411,7 @@ procedure Savadur.Bin is
    -----------
 
    procedure Usage (Error_Message : in String := "") is
+
       procedure Endpoint_Config;
       --  Prints Usage for configuring endpoint and id
 
@@ -424,8 +424,8 @@ procedure Savadur.Bin is
 
       procedure Endpoint_Config is
       begin
-         Logs.Write ("    --config --endpoint endpoint :"
-                     & " Set client endpoint");
+         Logs.Write
+           ("    --config --endpoint endpoint : Set client endpoint");
          Logs.Write ("    --config --id  client_id : Set client id");
       end Endpoint_Config;
 
@@ -443,6 +443,7 @@ procedure Savadur.Bin is
          Logs.Write ("    -VV | --very-verbose");
          Logs.Write ("    -L filename          : filename for log file");
       end Global_Options;
+
    begin
       --  Display error message if not null
 
@@ -454,6 +455,7 @@ procedure Savadur.Bin is
       end if;
 
       Logs.Write ("Savadur " & Version.Simple);
+
       case Mode is
          when Savadur_Client =>
             Logs.Write ("usage : savadur --client [OPTIONS]");
@@ -537,11 +539,14 @@ begin
             begin
                if Full = "-version" then
                   Text_IO.Put_Line ("Savadur " & Savadur.Version.Complete);
+
                elsif Full = "-help" then
                   Usage;
                   return;
+
                elsif Full = "-savadurdir" then
                   Config.Set_Savadur_Directory (GNAT.Command_Line.Parameter);
+
                elsif Full = "-verbose" then
                   Logs.Handler.Set
                     (Kind      => Logs.Handler.Verbose,

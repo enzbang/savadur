@@ -736,7 +736,6 @@ package body Savadur.Build is
                & " [" & Log_Content & ']',
                Kind => Logs.Handler.Very_Verbose);
          end if;
-
       end Send_Status;
 
       Selected_Scenario : constant Savadur.Scenarios.Scenario := Init;

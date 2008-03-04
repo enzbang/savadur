@@ -54,7 +54,7 @@ package body Savadur.Servers is
    -- Go_Offline --
    ----------------
 
-   procedure Go_Offline (Server_Name : Unbounded_String) is
+   procedure Go_Offline (Server_Name : in Unbounded_String) is
       Position : constant Sets.Cursor :=
                    Sets.Find
                      (Container => All_Servers,
@@ -66,16 +66,15 @@ package body Savadur.Servers is
       Element  : Server := Sets.Element (Position);
    begin
       Element.Status := Offline;
-      Sets.Replace_Element (Container => All_Servers,
-                            Position  => Position,
-                            New_Item  => Element);
+      Sets.Replace_Element
+        (Container => All_Servers, Position => Position, New_Item => Element);
    end Go_Offline;
 
    ---------------
    -- Go_Online --
    ---------------
 
-   procedure Go_Online (Server_Name : Unbounded_String) is
+   procedure Go_Online (Server_Name : in Unbounded_String) is
       Position : constant Sets.Cursor :=
                    Sets.Find
                      (Container => All_Servers,
@@ -87,9 +86,8 @@ package body Savadur.Servers is
       Element  : Server := Sets.Element (Position);
    begin
       Element.Status := Online;
-      Sets.Replace_Element (Container => All_Servers,
-                            Position  => Position,
-                            New_Item  => Element);
+      Sets.Replace_Element
+        (Container => All_Servers, Position => Position, New_Item => Element);
    end Go_Online;
 
    ----------
@@ -152,8 +150,7 @@ package body Savadur.Servers is
       New_Item : constant Server :=
                    Server'(+Name, +URL, +Log_Path, Send_Log, Offline);
    begin
-      Sets.Insert (Container => All_Servers,
-                   New_Item  => New_Item);
+      Sets.Insert (Container => All_Servers, New_Item => New_Item);
    end Insert;
 
    ---------------
@@ -188,7 +185,7 @@ package body Savadur.Servers is
    ----------
 
    function Name (Position : in Cursor) return String is
-      Element  : constant Server := Sets.Element (Sets.Cursor (Position));
+      Element : constant Server := Sets.Element (Sets.Cursor (Position));
    begin
       return -Element.Name;
    end Name;
@@ -198,7 +195,7 @@ package body Savadur.Servers is
    ---------------------
 
    procedure Offline_Iterate
-     (Process   : not null access procedure (Position : Cursor))
+     (Process : not null access procedure (Position : in Cursor))
    is
       Position : Sets.Cursor := Sets.First (All_Servers);
    begin
@@ -215,7 +212,7 @@ package body Savadur.Servers is
    --------------------
 
    procedure Online_Iterate
-     (Process   : not null access procedure (Position : Cursor))
+     (Process : not null access procedure (Position : in Cursor))
    is
       Position : Sets.Cursor := Sets.First (All_Servers);
    begin
@@ -241,7 +238,7 @@ package body Savadur.Servers is
    ---------
 
    function URL (Position : in Cursor) return String is
-      Element  : constant Server := Sets.Element (Sets.Cursor (Position));
+      Element : constant Server := Sets.Element (Sets.Cursor (Position));
    begin
       return -Element.URL;
    end URL;

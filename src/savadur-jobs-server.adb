@@ -46,6 +46,10 @@ package body Savadur.Jobs.Server is
 
    protected body Job_Id is
 
+      ---------
+      -- Get --
+      ---------
+
       procedure Get (Id : out Positive) is
       begin
          Id := Database.Job_Id;

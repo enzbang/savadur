@@ -122,6 +122,7 @@ package body Savadur.Config.Server is
 
       Walk_Directories : while More_Entries (S) loop
          Get_Next_Entry (S, D);
+
          Load_Config : declare
             Filename : constant String := Full_Name (D);
          begin

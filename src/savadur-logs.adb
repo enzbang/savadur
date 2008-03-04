@@ -29,10 +29,7 @@ package body Savadur.Logs is
      (Content : in String;
       Kind    : in Handler.Log_Level := Handler.Information) is
    begin
-      Handler.Write
-        (Name    => Module,
-         Kind    => Kind,
-         Content => Content);
+      Handler.Write (Name => Module, Kind => Kind, Content => Content);
    end Write;
 
 end Savadur.Logs;

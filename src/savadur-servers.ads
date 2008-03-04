@@ -55,18 +55,18 @@ package Savadur.Servers is
    function URL (Position : in Cursor) return String;
    --  Returns server url
 
-   procedure Go_Offline (Server_Name : Unbounded_String);
+   procedure Go_Offline (Server_Name : in Unbounded_String);
    --  Marks a server as offline
 
-   procedure Go_Online (Server_Name : Unbounded_String);
+   procedure Go_Online (Server_Name : in Unbounded_String);
    --  Marks a server as online
 
    procedure Offline_Iterate
-     (Process   : not null access procedure (Position : Cursor));
+     (Process : not null access procedure (Position : in Cursor));
    --  Iterates on offline servers
 
    procedure Online_Iterate
-     (Process   : not null access procedure (Position : Cursor));
+     (Process : not null access procedure (Position : in Cursor));
    --  Iterates on offline servers
 
    function Image return String;
