@@ -243,10 +243,10 @@ package body Savadur.Web.Server is
          end Ping_Client;
       end loop;
 
-         return Response.Build
-           (MIME.Text_HTML,
-            "<p>Online clients : " & Online_Clients & "...</p>"
-            & "<p>Offline clients : " & Offline_Clients & "...</p>");
+      return Response.Build
+        (MIME.Text_HTML,
+         "<p>Online clients : " & Online_Clients & "...</p>"
+           & "<p>Offline clients : " & Offline_Clients & "...</p>");
    end Ping;
 
    ---------
