@@ -255,6 +255,7 @@ package body Savadur.Database is
       --  Remember last client and his scenarios
 
       Last_Client     : Unbounded_String;
+      Last_Scenario   : Unbounded_String;
       Last_Job_Id     : Natural := 0;
 
       --  Temporay Tag for a client
@@ -268,7 +269,6 @@ package body Savadur.Database is
 
       --  Temporay Tag for a job id
 
-      Scenario_Job_Id : Templates.Tag;
       Rowid_Job_Id    : Templates.Tag;
       Status_Job_Id   : Templates.Tag;
       Date_Job_Id     : Templates.Tag;
@@ -291,19 +291,18 @@ package body Savadur.Database is
              (Last_Client) /= DB.String_Vectors.Element (Line, 1)
          then
 
-            Job_Id_Client := Job_Id_Client & Last_Job_Id;
+            Job_Id_Client   := Job_Id_Client & Last_Job_Id;
+            Scenario_Client := Scenario_Client & Last_Scenario;
 
             --  Reset last Job_ID
             Last_Job_Id := 0;
 
-            Scenario_Client := Scenario_Client & Scenario_Job_Id;
             Status_Client   := Status_Client   & Status_Job_Id;
             Date_Client     := Date_Client     & Date_Job_Id;
             Action_Client   := Action_Client   & Action_Job_Id;
             Rowid_Client    := Rowid_Client    & Rowid_Job_Id;
 
             --  Clear temp tag
-            Templates.Clear (Scenario_Job_Id);
             Templates.Clear (Status_Job_Id);
             Templates.Clear (Date_Job_Id);
             Templates.Clear (Action_Job_Id);
@@ -331,27 +330,24 @@ package body Savadur.Database is
            and then Last_Job_Id /=
              Natural'Value (DB.String_Vectors.Element (Line, 6))
          then
-            Job_Id_Client := Job_Id_Client & Last_Job_Id;
+            Job_Id_Client   := Job_Id_Client   & Last_Job_Id;
+            Scenario_Client := Scenario_Client & Last_Scenario;
 
             --  Reset last Job_ID
             Last_Job_Id := 0;
 
-            Scenario_Client := Scenario_Client & Scenario_Job_Id;
-            Status_Client   := Status_Client   & Status_Job_Id;
-            Date_Client     := Date_Client     & Date_Job_Id;
-            Action_Client   := Action_Client   & Action_Job_Id;
-            Rowid_Client    := Rowid_Client    & Rowid_Job_Id;
+            Status_Client := Status_Client & Status_Job_Id;
+            Date_Client   := Date_Client   & Date_Job_Id;
+            Action_Client := Action_Client & Action_Job_Id;
+            Rowid_Client  := Rowid_Client  & Rowid_Job_Id;
 
             --  Clear temp tag
-            Templates.Clear (Scenario_Job_Id);
             Templates.Clear (Status_Job_Id);
             Templates.Clear (Date_Job_Id);
             Templates.Clear (Action_Job_Id);
             Templates.Clear (Rowid_Job_Id);
          end if;
 
-         Scenario_Job_Id := Scenario_Job_Id &
-           DB.String_Vectors.Element (Line, 2);
          Status_Job_Id   := Status_Job_Id &
            DB.String_Vectors.Element (Line, 3);
          Date_Job_Id     := Date_Job_Id &
@@ -361,16 +357,18 @@ package body Savadur.Database is
          Rowid_Job_Id    := Rowid_Job_Id &
            DB.String_Vectors.Element (Line, 7);
 
-         Last_Client := To_Unbounded_String
+         Last_Client   := To_Unbounded_String
            (DB.String_Vectors.Element (Line, 1));
-         Last_Job_Id := Natural'Value (DB.String_Vectors.Element (Line, 6));
+         Last_Scenario := To_Unbounded_String
+           (DB.String_Vectors.Element (Line, 2));
+         Last_Job_Id   := Natural'Value (DB.String_Vectors.Element (Line, 6));
 
          Line.Clear;
       end loop;
 
       if To_String (Last_Client) /= "" then
          Job_Id_Client   := Job_Id_Client   & Last_Job_Id;
-         Scenario_Client := Scenario_Client & Scenario_Job_Id;
+         Scenario_Client := Scenario_Client & Last_Scenario;
          Status_Client   := Status_Client   & Status_Job_Id;
          Date_Client     := Date_Client     & Date_Job_Id;
          Action_Client   := Action_Client   & Action_Job_Id;
