@@ -36,6 +36,12 @@
         </tr>
         @@END_TABLE@@
       </table>
+
+      <h2>Online clients</h2>
+
+      @_ONLINE_CLIENTS_@
+
+      <p><a href="/ping">Ping clients</a></p>
     </div>
   </body>
 </html>

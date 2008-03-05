@@ -195,7 +195,21 @@ package body Savadur.Web.Server is
 
    function List (Request : in Status.Data) return Response.Data is
       pragma Unreferenced (Request);
+      use type Templates.Tag;
+      P_Client     : Clients.Sets.Cursor := Clients.Registered.First;
+      Clients_List : Templates.Tag;
+      Set          : Templates.Translate_Set := Project_List.To_Set
+        (Savadur.Config.Project_List.Configurations);
    begin
+
+      while Clients.Sets.Has_Element (P_Client) loop
+         Clients_List := Clients_List & Clients.Sets.Element (P_Client).Key;
+         Clients.Sets.Next (P_Client);
+      end loop;
+
+      Templates.Insert
+        (Set, Templates.Assoc ("ONLINE_CLIENTS", Clients_List));
+
       return AWS.Response.Build
         (Content_Type => MIME.Text_HTML,
          Message_Body => AWS.Templates.Parse
@@ -203,8 +217,7 @@ package body Savadur.Web.Server is
               (Containing_Directory => Savadur.Config.Web_Templates_Directory,
                Name                 => "list",
                Extension            => "thtml"),
-            Translations => Project_List.To_Set
-              (Savadur.Config.Project_List.Configurations)));
+            Translations => Set));
    end List;
 
    ----------
