@@ -27,7 +27,9 @@
           <td>
             <ul>
               @@TABLE@@
-              <li>@_SCENARIOS_@ (@_CLIENTS_@)</li>
+                @@IF@@ @_SCENARIOS_@ /= ""
+                  <li>@_SCENARIOS_@ (@_CLIENTS_@)</li>
+                @@END_IF@@
               @@END_TABLE@@
             </ul>
           </td>
