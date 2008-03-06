@@ -439,7 +439,7 @@ procedure Savadur.Bin is
          Logs.Write ("    -v  | --version");
          Logs.Write ("    -V  | --verbose");
          Logs.Write ("    -VV | --very-verbose");
-         Logs.Write ("    -L filename          : filename for log file");
+         Logs.Write ("    -L filename          : log filename");
       end Global_Options;
 
    begin
