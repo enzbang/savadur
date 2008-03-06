@@ -47,4 +47,5 @@ package Savadur.Config.Client is
    --  Writes client configuration file (not that if read the previous version
    --  to avoid deleting metadata or delays)
    --  ??? All parameters should be configurable with command line
+
 end Savadur.Config.Client;

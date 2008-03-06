@@ -58,11 +58,11 @@ package body Savadur.Servers is
       Position : constant Sets.Cursor :=
                    Sets.Find
                      (Container => All_Servers,
-                      Item      => Server'(Name  => Server_Name,
-                                           URL    => <>,
+                      Item      => Server'(Name     => Server_Name,
+                                           URL      => <>,
                                            Log_Path => <>,
                                            Send_Log => <>,
-                                           Status => <>));
+                                           Status   => <>));
       Element  : Server := Sets.Element (Position);
    begin
       Element.Status := Offline;
