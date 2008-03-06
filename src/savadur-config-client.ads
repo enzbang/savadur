@@ -23,7 +23,7 @@ with Savadur.Web_Services.Client;
 
 package Savadur.Config.Client is
 
-   Config_Error : exception;
+   Config_Error : exception renames Savadur.Config.Config_Error;
 
    function Get_Key return String;
    --  Returns client key

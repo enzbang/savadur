@@ -735,10 +735,7 @@ exception
         =>
       Usage (Error_Message => "INVALID : unknown syntax");
 
-   when E : Savadur.Config.Config_Error
-      | Savadur.Config.Project.Config_Error
-      | Savadur.Config.Environment_Variables.Config_Error
-        =>
+   when E : Savadur.Config.Config_Error =>
       Usage (Error_Message => Exceptions.Exception_Message (E));
 
    when U : others =>

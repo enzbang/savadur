@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                                Savadur                                   --
 --                                                                          --
---                           Copyright (C) 2007                             --
+--                         Copyright (C) 2007-2008                          --
 --                      Pascal Obry - Olivier Ramonat                       --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -24,7 +24,7 @@ with Savadur.Projects;
 
 package Savadur.Config.Environment_Variables is
 
-   Config_Error : exception;
+   Config_Error : exception renames Savadur.Config.Config_Error;
 
    function Parse
      (Project : access Projects.Project_Config)

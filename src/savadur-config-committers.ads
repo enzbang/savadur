@@ -21,7 +21,7 @@
 
 package Savadur.Config.Committers is
 
-   Config_Error : exception;
+   Config_Error : exception renames Savadur.Config.Config_Error;
 
    function Get (Name : in String) return String;
    --  Given the name, returns the e-mail
