@@ -320,6 +320,7 @@ package body Config_Parse is
          & "Name => test_server" & ASCII.LF
          & "URL => http://localhost:8181" & ASCII.LF
          & "Log_Path => @LOGS@/test/test-dir/logs" & ASCII.LF
+         & "Log_Prefix => machine" & ASCII.LF
          & "Send_Log => TRUE" & ASCII.LF
          & "]" & ASCII.LF,
          "Wrong Servers parse, expected : " & ASCII.LF

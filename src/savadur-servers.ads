@@ -46,6 +46,9 @@ package Savadur.Servers is
    function Log_Path (Server : in Servers.Server) return String;
    --  Returns server's log path
 
+   function Log_Prefix (Server : in Servers.Server) return String;
+   --  Returns server's log name prefix
+
    function Send_Log (Server : in Servers.Server) return Boolean;
    --  Returns True if the log should be sent to the server
 
@@ -75,17 +78,19 @@ package Savadur.Servers is
    function Length return Natural;
    --  Returns the servers set length
 
-   procedure Insert (Name, URL, Log_Path : in String; Send_Log : in Boolean);
+   procedure Insert
+     (Name, URL, Log_Path, Log_Prefix : in String; Send_Log : in Boolean);
    --  Insert a new server
 
 private
 
    type Server is record
-      Name     : Unbounded_String;
-      URL      : Unbounded_String;
-      Log_Path : Unbounded_String;
-      Send_Log : Boolean;
-      Status   : Online_Status;
+      Name       : Unbounded_String;
+      URL        : Unbounded_String;
+      Log_Path   : Unbounded_String;
+      Log_Prefix : Unbounded_String;
+      Send_Log   : Boolean;
+      Status     : Online_Status;
    end record;
 
    function Hash (Server : in Servers.Server) return Containers.Hash_Type;
@@ -108,10 +113,11 @@ private
    type Cursor is new Sets.Cursor;
 
    Empty_Server : constant Server :=
-                    (Name     => Null_Unbounded_String,
-                     URL      => Null_Unbounded_String,
-                     Log_Path => Null_Unbounded_String,
-                     Send_Log => False,
-                     Status   => Offline);
+                    (Name       => Null_Unbounded_String,
+                     URL        => Null_Unbounded_String,
+                     Log_Path   => Null_Unbounded_String,
+                     Log_Prefix => Null_Unbounded_String,
+                     Send_Log   => False,
+                     Status     => Offline);
 
 end Savadur.Servers;

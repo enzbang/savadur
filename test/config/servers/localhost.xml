@@ -2,4 +2,5 @@
    <name value="test_server"/>
    <location url="http://localhost:8181"/>
    <log_path value="@LOGS@/test/test-dir/logs"/>
+   <log_prefix value="machine"/>
 </server>

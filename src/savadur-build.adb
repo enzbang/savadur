@@ -708,7 +708,8 @@ package body Savadur.Build is
                      Utils.Set_Content
                        (Log_Filename
                           (Project, Action_Id, Job_Id,
-                           Directory => Servers.Log_Path (Server)),
+                           Directory => Servers.Log_Path (Server),
+                           Prefix    => Servers.Log_Prefix (Server)),
                         Log_Content);
                   else
                      Logs.Write

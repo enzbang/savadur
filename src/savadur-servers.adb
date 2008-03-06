@@ -41,11 +41,12 @@ package body Savadur.Servers is
       Position : constant Sets.Cursor :=
                    Sets.Find
                      (Container => All_Servers,
-                      Item      => Server'(Name     => +Name,
-                                           URL      => <>,
-                                           Log_Path => <>,
-                                           Send_Log => <>,
-                                           Status   => <>));
+                      Item      => Server'(Name       => +Name,
+                                           URL        => <>,
+                                           Log_Path   => <>,
+                                           Log_Prefix => <>,
+                                           Send_Log   => <>,
+                                           Status     => <>));
    begin
       return Sets.Element (Position);
    end Get;
@@ -58,11 +59,12 @@ package body Savadur.Servers is
       Position : constant Sets.Cursor :=
                    Sets.Find
                      (Container => All_Servers,
-                      Item      => Server'(Name     => Server_Name,
-                                           URL      => <>,
-                                           Log_Path => <>,
-                                           Send_Log => <>,
-                                           Status   => <>));
+                      Item      => Server'(Name       => Server_Name,
+                                           URL        => <>,
+                                           Log_Path   => <>,
+                                           Log_Prefix => <>,
+                                           Send_Log   => <>,
+                                           Status     => <>));
       Element  : Server := Sets.Element (Position);
    begin
       Element.Status := Offline;
@@ -78,11 +80,12 @@ package body Savadur.Servers is
       Position : constant Sets.Cursor :=
                    Sets.Find
                      (Container => All_Servers,
-                      Item      => Server'(Name     => Server_Name,
-                                           URL      => <>,
-                                           Log_Path => <>,
-                                           Send_Log => <>,
-                                           Status   => <>));
+                      Item      => Server'(Name       => Server_Name,
+                                           URL        => <>,
+                                           Log_Path   => <>,
+                                           Log_Prefix => <>,
+                                           Send_Log   => <>,
+                                           Status     => <>));
       Element  : Server := Sets.Element (Position);
    begin
       Element.Status := Online;
@@ -131,6 +134,12 @@ package body Savadur.Servers is
                  (Result, "Log_Path => " & To_String (S.Log_Path) & ASCII.LF);
             end if;
 
+            if S.Log_Prefix /= Null_Unbounded_String then
+               Append
+                 (Result,
+                  "Log_Prefix => " & To_String (S.Log_Prefix) & ASCII.LF);
+            end if;
+
             Append
               (Result, "Send_Log => " & Boolean'Image (S.Send_Log) & ASCII.LF);
 
@@ -146,9 +155,12 @@ package body Savadur.Servers is
    -- Insert --
    ------------
 
-   procedure Insert (Name, URL, Log_Path : in String; Send_Log : in Boolean) is
+   procedure Insert
+     (Name, URL, Log_Path, Log_Prefix : in String; Send_Log : in Boolean)
+   is
       New_Item : constant Server :=
-                   Server'(+Name, +URL, +Log_Path, Send_Log, Offline);
+                   Server'(+Name, +URL,
+                           +Log_Path, +Log_Prefix, Send_Log, Offline);
    begin
       Sets.Insert (Container => All_Servers, New_Item => New_Item);
    end Insert;
@@ -179,6 +191,15 @@ package body Savadur.Servers is
    begin
       return -Server.Log_Path;
    end Log_Path;
+
+   ----------------
+   -- Log_Prefix --
+   ----------------
+
+   function Log_Prefix (Server : in Servers.Server) return String is
+   begin
+      return -Server.Log_Prefix;
+   end Log_Prefix;
 
    ----------
    -- Name --

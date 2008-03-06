@@ -42,7 +42,7 @@ package body Savadur.Config.Server is
    use AWS;
    use Savadur.Utils;
 
-   type Node_Value is (Server, Name, Location, Log_Path, Send_Log);
+   type Node_Value is (Server, Name, Location, Log_Path, Log_Prefix, Send_Log);
 
    type Attribute is (Value, URL);
 
@@ -57,6 +57,7 @@ package body Savadur.Config.Server is
       Server_Name : Unbounded_String;
       Server_URL  : Unbounded_String;
       Log_Path    : Unbounded_String;
+      Log_Prefix  : Unbounded_String;
       Send_Log    : Boolean := True;  -- default, send log
    end record;
 
@@ -132,10 +133,11 @@ package body Savadur.Config.Server is
             Input_Sources.File.Close (Source);
 
             Savadur.Servers.Insert
-              (Name     => -Reader.Server_Name,
-               URL      => -Reader.Server_URL,
-               Log_Path => -Reader.Log_Path,
-               Send_Log => Reader.Send_Log);
+              (Name       => -Reader.Server_Name,
+               URL        => -Reader.Server_URL,
+               Log_Path   => -Reader.Log_Path,
+               Log_Prefix => -Reader.Log_Prefix,
+               Send_Log   => Reader.Send_Log);
          end Load_Config;
       end loop Walk_Directories;
 
@@ -197,6 +199,17 @@ package body Savadur.Config.Server is
                      raise Config_Error with "Unexpected Value attribute";
                   when Value =>
                      Handler.Log_Path := +Get_Value (Atts, J);
+               end case;
+            end loop;
+
+         when Log_Prefix =>
+            for J in 0 .. Get_Length (Atts) - 1 loop
+               Attr := Get_Attribute (Get_Qname (Atts, J));
+               case Attr is
+                  when URL =>
+                     raise Config_Error with "Unexpected Value attribute";
+                  when Value =>
+                     Handler.Log_Prefix := +Get_Value (Atts, J);
                end case;
             end loop;
 
