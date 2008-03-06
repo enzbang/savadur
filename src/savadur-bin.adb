@@ -741,7 +741,8 @@ exception
         =>
       Usage (Error_Message => Exceptions.Exception_Message (E));
 
-   when others =>
+   when U : others =>
       Usage (Error_Message =>
-             "Unknown error - should have been caught before !!!");
+             "Unknown error - should have been caught before: "
+             & Exceptions.Exception_Message (U));
 end Savadur.Bin;
