@@ -31,30 +31,20 @@ with Unicode.CES;
 with Savadur.Logs;
 with Savadur.Utils;
 
-package body Savadur.Config.Notifications.SMTP is
+package body Savadur.Config.Notifications is
 
    use Ada;
    use Ada.Strings.Unbounded;
    use Savadur.Utils;
 
-   type SMTP_Config is record
-      Server    : Unbounded_String;
-      User      : Unbounded_String;
-      Password  : Unbounded_String;
-      Sender      : Unbounded_String;
-   end record;
+   type Node_Value is
+     (Notifications, Jabber, N_SMTP,
+      Server, JID, Password, Auth_Type, User, Sender);
 
-   SMTP_Conf : SMTP_Config :=
-                 (+"localhost",
-                  Null_Unbounded_String,
-                  Null_Unbounded_String,
-                  Null_Unbounded_String);
-   --  Default using localhost as mail server
-
-   type Node_Value is (SMTP, Server, User, Password, Sender);
+   subtype Root_Node is Node_Value range Notifications .. N_SMTP;
 
    type Tree_Reader is new Sax.Readers.Reader with record
-      SMTP_Node     : Boolean;
+      Conf_Node     : Root_Node;
       Content_Value : Unbounded_String;
    end record;
 
@@ -74,6 +64,113 @@ package body Savadur.Config.Notifications.SMTP is
       Local_Name    : in     Unicode.CES.Byte_Sequence := "";
       Qname         : in     Unicode.CES.Byte_Sequence := "");
 
+   --  XMPP
+
+   type XMPP_Config_Data is record
+      Server    : Unbounded_String;
+      JID       : Unbounded_String;
+      Password  : Unbounded_String;
+      Auth_Type : AWS.Jabber.Authentication_Type;
+   end record;
+
+   XMPP_Config : XMPP_Config_Data;
+
+   package body XMPP is
+
+      ------------
+      -- Server --
+      ------------
+
+      function Server return String is
+      begin
+         return -XMPP_Config.Server;
+      end Server;
+
+      ---------
+      -- JID --
+      ---------
+
+      function JID return String is
+      begin
+         return -XMPP_Config.JID;
+      end JID;
+
+      --------------
+      -- Password --
+      --------------
+
+      function Password return String is
+      begin
+         return -XMPP_Config.Password;
+      end Password;
+
+      ---------------
+      -- Auth_Type --
+      ---------------
+
+      function Auth_Type return AWS.Jabber.Authentication_Type is
+      begin
+         return XMPP_Config.Auth_Type;
+      end Auth_Type;
+
+   end XMPP;
+
+   --  SMTP
+
+   type SMTP_Config_Data is record
+      Server   : Unbounded_String;
+      User     : Unbounded_String;
+      Password : Unbounded_String;
+      Sender   : Unbounded_String;
+   end record;
+
+   SMTP_Config : SMTP_Config_Data :=
+                   (+"localhost",
+                    Null_Unbounded_String,
+                    Null_Unbounded_String,
+                    Null_Unbounded_String);
+   --  Default using localhost as mail server
+
+   package body SMTP is
+
+      ------------
+      -- Server --
+      ------------
+
+      function Server return String is
+      begin
+         return -SMTP_Config.Server;
+      end Server;
+
+      ----------
+      -- User --
+      ----------
+
+      function User return String is
+      begin
+         return -SMTP_Config.User;
+      end User;
+
+      --------------
+      -- Password --
+      --------------
+
+      function Password return String is
+      begin
+         return -SMTP_Config.Password;
+      end Password;
+
+      ------------
+      -- Sender --
+      ------------
+
+      function Sender return String  is
+      begin
+         return -SMTP_Config.Sender;
+      end Sender;
+
+   end SMTP;
+
    -----------------
    -- End_Element --
    -----------------
@@ -89,20 +186,45 @@ package body Savadur.Config.Notifications.SMTP is
       NV : constant Node_Value := Get_Node_Value (Local_Name);
    begin
       case NV is
-         when Sender =>
-            SMTP_Conf.Sender := Handler.Content_Value;
-
          when Server =>
-            SMTP_Conf.Server := Handler.Content_Value;
+            case Handler.Conf_Node is
+               when Notifications =>
+                  raise Config_Error with "unexpected server node";
 
-         when User =>
-            SMTP_Conf.User := Handler.Content_Value;
+               when Jabber =>
+                  XMPP_Config.Server := Handler.Content_Value;
+
+               when N_SMTP =>
+                  SMTP_Config.Server := Handler.Content_Value;
+            end case;
+
+         when JID =>
+            XMPP_Config.JID := Handler.Content_Value;
 
          when Password =>
-            SMTP_Conf.Password := Handler.Content_Value;
+            case Handler.Conf_Node is
+               when Notifications =>
+                  raise Config_Error with "unexpected server node";
 
-         when SMTP =>
-            Handler.SMTP_Node := False;
+               when Jabber =>
+                  XMPP_Config.Password := Handler.Content_Value;
+
+               when N_SMTP =>
+                  SMTP_Config.Password := Handler.Content_Value;
+            end case;
+
+         when Auth_Type =>
+            XMPP_Config.Auth_Type :=
+              AWS.Jabber.Authentication_Type'Value (-Handler.Content_Value);
+
+         when User =>
+            SMTP_Config.User := Handler.Content_Value;
+
+         when Sender =>
+            SMTP_Config.Sender := Handler.Content_Value;
+
+         when Jabber | N_SMTP | Notifications =>
+            Handler.Conf_Node := Notifications;
       end case;
    end End_Element;
 
@@ -112,9 +234,27 @@ package body Savadur.Config.Notifications.SMTP is
 
    function Get_Node_Value (S : in String) return Node_Value is
       Upper_S : constant String := Ada.Characters.Handling.To_Upper (S);
+
+      function Image (N : in Node_Value) return String;
+      --  Return N image, handling special case N_SMTP which is SMTP
+
+      -----------
+      -- Image --
+      -----------
+
+      function Image (N : in Node_Value) return String is
+         I : constant String := Node_Value'Image (N);
+      begin
+         if I = "N_SMTP" then
+            return "SMTP";
+         else
+            return I;
+         end if;
+      end Image;
+
    begin
       for NV in Node_Value'Range loop
-         if Node_Value'Image (NV) = Upper_S then
+         if Image (NV) = Upper_S then
             return NV;
          end if;
       end loop;
@@ -134,7 +274,7 @@ package body Savadur.Config.Notifications.SMTP is
       Filename   : constant String :=
                      Directories.Compose
                        (Containing_Directory => Config_Dir,
-                        Name                 => "notify_smtp.xml");
+                        Name                 => "notify.xml");
 
       Reader     : Tree_Reader;
       Source     : Input_Sources.File.File_Input;
@@ -149,33 +289,6 @@ package body Savadur.Config.Notifications.SMTP is
          Input_Sources.File.Close (Source);
       end if;
    end Parse;
-
-   --------------
-   -- Password --
-   --------------
-
-   function Password return String is
-   begin
-      return -SMTP_Conf.Password;
-   end Password;
-
-   ------------
-   -- Sender --
-   ------------
-
-   function Sender return String is
-   begin
-      return -SMTP_Conf.Sender;
-   end Sender;
-
-   ------------
-   -- Server --
-   ------------
-
-   function Server return String is
-   begin
-      return -SMTP_Conf.Server;
-   end Server;
 
    -------------------
    -- Start_Element --
@@ -196,23 +309,20 @@ package body Savadur.Config.Notifications.SMTP is
 
    begin
       case NV is
-         when SMTP =>
-            Handler.SMTP_Node := True;
+         when Notifications =>
+            Handler.Conf_Node := Notifications;
 
-         when Sender | Server | User | Password =>
+         when Jabber =>
+            Handler.Conf_Node := Jabber;
+
+         when N_SMTP =>
+            Handler.Conf_Node := N_SMTP;
+
+         when Server | JID | Password | Auth_Type | User | Sender =>
             --  Always take the first attribute value as there is only one
             --  attribute.
             Handler.Content_Value := +Get_Value (Atts, 0);
       end case;
    end Start_Element;
 
-   ----------
-   -- User --
-   ----------
-
-   function User return String is
-   begin
-      return -SMTP_Conf.User;
-   end User;
-
-end Savadur.Config.Notifications.SMTP;
+end Savadur.Config.Notifications;

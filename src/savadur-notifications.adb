@@ -28,8 +28,7 @@ with AWS.SMTP.Authentication.Plain;
 with AWS.SMTP.Client;
 with AWS.Templates;
 
-with Savadur.Config.Notifications.SMTP;
-with Savadur.Config.Notifications.XMPP;
+with Savadur.Config.Notifications;
 with Savadur.Config.Syndication;
 with Savadur.Database;
 with Savadur.Logs;
@@ -167,10 +166,10 @@ package body Savadur.Notifications is
    begin
       Jabber.Connect
         (Server    => Server,
-         Host      => Config.Notifications.XMPP.Jabber_Server,
-         User      => Config.Notifications.XMPP.Jabber_JID,
-         Password  => Config.Notifications.XMPP.Jabber_Password,
-         Auth_Type => Config.Notifications.XMPP.Jabber_Auth_Type);
+         Host      => Config.Notifications.XMPP.Server,
+         User      => Config.Notifications.XMPP.JID,
+         Password  => Config.Notifications.XMPP.Password,
+         Auth_Type => Config.Notifications.XMPP.Auth_Type);
 
       Jabber.Send_Message
         (Server  => Server,

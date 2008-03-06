@@ -26,8 +26,7 @@ with AWS.Jabber;
 
 with Savadur.Actions;
 with Savadur.Config.Environment_Variables;
-with Savadur.Config.Notifications.XMPP;
-with Savadur.Config.Notifications.SMTP;
+with Savadur.Config.Notifications;
 with Savadur.Config.Project;
 with Savadur.Config.Project_List;
 with Savadur.Config.SCM;
@@ -68,10 +67,7 @@ package body Config_Parse is
    procedure Check_Project_List
      (T : in out AUnit.Test_Cases.Test_Case'Class);
 
-   procedure Check_Notify_XMPP
-     (T : in out AUnit.Test_Cases.Test_Case'Class);
-
-   procedure Check_Notify_SMTP
+   procedure Check_Notify
      (T : in out AUnit.Test_Cases.Test_Case'Class);
 
    --------------------------
@@ -101,17 +97,34 @@ package body Config_Parse is
          "Wrong env variable list");
    end Check_Env_Var_Config;
 
-   -----------------------
-   -- Check_Notify_SMTP --
-   -----------------------
+   ------------------
+   -- Check_Notify --
+   ------------------
 
-   procedure Check_Notify_SMTP
+   procedure Check_Notify
      (T : in out AUnit.Test_Cases.Test_Case'Class)
    is
       pragma Unreferenced (T);
       use type AWS.Jabber.Authentication_Type;
    begin
-      Config.Notifications.SMTP.Parse;
+      Config.Notifications.Parse;
+
+      Assertions.Assert
+        (Config.Notifications.XMPP.Server = "server.example.com",
+         "Wrong jabber server");
+
+      Assertions.Assert
+        (Config.Notifications.XMPP.JID = "savadur",
+        "Wrong jabber JID");
+
+      Assertions.Assert
+        (Config.Notifications.XMPP.Password = "myPaSsW0rd",
+         "Wrong jabber password");
+
+      Assertions.Assert
+        (Config.Notifications.XMPP.Auth_Type = AWS.Jabber.PLAIN,
+         "Wrong jabber authentication type");
+
       Assertions.Assert
         (Config.Notifications.SMTP.Server = "smtp.example.com",
          "Wrong SMTP server");
@@ -127,35 +140,7 @@ package body Config_Parse is
       Assertions.Assert
         (Config.Notifications.SMTP.Sender = "savadur@example.net",
          "Wrong SMTP Sender");
-   end Check_Notify_SMTP;
-
-   -----------------------
-   -- Check_Notify_XMPP --
-   -----------------------
-
-   procedure Check_Notify_XMPP
-     (T : in out AUnit.Test_Cases.Test_Case'Class)
-   is
-      pragma Unreferenced (T);
-      use type AWS.Jabber.Authentication_Type;
-   begin
-      Config.Notifications.XMPP.Parse;
-      Assertions.Assert
-        (Config.Notifications.XMPP.Jabber_Server = "server.example.com",
-         "Wrong jabber server");
-
-      Assertions.Assert
-        (Config.Notifications.XMPP.Jabber_JID = "savadur",
-        "Wrong jabber JID");
-
-      Assertions.Assert
-        (Config.Notifications.XMPP.Jabber_Password = "myPaSsW0rd",
-         "Wrong jabber password");
-
-      Assertions.Assert
-        (Config.Notifications.XMPP.Jabber_Auth_Type = AWS.Jabber.PLAIN,
-        "Wrong jabber authentication type");
-   end Check_Notify_XMPP;
+   end Check_Notify;
 
    --------------------------
    -- Check_Project_Config --
@@ -368,9 +353,7 @@ package body Config_Parse is
       Registration.Register_Routine
         (T, Check_Project_List'Access, "check project list");
       Registration.Register_Routine
-        (T, Check_Notify_XMPP'Access, "check XMPP notify configuration");
-      Registration.Register_Routine
-        (T, Check_Notify_SMTP'Access, "check SMTP notify configuration");
+        (T, Check_Notify'Access, "check XMPP/SMTP notify configuration");
    end Register_Tests;
 
    -----------------

@@ -38,8 +38,7 @@ with Savadur.Config.Client;
 with Savadur.Config.Environment_Variables;
 with Savadur.Config.Project;
 with Savadur.Config.Project_List;
-with Savadur.Config.Notifications.SMTP;
-with Savadur.Config.Notifications.XMPP;
+with Savadur.Config.Notifications;
 with Savadur.Config.SCM;
 with Savadur.Config.Server;
 with Savadur.Jobs.Client;
@@ -324,8 +323,7 @@ procedure Savadur.Bin is
       Config.SCM.Parse;
       Config.Project.Parse;
       Config.Project_List.Parse;
-      Config.Notifications.XMPP.Parse;
-      Config.Notifications.SMTP.Parse;
+      Config.Notifications.Parse;
 
       Web.Server.Start;
 

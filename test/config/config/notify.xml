@@ -1,0 +1,14 @@
+<notifications>
+  <jabber>
+    <server value="server.example.com" />
+    <jid    value="savadur" />
+    <password value="myPaSsW0rd" />
+    <auth_type value="PLAIN" />
+  </jabber>
+  <smtp>
+    <server value="smtp.example.com"/>
+    <user value="savadur@here.com"/>
+    <password value="secret_smtp_pwd"/>
+    <sender value="savadur@example.net"/>
+  </smtp>
+</notifications>
