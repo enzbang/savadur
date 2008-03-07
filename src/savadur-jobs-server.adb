@@ -83,34 +83,35 @@ package body Savadur.Jobs.Server is
       ----------------------
 
       procedure Send_Job_Request (Position : in Project_List.Clients.Cursor) is
+         use type Clients.Client_Status;
          Client_Ref : constant Project_List.Client :=
                         Project_List.Clients.Element (Position);
-         P_Client   : constant Clients.Sets.Cursor :=
-                        Clients.Keys.Find
-                          (Clients.Registered, -Client_Ref.Key);
+         Client     : constant Clients.Cursor :=
+                        Clients.Find (-Client_Ref.Key);
       begin
-         if Clients.Sets.Has_Element (P_Client) then
+         if Clients.Has_Element (Client)
+           and then Clients.Status (Client) /= Clients.Offline
+         then
             declare
-               Client : constant Clients.Client :=
-                          Clients.Sets.Element (P_Client);
+               Key : constant String := Clients.Key (Client);
             begin
-               Logs.Write ("Send job request to " & (-Client.Key));
+               Logs.Write ("Send job request to " & Key);
                Server_Service.Client.Run
-                 (Server_Name    => -Client.Server_Name,
+                 (Server_Name    => Clients.Server_Name (Client),
                   Scenario       => -Scenario,
                   Signed_Project =>
                     Web_Services.Server.Signed_Project
                     (Signed_Files.To_External_Handler (Project.Signature)),
                   Id             => Generated_Job_Id,
-                  Endpoint       => -Client.Callback_Endpoint);
+                  Endpoint       => Clients.Callback_Endpoint (Client));
             exception
                when AWS.Client.Connection_Error =>
                   --  Client if offline.
                   --  Removes it from online clients and add logout info
                   --  into database.
 
-                  Database.Logout (-Client.Key);
-                  Clients.Sets.Delete (Clients.Registered, Client);
+                  Database.Logout (Key);
+                  Clients.Set_Status (Key, Clients.Offline);
             end;
 
          else

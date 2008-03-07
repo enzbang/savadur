@@ -39,7 +39,8 @@
 
       <h2>Online clients</h2>
 
-      @_ONLINE_CLIENTS_@
+      @_CLIENTS_NAME_@
+      @_CLIENTS_STATUS_@
 
       <p><a href="/ping">Ping clients</a></p>
     </div>

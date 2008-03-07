@@ -23,6 +23,8 @@ with Ada.Containers.Indefinite_Hashed_Sets;
 with Ada.Strings.Hash_Case_Insensitive;
 with Ada.Strings.Unbounded;
 
+with AWS.Templates;
+
 with Savadur.Web_Services.Client;
 
 package Savadur.Clients is
@@ -30,49 +32,82 @@ package Savadur.Clients is
    use Ada;
    use Ada.Strings.Unbounded;
 
+   use AWS;
+
    subtype Metadata is Web_Services.Client.Metadata;
 
+   type Client_Status is (Idle, Busy, Offline);
+
+   type Client is private;
+
+   Empty_Client : constant Client;
+
+   procedure Register
+     (Key               : in String;
+      Metadata          : in Clients.Metadata;
+      Status            : in Client_Status;
+      Server_Name       : in String;
+      Callback_Endpoint : in String);
+   --  Register a new client
+
+   procedure Set_Status (Key : in String; Status : in Client_Status);
+   --  Update the client status
+
+   function Clients_Set return Templates.Translate_Set;
+   --  Returns a set of client data
+
+   function Clients_Set
+     (Status : in Client_Status) return Templates.Translate_Set;
+   --  Returns a set of client in given status
+
+   type Iterate_Action is access procedure
+     (Key : in String; Server_Name : in String; Callback_Endpoint : in String);
+
+   procedure Iterate
+     (Status : in Client_Status;
+      Action : in Iterate_Action);
+   --  Run the action on all client with the given status
+
+   type Cursor is private;
+
+   No_Element : constant Cursor;
+
+   function Find (Key : in String) return Cursor;
+   function Has_Element (Position : in Cursor) return Boolean;
+
+   function Key (Position : in Cursor) return String;
+   function Status (Position : in Cursor) return Client_Status;
+   function Server_Name (Position : in Cursor) return String;
+   function Callback_Endpoint (Position : in Cursor) return String;
+
+private
    type Client is record
       Key               : Unbounded_String;
       Metadata          : Clients.Metadata;
+      Status            : Client_Status;
       Server_Name       : Unbounded_String;
       Callback_Endpoint : Unbounded_String;
    end record;
+
+   Empty_Client : constant Client :=
+     (Key               => <>,
+      Metadata          => <>,
+      Status            => Offline,
+      Server_Name       => <>,
+      Callback_Endpoint => <>);
 
    function Hash (Client : in Clients.Client) return Containers.Hash_Type;
    --  Renames Strings.Hash
 
    function Key_Equal (C1, C2 : in Client) return Boolean;
 
-   Empty_Client : constant Client;
-
-   ----------
-   -- Sets --
-   ----------
-
    package Sets is new Ada.Containers.Indefinite_Hashed_Sets
      (Element_Type        => Client,
       Hash                => Hash,
       Equivalent_Elements => Key_Equal);
 
-   function Image (Clients_Set : in Sets.Set) return String;
-   --  Returns the Client_Set image
+   type Cursor is new Sets.Cursor;
 
-   subtype Set is Sets.Set;
-
-   function Key (Client : in Clients.Client) return String;
-
-   package Keys is new Sets.Generic_Keys
-     (String, Key, Strings.Hash_Case_Insensitive, "=");
-
-   Registered : Sets.Set;
-
-private
-
-   Empty_Client : constant Client :=
-     (Key               => <>,
-      Metadata          => <>,
-      Server_Name       => <>,
-      Callback_Endpoint => <>);
+   No_Element : constant Cursor := Cursor (Sets.No_Element);
 
 end Savadur.Clients;

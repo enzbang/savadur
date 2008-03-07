@@ -72,6 +72,10 @@ package body Savadur.Web.Server is
    function List (Request : in Status.Data) return Response.Data;
    --  Displays the project list
 
+   procedure Ping
+     (Key : in String; Server_Name : in String; Endpoint : in String);
+   --  Ping a client
+
    function Ping return Response.Data;
    --  Pings clients
 
@@ -196,19 +200,12 @@ package body Savadur.Web.Server is
    function List (Request : in Status.Data) return Response.Data is
       pragma Unreferenced (Request);
       use type Templates.Tag;
-      P_Client     : Clients.Sets.Cursor := Clients.Registered.First;
       Clients_List : Templates.Tag;
       Set          : Templates.Translate_Set := Project_List.To_Set
         (Savadur.Config.Project_List.Configurations);
    begin
 
-      while Clients.Sets.Has_Element (P_Client) loop
-         Clients_List := Clients_List & Clients.Sets.Element (P_Client).Key;
-         Clients.Sets.Next (P_Client);
-      end loop;
-
-      Templates.Insert
-        (Set, Templates.Assoc ("ONLINE_CLIENTS", Clients_List));
+      Templates.Insert (Set, Clients.Clients_Set);
 
       return AWS.Response.Build
         (Content_Type => MIME.Text_HTML,
@@ -224,42 +221,37 @@ package body Savadur.Web.Server is
    -- Ping --
    ----------
 
+   procedure Ping
+     (Key : in String; Server_Name : in String; Endpoint : in String) is
+   begin
+      Logs.Write ("Ping client " & Key);
+      Logs.Write
+        ("Get " &
+         Server_Service.Client.Ping
+           (Endpoint => Endpoint));
+
+   exception
+      when SOAP.SOAP_Error =>
+         --  Client if offline.
+         --  Removes it from online clients and add logout info
+         --  into database
+
+         Database.Logout (Key);
+         Clients.Set_Status (Key, Clients.Offline);
+   end Ping;
+
+   ----------
+   -- Ping --
+   ----------
+
    function Ping return Response.Data is
       use Ada.Strings.Unbounded;
       use Savadur.Utils;
-      P_Client        : Clients.Sets.Cursor := Clients.Registered.First;
-      Offline_Clients : Unbounded_String;
-      Online_Clients  : Unbounded_String;
    begin
-      while Clients.Sets.Has_Element (P_Client) loop
-         Ping_Client : declare
-            Client : constant Clients.Client :=
-                       Clients.Sets.Element (P_Client);
-         begin
-            Clients.Sets.Next (P_Client);
 
-            Logs.Write ("Ping client " & (-Client.Key));
-            Logs.Write
-              ("Get " &
-               Server_Service.Client.Ping
-                 (Endpoint => -Client.Callback_Endpoint));
-            Append (Online_Clients, Client.Key);
-         exception
-            when SOAP.SOAP_Error =>
-               --  Client if offline.
-               --  Removes it from online clients and add logout info
-               --  into database
+      Clients.Iterate (Clients.Idle, Ping'Access);
 
-               Database.Logout (-Client.Key);
-               Clients.Sets.Delete (Clients.Registered, Client);
-               Append (Offline_Clients, Client.Key);
-         end Ping_Client;
-      end loop;
-
-      return Response.Build
-        (MIME.Text_HTML,
-         "<p>Online clients : " & Online_Clients & "...</p>"
-           & "<p>Offline clients : " & Offline_Clients & "...</p>");
+      return Response.Build (MIME.Text_HTML, "<p>Pinging clients...</p>");
    end Ping;
 
    ---------
