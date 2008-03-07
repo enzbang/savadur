@@ -256,6 +256,7 @@ package body Config_Parse is
       use Ada.Strings.Unbounded;
       Git_SCM : constant String := "* git"
         & "["
+        & "update => git-pull  result type : EXIT_STATUS"
         & "init => git-clone $url $sources  result type : EXIT_STATUS"
         & "pull => git-pull  result type : EXIT_STATUS"
         & "committers_1 => git-show --pretty=short $v1 (Author:(.*))"
@@ -319,7 +320,7 @@ package body Config_Parse is
          & "Name => test_server" & ASCII.LF
          & "URL => http://localhost:8181" & ASCII.LF
          & "Log_Path => @LOGS@/test/test-dir/logs" & ASCII.LF
-         & "Log_Prefix => machine" & ASCII.LF
+         & "Log_Prefix => machine-" & ASCII.LF
          & "Send_Log => TRUE" & ASCII.LF
          & "]" & ASCII.LF,
          "Wrong Servers parse, expected : " & ASCII.LF
