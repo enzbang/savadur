@@ -297,6 +297,7 @@ package body Savadur.Web_Services.Client is
             Logs.Write (Boolean'Image (Report.Result));
 
             if Report.Action = Actions.End_Action.Id then
+               Clients.Set_Status (-Report.Key, Clients.Idle);
                --  End of scenario. Final status
                Database.Final_Status
                  (-Report.Key, -Report.Project_Name, -Report.Scenario,
@@ -318,6 +319,11 @@ package body Savadur.Web_Services.Client is
                Notifications.Update_RSS;
 
             else
+               Clients.Set_Status
+                 (-Report.Key, Clients.Busy,
+                  Actions.Id_Utils.To_String (Report.Action) & " on "
+                  & (-Report.Project_Name) & " (" & (-Report.Scenario) & ")");
+
                --  This is the action log. Scenario is in progress
                Database.Log
                  (-Report.Key, -Report.Project_Name, -Report.Scenario,

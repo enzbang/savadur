@@ -50,7 +50,8 @@ package Savadur.Clients is
       Callback_Endpoint : in String);
    --  Register a new client
 
-   procedure Set_Status (Key : in String; Status : in Client_Status);
+   procedure Set_Status
+     (Key : in String; Status : in Client_Status; Message : in String := "");
    --  Update the client status
 
    function Clients_Set return Templates.Translate_Set;
@@ -87,12 +88,14 @@ private
       Status            : Client_Status;
       Server_Name       : Unbounded_String;
       Callback_Endpoint : Unbounded_String;
+      Running           : Unbounded_String;
    end record;
 
    Empty_Client : constant Client :=
      (Key               => <>,
       Metadata          => <>,
       Status            => Offline,
+      Running           => <>,
       Server_Name       => <>,
       Callback_Endpoint => <>);
 

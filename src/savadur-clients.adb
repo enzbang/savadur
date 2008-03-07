@@ -229,7 +229,8 @@ package body Savadur.Clients is
       Insert_Or_Update : begin
          Clients.Registered.Insert
            (New_Item => (+Key, Metadata, Status,
-                         +Server_Name, +Callback_Endpoint));
+                         +Server_Name, +Callback_Endpoint,
+                           Running  => <>));
       exception
          when Constraint_Error =>
             --  If the client has been deconnected and try to register again
@@ -237,7 +238,8 @@ package body Savadur.Clients is
             Logs.Write ("Client exits... update it");
             Clients.Registered.Replace
               (New_Item => (+Key, Metadata, Status,
-                            +Server_Name, +Callback_Endpoint));
+                            +Server_Name, +Callback_Endpoint,
+                            Running => <>));
       end Insert_Or_Update;
 
    end Register;
@@ -246,10 +248,12 @@ package body Savadur.Clients is
    -- Set_Status --
    ----------------
 
-   procedure Set_Status (Key : in String; Status : in Client_Status) is
+   procedure Set_Status
+     (Key : in String; Status : in Client_Status; Message : in String := "") is
       Element : Client := Keys.Element (Registered, Key);
    begin
-      Element.Status := Status;
+      Element.Status  := Status;
+      Element.Running := +Message;
       Registered.Replace (Element);
    end Set_Status;
 
