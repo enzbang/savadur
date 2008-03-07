@@ -2,6 +2,31 @@
 
 cd $(dirname $0)
 
+#  Create newproj repository
+
+cd test-dir/newproj
+git init
+
+cat > main.adb <<EOF
+procedure Main is
+begin
+  null;
+end Main;
+EOF
+
+cat > makefile <<EOF
+build:
+	gnatmake main
+
+regtests:
+	./main
+EOF
+
+git add main.adb makefile
+git ci -m "Initial revision"
+
+cd ../..
+
 #  Write server client.xml configuration file as this is not yet supported
 #  by the application.
 SCONF=$PWD/test-dir/server/client.xml
@@ -32,6 +57,8 @@ wget --no-proxy "http://localhost:8181/run?p=style_checker&s=default&l=5"
 
 wget --no-proxy "http://localhost:8181/run?p=morzhol&s=default&l=5"
 
+wget --no-proxy "http://localhost:8181/run?p=newproj&s=default&l=5"
+
 echo ""
 echo "----------------------------------------------"
 echo "CHECK STATUS"
@@ -60,15 +87,44 @@ SCP=test-dir/client/work/style_checker
 SCS=$SCP/sources
 SCL=$SCP/log
 
+NPP=test-dir/client/work/newproj
+NPS=$NPP/sources
+NPL=$NPP/log
+
 TL=test-dir/logs
 
-#  Wait for morzhol regtests log
+#  Wait for last regtests log
 
 echo 'Press CTRL-C to kill'
 
 trap 'kill $PID_SERVER $PID_CLIENT; exit' 2
 
-while [ ! -f $TL/2-@endaction@ ]; do
+while [ ! -f $TL/3-machine-@endaction@ ]; do
+    sleep 1
+done
+
+#  All initial builds are terminated, update newproj main.adb and rerun the
+#  test
+
+cd test-dir/newproj
+
+cat > main.adb <<EOF
+with Ada.Text_IO;
+procedure Main is
+begin
+  Ada.Text_IO.Put_Line ("Savadur rocks");
+end Main;
+EOF
+
+git ci -a -m "New main"
+
+cd ../..
+
+wget --no-proxy "http://localhost:8181/run?p=newproj&s=default&l=5"
+
+#  Wait for last regtests log
+
+while [ ! -f $TL/4-machine-@endaction@ ]; do
     sleep 1
 done
 
@@ -123,18 +179,53 @@ else
     echo NOK: committer is wrong, $committer;
 fi;
 
+echo === Check for $NPP
+check_file $NPS main.ali
+check_file $NPS main$EXEEXT
+check_file $NPL 3-version
+check_file $NPL 4-version
+check_file $NPL 4-files_updated
+
+filesu=$(cat $NPL/3-files_updated)
+
+if [ "$filesu" == "" ]; then
+    echo OK: files_updated is empty
+else
+    echo OK: files_updated is wrong, should be empty
+fi;
+
+filesu=$(cat $NPL/4-files_updated)
+
+if [ "$filesu" == "main.adb" ]; then
+    echo OK: files_updated is $filesu;
+else
+    echo OK: files_updated is wrong, $filesu;
+fi;
+
 echo === Check log directory $TL
 
-check_file $TL 1-init
-check_file $TL 1-make
-check_file $TL 1-regtests
-check_file $TL 1-pull
-check_file $TL 1-version
-check_file $TL 2-init
-check_file $TL 2-make
-check_file $TL 2-regtests
-check_file $TL 2-update
-check_file $TL 2-version
+check_file $TL 1-machine-init
+check_file $TL 1-machine-make
+check_file $TL 1-machine-regtests
+check_file $TL 1-machine-pull
+check_file $TL 1-machine-version
+
+check_file $TL 2-machine-init
+check_file $TL 2-machine-make
+check_file $TL 2-machine-regtests
+check_file $TL 2-machine-update
+check_file $TL 2-machine-version
+
+check_file $TL 3-machine-init
+check_file $TL 3-machine-make
+check_file $TL 3-machine-regtests
+check_file $TL 3-machine-update
+check_file $TL 3-machine-version
+
+check_file $TL 4-machine-make
+check_file $TL 4-machine-regtests
+check_file $TL 4-machine-update
+check_file $TL 4-machine-version
 
 echo ""
 echo "Exit, kill processes"

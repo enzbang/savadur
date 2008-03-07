@@ -9,4 +9,9 @@
          <client key="me"/>
       </scenario>
   </project>
+  <project id="newproj">
+      <scenario id="default">
+         <client key="me"/>
+      </scenario>
+  </project>
 </project_list>

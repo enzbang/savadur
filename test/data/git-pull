@@ -1,0 +1,13 @@
+remote: Counting objects: 5, done.
+remote: Compressing objects: 100% (3/3), done.
+remote: Total 4 (delta 1), reused 4 (delta 1)
+Unpacking objects: 100% (4/4), done.
+From git+ssh://pobry@repo.or.cz/srv/git/git-scripts
+   7b21d46..27b03f7  master     -> origin/master
+Updating 7b21d46..27b03f7
+Fast forward
+ git-svnci |   10 ++++++++++
+ git-svnup |   10 ++++++++++
+ 2 files changed, 20 insertions(+), 0 deletions(-)
+ create mode 100755 git-svnci
+ create mode 100755 git-svnup

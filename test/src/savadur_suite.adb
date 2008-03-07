@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                                Savadur                                   --
 --                                                                          --
---                           Copyright (C) 2007                             --
+--                         Copyright (C) 2007-2008                          --
 --                      Pascal Obry - Olivier Ramonat                       --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -22,6 +22,7 @@
 with Config_Parse;
 with Signed_Files;
 with Periodic_Times;
+with SCM_Specific;
 
 package body Savadur_Suite is
 
@@ -31,6 +32,7 @@ package body Savadur_Suite is
    Test_1 : aliased Config_Parse.Test_Case;
    Test_2 : aliased Signed_Files.Test_Case;
    Test_3 : aliased Periodic_Times.Test_Case;
+   Test_4 : aliased SCM_Specific.Test_Case;
 
    -----------
    -- Suite --
@@ -41,6 +43,7 @@ package body Savadur_Suite is
       Add_Test (Result'Access, Test_1'Access);
       Add_Test (Result'Access, Test_2'Access);
       Add_Test (Result'Access, Test_3'Access);
+      Add_Test (Result'Access, Test_4'Access);
       return Result'Access;
    end Suite;
 

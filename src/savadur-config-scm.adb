@@ -40,7 +40,7 @@ package body Savadur.Config.SCM is
    use Ada.Strings.Unbounded;
    use Savadur.Utils;
 
-   type Node_Value is (SCM, Name, Action, Cmd);
+   type Node_Value is (SCM, Name, Files_Updated, Action, Cmd);
 
    type Attribute is (Id, Result, Regexp);
 
@@ -48,16 +48,14 @@ package body Savadur.Config.SCM is
 
    type XML_Schema is array (Node_Value) of XML_Attribute;
 
-   Schema : constant XML_Schema :=
-              XML_Schema'(SCM    => XML_Attribute'(Id => False,
-                                                   others => False),
-                          Cmd    => XML_Attribute'(Regexp => True,
-                                                   others => False),
-                          Action => XML_Attribute'(Id     => True,
-                                                   Result => True,
-                                                   Regexp => False),
-                          Name   => XML_Attribute'(Id     => True,
-                                                   others => False));
+   Schema : constant XML_Schema := XML_Schema'
+     (SCM           => XML_Attribute'(Id => False, others => False),
+      Cmd           => XML_Attribute'(Regexp => True, others => False),
+      Action        => XML_Attribute'(Id     => True,
+                                      Result => True,
+                                      Regexp => False),
+      Name          => XML_Attribute'(Id     => True, others => False),
+      Files_Updated => XML_Attribute'(Regexp => True, others => False));
 
    function Get_Node_Value (S : in String) return Node_Value;
    --  Returns the node value matching the given string or raise Config_Error
@@ -128,7 +126,7 @@ package body Savadur.Config.SCM is
             Handler.Action.Cmd.Cmd :=
               Actions.External_Command (Handler.Content_Value);
 
-         when SCM | Name =>
+         when SCM | Name | Files_Updated =>
             null;
       end case;
 
@@ -194,9 +192,10 @@ package body Savadur.Config.SCM is
    begin
       Reader.SCM :=
         Savadur.SCM.SCM'
-          (Id       => Savadur.SCM.Id_Utils.Nil,
-           Actions  => Actions.Sets.Empty_Set,
-           Filename => +Filename);
+          (Id            => Savadur.SCM.Id_Utils.Nil,
+           Actions       => Actions.Sets.Empty_Set,
+           Files_Updated => Null_Unbounded_String,
+           Filename      => +Filename);
 
       Input_Sources.File.Open
         (Filename => Filename,
@@ -308,7 +307,7 @@ package body Savadur.Config.SCM is
                   when Name =>
                      Handler.SCM.Id :=
                        Savadur.SCM.Id_Utils.Value (Get_Value (Atts, J));
-                  when SCM | Cmd => null;
+                  when SCM | Cmd | Files_Updated => null;
                end case;
 
             when Result =>
@@ -325,6 +324,10 @@ package body Savadur.Config.SCM is
                   when Cmd =>
                      Handler.Action.Cmd.Output :=
                        Actions.Output_Pattern (+Get_Value (Atts, J));
+
+                  when Files_Updated =>
+                     Handler.SCM.Files_Updated :=
+                       To_Unbounded_String (Get_Value (Atts, J));
 
                   when others => null;
                end case;

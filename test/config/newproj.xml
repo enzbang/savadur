@@ -1,9 +1,9 @@
 <project>
-  <name id="style_checker" />
+  <name id="newproj" />
   <scm id="git" />
 
   <variable id="url"
-     value="http://repo.or.cz/r/style_checker.git" />
+     value="../../../newproj" />
 
   <action id="make">
     <cmd>make</cmd>
@@ -14,7 +14,7 @@
   </action>
 
   <scenario id="default">
-    <scm_action id="pull" />
+    <scm_action id="update" />
     <scm_action id="version" require_change="true" on_error="quit" />
     <action id="make" />
     <action id="regtests" />

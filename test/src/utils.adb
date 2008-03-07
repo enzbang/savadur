@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                                Savadur                                   --
 --                                                                          --
---                           Copyright (C) 2007                             --
+--                         Copyright (C) 2007-2008                          --
 --                      Pascal Obry - Olivier Ramonat                       --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -22,10 +22,45 @@
 with Ada.Strings.Maps;
 with Ada.Strings.Unbounded;
 
+with GNAT.Regpat;
+
 package body Utils is
 
    use Ada.Strings;
    use Ada.Strings.Unbounded;
+   use GNAT;
+
+   -----------
+   -- Parse --
+   -----------
+
+   function Parse
+     (Content, Regexp : in String; N : in Positive := 1) return String
+   is
+      use type Regpat.Match_Location;
+      Pattern : constant Regpat.Pattern_Matcher := Regpat.Compile (Regexp);
+      First   : Positive := Content'First;
+      Result  : Unbounded_String;
+      Matches : Regpat.Match_Array (0 .. N);
+   begin
+      while First <= Content'Last loop
+         Regpat.Match (Pattern, Content, Matches, Data_First => First);
+
+         exit when Matches (0) = Regpat.No_Match
+           or else Matches (N) = Regpat.No_Match;
+
+         --  Each result on a separate line
+
+         if Result /= Null_Unbounded_String then
+            Append (Result, ASCII.LF);
+         end if;
+
+         Append (Result, Content (Matches (N).First .. Matches (N).Last));
+         First := Matches (1).Last + 1;
+      end loop;
+
+      return To_String (Result);
+   end Parse;
 
    -----------
    -- Strip --

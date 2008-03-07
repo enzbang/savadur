@@ -20,6 +20,7 @@
 
 <scm>
   <name id="subversion" />
+  <files_updated regexp="[AU]    ([^\n]+)"/>
 
   <action id="init">
     <cmd>svn checkout $url $sources</cmd>

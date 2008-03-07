@@ -747,12 +747,16 @@ package body Savadur.Build is
    begin
       For_All_Ref_Actions : declare
          use Savadur.Actions.Vectors;
-         Position : Cursor := Selected_Scenario.Actions.First;
+         Position    : Cursor := Selected_Scenario.Actions.First;
+         Project_SCM : constant Savadur.SCM.SCM := Savadur.SCM.Keys.Element
+           (Container => Savadur.Config.SCM.Configurations,
+            Key       => Project.SCM_Id);
       begin
          Run_Actions : while Has_Element (Position) loop
 
             Execute_Command : declare
                use type SCM.Id;
+               use type Actions.Ref_Action;
                Ref         : constant Actions.Ref_Action := Element (Position);
                Log_File    : constant String :=
                                Log_Filename (Project, Ref.Id, Job_Id);
@@ -787,6 +791,56 @@ package body Savadur.Build is
                                    Diff_Data   => Diff_Data'Access);
 
                   Send_Status (Server, Ref.Id, Log_File);
+
+                  --  Check update status
+
+                  if Ref = SCM.Update
+                    and then Project_SCM.Files_Updated /= Null_Unbounded_String
+                  then
+                     --  Compute the files changed
+                     Logs.Write
+                       ("Compute changed file for " &
+                        Actions.Id_Utils.To_String (Ref.Id),
+                        Kind => Logs.Handler.Very_Verbose);
+
+                     Parse_Output : declare
+                        use type Regpat.Match_Location;
+                        Content : constant String := Utils.Content (Log_File);
+                        Pattern : constant Regpat.Pattern_Matcher :=
+                                    Regpat.Compile
+                                      (To_String (Project_SCM.Files_Updated));
+                        First   : Positive := Content'First;
+                        Result  : Unbounded_String;
+                        Matches : Regpat.Match_Array (0 .. 1);
+                     begin
+                        while First <= Content'Last loop
+                           Regpat.Match
+                             (Pattern, Content, Matches,
+                              Data_First => First);
+
+                           exit when Matches (0) = Regpat.No_Match
+                             or else Matches (1) = Regpat.No_Match;
+
+                           --  Each result on a separate line
+
+                           if Result /= Null_Unbounded_String then
+                              Append (Result, ASCII.LF);
+                           end if;
+
+                           Append
+                             (Result,
+                              Content (Matches (1).First .. Matches (1).Last));
+                           First := Matches (1).Last + 1;
+                        end loop;
+
+                        Utils.Set_Content
+                          (Filename => Log_Filename
+                             (Project,
+                              Actions.Id_Utils.Value ("files_updated"),
+                              Job_Id),
+                           Content => To_String (Result));
+                     end Parse_Output;
+                  end if;
 
                   if not Status then
                      case Ref.On_Error is

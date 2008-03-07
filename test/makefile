@@ -52,15 +52,18 @@ setup_clientserver:
 	@$(RM) -r test-dir/client
 	@$(RM) -r test-dir/server
 	@$(RM) -r test-dir/logs
+	@$(RM) -r test-dir/newproj
 	@$(MKDIR) test-dir/client/servers
 	@$(MKDIR) test-dir/server/projects
 	@$(MKDIR) test-dir/server/config
 	@$(MKDIR) test-dir/server/htdocs/templates
 	@$(MKDIR) test-dir/client/share/templates
 	@$(MKDIR) test-dir/logs
+	@$(MKDIR) test-dir/newproj
 	@$(CP) -r ../config/scm/ test-dir/server
 	@$(CP) config/style_checker.xml test-dir/server/projects/
 	@$(CP) config/morzhol.xml test-dir/server/projects/
+	@$(CP) config/newproj.xml test-dir/server/projects/
 	@$(SED) -e "s,@LOGS@,$(PWD),g" config/servers/localhost.xml \
 		> test-dir/client/servers/localhost.xml
 	@$(CP) test-dir/project_list.xml test-dir/server/config/

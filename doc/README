@@ -27,6 +27,7 @@ revision number.
 
    <scm>
      <name id="git" />
+     <files_updated regexp=" ([^\n]*) \|  "/>
 
      <action id="init">
        <cmd>git-clone $url $sources</cmd>
@@ -154,7 +155,8 @@ Trigger a build
 To trigger a build it is possible to send a simple HTTP request to the server
 for a specific project and scenario.
 
-   $ wget --no-proxy http://<server>:<port>/run?p=<project>\&s=<scenario>\&l=<latency>
+   $ wget --no-proxy \
+     	  http://<server>:<port>/run?p=<project>\&s=<scenario>\&l=<latency>
 
      <project>  : the project name
      <scenario> : the specific scenario to run

@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                                Savadur                                   --
 --                                                                          --
---                         Copyright (C) 2007-2008                          --
+--                            Copyright (C) 2008                            --
 --                      Pascal Obry - Olivier Ramonat                       --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -19,15 +19,20 @@
 --  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.       --
 ------------------------------------------------------------------------------
 
-package Utils is
+with AUnit;
 
-   function Strip (Source : in String) return String;
-   --  Strip the given string removing line feed, carriage return, duplicated
-   --  whitespaces.
+package SCM_Specific is
 
-   function Parse
-     (Content, Regexp : in String; N : in Positive := 1) return String;
-   --  Parse content using regexp and returns the result which is the
-   --  catenation of all Nth matches.
+   use AUnit;
+   use AUnit.Test_Cases;
+   use AUnit.Test_Results;
 
-end Utils;
+   type Test_Case is new AUnit.Test_Cases.Test_Case with null record;
+
+   procedure Register_Tests (T : in out Test_Case);
+   --  Register routines to be run
+
+   function Name (T : in Test_Case) return Test_String;
+   --  Returns name identifying the test case
+
+end SCM_Specific;
