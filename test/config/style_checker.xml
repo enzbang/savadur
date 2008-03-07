@@ -14,8 +14,8 @@
   </action>
 
   <scenario id="default">
-    <scm_action id="pull" />
     <scm_action id="version" require_change="true" on_error="quit" />
+    <scm_action id="pull" />
     <action id="make" />
     <action id="regtests" />
   </scenario>
