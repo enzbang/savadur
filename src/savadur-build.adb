@@ -537,13 +537,13 @@ package body Savadur.Build is
 
          Search_Action : declare
             use Savadur.SCM;
-            SCM_Used : constant Savadur.SCM.SCM := Savadur.SCM.Keys.Element
+            Project_SCM : constant Savadur.SCM.SCM := Savadur.SCM.Keys.Element
               (Container => Savadur.Config.SCM.Configurations,
                Key       => Project.SCM_Id);
 
          begin
             Get_Action := Actions.Keys.Element
-              (Container => SCM_Used.Actions,
+              (Container => Project_SCM.Actions,
                Key       => Action_Id);
          end Search_Action;
 

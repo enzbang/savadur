@@ -285,7 +285,6 @@ package body Config_Parse is
            Utils.Strip (Git_SCM & SVN_SCM),
          "Wrong SCM parse"
            & Savadur.SCM.Image (Savadur.Config.SCM.Configurations));
-
    end Check_SCM_Config;
 
    -------------------------
