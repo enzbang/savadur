@@ -47,7 +47,7 @@ package body SCM_Specific is
    is
       pragma Unreferenced (T);
 
-      SCM     : Savadur.SCM.SCM := Savadur.Config.SCM.Get ("git");
+      SCM     : constant Savadur.SCM.SCM := Savadur.Config.SCM.Get ("git");
       Content : constant String :=
                   Savadur.Utils.Content ("data/git-pull");
       Result  : constant String :=
@@ -70,7 +70,8 @@ package body SCM_Specific is
    is
       pragma Unreferenced (T);
 
-      SCM     : Savadur.SCM.SCM := Savadur.Config.SCM.Get ("subversion");
+      SCM     : constant Savadur.SCM.SCM :=
+                  Savadur.Config.SCM.Get ("subversion");
       Content : constant String :=
                   Savadur.Utils.Content ("data/svn-update");
       Result  : constant String :=
