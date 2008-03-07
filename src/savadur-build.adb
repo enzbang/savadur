@@ -628,6 +628,8 @@ package body Savadur.Build is
       Id      : in     Scenarios.Id;
       Job_Id  : in     Natural := 0) return Boolean
    is
+      use type SCM.Id;
+
       function Init return Savadur.Scenarios.Scenario;
       --  Returns the selected scenario and set the environment variables
 
@@ -752,10 +754,57 @@ package body Savadur.Build is
            (Container => Savadur.Config.SCM.Configurations,
             Key       => Project.SCM_Id);
       begin
+         --  Check first if the source directory exists
+
+         if not Directories.Exists (Sources_Directory) then
+            --  No sources directory. This means that the project has not been
+            --  initialized.
+            --  The sources directory has to be created by the SCM Call SCM
+            --  init from current directory. If there is no SCM defined for
+            --  this project we create the directory.
+
+            Logs.Write ("Create directory : " & Sources_Directory);
+
+            if Project.SCM_Id = SCM.Null_Id then
+               Directories.Create_Directory (Sources_Directory);
+
+            else
+               declare
+                  Return_Code : Integer;
+                  Result      : Boolean;
+               begin
+                  Execute
+                    (Exec_Action   => Get_Action
+                       (Project    => Project.all,
+                        Ref_Action => Savadur.SCM.Init),
+                     Directory     =>
+                     Projects.Project_Directory (Project),
+                     Log_Filename  => Log_Filename
+                       (Project, SCM.Init.Id, Job_Id),
+                     Return_Code   => Return_Code,
+                     Result        => Result);
+
+                  if not Result or else Return_Code /= 0
+                    or else not Directories.Exists (Sources_Directory)
+                  then
+                     Status := False;
+                     Send_Status (Server, Savadur.SCM.Init.Id);
+                     raise Command_Parse_Error with "SCM init failed !";
+                  end if;
+
+                  Send_Status
+                    (Server,
+                     Savadur.SCM.Init.Id,
+                     Log_Filename (Project, SCM.Init.Id, Job_Id));
+               end;
+            end if;
+         end if;
+
+         --  Now run all actions
+
          Run_Actions : while Has_Element (Position) loop
 
             Execute_Command : declare
-               use type SCM.Id;
                use type Actions.Ref_Action;
                Ref         : constant Actions.Ref_Action := Element (Position);
                Log_File    : constant String :=
@@ -766,144 +815,102 @@ package body Savadur.Build is
                Return_Code : Integer;
                Result      : Boolean;
             begin
-               if Directories.Exists (Sources_Directory) then
+               Execute (Exec_Action  => Exec_Action,
+                        Directory    => Sources_Directory,
+                        Log_Filename => Log_File,
+                        Return_Code  => Return_Code,
+                        Result       => Result);
 
-                  Execute (Exec_Action  => Exec_Action,
-                           Directory    => Sources_Directory,
-                           Log_Filename => Log_File,
-                           Return_Code  => Return_Code,
-                           Result       => Result);
+               if not Result then
+                  Status := False; --  Exit with error
 
-                  if not Result then
-                     Status := False; --  Exit with error
+                  Send_Status (Server, Ref.Id);
 
-                     Send_Status (Server, Ref.Id);
+                  exit Run_Actions;
+               end if;
 
-                     exit Run_Actions;
-                  end if;
+               Status := Check (Project     => Project,
+                                Exec_Action => Exec_Action,
+                                Ref         => Ref,
+                                Return_Code => Return_Code,
+                                Job_Id      => Job_Id,
+                                Log_File    => Log_File,
+                                Diff_Data   => Diff_Data'Access);
 
-                  Status := Check (Project     => Project,
-                                   Exec_Action => Exec_Action,
-                                   Ref         => Ref,
-                                   Return_Code => Return_Code,
-                                   Job_Id      => Job_Id,
-                                   Log_File    => Log_File,
-                                   Diff_Data   => Diff_Data'Access);
+               Send_Status (Server, Ref.Id, Log_File);
 
-                  Send_Status (Server, Ref.Id, Log_File);
+               --  Check update status
 
-                  --  Check update status
+               if Ref = SCM.Update
+                 and then Project_SCM.Files_Updated /= Null_Unbounded_String
+               then
+                  --  Compute the files changed
+                  Logs.Write
+                    ("Compute changed file for " &
+                     Actions.Id_Utils.To_String (Ref.Id),
+                     Kind => Logs.Handler.Very_Verbose);
 
-                  if Ref = SCM.Update
-                    and then Project_SCM.Files_Updated /= Null_Unbounded_String
-                  then
-                     --  Compute the files changed
-                     Logs.Write
-                       ("Compute changed file for " &
-                        Actions.Id_Utils.To_String (Ref.Id),
-                        Kind => Logs.Handler.Very_Verbose);
+                  Parse_Output : declare
+                     use type Regpat.Match_Location;
+                     Content : constant String := Utils.Content (Log_File);
+                     Pattern : constant Regpat.Pattern_Matcher :=
+                                 Regpat.Compile
+                                   (To_String (Project_SCM.Files_Updated));
+                     First   : Positive := Content'First;
+                     Result  : Unbounded_String;
+                     Matches : Regpat.Match_Array (0 .. 1);
+                  begin
+                     while First <= Content'Last loop
+                        Regpat.Match
+                          (Pattern, Content, Matches,
+                           Data_First => First);
 
-                     Parse_Output : declare
-                        use type Regpat.Match_Location;
-                        Content : constant String := Utils.Content (Log_File);
-                        Pattern : constant Regpat.Pattern_Matcher :=
-                                    Regpat.Compile
-                                      (To_String (Project_SCM.Files_Updated));
-                        First   : Positive := Content'First;
-                        Result  : Unbounded_String;
-                        Matches : Regpat.Match_Array (0 .. 1);
-                     begin
-                        while First <= Content'Last loop
-                           Regpat.Match
-                             (Pattern, Content, Matches,
-                              Data_First => First);
+                        exit when Matches (0) = Regpat.No_Match
+                          or else Matches (1) = Regpat.No_Match;
 
-                           exit when Matches (0) = Regpat.No_Match
-                             or else Matches (1) = Regpat.No_Match;
+                        --  Each result on a separate line
 
-                           --  Each result on a separate line
+                        if Result /= Null_Unbounded_String then
+                           Append (Result, ASCII.LF);
+                        end if;
 
-                           if Result /= Null_Unbounded_String then
-                              Append (Result, ASCII.LF);
-                           end if;
+                        Append
+                          (Result,
+                           Content (Matches (1).First .. Matches (1).Last));
+                        First := Matches (1).Last + 1;
+                     end loop;
 
-                           Append
-                             (Result,
-                              Content (Matches (1).First .. Matches (1).Last));
-                           First := Matches (1).Last + 1;
-                        end loop;
+                     Utils.Set_Content
+                       (Filename => Log_Filename
+                          (Project,
+                           Actions.Id_Utils.Value ("files_updated"),
+                           Job_Id),
+                        Content  => To_String (Result));
+                  end Parse_Output;
+               end if;
 
-                        Utils.Set_Content
-                          (Filename => Log_Filename
-                             (Project,
-                              Actions.Id_Utils.Value ("files_updated"),
-                              Job_Id),
-                           Content => To_String (Result));
-                     end Parse_Output;
-                  end if;
-
-                  if not Status then
-                     case Ref.On_Error is
-                        when Actions.Quit =>
-                           Status := True;
-                           exit Run_Actions;
+               if not Status then
+                  case Ref.On_Error is
+                     when Actions.Quit =>
+                        Status := True;
+                        exit Run_Actions;
 
                         when Actions.Error =>
-                           Project.Variables.Insert
-                             (New_Item =>
-                              Variables.Variable'
-                                (Name =>
-                                 Variables.Name_Utils.Value ("failed_action"),
-                                 Value => Actions.Id_Utils.
-                                   To_Unbounded_String (Ref.Id)));
-                           exit Run_Actions;
+                        Project.Variables.Insert
+                          (New_Item =>
+                           Variables.Variable'
+                             (Name  =>
+                              Variables.Name_Utils.Value ("failed_action"),
+                              Value => Actions.Id_Utils.
+                                To_Unbounded_String (Ref.Id)));
+                        exit Run_Actions;
 
                         when Actions.Continue =>
-                           null;
-                     end case;
-                  end if;
-
-                  Next (Position);
-
-               else
-                  --  No sources directory. This means that the project has not
-                  --  been initialized.
-                  --  The sources directory has to be created by the SCM
-                  --  Call SCM init from current directory. If there is no SCM
-                  --  defined for this project we create the directory.
-
-                  Logs.Write ("Create directory : " & Sources_Directory);
-
-                  if Project.SCM_Id = SCM.Null_Id then
-                     Directories.Create_Directory (Sources_Directory);
-
-                  else
-                     Execute
-                       (Exec_Action   => Get_Action
-                          (Project    => Project.all,
-                           Ref_Action => Savadur.SCM.Init),
-                        Directory     =>
-                          Projects.Project_Directory (Project),
-                        Log_Filename  => Log_Filename
-                          (Project, SCM.Init.Id, Job_Id),
-                        Return_Code   => Return_Code,
-                        Result        => Result);
-
-                     if not Result or else Return_Code /= 0
-                       or else not Directories.Exists (Sources_Directory)
-                     then
-                        Status := False;
-                        Send_Status (Server, Savadur.SCM.Init.Id);
-                        raise Command_Parse_Error with "SCM init failed !";
-                     end if;
-
-                     Send_Status
-                       (Server,
-                        Savadur.SCM.Init.Id,
-                        Log_Filename (Project, SCM.Init.Id, Job_Id));
-                  end if;
-                  --  No Next (Position) to retry the same command
+                        null;
+                  end case;
                end if;
+
+               Next (Position);
             end Execute_Command;
          end loop Run_Actions;
 
