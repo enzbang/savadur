@@ -94,8 +94,8 @@ The project file savadur.xml:
      </action>
 
      <scenario id="default">
-       <scm_action id="pull" />
        <scm_action id="version" require_change="true" on_error="quit" />
+       <scm_action id="pull" />
        <action id="make" />
        <action id="regtests" />
      </scenario>
@@ -170,24 +170,26 @@ Following the example above:
 Notifications
 -------------
 
-XMPP and SMTP notifications can be activated on the server side using XML.
+XMPP and SMTP notifications can be activated on the server side using an
+XML document named notify.xml.
 
 For XMPP:
 
+<notifications>
    <jabber>
      <server value="jabber.org" />
      <jid value="savadur-bot" />
      <password value="savadur_pwd" />
      <auth_type value="PLAIN" />
    </jabber>
-
-For SMTP, user and password are optional:
-
    <smtp>
       <server value="smtp.example.com"/>
       <user value="savadur@here.com"/>
       <password value="secret_smtp_pwd"/>
    </smtp>
+</notifications>
+
+For SMTP, user and password are optional.
 
 For now only PLAIN authentication is supported for XMPP and SMTP.
 
