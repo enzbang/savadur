@@ -391,8 +391,8 @@ procedure Savadur.Bin is
 
    procedure Set_Client_Config is
       use Ada.Text_IO;
-      File                   : File_Type;
-      Filename               : constant String := Directories.Compose
+      File     : File_Type;
+      Filename : constant String := Directories.Compose
         (Containing_Directory => Config.Savadur_Directory,
          Name                 => "client",
          Extension            => "xml");
