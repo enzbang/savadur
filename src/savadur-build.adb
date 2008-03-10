@@ -750,10 +750,15 @@ package body Savadur.Build is
       For_All_Ref_Actions : declare
          use Savadur.Actions.Vectors;
          Position    : Cursor := Selected_Scenario.Actions.First;
-         Project_SCM : constant Savadur.SCM.SCM := Savadur.SCM.Keys.Element
-           (Container => Savadur.Config.SCM.Configurations,
-            Key       => Project.SCM_Id);
+         Project_SCM : Savadur.SCM.SCM;
       begin
+
+         if Project.SCM_Id /= SCM.Null_Id then
+            Project_SCM := Savadur.SCM.Keys.Element
+              (Container => Savadur.Config.SCM.Configurations,
+               Key       => Project.SCM_Id);
+         end if;
+
          --  Check first if the source directory exists
 
          if not Directories.Exists (Sources_Directory) then
