@@ -261,7 +261,7 @@ package body Config_Parse is
         & "pull => git-pull  result type : EXIT_STATUS"
         & "committers_1 => git-show --pretty=short $v1 (Author:(.*))"
         & "result type : VALUE"
-        & "version=>git-show-ref -s refs/heads/master "
+        & "version => git-ls-remote origin refs/heads/master (^([^\t]*)) "
         & "result type : VALUE "
         & "committers_n => git-log $v1..$v2 (Author:(.*))"
         & "result type : VALUE"
