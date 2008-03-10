@@ -88,7 +88,9 @@
                    @@END_IF@@
                    >
                   <a href="/log/@_LOGS_ID_@">
-                    <span class="timestamp">@_LOGS_DATE_@</span>
+                    <span class="timestamp">@_LOGS_START_DATE_@</span>
+                    <span class="timestamp">@_LOGS_STOP_DATE_@</span>
+                    <span class="timestamp">@_LOGS_DURATION_@</span>
                     @_LOGS_ACTION_@
                   </a>
                 </td>

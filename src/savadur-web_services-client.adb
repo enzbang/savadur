@@ -246,6 +246,17 @@ package body Savadur.Web_Services.Client is
 
    end Report_Handler;
 
+   procedure Status_Start
+     (Key          : in String;
+      Project_Name : in String;
+      Scenario     : in String;
+      Action       : in String;
+      Job_Id       : in Natural)
+   is
+   begin
+      Database.Log_Start (Key, Project_Name, Scenario, Action, Job_Id);
+   end Status_Start;
+
    ------------
    -- Status --
    ------------

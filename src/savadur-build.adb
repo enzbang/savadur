@@ -781,6 +781,23 @@ package body Savadur.Build is
                   Return_Code : Integer;
                   Result      : Boolean;
                begin
+
+                  --  Notify the server that the action is starting
+
+                  Notify_Start : declare
+                     Server_URL : constant String :=
+                                    Servers.URL (Servers.Get (Server));
+                  begin
+                     Client_Service.Client.Status_Start
+                       (Key          => Config.Client.Get_Key,
+                        Project_Name =>
+                          Projects.Id_Utils.To_String (Project.Project_Id),
+                        Scenario     => Scenarios.Id_Utils.To_String (Id),
+                        Action       => Actions.Id_Utils.To_String (SCM.Init.Id),
+                        Job_Id       => Job_Id,
+                        Endpoint     => Server_URL);
+                  end Notify_Start;
+
                   Execute
                     (Exec_Action   => Get_Action
                        (Project    => Project.all,
@@ -823,6 +840,22 @@ package body Savadur.Build is
                Return_Code : Integer;
                Result      : Boolean;
             begin
+               --  Notify the server that the action is starting
+
+               Notify_Start_Action : declare
+                  Server_URL : constant String :=
+                                 Servers.URL (Servers.Get (Server));
+               begin
+                  Client_Service.Client.Status_Start
+                    (Key          => Config.Client.Get_Key,
+                     Project_Name =>
+                       Projects.Id_Utils.To_String (Project.Project_Id),
+                     Scenario     => Scenarios.Id_Utils.To_String (Id),
+                     Action       => Actions.Id_Utils.To_String (Ref.Id),
+                     Job_Id       => Job_Id,
+                     Endpoint     => Server_URL);
+               end Notify_Start_Action;
+
                Execute (Exec_Action  => Exec_Action,
                         Directory    => Sources_Directory,
                         Log_Filename => Log_File,

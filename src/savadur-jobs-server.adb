@@ -96,6 +96,12 @@ package body Savadur.Jobs.Server is
                Key : constant String := Clients.Key (Client);
             begin
                Logs.Write ("Send job request to " & Key);
+
+               --  This is the action log. Scenario is in progress
+               Database.Log
+                 (Key, Projects.Id_Utils.To_String (Project.Project_Id),
+                  -Scenario, "Request", "", True, Generated_Job_Id);
+
                Server_Service.Client.Run
                  (Server_Name    => Clients.Server_Name (Client),
                   Scenario       => -Scenario,

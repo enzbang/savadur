@@ -85,6 +85,14 @@ package Savadur.Web_Services.Client is
    --  Status is called by the client to register status of each action in the
    --  given scenario.
 
+   procedure Status_Start
+     (Key          : in String;
+      Project_Name : in String;
+      Scenario     : in String;
+      Action       : in String;
+      Job_Id       : in Natural);
+   --  Status_Start is called by the client before running each action
+
    function Ping return String;
    --  Returns pong if server is alive
 

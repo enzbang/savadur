@@ -194,8 +194,9 @@ package body Savadur.Database is
       Connect (DBH);
 
       DBH.Handle.Prepare_Select
-        (Iter, "select log, project, scenario, status, date, action"
-           & " from logs where rowid = " & DB.Tools.I (Id));
+        (Iter, "select log, project, scenario, status, start_date,"
+         & " stop_date, duration, action"
+         & " from logs where rowid = " & DB.Tools.I (Id));
 
       if Iter.More then
          Iter.Get_Line (Line);
@@ -217,10 +218,16 @@ package body Savadur.Database is
                  ("STATUS", DB.String_Vectors.Element (Line, 4)));
             Templates.Insert
               (Set, Templates.Assoc
-                 ("DATE", DB.String_Vectors.Element (Line, 5)));
+                 ("START_DATE", DB.String_Vectors.Element (Line, 5)));
             Templates.Insert
               (Set, Templates.Assoc
-                 ("ACTION", DB.String_Vectors.Element (Line, 6)));
+                 ("STOP_DATE", DB.String_Vectors.Element (Line, 6)));
+            Templates.Insert
+              (Set, Templates.Assoc
+                 ("DURATION", DB.String_Vectors.Element (Line, 7)));
+            Templates.Insert
+              (Set, Templates.Assoc
+                 ("ACTION", DB.String_Vectors.Element (Line, 8)));
 
             Line.Clear;
             Iter.End_Select;
@@ -240,17 +247,19 @@ package body Savadur.Database is
      (Project_Name : in String) return Templates.Translate_Set
    is
       use type Templates.Tag;
-      DBH      : constant TLS_DBH_Access := TLS_DBH_Access (DBH_TLS.Reference);
-      Iter     : DB.SQLite.Iterator;
-      Line     : DB.String_Vectors.Vector;
-      Set      : Templates.Translate_Set;
-      Client   : Templates.Tag;
-      Scenario : Templates.Tag;
-      Action   : Templates.Tag;
-      Status   : Templates.Tag;
-      Date     : Templates.Tag;
-      Job_Id   : Templates.Tag;
-      Rowid    : Templates.Tag;
+      DBH        : constant TLS_DBH_Access := TLS_DBH_Access (DBH_TLS.Reference);
+      Iter       : DB.SQLite.Iterator;
+      Line       : DB.String_Vectors.Vector;
+      Set        : Templates.Translate_Set;
+      Client     : Templates.Tag;
+      Scenario   : Templates.Tag;
+      Action     : Templates.Tag;
+      Status     : Templates.Tag;
+      Start_Date : Templates.Tag;
+      Stop_Date  : Templates.Tag;
+      Duration   : Templates.Tag;
+      Job_Id     : Templates.Tag;
+      Rowid      : Templates.Tag;
 
       --  Remember last client and his scenarios
 
@@ -260,26 +269,30 @@ package body Savadur.Database is
 
       --  Temporay Tag for a client
 
-      Scenario_Client : Templates.Tag;
-      Status_Client   : Templates.Tag;
-      Date_Client     : Templates.Tag;
-      Action_Client   : Templates.Tag;
-      Rowid_Client    : Templates.Tag;
-      Job_Id_Client   : Templates.Tag;
+      Scenario_Client   : Templates.Tag;
+      Status_Client     : Templates.Tag;
+      Start_Date_Client : Templates.Tag;
+      Stop_Date_Client  : Templates.Tag;
+      Duration_Client   : Templates.Tag;
+      Action_Client     : Templates.Tag;
+      Rowid_Client      : Templates.Tag;
+      Job_Id_Client     : Templates.Tag;
 
       --  Temporay Tag for a job id
 
-      Rowid_Job_Id    : Templates.Tag;
-      Status_Job_Id   : Templates.Tag;
-      Date_Job_Id     : Templates.Tag;
-      Action_Job_Id   : Templates.Tag;
+      Rowid_Job_Id      : Templates.Tag;
+      Status_Job_Id     : Templates.Tag;
+      Start_Date_Job_Id : Templates.Tag;
+      Stop_Date_Job_Id  : Templates.Tag;
+      Duration_Job_Id   : Templates.Tag;
+      Action_Job_Id     : Templates.Tag;
 
    begin
       Connect (DBH);
 
       DBH.Handle.Prepare_Select
         (Iter, "select client, scenario, status, "
-           & "date, action, job_id, rowid from logs "
+           & "start_date, stop_date, duration, action, job_id, rowid from logs "
            & "where project = " & DB.Tools.Q (Project_Name)
            & " order by client ASC, rowid DESC");
 
@@ -297,30 +310,38 @@ package body Savadur.Database is
             --  Reset last Job_ID
             Last_Job_Id := 0;
 
-            Status_Client   := Status_Client   & Status_Job_Id;
-            Date_Client     := Date_Client     & Date_Job_Id;
-            Action_Client   := Action_Client   & Action_Job_Id;
-            Rowid_Client    := Rowid_Client    & Rowid_Job_Id;
+            Status_Client     := Status_Client     & Status_Job_Id;
+            Start_Date_Client := Start_Date_Client & Start_Date_Job_Id;
+            Stop_Date_Client  := Stop_Date_Client  & Stop_Date_Job_Id;
+            Duration_Client   := Duration_Client   & Duration_Job_Id;
+            Action_Client     := Action_Client     & Action_Job_Id;
+            Rowid_Client      := Rowid_Client      & Rowid_Job_Id;
 
             --  Clear temp tag
             Templates.Clear (Status_Job_Id);
-            Templates.Clear (Date_Job_Id);
+            Templates.Clear (Start_Date_Job_Id);
+            Templates.Clear (Stop_Date_Job_Id);
+            Templates.Clear (Duration_Job_Id);
             Templates.Clear (Action_Job_Id);
             Templates.Clear (Rowid_Job_Id);
 
             --  New client column
-            Client   := Client   & Last_Client;
-            Scenario := Scenario & Scenario_Client;
-            Status   := Status   & Status_Client;
-            Date     := Date     & Date_Client;
-            Action   := Action   & Action_Client;
-            Rowid    := Rowid    & Rowid_Client;
-            Job_Id   := Job_Id   & Job_Id_Client;
+            Client     := Client     & Last_Client;
+            Scenario   := Scenario   & Scenario_Client;
+            Status     := Status     & Status_Client;
+            Start_Date := Start_Date & Start_Date_Client;
+            Stop_Date  := Stop_Date  & Stop_Date_Client;
+            Duration   := Duration   & Duration_Client;
+            Action     := Action     & Action_Client;
+            Rowid      := Rowid      & Rowid_Client;
+            Job_Id     := Job_Id     & Job_Id_Client;
 
             --  Clear temp tag
             Templates.Clear (Scenario_Client);
             Templates.Clear (Status_Client);
-            Templates.Clear (Date_Client);
+            Templates.Clear (Start_Date_Client);
+            Templates.Clear (Stop_Date_Client);
+            Templates.Clear (Duration_Client);
             Templates.Clear (Action_Client);
             Templates.Clear (Rowid_Client);
             Templates.Clear (Job_Id_Client);
@@ -328,7 +349,7 @@ package body Savadur.Database is
 
          if Last_Job_Id /= 0
            and then Last_Job_Id /=
-             Natural'Value (DB.String_Vectors.Element (Line, 6))
+             Natural'Value (DB.String_Vectors.Element (Line, 8))
          then
             Job_Id_Client   := Job_Id_Client   & Last_Job_Id;
             Scenario_Client := Scenario_Client & Last_Scenario;
@@ -336,53 +357,66 @@ package body Savadur.Database is
             --  Reset last Job_ID
             Last_Job_Id := 0;
 
-            Status_Client := Status_Client & Status_Job_Id;
-            Date_Client   := Date_Client   & Date_Job_Id;
-            Action_Client := Action_Client & Action_Job_Id;
-            Rowid_Client  := Rowid_Client  & Rowid_Job_Id;
+            Status_Client     := Status_Client     & Status_Job_Id;
+            Start_Date_Client := Start_Date_Client & Start_Date_Job_Id;
+            Stop_Date_Client  := Stop_Date_Client  & Stop_Date_Job_Id;
+            Duration_Client   := Duration_Client   & Duration_Job_Id;
+            Action_Client     := Action_Client     & Action_Job_Id;
+            Rowid_Client      := Rowid_Client      & Rowid_Job_Id;
 
             --  Clear temp tag
             Templates.Clear (Status_Job_Id);
-            Templates.Clear (Date_Job_Id);
+            Templates.Clear (Start_Date_Job_Id);
+            Templates.Clear (Stop_Date_Job_Id);
+            Templates.Clear (Duration_Job_Id);
             Templates.Clear (Action_Job_Id);
             Templates.Clear (Rowid_Job_Id);
          end if;
 
-         Status_Job_Id   := Status_Job_Id &
-           DB.String_Vectors.Element (Line, 3);
-         Date_Job_Id     := Date_Job_Id &
-           DB.String_Vectors.Element (Line, 4);
-         Action_Job_Id   := Action_Job_Id &
-           DB.String_Vectors.Element (Line, 5);
-         Rowid_Job_Id    := Rowid_Job_Id &
-           DB.String_Vectors.Element (Line, 7);
+         Status_Job_Id     := Status_Job_Id
+           & DB.String_Vectors.Element (Line, 3);
+         Start_Date_Job_Id := Start_Date_Job_Id
+           & DB.String_Vectors.Element (Line, 4);
+         Stop_Date_Job_Id  := Stop_Date_Job_Id
+           & DB.String_Vectors.Element (Line, 5);
+         Duration_Job_Id := Duration_Job_Id
+           & DB.String_Vectors.Element (Line, 6);
+         Action_Job_Id     := Action_Job_Id
+           & DB.String_Vectors.Element (Line, 7);
+         Rowid_Job_Id      := Rowid_Job_Id
+           & DB.String_Vectors.Element (Line, 9);
 
-         Last_Client   := To_Unbounded_String
+         Last_Client       := To_Unbounded_String
            (DB.String_Vectors.Element (Line, 1));
-         Last_Scenario := To_Unbounded_String
+         Last_Scenario     := To_Unbounded_String
            (DB.String_Vectors.Element (Line, 2));
-         Last_Job_Id   := Natural'Value (DB.String_Vectors.Element (Line, 6));
+         Last_Job_Id       := Natural'Value
+           (DB.String_Vectors.Element (Line, 8));
 
          Line.Clear;
       end loop;
 
       if To_String (Last_Client) /= "" then
-         Job_Id_Client   := Job_Id_Client   & Last_Job_Id;
-         Scenario_Client := Scenario_Client & Last_Scenario;
-         Status_Client   := Status_Client   & Status_Job_Id;
-         Date_Client     := Date_Client     & Date_Job_Id;
-         Action_Client   := Action_Client   & Action_Job_Id;
-         Rowid_Client    := Rowid_Client    & Rowid_Job_Id;
+         Job_Id_Client     := Job_Id_Client     & Last_Job_Id;
+         Scenario_Client   := Scenario_Client   & Last_Scenario;
+         Status_Client     := Status_Client     & Status_Job_Id;
+         Start_Date_Client := Start_Date_Client & Start_Date_Job_Id;
+         Stop_Date_Client  := Stop_Date_Client  & Stop_Date_Job_Id;
+         Duration_Client   := Duration_Client   & Duration_Job_Id;
+         Action_Client     := Action_Client     & Action_Job_Id;
+         Rowid_Client      := Rowid_Client      & Rowid_Job_Id;
 
          --  New client column
 
-         Client   := Client   & Last_Client;
-         Scenario := Scenario & Scenario_Client;
-         Status   := Status   & Status_Client;
-         Date     := Date     & Date_Client;
-         Action   := Action   & Action_Client;
-         Rowid    := Rowid    & Rowid_Client;
-         Job_Id   := Job_Id   & Job_Id_Client;
+         Client     := Client     & Last_Client;
+         Scenario   := Scenario   & Scenario_Client;
+         Status     := Status     & Status_Client;
+         Start_Date := Start_Date & Start_Date_Client;
+         Stop_Date  := Stop_Date  & Stop_Date_Client;
+         Duration   := Duration   & Duration_Client;
+         Action     := Action     & Action_Client;
+         Rowid      := Rowid      & Rowid_Client;
+         Job_Id     := Job_Id     & Job_Id_Client;
       end if;
 
       Iter.End_Select;
@@ -390,7 +424,9 @@ package body Savadur.Database is
       Templates.Insert (Set, Templates.Assoc ("LOGS_CLIENT", Client));
       Templates.Insert (Set, Templates.Assoc ("LOGS_SCENARIO", Scenario));
       Templates.Insert (Set, Templates.Assoc ("LOGS_STATUS", Status));
-      Templates.Insert (Set, Templates.Assoc ("LOGS_DATE", Date));
+      Templates.Insert (Set, Templates.Assoc ("LOGS_START_DATE", Start_Date));
+      Templates.Insert (Set, Templates.Assoc ("LOGS_STOP_DATE", Stop_Date));
+      Templates.Insert (Set, Templates.Assoc ("LOGS_DURATION", Duration));
       Templates.Insert (Set, Templates.Assoc ("LOGS_ACTION", Action));
       Templates.Insert (Set, Templates.Assoc ("LOGS_ID", Rowid));
       Templates.Insert (Set, Templates.Assoc ("LOGS_JOB_ID", Job_Id));
@@ -448,12 +484,12 @@ package body Savadur.Database is
       use DB.Tools;
 
       DBH : constant TLS_DBH_Access := TLS_DBH_Access (DBH_TLS.Reference);
-      SQL : constant String := "insert into logs (project, client, scenario,"
-        & "action, log, status, job_id) values ("
-        & Q (Project_Name) & ", " & Q (Key)
-        & ", " & Q (Scenario) & ", " & Q (Action)
-        & ", " & Q (Output) & ", " & Q (Result)
-        & ", " & I (Job_Id) & ")";
+      SQL : constant String := "update logs set log = "
+        & Q (Output) & ", status = " & Q (Result)
+        & ", stop_date = datetime('now')"
+        & " where project = " & Q (Project_Name) & " and client = " & Q (Key)
+        & " and scenario = " & Q (Scenario) & " and action = " & Q (Action)
+        & " and job_id = " & I (Job_Id);
    begin
       Connect (DBH);
       DBH.Handle.Execute (SQL);
@@ -463,6 +499,35 @@ package body Savadur.Database is
                              Content => Exception_Message (E),
                              Kind    => Logs.Handler.Error);
    end Log;
+
+   ---------------
+   -- Log_Start --
+   ---------------
+
+   procedure Log_Start
+     (Key          : in String;
+      Project_Name : in String;
+      Scenario     : in String;
+      Action       : in String;
+      Job_Id       : in Natural)
+   is
+      use DB.Tools;
+
+      DBH : constant TLS_DBH_Access := TLS_DBH_Access (DBH_TLS.Reference);
+      SQL : constant String := "insert into logs (project, client, scenario,"
+        & "action, job_id) values ("
+        & Q (Project_Name) & ", " & Q (Key)
+        & ", " & Q (Scenario) & ", " & Q (Action)
+        & ", " & I (Job_Id) & ")";
+   begin
+      Connect (DBH);
+      DBH.Handle.Execute (SQL);
+   exception
+      when E : DB.DB_Error =>
+         Logs.Handler.Write (Name    => Module,
+                             Content => Exception_Message (E),
+                             Kind    => Logs.Handler.Error);
+   end Log_Start;
 
    -----------
    -- Login --

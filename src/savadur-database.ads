@@ -37,6 +37,14 @@ package Savadur.Database is
       Job_Id       : in Natural);
    --  Adds log to database
 
+   procedure Log_Start
+     (Key          : in String;
+      Project_Name : in String;
+      Scenario     : in String;
+      Action       : in String;
+      Job_Id       : in Natural);
+   --  Logs that action is started
+
    function Get_Logs
      (Project_Name : in String) return Templates.Translate_Set;
    --  Get logs

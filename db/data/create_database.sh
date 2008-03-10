@@ -37,8 +37,17 @@ create table logs (
 "log" longtext,
 "status" boolean,
 "job_id" integer,
-"date" date default current_timestamp
+"start_date" date default current_timestamp,
+"stop_date" date,
+"duration" integer default -1
 );
+
+create trigger set_action_duration after update on logs
+   begin
+      update logs set duration =
+       (julianday(new.stop_date)*86000 - julianday(new.start_date)*86000)
+       where rowid = new.rowid;
+   end;
 
 create table notify (
 "project" varchar(50) not null,
