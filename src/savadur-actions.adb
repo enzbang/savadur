@@ -45,12 +45,15 @@ package body Savadur.Actions is
    -----------
 
    function Image (Action : in Actions.Action) return String is
+      use type Config.Cmd.Output_Pattern;
       R : Unbounded_String;
    begin
-      R := R & To_String (Action.Id) & " => " & To_String (Action.Cmd.Cmd);
+      R := R & To_String (Action.Id) & " => "
+        & Config.Cmd.External_Command_Utils.To_String (Action.Cmd.Cmd);
 
-      if Action.Cmd.Output /= Actions.Output_Pattern_Utils.Nil then
-         R := R & " (" & To_String (Action.Cmd.Output) & ')';
+      if Action.Cmd.Output /= Config.Cmd.Output_Pattern_Utils.Nil then
+         R := R & " (" &
+           Config.Cmd.Output_Pattern_Utils.To_String (Action.Cmd.Output) & ')';
       end if;
 
       R := R & " " & " result type : "

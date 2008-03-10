@@ -23,6 +23,7 @@ with Ada.Strings.Unbounded;
 with Ada.Containers.Indefinite_Hashed_Sets;
 with Ada.Containers.Indefinite_Vectors;
 
+with Savadur.Config.Cmd;
 with Savadur.Utils;
 
 package Savadur.Actions is
@@ -35,26 +36,13 @@ package Savadur.Actions is
    type Id is new Unbounded_String;
    package Id_Utils is new Generic_Utils (Source => Id);
 
-   type External_Command is new Unbounded_String;
-   package External_Command_Utils is
-     new Generic_Utils (Source => External_Command);
-
-   type Output_Pattern is new Unbounded_String;
-   package Output_Pattern_Utils is
-     new Generic_Utils (Source => Output_Pattern);
-
-   type Command is record
-      Cmd    : External_Command;
-      Output : Output_Pattern;
-   end record;
-
    type Kind is (SCM, Default);
 
    type Result_Type is (Exit_Status, Value);
 
    type Action is record
       Id     : Actions.Id;
-      Cmd    : Command;
+      Cmd    : Config.Cmd.Command;
       Result : Result_Type := Exit_Status;
    end record;
 
@@ -122,24 +110,20 @@ package Savadur.Actions is
 
 private
 
-   Null_Command          : constant Command :=
-                             (External_Command_Utils.Nil,
-                              Output_Pattern_Utils.Nil);
+   Null_Action     : constant Action :=
+                       Action'(Id     => Id_Utils.Nil,
+                               Cmd    => Config.Cmd.Null_Command,
+                               Result => <>);
 
-   Null_Action           : constant Action :=
-                             Action'(Id     => Id_Utils.Nil,
-                                     Cmd    => Null_Command,
-                                     Result => <>);
+   End_Action      : constant Action :=
+                       Action'(Id     => Id_Utils.Value ("@ENDACTION@"),
+                               Cmd    => Config.Cmd.Null_Command,
+                               Result => <>);
 
-   End_Action            : constant Action :=
-                             Action'(Id     => Id_Utils.Value ("@ENDACTION@"),
-                                     Cmd    => Null_Command,
-                                     Result => <>);
-
-   Null_Ref_Action      : constant Ref_Action :=
-                            Ref_Action'(Id             => Id_Utils.Nil,
-                                        Action_Type    => <>,
-                                        Value          => <>,
-                                        Require_Change => <>,
-                                        On_Error       => <>);
+   Null_Ref_Action : constant Ref_Action :=
+                       Ref_Action'(Id             => Id_Utils.Nil,
+                                   Action_Type    => <>,
+                                   Value          => <>,
+                                   Require_Change => <>,
+                                   On_Error       => <>);
 end Savadur.Actions;

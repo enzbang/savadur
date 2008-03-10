@@ -33,6 +33,7 @@ with Input_Sources.File;
 with Unicode.CES;
 
 with Savadur.Actions;
+with Savadur.Config.Cmd;
 with Savadur.Logs;
 with Savadur.Scenarios;
 with Savadur.SCM;
@@ -210,8 +211,8 @@ package body Savadur.Config.Project is
             Handler.Ref_Action := Actions.Null_Ref_Action;
 
          when Cmd =>
-            Handler.Action.Cmd.Cmd :=
-              Actions.External_Command (Handler.Content_Value);
+            Config.Cmd.End_Element
+              (Handler.Action.Cmd, To_String (Handler.Content_Value));
 
          when Description =>
             Handler.Current_Project.Description :=
@@ -423,9 +424,6 @@ package body Savadur.Config.Project is
       Qname         : in     Unicode.CES.Byte_Sequence := "";
       Atts          : in     Sax.Attributes.Attributes'Class)
    is
-      pragma Unreferenced (Namespace_URI);
-      pragma Unreferenced (Qname);
-
       use Sax.Attributes;
 
       NV   : constant Node_Value := Get_Node_Value (Local_Name);
@@ -582,10 +580,9 @@ package body Savadur.Config.Project is
             when Regexp =>
                case NV is
                   when Cmd =>
-                     if Get_Value (Atts, Position) /= "" then
-                        Handler.Action.Cmd.Output :=
-                          Actions.Output_Pattern (+Get_Value (Atts, Position));
-                     end if;
+                     Config.Cmd.Start_Element
+                       (Handler.Action.Cmd,
+                        Namespace_URI, Local_Name, Qname, Atts);
 
                   when others => null;
                end case;

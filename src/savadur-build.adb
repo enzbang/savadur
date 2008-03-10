@@ -35,6 +35,7 @@ with Morzhol.OS;
 with Savadur.Build.Notification;
 with Savadur.Client_Service.Client;
 with Savadur.Config.Client;
+with Savadur.Config.Cmd;
 with Savadur.Config.Committers;
 with Savadur.Config.SCM;
 with Savadur.Logs;
@@ -53,7 +54,7 @@ package body Savadur.Build is
    use Savadur.Utils;
 
    procedure Get_Arguments
-     (Command         : in     Actions.Command;
+     (Command         : in     Config.Cmd.Command;
       Prog_Name       :    out Unbounded_String;
       Argument_String :    out OS_Lib.Argument_List_Access);
    --  Returns the programme name and the argument list
@@ -254,7 +255,7 @@ package body Savadur.Build is
 
       if not Result then
          Logs.Write
-           (Actions.External_Command_Utils.To_String
+           (Config.Cmd.External_Command_Utils.To_String
               (Exec_Action.Cmd.Cmd) & " failed");
       else
          Logs.Write (Content => "... success", Kind => Logs.Handler.Verbose);
@@ -279,8 +280,8 @@ package body Savadur.Build is
       Result       :    out Boolean)
    is
       use type Actions.Result_Type;
-      use type Actions.Output_Pattern;
-      use Actions.External_Command_Utils;
+      use type Config.Cmd.Output_Pattern;
+      use Config.Cmd.External_Command_Utils;
       use GNAT.OS_Lib;
 
       Exec_Path       : OS_Lib.String_Access;
@@ -290,13 +291,13 @@ package body Savadur.Build is
    begin
       Logs.Write
         (Content => "Execute: "
-         & Actions.External_Command_Utils.To_String (Exec_Action.Cmd.Cmd),
+         & Config.Cmd.External_Command_Utils.To_String (Exec_Action.Cmd.Cmd),
          Kind    => Logs.Handler.Verbose);
       Logs.Write
         (Content => "Log file: " & Log_Filename,
          Kind    => Logs.Handler.Very_Verbose);
 
-      if Exec_Action.Cmd.Output /= Actions.Output_Pattern_Utils.Nil then
+      if Exec_Action.Cmd.Output /= Config.Cmd.Output_Pattern_Utils.Nil then
          Output_Filename := Output_Filename & "-tmp";
       end if;
 
@@ -365,7 +366,7 @@ package body Savadur.Build is
                 Err_To_Out   => True);
       end if;
 
-      if Exec_Action.Cmd.Output /= Actions.Output_Pattern_Utils.Nil then
+      if Exec_Action.Cmd.Output /= Config.Cmd.Output_Pattern_Utils.Nil then
          --  We need to get the content of the log and match it against the
          --  regular expression.
          Parse_Content : declare
@@ -375,7 +376,7 @@ package body Savadur.Build is
                         Utils.Content (To_String (Output_Filename));
             Pattern : constant Regpat.Pattern_Matcher :=
                         Regpat.Compile
-                          (Actions.Output_Pattern_Utils.To_String
+                          (Config.Cmd.Output_Pattern_Utils.To_String
                              (Exec_Action.Cmd.Output));
             First   : Positive := Content'First;
             Result  : Unbounded_String;
@@ -421,8 +422,8 @@ package body Savadur.Build is
       if not Result then
          --  Command failed to execute, do not read the return code
          Logs.Write
-           (Content => "Can not execute "
-            & Actions.External_Command_Utils.To_String (Exec_Action.Cmd.Cmd),
+           (Content => "Can not execute " &
+             Config.Cmd.External_Command_Utils.To_String (Exec_Action.Cmd.Cmd),
             Kind    => Logs.Handler.Error);
       end if;
 
@@ -444,8 +445,8 @@ package body Savadur.Build is
 
       function Parse
         (Project : in Projects.Project_Config;
-         Cmd     : in Actions.External_Command)
-         return Actions.External_Command;
+         Cmd     : in Config.Cmd.External_Command)
+         return Config.Cmd.External_Command;
       --  Replaces strings beginning with $
       --  by the correponding entry in project <variable> section.
 
@@ -455,8 +456,8 @@ package body Savadur.Build is
 
       function Parse
         (Project : in Projects.Project_Config;
-         Cmd     : in Actions.External_Command)
-         return Actions.External_Command
+         Cmd     : in Config.Cmd.External_Command)
+         return Config.Cmd.External_Command
       is
 
          function Get_Value (Key : in String) return Variables.Variable;
@@ -523,7 +524,7 @@ package body Savadur.Build is
             Append (Result, Source (Start .. Source'Last));
          end if;
 
-         return Actions.External_Command (Result);
+         return Config.Cmd.External_Command (Result);
       exception
          when E : others =>
             Logs.Write
@@ -569,7 +570,7 @@ package body Savadur.Build is
    -------------------
 
    procedure Get_Arguments
-     (Command         : in     Actions.Command;
+     (Command         : in     Config.Cmd.Command;
       Prog_Name       :    out Unbounded_String;
       Argument_String :    out OS_Lib.Argument_List_Access)
    is
