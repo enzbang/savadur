@@ -48,9 +48,9 @@ private
       Result       :    out Boolean);
    --  Executes a command defined by Exec_Action.Cmd
    --  Before command execution, the string beginning with $ are replaced
-   --  by the correponding entry in project <variable> section
-   --  Success is set to True if the command is executed and its output
-   --  successfully written to the file. If Success is True, then Return_Code
+   --  by the correponding entry in project <variable> section.
+   --  Result is set to True if the command is executed and its output
+   --  successfully written to the file. If Result is True, then Return_Code
    --  will be set to the status code returned by the operating system.
    --  Otherwise, Return_Code is undefined.
 

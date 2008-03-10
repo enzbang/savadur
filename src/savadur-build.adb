@@ -415,8 +415,7 @@ package body Savadur.Build is
       end if;
 
       if not Result then
-         --  Command failed to execute
-         --  Do not read the return code
+         --  Command failed to execute, do not read the return code
          Logs.Write
            (Content => "Can not execute "
             & Actions.External_Command_Utils.To_String (Exec_Action.Cmd.Cmd),
@@ -900,7 +899,7 @@ package body Savadur.Build is
                         Status := True;
                         exit Run_Actions;
 
-                        when Actions.Error =>
+                     when Actions.Error =>
                         Project.Variables.Insert
                           (New_Item =>
                            Variables.Variable'
@@ -910,7 +909,7 @@ package body Savadur.Build is
                                 To_Unbounded_String (Ref.Id)));
                         exit Run_Actions;
 
-                        when Actions.Continue =>
+                     when Actions.Continue =>
                         null;
                   end case;
                end if;
