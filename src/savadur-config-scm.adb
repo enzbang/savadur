@@ -50,12 +50,10 @@ package body Savadur.Config.SCM is
    type XML_Schema is array (Node_Value) of XML_Attribute;
 
    Schema : constant XML_Schema := XML_Schema'
-     (SCM           => XML_Attribute'(Id => False, others => False),
-      Cmd           => XML_Attribute'(Regexp => True, others => False),
-      Action        => XML_Attribute'(Id     => True,
-                                      Result => True,
-                                      Regexp => False),
-      Name          => XML_Attribute'(Id     => True, others => False),
+     (SCM           => XML_Attribute'(Id            => False, others => False),
+      Cmd           => XML_Attribute'(Regexp        => True, others => False),
+      Action        => XML_Attribute'(Id | Result   => True, others => False),
+      Name          => XML_Attribute'(Id            => True, others => False),
       Files_Updated => XML_Attribute'(Regexp => True, others => False));
 
    function Get_Node_Value (S : in String) return Node_Value;
@@ -305,7 +303,8 @@ package body Savadur.Config.SCM is
                   when Name =>
                      Handler.SCM.Id :=
                        Savadur.SCM.Id_Utils.Value (Get_Value (Atts, J));
-                  when SCM | Cmd | Files_Updated => null;
+                  when SCM | Cmd | Files_Updated =>
+                     null;
                end case;
 
             when Result =>
@@ -314,7 +313,8 @@ package body Savadur.Config.SCM is
                      Handler.Action.Result :=
                        Actions.Result_Type'Value (Get_Value (Atts, J));
 
-                  when others => null;
+                  when others =>
+                     null;
                end case;
 
             when Regexp =>
@@ -328,7 +328,8 @@ package body Savadur.Config.SCM is
                      Handler.SCM.Files_Updated :=
                        To_Unbounded_String (Get_Value (Atts, J));
 
-                  when others => null;
+                  when others =>
+                     null;
                end case;
          end case;
       end loop;

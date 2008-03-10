@@ -477,7 +477,8 @@ package body Savadur.Config.Project is
                      Handler.Current_Project.Project_Id :=
                        Projects.Project_Id (+Get_Value (Atts, Position));
 
-                  when others => null;
+                  when others =>
+                     null;
                end case;
 
             when Value =>
@@ -493,7 +494,8 @@ package body Savadur.Config.Project is
                      end if;
                      Handler.Ref_Action.Value := +Get_Value (Atts, Position);
 
-                  when others => null;
+                  when others =>
+                     null;
                end case;
 
             when Result =>
@@ -516,7 +518,8 @@ package body Savadur.Config.Project is
                              & " value = " & Get_Value (Atts, Position);
                      end Get_Action_Result_Type;
 
-                  when others => null;
+                  when others =>
+                     null;
                end case;
 
             when Require_Change =>
@@ -539,7 +542,8 @@ package body Savadur.Config.Project is
                              & " value = " & Get_Value (Atts, Position);
                      end Get_Require_Change_Value;
 
-                  when others => null;
+                  when others =>
+                     null;
                end case;
 
             when On_Error =>
@@ -563,7 +567,8 @@ package body Savadur.Config.Project is
                              & " value = " & Get_Value (Atts, Position);
                      end Get_On_Error_Value;
 
-                  when others => null;
+                  when others =>
+                     null;
                end case;
 
             when Periodic =>
@@ -574,7 +579,8 @@ package body Savadur.Config.Project is
                           Savadur.Times.Create (Get_Value (Atts, Position));
                      end if;
 
-                  when others => null;
+                  when others =>
+                     null;
                end case;
 
             when Regexp =>
@@ -584,7 +590,8 @@ package body Savadur.Config.Project is
                        (Handler.Action.Cmd,
                         Namespace_URI, Local_Name, Qname, Atts);
 
-                  when others => null;
+                  when others =>
+                     null;
                end case;
 
          end case;
@@ -606,7 +613,9 @@ package body Savadur.Config.Project is
             if not Handler.Inside_Scenario then
                raise Config_Error with "SCM Action outside scenario";
             end if;
-         when others => null;
+
+         when others =>
+            null;
       end case;
 
       for J in 0 .. Get_Length (Atts) - 1 loop
