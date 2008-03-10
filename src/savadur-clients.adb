@@ -59,14 +59,16 @@ package body Savadur.Clients is
       P_Client : Sets.Cursor := Registered.First;
       Names    : Templates.Tag;
       Status   : Templates.Tag;
+      Running  : Templates.Tag;
       Set      : Templates.Translate_Set;
    begin
       while Sets.Has_Element (P_Client) loop
          Get_Status : declare
             Element : Client := Sets.Element (P_Client);
          begin
-            Names  := Names & Element.Key;
-            Status := Status & Client_Status'Image (Element.Status);
+            Names   := Names & Element.Key;
+            Status  := Status & Client_Status'Image (Element.Status);
+            Running := Running & Element.Running;
             Sets.Next (P_Client);
          end Get_Status;
       end loop;
@@ -76,6 +78,9 @@ package body Savadur.Clients is
 
       Templates.Insert
         (Set, Templates.Assoc ("CLIENTS_STATUS", Status));
+
+      Templates.Insert
+        (Set, Templates.Assoc ("CLIENTS_RUNNING", Running));
 
       return Set;
    end Clients_Set;

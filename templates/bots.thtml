@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+          "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>Savadur : Bots</title>
+
+    <meta name="description"
+          content="bots " />
+
+    <meta http-equiv="Content-Type"
+          content="text/html; charset=utf-8" />
+    <style type="text/css">
+      @import url("/css/style.css");
+    </style>
+  </head>
+  <body id="menu_page">
+    <h1>Bots</h1>
+
+    <div id="content">
+
+      @@IF@@ @_CLIENTS_NAME_@ = ""
+        <h2>No bots registered</h2>
+      @@ELSE@@
+        <table class="list">
+          <tr><th>Bot</th><th>Status</th><th>Running</th></tr>
+          @@TABLE@@
+          <tr>
+            <td>@_CLIENTS_NAME_@</td>
+            <td>@_CLIENTS_STATUS_@</td>
+            <td>@_CLIENTS_RUNNING_@</td>
+          </tr>
+          @@END_TABLE@@
+        </table>
+      @@END_IF@@
+    </div>
+  </body>
+</html>

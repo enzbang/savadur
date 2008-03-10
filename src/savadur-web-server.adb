@@ -79,6 +79,9 @@ package body Savadur.Web.Server is
    function Ping return Response.Data;
    --  Pings clients
 
+   function Show_Bots return Response.Data;
+   --  Shows all bots
+
    function Show_Log (Log_Id : in String) return Response.Data;
    --  Show the selected log content
 
@@ -90,10 +93,11 @@ package body Savadur.Web.Server is
    -------------------
 
    function HTTP_Callback (Request : in Status.Data) return Response.Data is
-      URI     : constant String := Status.URI (Request);
-      Log_URI : constant String := "/log/";
-      CSS_URI : constant String := "/css/";
-      Img_URI : constant String := "/img/";
+      URI      : constant String := Status.URI (Request);
+      Log_URI  : constant String := "/log/";
+      CSS_URI  : constant String := "/css/";
+      Img_URI  : constant String := "/img/";
+      Bots_URI : constant String := "/bots/";
    begin
       Logs.Write
         (Content => "Calling => " & URI,
@@ -133,6 +137,9 @@ package body Savadur.Web.Server is
         and then URI (URI'First .. URI'First + Log_URI'Length - 1) = Log_URI
       then
          return Show_Log (URI (URI'First + Log_URI'Length .. URI'Last));
+
+      elsif URI = Bots_URI then
+         return Show_Bots;
 
       elsif URI'Length > CSS_URI'Length
         and then URI (URI'First .. URI'First + CSS_URI'Length - 1) = CSS_URI
@@ -301,6 +308,23 @@ package body Savadur.Web.Server is
             "<p>Project " & Project_Name & " Not found</p>",
             Status_Code => Messages.S200);
    end Run;
+
+   ---------------
+   -- Show_Bots --
+   ---------------
+
+   function Show_Bots return Response.Data is
+   begin
+      return AWS.Response.Build
+        (Content_Type => MIME.Text_HTML,
+         Message_Body => AWS.Templates.Parse
+           (Filename     => Directories.Compose
+              (Containing_Directory =>
+                 Savadur.Config.Web_Templates_Directory,
+               Name                 => "bots",
+               Extension            => "thtml"),
+            Translations => Clients.Clients_Set));
+   end Show_Bots;
 
    ----------------
    --  Show_Log  --
