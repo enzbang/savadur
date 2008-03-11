@@ -108,7 +108,7 @@ package body Savadur.Config.Project is
    type Tree_Reader is new Sax.Readers.Reader with record
       Content_Value        : Unbounded_String;
       Var                  : Variables.Variable;
-      Action               : Actions.Action;
+      Action               : Actions.Action := Actions.Null_Action;
       Ref_Action           : Actions.Ref_Action;
       Scenario             : Scenarios.Scenario;
       Description          : Projects.Project_Description;
@@ -588,6 +588,8 @@ package body Savadur.Config.Project is
                   when Cmd =>
                      Config.Cmd.Start_Element
                        (Handler.Action.Cmd,
+                        Projects.Id_Utils.To_String
+                          (Handler.Current_Project.Project_Id),
                         Namespace_URI, Local_Name, Qname, Atts);
 
                   when others =>

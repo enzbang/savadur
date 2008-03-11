@@ -37,6 +37,7 @@ with Savadur.Client_Service.Client;
 with Savadur.Config.Client;
 with Savadur.Config.Cmd;
 with Savadur.Config.Committers;
+with Savadur.Config.Filters;
 with Savadur.Config.SCM;
 with Savadur.Logs;
 with Savadur.SCM;
@@ -281,6 +282,7 @@ package body Savadur.Build is
    is
       use type Actions.Result_Type;
       use type Config.Cmd.Output_Pattern;
+      use type Config.Filters.Filter_Id;
       use Config.Cmd.External_Command_Utils;
       use GNAT.OS_Lib;
 
@@ -366,38 +368,18 @@ package body Savadur.Build is
                 Err_To_Out   => True);
       end if;
 
+      --  First apply the main output filter
+
       if Exec_Action.Cmd.Output /= Config.Cmd.Output_Pattern_Utils.Nil then
          --  We need to get the content of the log and match it against the
          --  regular expression.
          Parse_Content : declare
-            use type Regpat.Match_Location;
-
-            Content : constant String :=
-                        Utils.Content (To_String (Output_Filename));
-            Pattern : constant Regpat.Pattern_Matcher :=
-                        Regpat.Compile
-                          (Config.Cmd.Output_Pattern_Utils.To_String
-                             (Exec_Action.Cmd.Output));
-            First   : Positive := Content'First;
-            Result  : Unbounded_String;
-            Matches : Regpat.Match_Array (0 .. 1);
+            Result : Unbounded_String;
          begin
-            Match_Content : while First <= Content'Last loop
-               Regpat.Match (Pattern, Content, Matches, Data_First => First);
-
-               exit Match_Content when Matches (0) = Regpat.No_Match
-                 or else Matches (1) = Regpat.No_Match;
-
-               --  Each result on a separate line
-
-               if Result /= Null_Unbounded_String then
-                  Append (Result, ASCII.LF);
-               end if;
-
-               Append
-                 (Result, Content (Matches (1).First .. Matches (1).Last));
-               First := Matches (1).Last + 1;
-            end loop Match_Content;
+            Result := Utils.Parse
+              (Utils.Content (To_String (Output_Filename)),
+               Config.Cmd.Output_Pattern_Utils.To_String
+                 (Exec_Action.Cmd.Output));
 
             if Result = Null_Unbounded_String then
                --  No match, just rename the output file
@@ -418,6 +400,33 @@ package body Savadur.Build is
             end if;
          end Parse_Content;
       end if;
+
+      --  Now apply all filters
+
+      for K in Exec_Action.Cmd.Filters'Range loop
+         if not
+           (Exec_Action.Cmd.Filters (K) = Config.Filters.Id_Utils.Nil)
+         then
+            declare
+               Content       : constant String :=
+                                 Utils.Content (To_String (Output_Filename));
+               Filter        : constant Config.Filters.Filter :=
+                                 Config.Filters.Get
+                                   (Exec_Action.Cmd.Filters (K));
+               Filter_Output : constant String :=
+                                 To_String (Output_Filename)
+                                   & "."
+                                   & Config.Filters.Simple_Name (Filter.Id);
+               Result        : Unbounded_String;
+            begin
+               Result := Utils.Parse
+                 (Content,
+                  Config.Filters.Pattern_Utils.To_String (Filter.Pattern));
+
+               Utils.Set_Content (Filter_Output, To_String (Result));
+            end;
+         end if;
+      end loop;
 
       if not Result then
          --  Command failed to execute, do not read the return code
@@ -847,56 +856,6 @@ package body Savadur.Build is
                                 Diff_Data   => Diff_Data'Access);
 
                Send_Status (Server, Ref.Id, Log_File);
-
-               --  Check update status
-
-               if Ref = SCM.Update
-                 and then Project_SCM.Files_Updated /= Null_Unbounded_String
-               then
-                  --  Compute the files changed
-                  Logs.Write
-                    ("Compute changed file for " &
-                     Actions.Id_Utils.To_String (Ref.Id),
-                     Kind => Logs.Handler.Very_Verbose);
-
-                  Parse_Output : declare
-                     use type Regpat.Match_Location;
-                     Content : constant String := Utils.Content (Log_File);
-                     Pattern : constant Regpat.Pattern_Matcher :=
-                                 Regpat.Compile
-                                   (To_String (Project_SCM.Files_Updated));
-                     First   : Positive := Content'First;
-                     Result  : Unbounded_String;
-                     Matches : Regpat.Match_Array (0 .. 1);
-                  begin
-                     while First <= Content'Last loop
-                        Regpat.Match
-                          (Pattern, Content, Matches,
-                           Data_First => First);
-
-                        exit when Matches (0) = Regpat.No_Match
-                          or else Matches (1) = Regpat.No_Match;
-
-                        --  Each result on a separate line
-
-                        if Result /= Null_Unbounded_String then
-                           Append (Result, ASCII.LF);
-                        end if;
-
-                        Append
-                          (Result,
-                           Content (Matches (1).First .. Matches (1).Last));
-                        First := Matches (1).Last + 1;
-                     end loop;
-
-                     Utils.Set_Content
-                       (Filename => Log_Filename
-                          (Project,
-                           Actions.Id_Utils.Value ("files_updated"),
-                           Job_Id),
-                        Content  => To_String (Result));
-                  end Parse_Output;
-               end if;
 
                if not Status then
                   case Ref.On_Error is

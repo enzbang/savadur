@@ -25,9 +25,4 @@ package Utils is
    --  Strip the given string removing line feed, carriage return, duplicated
    --  whitespaces.
 
-   function Parse
-     (Content, Regexp : in String; N : in Positive := 1) return String;
-   --  Parse content using regexp and returns the result which is the
-   --  catenation of all Nth matches.
-
 end Utils;

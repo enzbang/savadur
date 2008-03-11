@@ -26,21 +26,56 @@ package body Savadur.Config.Cmd is
    use Ada.Characters.Handling;
    use Sax.Attributes;
 
+   type Attribute is (Regexp, Filter1, Filter2);
+
+   function Get_Attribute (S : in String) return Attribute;
+   --  Returns the attribute value matching the given string or raise
+   --  Config_Error.
+
+   -------------------
+   -- Get_Attribute --
+   -------------------
+
+   function Get_Attribute (S : in String) return Attribute is
+      Upper_S : constant String := Ada.Characters.Handling.To_Upper (S);
+   begin
+      for SA in Attribute'Range loop
+         if Attribute'Image (SA) = Upper_S then
+            return SA;
+         end if;
+      end loop;
+
+      raise Config_Error with "(Cmd) Unknown attribute " & S;
+   end Get_Attribute;
+
+   -------------------
+   -- Start_Element --
+   -------------------
+
    procedure Start_Element
      (Command       : in out Cmd.Command;
+      Prefix        : in     String;
       Namespace_URI : in     Unicode.CES.Byte_Sequence := "";
       Local_Name    : in     Unicode.CES.Byte_Sequence := "";
       Qname         : in     Unicode.CES.Byte_Sequence := "";
-      Atts          : in     Sax.Attributes.Attributes'Class)
-   is
+      Atts          : in     Sax.Attributes.Attributes'Class) is
    begin
       for J in 0 .. Get_Length (Atts) - 1 loop
          Handle_Attribute : declare
-            A : constant String := To_Lower (Get_Qname (Atts, J));
-            V : constant String := Get_Value (Atts, J);
+            Att : constant Attribute := Get_Attribute (Get_Qname (Atts, J));
+            Val : constant String := Get_Value (Atts, J);
          begin
-            if A = "regexp" and then V /= "" then
-               Command.Output := Output_Pattern_Utils.Value (V);
+            if Val /= "" then
+               case Att is
+                  when Regexp =>
+                     Command.Output := Output_Pattern_Utils.Value (Val);
+
+                  when Filter1 =>
+                     Command.Filters (1) := Filters.Get_Id (Prefix, Val);
+
+                  when Filter2 =>
+                     Command.Filters (2) := Filters.Get_Id (Prefix, Val);
+               end case;
             end if;
          end Handle_Attribute;
       end loop;

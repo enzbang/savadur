@@ -32,6 +32,7 @@ with Unicode.CES;
 
 with Savadur.Actions;
 with Savadur.Config.Cmd;
+with Savadur.Config.Filters;
 with Savadur.Logs;
 with Savadur.Utils;
 
@@ -41,9 +42,9 @@ package body Savadur.Config.SCM is
    use Ada.Strings.Unbounded;
    use Savadur.Utils;
 
-   type Node_Value is (SCM, Name, Files_Updated, Action, Cmd);
+   type Node_Value is (SCM, Name, Action, Cmd, Filter);
 
-   type Attribute is (Id, Result, Regexp);
+   type Attribute is (Id, Result);
 
    type XML_Attribute is array (Attribute) of Boolean;
 
@@ -51,10 +52,10 @@ package body Savadur.Config.SCM is
 
    Schema : constant XML_Schema := XML_Schema'
      (SCM           => XML_Attribute'(Id            => False, others => False),
-      Cmd           => XML_Attribute'(Regexp        => True, others => False),
+      Cmd           => XML_Attribute'(others => False),
       Action        => XML_Attribute'(Id | Result   => True, others => False),
       Name          => XML_Attribute'(Id            => True, others => False),
-      Files_Updated => XML_Attribute'(Regexp => True, others => False));
+      Filter        => XML_Attribute'(others => False));
 
    function Get_Node_Value (S : in String) return Node_Value;
    --  Returns the node value matching the given string or raise Config_Error
@@ -125,7 +126,7 @@ package body Savadur.Config.SCM is
             Config.Cmd.End_Element
               (Handler.Action.Cmd, To_String (Handler.Content_Value));
 
-         when SCM | Name | Files_Updated =>
+         when SCM | Name | Filter =>
             null;
       end case;
 
@@ -162,7 +163,7 @@ package body Savadur.Config.SCM is
          end if;
       end loop;
 
-      raise Config_Error with "Unknown node " & S;
+      raise Config_Error with "(SCM) Unknown attribute " & S;
    end Get_Attribute;
 
    --------------------
@@ -178,7 +179,7 @@ package body Savadur.Config.SCM is
          end if;
       end loop;
 
-      raise Config_Error with "Unknown node " & S;
+      raise Config_Error with "(SCM) Unknown node " & S;
    end Get_Node_Value;
 
    --------------------
@@ -191,10 +192,9 @@ package body Savadur.Config.SCM is
    begin
       Reader.SCM :=
         Savadur.SCM.SCM'
-          (Id            => Savadur.SCM.Id_Utils.Nil,
-           Actions       => Actions.Sets.Empty_Set,
-           Files_Updated => Null_Unbounded_String,
-           Filename      => +Filename);
+          (Id       => Savadur.SCM.Id_Utils.Nil,
+           Actions  => Actions.Sets.Empty_Set,
+           Filename => +Filename);
 
       Input_Sources.File.Open
         (Filename => Filename,
@@ -287,52 +287,52 @@ package body Savadur.Config.SCM is
       Attr : Attribute;
 
    begin
-      for J in 0 .. Get_Length (Atts) - 1 loop
-         Attr := Get_Attribute (Get_Qname (Atts, J));
-         if not Schema (NV) (Attr) then
-            raise Config_Error with "Unknow attribute "
-              & Node_Value'Image (NV) & "." & Get_Qname (Atts, J);
-         end if;
+      case NV is
+         when Filter =>
+            Filters.Start_Element
+              (Savadur.SCM.Id_Utils.To_String (Handler.SCM.Id),
+               Namespace_URI, Local_Name, Qname, Atts);
 
-         case Attr is
-            when Id =>
-               case NV is
-                  when Action =>
-                     Handler.Action.Id :=
-                       Actions.Id_Utils.Value (Get_Value (Atts, J));
-                  when Name =>
-                     Handler.SCM.Id :=
-                       Savadur.SCM.Id_Utils.Value (Get_Value (Atts, J));
-                  when SCM | Cmd | Files_Updated =>
-                     null;
+         when Cmd =>
+            Config.Cmd.Start_Element
+              (Handler.Action.Cmd,
+               Savadur.SCM.Id_Utils.To_String (Handler.SCM.Id),
+               Namespace_URI, Local_Name, Qname, Atts);
+
+         when others =>
+            for J in 0 .. Get_Length (Atts) - 1 loop
+               Attr := Get_Attribute (Get_Qname (Atts, J));
+
+               if not Schema (NV) (Attr) then
+                  raise Config_Error with "Unknow attribute "
+                    & Node_Value'Image (NV) & "." & Get_Qname (Atts, J);
+               end if;
+
+               case Attr is
+                  when Id =>
+                     case NV is
+                        when Action =>
+                           Handler.Action.Id :=
+                             Actions.Id_Utils.Value (Get_Value (Atts, J));
+                        when Name =>
+                           Handler.SCM.Id :=
+                             Savadur.SCM.Id_Utils.Value (Get_Value (Atts, J));
+                        when SCM | Cmd | Filter =>
+                           null;
+                     end case;
+
+                  when Result =>
+                     case NV is
+                        when Action =>
+                           Handler.Action.Result :=
+                             Actions.Result_Type'Value (Get_Value (Atts, J));
+
+                        when Name | SCM | Cmd | Filter =>
+                           null;
+                     end case;
                end case;
-
-            when Result =>
-               case NV is
-                  when Action =>
-                     Handler.Action.Result :=
-                       Actions.Result_Type'Value (Get_Value (Atts, J));
-
-                  when others =>
-                     null;
-               end case;
-
-            when Regexp =>
-               case NV is
-                  when Cmd =>
-                     Config.Cmd.Start_Element
-                       (Handler.Action.Cmd,
-                        Namespace_URI, Local_Name, Qname, Atts);
-
-                  when Files_Updated =>
-                     Handler.SCM.Files_Updated :=
-                       To_Unbounded_String (Get_Value (Atts, J));
-
-                  when others =>
-                     null;
-               end case;
-         end case;
-      end loop;
+            end loop;
+      end case;
    end Start_Element;
 
 end Savadur.Config.SCM;

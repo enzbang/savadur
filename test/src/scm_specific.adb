@@ -21,11 +21,11 @@
 
 with Ada.Strings.Unbounded;
 
+with Savadur.Actions;
+with Savadur.Config.Filters;
 with Savadur.Config.SCM;
 with Savadur.SCM;
 with Savadur.Utils;
-
-with Utils;
 
 package body SCM_Specific is
 
@@ -48,17 +48,23 @@ package body SCM_Specific is
       pragma Unreferenced (T);
 
       SCM     : constant Savadur.SCM.SCM := Savadur.Config.SCM.Get ("git");
+      Action  : constant Savadur.Actions.Action :=
+                  Savadur.Actions.Keys.Element
+                    (SCM.Actions, Savadur.Actions.Id_Utils.Value ("update"));
       Content : constant String :=
                   Savadur.Utils.Content ("data/git-pull");
-      Result  : constant String :=
-                  Utils.Parse (Content, To_String (SCM.Files_Updated));
+      Filter  : constant Config.Filters.Filter :=
+                  Config.Filters.Get (Action.Cmd.Filters (1));
+      Pattern : constant String :=
+                  Config.Filters.Pattern_Utils.To_String (Filter.Pattern);
+      Result  : constant String := To_String (Utils.Parse (Content, Pattern));
    begin
       Assertions.Assert
         (Result =
            "git-svnci" & ASCII.LF &
            "git-svnup",
          "Wrong SCM files_updated for git: regexp:'"
-         & To_String (SCM.Files_Updated) & "' -> '" & Result & ''');
+         & Pattern & "' -> '" & Result & ''');
    end Check_Git;
 
    ---------------
@@ -72,10 +78,16 @@ package body SCM_Specific is
 
       SCM     : constant Savadur.SCM.SCM :=
                   Savadur.Config.SCM.Get ("subversion");
+      Action  : constant Savadur.Actions.Action :=
+                  Savadur.Actions.Keys.Element
+                    (SCM.Actions, Savadur.Actions.Id_Utils.Value ("update"));
       Content : constant String :=
                   Savadur.Utils.Content ("data/svn-update");
-      Result  : constant String :=
-                  Utils.Parse (Content, To_String (SCM.Files_Updated));
+      Filter  : constant Config.Filters.Filter :=
+                  Config.Filters.Get (Action.Cmd.Filters (1));
+      Pattern : constant String :=
+                  Config.Filters.Pattern_Utils.To_String (Filter.Pattern);
+      Result  : constant String := To_String (Utils.Parse (Content, Pattern));
    begin
       Assertions.Assert
         (Result =
@@ -100,7 +112,7 @@ package body SCM_Specific is
          "sources/obj" & ASCII.LF &
          "sources/makefile",
          "Wrong SCM files_updated for subversion: regexp:'"
-         & To_String (SCM.Files_Updated) & "' -> '" & Result & ''');
+         & Pattern & "' -> '" & Result & ''');
    end Check_SVN;
 
    ----------

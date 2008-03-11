@@ -20,14 +20,14 @@
 
 <scm>
   <name id="subversion" />
-  <files_updated regexp="[AU]    ([^\n]+)"/>
+  <filter id="files_updated" regexp="[GAU]    ([^\n]+)"/>
 
   <action id="init">
     <cmd>svn checkout $url $sources</cmd>
   </action>
 
   <action id="update">
-    <cmd>svn update</cmd>
+    <cmd filter1="files_updated">svn update</cmd>
   </action>
 
   <action id="version" result="value">

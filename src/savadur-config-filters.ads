@@ -24,51 +24,52 @@ with Ada.Strings.Unbounded;
 with Sax.Attributes;
 with Unicode.CES;
 
-with Savadur.Config.Filters;
 with Savadur.Utils;
 
-package Savadur.Config.Cmd is
+package Savadur.Config.Filters is
 
    use Ada;
    use Ada.Strings.Unbounded;
    use Savadur.Utils;
 
-   type External_Command is new Unbounded_String;
-   package External_Command_Utils is
-     new Generic_Utils (Source => External_Command);
+   type Filter_Id is new Unbounded_String;
 
-   type Output_Pattern is new Unbounded_String;
-   package Output_Pattern_Utils is
-     new Generic_Utils (Source => Output_Pattern);
+   type Set is array (1 .. 2) of Filter_Id;
 
-   type Command is record
-      Cmd     : External_Command;
-      Output  : Output_Pattern;
-      Filters : Config.Filters.Set;
+   package Id_Utils is new Generic_Utils (Source => Filter_Id);
+
+   type Pattern is new Unbounded_String;
+
+   package Pattern_Utils is new Generic_Utils (Source => Pattern);
+
+   type Filter is record
+      Id      : Filter_Id;
+      Pattern : Filters.Pattern;
    end record;
 
-   Null_Command : constant Command;
+   Null_Filter : constant Filter;
+
+   function Get (Id : in Filter_Id) return Filter;
+   --  Returns the filter with the given Id
 
    procedure Start_Element
-     (Command       : in out Cmd.Command;
-      Prefix        : in     String;
-      Namespace_URI : in     Unicode.CES.Byte_Sequence := "";
-      Local_Name    : in     Unicode.CES.Byte_Sequence := "";
-      Qname         : in     Unicode.CES.Byte_Sequence := "";
-      Atts          : in     Sax.Attributes.Attributes'Class);
-   --  Parse a cmd node and set Command accordingly. This is expected
-   --  to be called from the Start_Element Sax callback.
+     (Prefix        : in String;
+      Namespace_URI : in Unicode.CES.Byte_Sequence := "";
+      Local_Name    : in Unicode.CES.Byte_Sequence := "";
+      Qname         : in Unicode.CES.Byte_Sequence := "";
+      Atts          : in Sax.Attributes.Attributes'Class);
+   --  Parse a filter node and insert it into the filters set. The filter id is
+   --  prefixed by the given prefix. This makes it possible to have filters
+   --  defined in multiple XML document (project, SCM) with the same name.
 
-   procedure End_Element
-     (Command : in out Cmd.Command;
-      Content : in     String);
-   --  Expected to be called inside the End_Element Sax callback. Content is
-   --  the value of the tag (i.e. value between the opening and closing tag).
+   function Get_Id (Prefix, Id : in String) return Filter_Id;
+   --  Returns the Filter_Id for the given filter id and the prefix
+
+   function Simple_Name (Id : in Filter_Id) return String;
+   --  Returns Id simple name, this is the Id without the leading prefix
 
 private
 
-   Null_Command : constant Command :=
-                    (External_Command_Utils.Nil, Output_Pattern_Utils.Nil,
-                     Filters => (others => Filters.Id_Utils.Nil));
+   Null_Filter : constant Filter := (Id_Utils.Nil, Pattern_Utils.Nil);
 
-end Savadur.Config.Cmd;
+end Savadur.Config.Filters;

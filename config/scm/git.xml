@@ -20,18 +20,14 @@
 
 <scm>
   <name id="git" />
-  <files_updated regexp=" ([^\n]*) \|  "/>
+  <filter id="files_updated" regexp=" ([^\n]*) \|  "/>
 
   <action id="init">
     <cmd>git-clone $url $sources</cmd>
   </action>
 
   <action id="update">
-    <cmd>git-pull</cmd>
-  </action>
-
-  <action id="pull">
-    <cmd>git-pull</cmd>
+    <cmd filter1="files_updated">git-pull</cmd>
   </action>
 
   <action id="version" result="value">
