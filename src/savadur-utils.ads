@@ -68,4 +68,10 @@ package Savadur.Utils is
    procedure Set_Content (Filename, Content : in String);
    --  Sets the content of the given file
 
+   function Parse
+     (Content, Regexp : in String; N : in Positive := 1)
+      return Unbounded_String;
+   --  Parse content using regexp and returns the result which is the
+   --  catenation of all Nth matches.
+
 end Savadur.Utils;

@@ -22,12 +22,15 @@
 with Ada.Characters.Handling;
 with Ada.Streams.Stream_IO;
 
+with GNAT.Regpat;
+
 with AWS.Translator;
 
 package body Savadur.Utils is
 
    use Ada.Streams;
    use AWS;
+   use GNAT;
 
    -------------
    -- Content --
@@ -115,6 +118,39 @@ package body Savadur.Utils is
       end Value;
 
    end Generic_Utils;
+
+   -----------
+   -- Parse --
+   -----------
+
+   function Parse
+     (Content, Regexp : in String; N : in Positive := 1)
+      return Unbounded_String
+   is
+      use type Regpat.Match_Location;
+      Pattern : constant Regpat.Pattern_Matcher := Regpat.Compile (Regexp);
+      First   : Positive := Content'First;
+      Result  : Unbounded_String;
+      Matches : Regpat.Match_Array (0 .. N);
+   begin
+      while First <= Content'Last loop
+         Regpat.Match (Pattern, Content, Matches, Data_First => First);
+
+         exit when Matches (0) = Regpat.No_Match
+           or else Matches (N) = Regpat.No_Match;
+
+         --  Each result on a separate line
+
+         if Result /= Null_Unbounded_String then
+            Append (Result, ASCII.LF);
+         end if;
+
+         Append (Result, Content (Matches (N).First .. Matches (N).Last));
+         First := Matches (1).Last + 1;
+      end loop;
+
+      return Result;
+   end Parse;
 
    -----------------
    -- Set_Content --
