@@ -50,7 +50,7 @@ package body SCM_Specific is
       SCM     : constant Savadur.SCM.SCM := Savadur.Config.SCM.Get ("git");
       Action  : constant Savadur.Actions.Action :=
                   Savadur.Actions.Keys.Element
-                    (SCM.Actions, Savadur.Actions.Id_Utils.Value ("update"));
+                    (SCM.Actions, Savadur.Actions.Id_Utils.Value ("pull"));
       Content : constant String :=
                   Savadur.Utils.Content ("data/git-pull");
       Filter  : constant Config.Filters.Filter :=

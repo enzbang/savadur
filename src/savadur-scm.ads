@@ -37,12 +37,6 @@ package Savadur.SCM is
    Init         : constant Actions.Ref_Action;
    --  Mandatory, needed to initialize the repository
 
-   Update       : constant Actions.Ref_Action;
-   --  Optional, if present it is the action that get modification from the
-   --  repository. The output of this action can be parsed to get the list of
-   --  files involved. The parsing is done by the specific regular expression
-   --  defined by the file_regexp node.
-
    Committers_1 : constant Actions.Ref_Action;
    Committers_N : constant Actions.Ref_Action;
    --  Optionals, used to get the committers list (blame list) for a single
@@ -96,13 +90,6 @@ private
    Init     : constant Actions.Ref_Action :=
                 Actions.Ref_Action'(Action_Type    => Actions.SCM,
                                     Id             => Actions.Id (+"init"),
-                                    Value          => <>,
-                                    Require_Change => <>,
-                                    On_Error       => <>);
-
-   Update       : constant Actions.Ref_Action :=
-                Actions.Ref_Action'(Action_Type    => Actions.SCM,
-                                    Id             => Actions.Id (+"update"),
                                     Value          => <>,
                                     Require_Change => <>,
                                     On_Error       => <>);

@@ -160,7 +160,7 @@ check_file $SCS style_checker$EXEEXT
 check_file $SCL 1-init
 check_file $SCL 1-make
 check_file $SCL 1-regtests
-check_file $SCL 1-update
+check_file $SCL 1-pull
 check_file $SCL 1-version
 
 versize=$(wc -w $SCL/1-version | cut -c1)
@@ -184,9 +184,9 @@ check_file $NPS main.ali
 check_file $NPS main$EXEEXT
 check_file $NPL 3-version
 check_file $NPL 4-version
-check_file $NPL 4-update.files_updated
+check_file $NPL 4-pull.files_updated
 
-filesu=$(cat $NPL/3-update.files_updated)
+filesu=$(cat $NPL/3-pull.files_updated)
 
 if [ "$filesu" == "" ]; then
     echo OK: files_updated is empty
@@ -194,7 +194,7 @@ else
     echo OK: files_updated is wrong, should be empty
 fi;
 
-filesu=$(cat $NPL/4-update.files_updated)
+filesu=$(cat $NPL/4-pull.files_updated)
 
 if [ "$filesu" == "main.adb" ]; then
     echo OK: files_updated is $filesu;
@@ -207,7 +207,7 @@ echo === Check log directory $TL
 check_file $TL 1-machine-init
 check_file $TL 1-machine-make
 check_file $TL 1-machine-regtests
-check_file $TL 1-machine-update
+check_file $TL 1-machine-pull
 check_file $TL 1-machine-version
 
 check_file $TL 2-machine-init
@@ -219,12 +219,12 @@ check_file $TL 2-machine-version
 check_file $TL 3-machine-init
 check_file $TL 3-machine-make
 check_file $TL 3-machine-regtests
-check_file $TL 3-machine-update
+check_file $TL 3-machine-pull
 check_file $TL 3-machine-version
 
 check_file $TL 4-machine-make
 check_file $TL 4-machine-regtests
-check_file $TL 4-machine-update
+check_file $TL 4-machine-pull
 check_file $TL 4-machine-version
 
 echo ""
