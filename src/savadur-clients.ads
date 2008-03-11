@@ -92,12 +92,12 @@ private
    end record;
 
    Empty_Client : constant Client :=
-     (Key               => <>,
-      Metadata          => <>,
-      Status            => Offline,
-      Running           => <>,
-      Server_Name       => <>,
-      Callback_Endpoint => <>);
+                    Client'(Key               => <>,
+                            Metadata          => <>,
+                            Status            => Offline,
+                            Running           => <>,
+                            Server_Name       => <>,
+                            Callback_Endpoint => <>);
 
    function Hash (Client : in Clients.Client) return Containers.Hash_Type;
    --  Renames Strings.Hash

@@ -92,7 +92,7 @@ package body Savadur.Jobs.Server is
          if Clients.Has_Element (Client)
            and then Clients.Status (Client) /= Clients.Offline
          then
-            declare
+            Request_Client : declare
                Key : constant String := Clients.Key (Client);
             begin
                Logs.Write ("Send job request to " & Key);
@@ -112,7 +112,7 @@ package body Savadur.Jobs.Server is
 
                   Database.Logout (Key);
                   Clients.Set_Status (Key, Clients.Offline);
-            end;
+            end Request_Client;
 
          else
             Logs.Write

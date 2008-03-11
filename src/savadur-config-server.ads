@@ -21,6 +21,8 @@
 
 package Savadur.Config.Server is
 
+   Config_Error : Exception renames Config.Config_Error;
+
    procedure Parse;
    --  Fills the server configuration map
 

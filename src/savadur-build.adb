@@ -178,7 +178,7 @@ package body Savadur.Build is
          --  update. Call the special SCM action committers_list to get all
          --  committers for those specific modifications.
 
-         declare
+         Set_Versions_Var : declare
             Vars   : Variables.Sets.Set;
             Action : Actions.Action;
          begin
@@ -188,7 +188,9 @@ package body Savadur.Build is
                  (Variables.Variable'
                     (Variables.Name_Utils.Value ("v1"),
                      Diff_Data.V2));
-               Action := Get_Action (Project.all, SCM.Committers_1, Vars);
+               Action := Get_Action (Project    => Project.all,
+                                     Ref_Action => SCM.Committers_1,
+                                     Vars       => Vars);
 
             else
                Vars.Insert
@@ -199,10 +201,12 @@ package body Savadur.Build is
                  (Variables.Variable'
                     (Variables.Name_Utils.Value ("v2"),
                      Diff_Data.V2));
-               Action := Get_Action (Project.all, SCM.Committers_N, Vars);
+               Action := Get_Action (Project    => Project.all,
+                                     Ref_Action => SCM.Committers_N,
+                                     Vars       => Vars);
             end if;
 
-            declare
+            Get_Committers : declare
                Sources_Directory : constant String :=
                                      Projects.Project_Sources_Directory
                                        (Project);
@@ -244,8 +248,8 @@ package body Savadur.Build is
                Diff_Data.Committers :=
                  Web_Services.Client.Name_Set_Safe_Pointer.To_Safe_Pointer
                    (Committers (1 .. K));
-            end;
-         end;
+            end Get_Committers;
+         end Set_Versions_Var;
       end if;
 
       if not Result then
@@ -377,10 +381,10 @@ package body Savadur.Build is
             Result  : Unbounded_String;
             Matches : Regpat.Match_Array (0 .. 1);
          begin
-            while First <= Content'Last loop
+            Match_Content : while First <= Content'Last loop
                Regpat.Match (Pattern, Content, Matches, Data_First => First);
 
-               exit when Matches (0) = Regpat.No_Match
+               exit Match_Content when Matches (0) = Regpat.No_Match
                  or else Matches (1) = Regpat.No_Match;
 
                --  Each result on a separate line
@@ -392,7 +396,7 @@ package body Savadur.Build is
                Append
                  (Result, Content (Matches (1).First .. Matches (1).Last));
                First := Matches (1).Last + 1;
-            end loop;
+            end loop Match_Content;
 
             if Result = Null_Unbounded_String then
                --  No match, just rename the output file

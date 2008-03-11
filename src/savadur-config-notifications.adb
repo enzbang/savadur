@@ -125,10 +125,10 @@ package body Savadur.Config.Notifications is
    end record;
 
    SMTP_Config : SMTP_Config_Data :=
-                   (+"localhost",
-                    Null_Unbounded_String,
-                    Null_Unbounded_String,
-                    Null_Unbounded_String);
+                   SMTP_Config_Data'(+"localhost",
+                                     Null_Unbounded_String,
+                                     Null_Unbounded_String,
+                                     Null_Unbounded_String);
    --  Default using localhost as mail server
 
    package body SMTP is

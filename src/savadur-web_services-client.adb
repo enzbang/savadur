@@ -62,7 +62,8 @@ package body Savadur.Web_Services.Client is
    function "<" (R1, R2 : in Report_Data) return Boolean;
    --  Returns True if R1 has been created before R2
 
-   package Report_Set is new Containers.Ordered_Sets (Report_Data);
+   package Report_Set is
+     new Containers.Ordered_Sets (Element_Type => Report_Data);
 
    protected Report_Handler is
 
@@ -106,7 +107,7 @@ package body Savadur.Web_Services.Client is
       if Projects.Sets.Keys.Contains
         (Config.Project.Configurations, Project_Name)
       then
-         declare
+         Load_Signed_File : declare
             Proj             : aliased Projects.Project_Config :=
                                  Config.Project.Get (Project_Name);
             Project_Filename : constant String :=
@@ -129,7 +130,7 @@ package body Savadur.Web_Services.Client is
                  (Filename => +Directories.Simple_Name (Project_Filename),
                   Content  => +Utils.Content (Project_Filename));
             end if;
-         end;
+         end Load_Signed_File;
 
       else
          Logs.Write ("   project not found!");
@@ -155,7 +156,7 @@ package body Savadur.Web_Services.Client is
       if SCM.Keys.Contains
         (Config.SCM.Configurations, Value (SCM_Name))
       then
-         declare
+         Load_Signed_File : declare
             S            : aliased constant SCM.SCM :=
                              Config.SCM.Get (SCM_Name);
             SCM_Filename : constant String := -S.Filename;
@@ -175,7 +176,7 @@ package body Savadur.Web_Services.Client is
                  (Filename => +Directories.Simple_Name (SCM_Filename),
                   Content  => +Utils.Content (SCM_Filename));
             end if;
-         end;
+         end Load_Signed_File;
 
       else
          Logs.Write ("   SCM not found!");
@@ -204,8 +205,8 @@ package body Savadur.Web_Services.Client is
    begin
       Logs.Write ("Register new client : " & Key & ":"
                   & Server_Name & '@' & Callback_Endpoint);
-      Logs.Write ("Client Metadata are OS = " & (-Data.OS),
-                  Logs.Handler.Very_Verbose);
+      Logs.Write (Content => "Client Metadata are OS = " & (-Data.OS),
+                  Kind    => Logs.Handler.Very_Verbose);
 
       Clients.Register (Key, Data, Clients.Idle,
                         Server_Name, Callback_Endpoint);
@@ -320,8 +321,9 @@ package body Savadur.Web_Services.Client is
 
             else
                Clients.Set_Status
-                 (-Report.Key, Clients.Busy,
-                  Actions.Id_Utils.To_String (Report.Action) & " on "
+                 (Key     => -Report.Key,
+                  Status  => Clients.Busy,
+                  Message => Actions.Id_Utils.To_String (Report.Action) & " on "
                   & (-Report.Project_Name) & " (" & (-Report.Scenario) & ")");
 
                --  This is the action log. Scenario is in progress
@@ -335,6 +337,7 @@ package body Savadur.Web_Services.Client is
                --  In all cases, if result is an error we send an e-amil to all
                --  committers.
 
+               Send_Mails :
                for K in Report.Diff_Data.Committers.Item'Range loop
                   Savadur.Notifications.Send_Mail
                     (Email   =>
@@ -345,7 +348,7 @@ package body Savadur.Web_Services.Client is
                        & " to " & To_String (Report.Diff_Data.V2) & ASCII.LF
                        & "when running scenario "
                        & To_String (Report.Scenario) & ASCII.LF);
-               end loop;
+               end loop Send_Mails;
             end if;
          exception
             when E : others =>

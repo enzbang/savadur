@@ -60,7 +60,7 @@ package Savadur.Signed_Files is
 
 private
 
-   No_SHA1 : constant Signature := (others => '0');
+   No_SHA1 : constant Signature := Signature'(others => '0');
 
    type Handler is record
       Name      : Unbounded_String;

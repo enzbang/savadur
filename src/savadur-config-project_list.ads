@@ -23,6 +23,8 @@ with Savadur.Project_List;
 
 package Savadur.Config.Project_List is
 
+   Config_Error : exception renames Config.Config_Error;
+
    Configurations : Savadur.Project_List.Projects.Map;
 
    procedure Parse;

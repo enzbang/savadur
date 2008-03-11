@@ -113,11 +113,10 @@ private
    type Cursor is new Sets.Cursor;
 
    Empty_Server : constant Server :=
-                    (Name       => Null_Unbounded_String,
-                     URL        => Null_Unbounded_String,
-                     Log_Path   => Null_Unbounded_String,
-                     Log_Prefix => Null_Unbounded_String,
-                     Send_Log   => False,
-                     Status     => Offline);
-
+                    Server'(Name       => Null_Unbounded_String,
+                            URL        => Null_Unbounded_String,
+                            Log_Path   => Null_Unbounded_String,
+                            Log_Prefix => Null_Unbounded_String,
+                            Send_Log   => False,
+                            Status     => Offline);
 end Savadur.Servers;

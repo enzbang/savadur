@@ -419,7 +419,7 @@ package body Savadur.Config.Client is
            (Variable => "METADATA_OS",
             Value    => -Configuration.Client_Metadata.OS));
 
-      declare
+      Set_Delays : declare
          Conn_Retry : constant String :=
                         Duration'Image
                           (Configuration.Connection_Retry_Delay);
@@ -442,10 +442,12 @@ package body Savadur.Config.Client is
                  (Variable => "PING",
                   Value    => Ping (Ping'First + 1 .. Ping'Last)));
          end if;
-      end;
+      end Set_Delays;
 
       if Directories.Exists (Template) then
-         Text_IO.Create (File, Text_IO.Out_File, Filename);
+         Text_IO.Create (File => File,
+                         Mode => Text_IO.Out_File,
+                         Name => Filename);
          Text_IO.Put (File,
            Templates.Parse
              (Filename     => Template,
@@ -453,7 +455,8 @@ package body Savadur.Config.Client is
          Text_IO.Close (File);
 
       else
-         Logs.Write ("Missing template file: " & Template, Logs.Handler.Error);
+         Logs.Write (Content => "Missing template file: " & Template,
+                     Kind    => Logs.Handler.Error);
       end if;
    end Write;
 

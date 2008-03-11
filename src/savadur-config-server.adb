@@ -255,7 +255,7 @@ package body Savadur.Config.Server is
                         Item => Templates.Assoc (Variable => "SERVER_URL",
                                                  Value    => Url));
 
-      Text_IO.Create (File, Text_IO.Out_File, Filename);
+      Text_IO.Create (File => File, Mode => Text_IO.Out_File, Name => Filename);
       Text_IO.Put (File,
                    Templates.Parse
                      (Filename     => Template,

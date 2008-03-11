@@ -238,7 +238,7 @@ package body Savadur.Config.Project is
       else
          Logs.Write (Content => "Try loading unknown project " & Project_Name,
                      Kind    => Logs.Handler.Error);
-         raise IO_Exceptions.Name_Error
+         raise Config_Error
            with "Try loading unknown project " & Project_Name;
       end if;
    end Get;
@@ -624,10 +624,6 @@ package body Savadur.Config.Project is
 
          Get_Attribute_Value (J);
       end loop;
-
-   exception
-      when E : others =>
-         Ada.Text_IO.Put_Line (Exception_Information (E));
    end Start_Element;
 
 end Savadur.Config.Project;

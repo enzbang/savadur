@@ -36,7 +36,10 @@ package body Savadur.Clients is
    function Key (Client : in Clients.Client) return String;
 
    package Keys is new Sets.Generic_Keys
-     (String, Key, Strings.Hash_Case_Insensitive, "=");
+     (Key_Type        => String,
+      Key             => Key,
+      Hash            => Strings.Hash_Case_Insensitive,
+      Equivalent_Keys => "=");
 
    Registered : Sets.Set;
 
@@ -233,18 +236,18 @@ package body Savadur.Clients is
    begin
       Insert_Or_Update : begin
          Clients.Registered.Insert
-           (New_Item => (+Key, Metadata, Status,
-                         +Server_Name, +Callback_Endpoint,
-                           Running  => <>));
+           (New_Item => Client'(+Key, Metadata, Status,
+                                +Server_Name, +Callback_Endpoint,
+                                Running  => <>));
       exception
          when Constraint_Error =>
             --  If the client has been deconnected and try to register again
             --  replace the old configuration by the new one
             Logs.Write ("Client exits... update it");
             Clients.Registered.Replace
-              (New_Item => (+Key, Metadata, Status,
-                            +Server_Name, +Callback_Endpoint,
-                            Running => <>));
+              (New_Item => Client'(+Key, Metadata, Status,
+                                   +Server_Name, +Callback_Endpoint,
+                                   Running => <>));
       end Insert_Or_Update;
 
    end Register;

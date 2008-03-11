@@ -121,7 +121,7 @@ package body Savadur.Projects is
    begin
 
       if Project.Directory.Cached_Project_Sources_Directory = null then
-         declare
+         Set_Dir : declare
             Var : constant Savadur.Variables.Variable :=
                     Savadur.Variables.Keys.Element
                       (Container  => Project.Variables,
@@ -132,7 +132,7 @@ package body Savadur.Projects is
               (Directories.Compose
                  (Containing_Directory => Project_Directory (Project),
                   Name                 => To_String (Var.Value)));
-         end;
+         end Set_Dir;
       end if;
 
       return Project.Directory.Cached_Project_Sources_Directory.all;

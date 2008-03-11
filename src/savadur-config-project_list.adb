@@ -115,7 +115,8 @@ package body Savadur.Config.Project_List is
    begin
       Start_Search
         (Search    => S,
-         Directory => Directories.Compose (Config.Savadur_Directory, "config"),
+         Directory => Directories.Compose
+           (Containing_Directory => Config.Savadur_Directory, Name => "config"),
          Pattern   => "project_list.xml",
          Filter    => Filter_Type'(Ordinary_File => True,
                                    Directory     => False,
@@ -136,7 +137,8 @@ package body Savadur.Config.Project_List is
    exception
       when IO_Exceptions.Name_Error =>
          raise Config_Error with " No Servers Directory ?"
-           & Directories.Compose (Config.Savadur_Directory, "config");
+           & Directories.Compose
+           (Containing_Directory => Config.Savadur_Directory, Name => "config");
    end Parse;
 
    ---------------------
@@ -166,7 +168,9 @@ package body Savadur.Config.Project_List is
       is
          pragma Unreferenced (Key);
       begin
-         Element.Append (New_Item => (+Client, True));
+         Savadur.Project_List.Clients.Append
+           (Container => Element,
+            New_Item  => Savadur.Project_List.Client'(+Client, True));
       end Update_Client;
 
       ---------------------
@@ -182,14 +186,14 @@ package body Savadur.Config.Project_List is
                       Element.Find (Scenario);
       begin
          if not Savadur.Project_List.Scenarios.Has_Element (Position) then
-            declare
+            Add_To_Scenario : declare
                V : Savadur.Project_List.Clients.Vector;
                I : Boolean;
             begin
                Element.Insert
                  (Scenario,
                   New_Item => V, Position => Position, Inserted => I);
-            end;
+            end Add_To_Scenario;
          end if;
 
          Element.Update_Element (Position, Update_Client'Access);
@@ -200,13 +204,13 @@ package body Savadur.Config.Project_List is
 
    begin
       if not Savadur.Project_List.Projects.Has_Element (Position) then
-         declare
+         Add_To_Project : declare
             M : Savadur.Project_List.Scenarios.Map;
             I : Boolean;
          begin
             Configurations.Insert
               (Project, New_Item => M, Position => Position, Inserted => I);
-         end;
+         end Add_To_Project;
       end if;
 
       Configurations.Update_Element (Position, Update_Scenario'Access);

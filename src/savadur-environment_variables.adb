@@ -89,10 +89,11 @@ package body Savadur.Environment_Variables is
 
    exception
       when E : Constraint_Error =>
-         Logs.Write ("Unable to set environment", Logs.Handler.Error);
-         Logs.Write ("Set_Environment failed with " &
+         Logs.Write (Content => "Unable to set environment",
+                     Kind    => Logs.Handler.Error);
+         Logs.Write (Content => "Set_Environment failed with " &
                      Exceptions.Exception_Information (E),
-                     Logs.Handler.Error);
+                     Kind    => Logs.Handler.Error);
 
    end Set_Environment;
 

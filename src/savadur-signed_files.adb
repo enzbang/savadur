@@ -54,15 +54,15 @@ package body Savadur.Signed_Files is
 
          SHA.Process_Data.Initialize (Ctx);
 
-         while not Stream_IO.End_Of_File (F) loop
+         Process_File : while not Stream_IO.End_Of_File (F) loop
             Stream_IO.Read (F, Buffer, Last);
-            exit when Last = 0;
+            exit Process_File when Last = 0;
 
-            for K in Stream_Element_Offset range 1 .. Last loop
+            Process_Data : for K in Stream_Element_Offset range 1 .. Last loop
                SHA.Process_Data.Add
                  (SHA.Process_Data.Byte (Buffer (K)), Ctx);
-            end loop;
-         end loop;
+            end loop Process_Data;
+         end loop Process_File;
 
          Stream_IO.Close (F);
 
