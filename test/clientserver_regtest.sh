@@ -103,7 +103,7 @@ TL=test-dir/logs
 
 echo 'Press CTRL-C to kill'
 
-while [ ! -f $TL/3-machine-@ENDACTION@ ]; do
+while [ ! -f $TL/3-machine-@endaction@ ]; do
     sleep 1
 done
 
@@ -132,7 +132,7 @@ wget --no-proxy "http://localhost:8181/run?p=newproj&s=default&l=5"
 
 #  Wait for last regtests log
 
-while [ ! -f $TL/4-machine-@ENDACTION@ ]; do
+while [ ! -f $TL/4-machine-@endaction@ ]; do
     sleep 1
 done
 
