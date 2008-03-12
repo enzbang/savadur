@@ -152,6 +152,13 @@ package body Savadur.Build is
          end if;
       end if;
 
+      --  Apply filters if any
+
+      Apply_Filters
+        (Log_Filename (Project, Exec_Action.Id, Job_Id), Ref.Filters);
+
+      --  Check filter result, should we continue or exit now
+
       if Ref.Require_Change then
          Check_Last_State : declare
             State_Filename   : constant String :=

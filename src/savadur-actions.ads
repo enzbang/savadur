@@ -24,6 +24,7 @@ with Ada.Containers.Indefinite_Hashed_Sets;
 with Ada.Containers.Indefinite_Vectors;
 
 with Savadur.Config.Cmd;
+with Savadur.Config.Filters;
 with Savadur.Utils;
 
 package Savadur.Actions is
@@ -62,6 +63,7 @@ package Savadur.Actions is
       Value          : Unbounded_String := Null_Unbounded_String;
       Require_Change : Boolean          := False;
       On_Error       : On_Error_Hook    := Error;
+      Filters        : Config.Filters.Set;
    end record;
 
    Null_Ref_Action : constant Ref_Action;
@@ -125,5 +127,7 @@ private
                                    Action_Type    => <>,
                                    Value          => <>,
                                    Require_Change => <>,
-                                   On_Error       => <>);
+                                   On_Error       => <>,
+                                   Filters        => Config.Filters.Null_Set);
+
 end Savadur.Actions;

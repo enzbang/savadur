@@ -22,6 +22,7 @@
 with Ada.Containers.Indefinite_Hashed_Sets;
 with Ada.Strings.Unbounded;
 
+with Savadur.Config.Filters;
 with Savadur.Utils;
 with Savadur.Actions;
 
@@ -87,12 +88,15 @@ package Savadur.SCM is
 
 private
 
+   use Config;
+
    Init     : constant Actions.Ref_Action :=
                 Actions.Ref_Action'(Action_Type    => Actions.SCM,
                                     Id             => Actions.Id (+"init"),
                                     Value          => <>,
                                     Require_Change => <>,
-                                    On_Error       => <>);
+                                    On_Error       => <>,
+                                    Filters        => Filters.Null_Set);
 
    Committers_1 : constant Actions.Ref_Action :=
                     Actions.Ref_Action'(Action_Type    => Actions.SCM,
@@ -100,7 +104,8 @@ private
                                           Actions.Id (+"committers_1"),
                                         Value          => <>,
                                         Require_Change => <>,
-                                        On_Error       => <>);
+                                        On_Error       => <>,
+                                        Filters        => Filters.Null_Set);
 
    Committers_N : constant Actions.Ref_Action :=
                     Actions.Ref_Action'(Action_Type    => Actions.SCM,
@@ -108,7 +113,8 @@ private
                                           Actions.Id (+"committers_n"),
                                         Value          => <>,
                                         Require_Change => <>,
-                                        On_Error       => <>);
+                                        On_Error       => <>,
+                                        Filters        => Filters.Null_Set);
 
    Null_Id : constant Id := Id (Null_Unbounded_String);
 

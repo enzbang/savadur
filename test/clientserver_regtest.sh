@@ -22,7 +22,11 @@ regtests:
 	./main
 EOF
 
-git add main.adb makefile
+cat > readme.txt <<EOF
+This is a simple test project.
+EOF
+
+git add main.adb makefile readme.txt
 git ci -m "Initial revision"
 
 cd ../..
@@ -116,7 +120,11 @@ begin
 end Main;
 EOF
 
-git ci -a -m "New main"
+cat > readme.txt <<EOF
+Better documentation for this tool.
+EOF
+
+git ci -a -m "New main, and documentation"
 
 cd ../..
 
@@ -191,15 +199,23 @@ filesu=$(cat $NPL/3-pull.files_updated)
 if [ "$filesu" == "" ]; then
     echo OK: files_updated is empty
 else
-    echo OK: files_updated is wrong, should be empty
+    echo NOK: files_updated is wrong, should be empty
 fi;
 
-filesu=$(cat $NPL/4-pull.files_updated)
+filesi=$(cat $NPL/4-pull.files_ignored)
 
-if [ "$filesu" == "main.adb" ]; then
-    echo OK: files_updated is $filesu;
+if [ "$filesi" == "readme.txt" ]; then
+    echo OK: files_ignored is $filesi
 else
-    echo OK: files_updated is wrong, $filesu;
+    echo NOK: files_ignored is wrong, $filesi
+fi;
+
+filesu=$(cat $NPL/4-pull.files_updated | tr [:cntrl:] " ")
+
+if [ "$filesu" == "main.adb readme.txt" ]; then
+    echo OK: files_updated is $filesu
+else
+    echo NOK: files_updated is wrong, $filesu
 fi;
 
 echo === Check log directory $TL

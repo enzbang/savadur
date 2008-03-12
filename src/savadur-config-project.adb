@@ -34,6 +34,7 @@ with Unicode.CES;
 
 with Savadur.Actions;
 with Savadur.Config.Cmd;
+with Savadur.Config.Filters;
 with Savadur.Logs;
 with Savadur.Scenarios;
 with Savadur.SCM;
@@ -54,43 +55,33 @@ package body Savadur.Config.Project is
      (SCM, Variable, SCM_Action,
       Action, Scenario, Cmd,
       Notifications, On_Failure, On_Success,
-      Project, Name, Description);
+      Project, Name, Description, Filter);
 
-   type Attribute
-     is (Id, Value, Result, Require_Change, On_Error, Periodic, Regexp);
+   type Attribute is (Id, Value, Result, Require_Change, On_Error,
+                      Periodic, Filter1, Filter2);
 
    type XML_Attribute is array (Attribute) of Boolean;
 
    type XML_Schema is array (Node_Value) of XML_Attribute;
 
-   Schema : constant XML_Schema
-     := XML_Schema'(SCM           =>  XML_Attribute'(Id     => True,
-                                                     others => False),
-                    Variable      =>  XML_Attribute'(Id     => True,
-                                                     Value  => True,
-                                                     others => False),
-                    SCM_Action    => XML_Attribute'(Id             => True,
-                                                    Value          => True,
-                                                    Require_Change => True,
-                                                    On_Error       => True,
-                                                    others         => False),
-                    Action        => XML_Attribute'(Id             => True,
-                                                    Value          => True,
-                                                    Require_Change => True,
-                                                    On_Error       => True,
-                                                    others         => False),
-                    Scenario      => XML_Attribute'(Id       => True,
-                                                    Periodic => True,
-                                                    others   => False),
-                    Cmd           => XML_Attribute'(Regexp => True,
-                                                    others => False),
-                    Project       => XML_Attribute'(others => False),
-                    Description   => XML_Attribute'(others => False),
-                    Notifications => XML_Attribute'(others => False),
-                    On_Failure    => XML_Attribute'(others => False),
-                    On_Success    => XML_Attribute'(others => False),
-                    Name          => XML_Attribute'(Id     => True,
-                                                    others => False));
+   Schema : constant XML_Schema := XML_Schema'
+     (SCM           => XML_Attribute'(Id         => True,    others => False),
+      Variable      => XML_Attribute'(Id | Value => True,    others => False),
+      SCM_Action    => XML_Attribute'
+        (Id | Value | Require_Change | On_Error | Filter1 | Filter2 => True,
+         others                                                     => False),
+      Action        => XML_Attribute'
+        (Id | Value | Require_Change | On_Error => True,     others => False),
+      Scenario      => XML_Attribute'(Id | Periodic => True, others => False),
+      Project       => XML_Attribute'(others => False),
+      Description   => XML_Attribute'(others => False),
+      Notifications => XML_Attribute'(others => False),
+      On_Failure    => XML_Attribute'(others => False),
+      On_Success    => XML_Attribute'(others => False),
+      Name          => XML_Attribute'(Id     => True,        others => False),
+      --  Following nodes are parsed externally (Config.Cmd and Config.Filter)
+      Filter        => XML_Attribute'(others => False),
+      Cmd           => XML_Attribute'(others => False));
 
    function Get_Node_Value (S : in String) return Node_Value;
    --  Returns the node value matching the given string or raise Config_Error
@@ -218,7 +209,7 @@ package body Savadur.Config.Project is
             Handler.Current_Project.Description :=
               Projects.Project_Description (Handler.Content_Value);
 
-         when SCM | Project | Name =>
+         when SCM | Project | Name | Filter =>
             null;
       end case;
 
@@ -597,19 +588,31 @@ package body Savadur.Config.Project is
                      null;
                end case;
 
-            when Regexp =>
+            when Filter1 =>
                case NV is
-                  when Cmd =>
-                     Config.Cmd.Start_Element
-                       (Handler.Action.Cmd,
-                        Projects.Id_Utils.To_String
-                          (Handler.Current_Project.Project_Id),
-                        Namespace_URI, Local_Name, Qname, Atts);
+                  when SCM_Action =>
+                     Handler.Ref_Action.Filters (1) :=
+                       Filters.Get_Id
+                         (Projects.Id_Utils.To_String
+                              (Handler.Current_Project.Project_Id),
+                          Get_Value (Atts, Position));
 
                   when others =>
                      null;
                end case;
 
+            when Filter2 =>
+               case NV is
+                  when SCM_Action =>
+                     Handler.Ref_Action.Filters (2) :=
+                       Filters.Get_Id
+                         (Projects.Id_Utils.To_String
+                              (Handler.Current_Project.Project_Id),
+                          Get_Value (Atts, Position));
+
+                  when others =>
+                     null;
+               end case;
          end case;
       end Get_Attribute_Value;
 
@@ -629,6 +632,21 @@ package body Savadur.Config.Project is
             if not Handler.Inside_Scenario then
                raise Config_Error with "SCM Action outside scenario";
             end if;
+
+         when Cmd =>
+            Config.Cmd.Start_Element
+              (Handler.Action.Cmd,
+               Projects.Id_Utils.To_String
+                 (Handler.Current_Project.Project_Id),
+               Namespace_URI, Local_Name, Qname, Atts);
+            return;
+
+         when Filter =>
+            Config.Filters.Start_Element
+              (Projects.Id_Utils.To_String
+                 (Handler.Current_Project.Project_Id),
+               Namespace_URI, Local_Name, Qname, Atts);
+            return;
 
          when others =>
             null;
