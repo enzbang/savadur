@@ -73,9 +73,21 @@ echo "----------------------------------------------"
 function check_file() {
    local dir=$1
    local file=$2
+   local exists=$3
 
-   if [ -f $dir/$file ]; then
-       echo OK: $file;
+   if [ "$exists" = "true" ]; then
+       op='';
+   else
+       op='!';
+   fi;
+
+   if [ $op -f $dir/$file ]; then
+       echo -n OK: $file
+       if [ "$exists" = "false" ]; then
+	   echo ", does not exist"
+       else
+	   echo
+       fi;
    else
        echo NOK: $file;
    fi;
@@ -107,8 +119,8 @@ while [ ! -f $TL/3-machine-@endaction@ ]; do
     sleep 1
 done
 
-#  All initial builds are terminated, update newproj main.adb and rerun the
-#  test
+#  All initial builds are terminated, update newproj main.adb and
+#  readme.txt and rerun the test
 
 cd test-dir/newproj
 
@@ -136,14 +148,36 @@ while [ ! -f $TL/4-machine-@endaction@ ]; do
     sleep 1
 done
 
+#  Now update only the readme.txt (which is ignored), check that we do not
+#  run the make/regtests
+
+cd test-dir/newproj
+
+cat > readme.txt <<EOF
+Better documentation for this tool.
+Should not trigger the build.
+EOF
+
+git ci -a -m "Minor documentation update"
+
+cd ../..
+
+wget --no-proxy "http://localhost:8181/run?p=newproj&s=default&l=5"
+
+#  Wait for last regtests log
+
+while [ ! -f $TL/5-machine-@endaction@ ]; do
+    sleep 1
+done
+
 echo === Check for $MP
 
-check_file $MS/.build/debug/lib morzhol.ali
-check_file $ML 2-init
-check_file $ML 2-make
-check_file $ML 2-regtests
-check_file $ML 2-update
-check_file $ML 2-version
+check_file $MS/.build/debug/lib morzhol.ali true
+check_file $ML 2-init true
+check_file $ML 2-make true
+check_file $ML 2-regtests true
+check_file $ML 2-update true
+check_file $ML 2-version true
 
 versize=$(wc -w $ML/2-version | cut -c1)
 
@@ -163,13 +197,13 @@ fi;
 
 echo === Check for $SCP
 
-check_file $SCS/obj style_checker.ali
-check_file $SCS style_checker$EXEEXT
-check_file $SCL 1-init
-check_file $SCL 1-make
-check_file $SCL 1-regtests
-check_file $SCL 1-pull
-check_file $SCL 1-version
+check_file $SCS/obj style_checker.ali true
+check_file $SCS style_checker$EXEEXT true
+check_file $SCL 1-init true
+check_file $SCL 1-make true
+check_file $SCL 1-regtests true
+check_file $SCL 1-pull true
+check_file $SCL 1-version true
 
 versize=$(wc -w $SCL/1-version | cut -c1)
 
@@ -188,11 +222,15 @@ else
 fi;
 
 echo === Check for $NPP
-check_file $NPS main.ali
-check_file $NPS main$EXEEXT
-check_file $NPL 3-version
-check_file $NPL 4-version
-check_file $NPL 4-pull.files_updated
+check_file $NPS main.ali true
+check_file $NPS main$EXEEXT true
+check_file $NPL 3-version true
+check_file $NPL 4-version true
+check_file $NPL 4-pull.files_updated true
+check_file $NPL 5-pull true
+check_file $NPL 5-pull.files_updated true
+check_file $NPL 5-make false
+check_file $NPL 5-regtests false
 
 filesu=$(cat $NPL/3-pull.files_updated)
 
@@ -220,28 +258,28 @@ fi;
 
 echo === Check log directory $TL
 
-check_file $TL 1-machine-init
-check_file $TL 1-machine-make
-check_file $TL 1-machine-regtests
-check_file $TL 1-machine-pull
-check_file $TL 1-machine-version
+check_file $TL 1-machine-init true
+check_file $TL 1-machine-make true
+check_file $TL 1-machine-regtests true
+check_file $TL 1-machine-pull true
+check_file $TL 1-machine-version true
 
-check_file $TL 2-machine-init
-check_file $TL 2-machine-make
-check_file $TL 2-machine-regtests
-check_file $TL 2-machine-update
-check_file $TL 2-machine-version
+check_file $TL 2-machine-init true
+check_file $TL 2-machine-make true
+check_file $TL 2-machine-regtests true
+check_file $TL 2-machine-update true
+check_file $TL 2-machine-version true
 
-check_file $TL 3-machine-init
-check_file $TL 3-machine-make
-check_file $TL 3-machine-regtests
-check_file $TL 3-machine-pull
-check_file $TL 3-machine-version
+check_file $TL 3-machine-init true
+check_file $TL 3-machine-make true
+check_file $TL 3-machine-regtests true
+check_file $TL 3-machine-pull true
+check_file $TL 3-machine-version true
 
-check_file $TL 4-machine-make
-check_file $TL 4-machine-regtests
-check_file $TL 4-machine-pull
-check_file $TL 4-machine-version
+check_file $TL 4-machine-make true
+check_file $TL 4-machine-regtests true
+check_file $TL 4-machine-pull true
+check_file $TL 4-machine-version true
 
 echo ""
 echo "Exit, kill processes"

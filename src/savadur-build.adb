@@ -131,6 +131,19 @@ package body Savadur.Build is
       return Boolean
    is
       use type Actions.Result_Type;
+
+      function Filter_Based (Status : in String) return Boolean;
+      --  Returns true if the status if based on filter's result
+
+      ------------------
+      -- Filter_Based --
+      ------------------
+
+      function Filter_Based (Status : in String) return Boolean is
+      begin
+         return Strings.Fixed.Index (Status, "=") /= 0;
+      end Filter_Based;
+
       State_Directory : constant String :=
                           Projects.Project_State_Directory (Project);
       Result          : Boolean := True;
@@ -159,7 +172,93 @@ package body Savadur.Build is
 
       --  Check filter result, should we continue or exit now
 
-      if Ref.Status = "require_change" then
+      if Filter_Based (-Ref.Status) then
+         declare
+            function Get_Filter
+              (Name : in String) return Config.Filters.Filter;
+            --  Returns the filter give the name. First look in the project
+            --  then in the inherited SCM.
+
+            ----------------
+            -- Get_Filter --
+            ----------------
+
+            function Get_Filter
+              (Name : in String) return Config.Filters.Filter
+            is
+               use type Config.Filters.Filter;
+               Filter : Config.Filters.Filter;
+            begin
+               Filter := Config.Filters.Get
+                 (Config.Filters.Get_Id
+                    (Projects.Id_Utils.To_String (Project.Project_Id), Name));
+
+               if Filter = Config.Filters.Null_Filter then
+                  Filter := Config.Filters.Get
+                    (Config.Filters.Get_Id
+                       (SCM.Id_Utils.To_String (Project.SCM_Id), Name));
+               end if;
+
+               if Filter = Config.Filters.Null_Filter then
+                  Logs.Write ("Unknown filter " & Name, Logs.Handler.Error);
+                  raise Command_Parse_Error with "Unknown filter " & Name;
+               end if;
+
+               return Filter;
+            end Get_Filter;
+
+            Status           : constant String := -Ref.Status;
+            Log_File         : constant String :=
+                                 Log_Filename
+                                   (Project, Exec_Action.Id, Job_Id);
+            Sep              : constant Positive :=
+                                 Strings.Fixed.Index (Status, "=");
+            F1_Name, F2_Name : Unbounded_String;
+            Filter1, Filter2 : Config.Filters.Filter;
+            Equal            : Boolean;
+         begin
+            --  Get filter names
+
+            if Status (Sep - 1) = '/' then
+               F1_Name := +Status (Status'First .. Sep - 2);
+               Equal := False;
+            else
+               F1_Name := +Status (Status'First .. Sep - 1);
+               Equal := True;
+            end if;
+
+            F2_Name := +Status (Sep + 1 .. Status'Last);
+
+            --  Get filter objects
+
+            Filter1 := Get_Filter (-F1_Name);
+            Filter2 := Get_Filter (-F2_Name);
+
+            declare
+               L1 : constant String :=
+                      Utils.Content
+                        (Log_File & "."
+                         & Config.Filters.Simple_Name (Filter1.Id));
+               L2 : constant String :=
+                      Utils.Content
+                        (Log_File & "."
+                         & Config.Filters.Simple_Name (Filter2.Id));
+            begin
+               if (L1 = L2) = Equal then
+                  --  Ok if both logs are equal and check is equality.
+                  Result := True;
+
+               else
+                  Result := False;
+                  Logs.Write
+                    (Content => Actions.Id_Utils.To_String (Ref.Id)
+                     & " filters check is false: " & Status,
+                     Kind    => Logs.Handler.Verbose);
+               end if;
+            end;
+         end;
+
+      elsif Ref.Status = "require_change" then
          Check_Last_State : declare
             State_Filename   : constant String :=
                                  Directories.Compose
