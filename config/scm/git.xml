@@ -20,7 +20,7 @@
 
 <scm>
   <name id="git" />
-  <filter id="files_updated" regexp=" ([^\n]*) \|  "/>
+  <filter id="files_updated" regexp=" ([^\n]*) *\|  "/>
 
   <action id="init">
     <cmd>git-clone $url $sources</cmd>
