@@ -426,8 +426,7 @@ package body Savadur.Config.Project is
    is
       use Sax.Attributes;
 
-      NV   : constant Node_Value := Get_Node_Value (Local_Name);
-      Attr : Attribute;
+      NV : constant Node_Value := Get_Node_Value (Local_Name);
 
       procedure Get_Attribute_Value (Position : in Natural);
       --  Gets attribute value
@@ -437,7 +436,17 @@ package body Savadur.Config.Project is
       -------------------------
 
       procedure Get_Attribute_Value (Position : in Natural) is
+         Attr : Attribute;
       begin
+         Attr := Get_Attribute (Get_Qname (Atts, Position));
+
+         --  Check if attribute is valid
+
+         if not Schema (NV) (Attr) then
+            raise Config_Error with "(Project) Unknown attribute "
+              & Node_Value'Image (NV) & "." & Get_Qname (Atts, Position);
+         end if;
+
          case Attr is
             when Id =>
                case NV is
@@ -626,15 +635,6 @@ package body Savadur.Config.Project is
       end case;
 
       for J in 0 .. Get_Length (Atts) - 1 loop
-         Attr := Get_Attribute (Get_Qname (Atts, J));
-
-         --  Check if attribute is valid
-
-         if not Schema (NV) (Attr) then
-            raise Config_Error with "Unknow attribute "
-              & Node_Value'Image (NV) & "." & Get_Qname (Atts, J);
-         end if;
-
          Get_Attribute_Value (J);
       end loop;
    end Start_Element;
