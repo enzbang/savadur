@@ -116,7 +116,8 @@ package body Savadur.Config.Project_List is
       Start_Search
         (Search    => S,
          Directory => Directories.Compose
-           (Containing_Directory => Config.Savadur_Directory, Name => "config"),
+           (Containing_Directory => Config.Savadur_Directory,
+            Name                 => "config"),
          Pattern   => "project_list.xml",
          Filter    => Filter_Type'(Ordinary_File => True,
                                    Directory     => False,
@@ -136,9 +137,11 @@ package body Savadur.Config.Project_List is
       end loop Walk_Directories;
    exception
       when IO_Exceptions.Name_Error =>
-         raise Config_Error with " No Servers Directory ?"
-           & Directories.Compose
-           (Containing_Directory => Config.Savadur_Directory, Name => "config");
+         raise Config_Error
+           with " No Servers Directory ?"
+             & Directories.Compose
+                (Containing_Directory  => Config.Savadur_Directory,
+                 Name                  => "config");
    end Parse;
 
    ---------------------
@@ -168,9 +171,8 @@ package body Savadur.Config.Project_List is
       is
          pragma Unreferenced (Key);
       begin
-         Savadur.Project_List.Clients.Append
-           (Container => Element,
-            New_Item  => Savadur.Project_List.Client'(+Client, True));
+         Element.Append
+           (New_Item  => Savadur.Project_List.Client'(+Client, True));
       end Update_Client;
 
       ---------------------
