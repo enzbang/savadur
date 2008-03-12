@@ -23,6 +23,7 @@ with Ada.Characters.Handling;
 with Ada.Directories;
 with Ada.Exceptions;
 with Ada.IO_Exceptions;
+with Ada.Strings.Fixed;
 with Ada.Strings.Unbounded;
 with Ada.Text_IO;
 
@@ -57,8 +58,8 @@ package body Savadur.Config.Project is
       Notifications, On_Failure, On_Success,
       Project, Name, Description, Filter);
 
-   type Attribute is (Id, Value, Result, Require_Change, On_Error,
-                      Periodic, Filter1, Filter2);
+   type Attribute is
+     (Id, Value, Result, On_Error, Status, Periodic, Filter1, Filter2);
 
    type XML_Attribute is array (Attribute) of Boolean;
 
@@ -68,10 +69,10 @@ package body Savadur.Config.Project is
      (SCM           => XML_Attribute'(Id         => True,    others => False),
       Variable      => XML_Attribute'(Id | Value => True,    others => False),
       SCM_Action    => XML_Attribute'
-        (Id | Value | Require_Change | On_Error | Filter1 | Filter2 => True,
-         others                                                     => False),
+        (Id | Value | Status | On_Error | Filter1 | Filter2 => True,
+         others                                             => False),
       Action        => XML_Attribute'
-        (Id | Value | Require_Change | On_Error => True,     others => False),
+        (Id | Value | Status | On_Error => True,             others => False),
       Scenario      => XML_Attribute'(Id | Periodic => True, others => False),
       Project       => XML_Attribute'(others => False),
       Description   => XML_Attribute'(others => False),
@@ -524,7 +525,7 @@ package body Savadur.Config.Project is
                      null;
                end case;
 
-            when Require_Change =>
+            when Status =>
                case NV is
                   when Action | SCM_Action =>
                      if not Handler.Inside_Scenario then
@@ -534,17 +535,24 @@ package body Savadur.Config.Project is
                             & Get_Qname (Atts, Position);
                      end if;
 
-                     Get_Require_Change_Value : begin
-                        Handler.Ref_Action.Require_Change :=
-                          Boolean'Value (Get_Value (Atts, Position));
-                     exception
-                        when Constraint_Error =>
+                     Get_Status_Value : declare
+                        Value : constant String :=
+                                  Ada.Characters.Handling.To_Lower
+                                    (Get_Value (Atts, Position));
+                     begin
+                        if Value /= "require_change"
+                          and then Strings.Fixed.Index (Value, "=") = 0
+                        then
                            raise Config_Error
                              with "(Project) Unknown attribute value "
                                & Node_Value'Image (NV) & "."
                                & Get_Qname (Atts, Position)
-                               & " value = " & Get_Value (Atts, Position);
-                     end Get_Require_Change_Value;
+                               & " value = " & Value;
+
+                        else
+                           Handler.Ref_Action.Status := +Value;
+                        end if;
+                     end Get_Status_Value;
 
                   when others =>
                      null;

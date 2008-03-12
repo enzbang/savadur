@@ -194,7 +194,7 @@ package body Config_Parse is
         (Utils.Strip (Savadur.Scenarios.Image (Project.Scenarios)) =
            Utils.Strip ("* default"
          & "["
-         & "SCM version require_change on error = QUIT"
+         & "SCM version status=require_change on error = QUIT"
          & "SCM pull"
          & "DEFAULT make"
          & "DEFAULT regtests"

@@ -14,7 +14,7 @@
   </action>
 
   <scenario id="default">
-    <scm_action id="version" require_change="true" on_error="quit" />
+    <scm_action id="version" status="require_change" on_error="quit" />
     <scm_action id="update" />
     <action id="make" />
     <action id="regtests" />

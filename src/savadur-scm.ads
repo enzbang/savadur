@@ -91,30 +91,30 @@ private
    use Config;
 
    Init     : constant Actions.Ref_Action :=
-                Actions.Ref_Action'(Action_Type    => Actions.SCM,
-                                    Id             => Actions.Id (+"init"),
-                                    Value          => <>,
-                                    Require_Change => <>,
-                                    On_Error       => <>,
-                                    Filters        => Filters.Null_Set);
+                Actions.Ref_Action'(Action_Type => Actions.SCM,
+                                    Id          => Actions.Id (+"init"),
+                                    Value       => <>,
+                                    Status      => <>,
+                                    On_Error    => <>,
+                                    Filters     => Filters.Null_Set);
 
    Committers_1 : constant Actions.Ref_Action :=
-                    Actions.Ref_Action'(Action_Type    => Actions.SCM,
-                                        Id             =>
+                    Actions.Ref_Action'(Action_Type => Actions.SCM,
+                                        Id          =>
                                           Actions.Id (+"committers_1"),
-                                        Value          => <>,
-                                        Require_Change => <>,
-                                        On_Error       => <>,
-                                        Filters        => Filters.Null_Set);
+                                        Value       => <>,
+                                        Status      => <>,
+                                        On_Error    => <>,
+                                        Filters     => Filters.Null_Set);
 
    Committers_N : constant Actions.Ref_Action :=
-                    Actions.Ref_Action'(Action_Type    => Actions.SCM,
-                                        Id             =>
+                    Actions.Ref_Action'(Action_Type => Actions.SCM,
+                                        Id          =>
                                           Actions.Id (+"committers_n"),
-                                        Value          => <>,
-                                        Require_Change => <>,
-                                        On_Error       => <>,
-                                        Filters        => Filters.Null_Set);
+                                        Value       => <>,
+                                        Status      => <>,
+                                        On_Error    => <>,
+                                        Filters     => Filters.Null_Set);
 
    Null_Id : constant Id := Id (Null_Unbounded_String);
 

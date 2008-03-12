@@ -159,7 +159,7 @@ package body Savadur.Build is
 
       --  Check filter result, should we continue or exit now
 
-      if Ref.Require_Change then
+      if Ref.Status = "require_change" then
          Check_Last_State : declare
             State_Filename   : constant String :=
                                  Directories.Compose

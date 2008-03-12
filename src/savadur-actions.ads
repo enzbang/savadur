@@ -58,12 +58,12 @@ package Savadur.Actions is
    type On_Error_Hook is (Quit, Continue, Error);
 
    type Ref_Action is record
-      Id             : Actions.Id;
-      Action_Type    : Kind             := Default;
-      Value          : Unbounded_String := Null_Unbounded_String;
-      Require_Change : Boolean          := False;
-      On_Error       : On_Error_Hook    := Error;
-      Filters        : Config.Filters.Set;
+      Id          : Actions.Id;
+      Action_Type : Kind             := Default;
+      Value       : Unbounded_String := Null_Unbounded_String;
+      Status      : Unbounded_String := Null_Unbounded_String;
+      On_Error    : On_Error_Hook    := Error;
+      Filters     : Config.Filters.Set;
    end record;
 
    Null_Ref_Action : constant Ref_Action;
@@ -123,11 +123,11 @@ private
                                Result => <>);
 
    Null_Ref_Action : constant Ref_Action :=
-                       Ref_Action'(Id             => Id_Utils.Nil,
-                                   Action_Type    => <>,
-                                   Value          => <>,
-                                   Require_Change => <>,
-                                   On_Error       => <>,
-                                   Filters        => Config.Filters.Null_Set);
+                       Ref_Action'(Id          => Id_Utils.Nil,
+                                   Action_Type => <>,
+                                   Value       => <>,
+                                   Status      => <>,
+                                   On_Error    => <>,
+                                   Filters     => Config.Filters.Null_Set);
 
 end Savadur.Actions;
