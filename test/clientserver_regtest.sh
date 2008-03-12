@@ -50,6 +50,8 @@ SAVADUR_DIR=$PWD/test-dir/client ./bin/savadur --client -VV  \
 SAVADUR_DIR=$PWD/test-dir/client ./bin/savadur --client -VV  &
 PID_CLIENT=$!
 
+trap 'kill $PID_SERVER $PID_CLIENT; exit' 2
+
 sleep 5
 
 wget --no-proxy "http://localhost:8181/run?p=style_checker&s=default&l=5"
@@ -100,8 +102,6 @@ TL=test-dir/logs
 #  Wait for last regtests log
 
 echo 'Press CTRL-C to kill'
-
-trap 'kill $PID_SERVER $PID_CLIENT; exit' 2
 
 while [ ! -f $TL/3-machine-@ENDACTION@ ]; do
     sleep 1
