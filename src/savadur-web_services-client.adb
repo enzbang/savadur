@@ -47,16 +47,21 @@ package body Savadur.Web_Services.Client is
 
    Status_Updater : access Update_Status := null;
 
-   type Report_Data is record
+   type Report_Data (Start_Only : Boolean := False) is record
       Key          : Unbounded_String;
       Project_Name : Unbounded_String;
       Scenario     : Unbounded_String;
       Action       : Actions.Id;
-      Output       : Unbounded_String;
-      Result       : Boolean;
       Job_Id       : Natural;
       Number       : Natural := 0;
-      Diff_Data    : Client.Diff_Data;
+      case Start_Only is
+        when False =>
+          Output       : Unbounded_String;
+          Result       : Boolean;
+          Diff_Data    : Client.Diff_Data;
+         when True =>
+            null;
+      end case;
    end record;
 
    function "<" (R1, R2 : in Report_Data) return Boolean;
@@ -254,7 +259,19 @@ package body Savadur.Web_Services.Client is
       Job_Id       : in Natural)
    is
    begin
-      Database.Log_Start (Key, Project_Name, Scenario, Action, Job_Id);
+      if Status_Updater = null then
+         Status_Updater := new Update_Status;
+      end if;
+
+      Report_Handler.Add
+        (Report_Data'(Start_Only   => True,
+                      Key          => +Key,
+                      Project_Name => +Project_Name,
+                      Scenario     => +Scenario,
+                      Action       => Actions.Id_Utils.Value (Action),
+                      Job_Id       => Job_Id,
+                      Number       => <>));
+--      Database.Log_Start (Key, Project_Name, Scenario, Action, Job_Id);
    end Status_Start;
 
    ------------
@@ -276,15 +293,16 @@ package body Savadur.Web_Services.Client is
       end if;
 
       Report_Handler.Add
-        (Report_Data'(Key => +Key,
+        (Report_Data'(Start_Only   => False,
+                      Key          => +Key,
                       Project_Name => +Project_Name,
                       Scenario     => +Scenario,
                       Action       => Actions.Id_Utils.Value (Action),
                       Output       => +Output,
                       Result       => Result,
                       Job_Id       => Job_Id,
-                      Number       => <>,
-                      Diff_Data    => Diff_Data));
+                      Diff_Data    => Diff_Data,
+                      Number       => <>));
    end Status;
 
    -------------------
@@ -299,74 +317,85 @@ package body Savadur.Web_Services.Client is
          --  Wait for a new report data to be ready
          Report_Handler.Get (Report);
 
-         Handle_Report : begin
+         if Report.Start_Only then
             Logs.Write (-Report.Key & ":" & (-Report.Project_Name));
             Logs.Write
               ("Running Job Id" & Natural'Image (Report.Job_Id)
                & " :: " & (-Report.Scenario)
                & "/" & (Actions.Id_Utils.To_String (Report.Action)));
-            Logs.Write ("Output is " & (-Report.Output));
-            Logs.Write (Boolean'Image (Report.Result));
+            Database.Log_Start
+              (Key          => -Report.Key,
+               Project_Name => -Report.Project_Name,
+               Scenario     => -Report.Scenario,
+               Action       => Actions.Id_Utils.To_String (Report.Action),
+               Job_Id       => Report.Job_Id);
+         else
 
-            if Report.Action = Actions.End_Action.Id then
-               Clients.Set_Status (-Report.Key, Clients.Idle);
-               --  End of scenario. Final status
-               Database.Final_Status
-                 (-Report.Key, -Report.Project_Name, -Report.Scenario,
-                  Report.Result, Report.Job_Id);
+            Handle_Report : begin
+               Logs.Write ("Output is " & (-Report.Output));
+               Logs.Write (Boolean'Image (Report.Result));
+               if Report.Action = Actions.End_Action.Id then
+                  Clients.Set_Status (-Report.Key, Clients.Idle);
+                  --  End of scenario. Final status
+                  Database.Final_Status
+                    (-Report.Key, -Report.Project_Name, -Report.Scenario,
+                     Report.Result, Report.Job_Id);
 
-               --  Send notification messages
+                  --  Send notification messages
 
-               Savadur.Database.Send_Notifications
-                 (Project_Name   => -Report.Project_Name,
-                  Send_Mail_Hook => Savadur.Notifications.Send_Mail'Access,
-                  Send_XMPP_Hook => Savadur.Notifications.XMPP_Send'Access,
-                  Subject        => "Running " & (-Report.Project_Name),
-                  Content        => "End with "
-                    & Boolean'Image (Report.Result)
-                    & " when running scenario " & (-Report.Scenario));
+                  Savadur.Database.Send_Notifications
+                    (Project_Name   => -Report.Project_Name,
+                     Send_Mail_Hook => Savadur.Notifications.Send_Mail'Access,
+                     Send_XMPP_Hook => Savadur.Notifications.XMPP_Send'Access,
+                     Subject        => "Running " & (-Report.Project_Name),
+                     Content        => "End with "
+                     & Boolean'Image (Report.Result)
+                     & " when running scenario " & (-Report.Scenario));
 
-               --  Update RSS file
+                  --  Update RSS file
 
-               Notifications.Update_RSS;
+                  Notifications.Update_RSS;
 
-            else
-               Clients.Set_Status
-                 (Key     => -Report.Key,
-                  Status  => Clients.Busy,
-                  Message => Actions.Id_Utils.To_String (Report.Action) & " on "
-                  & (-Report.Project_Name) & " (" & (-Report.Scenario) & ")");
+               else
+                  Clients.Set_Status
+                    (Key     => -Report.Key,
+                     Status  => Clients.Busy,
+                     Message => Actions.Id_Utils.To_String (Report.Action)
+                     & " on " & (-Report.Project_Name)
+                     & " (" & (-Report.Scenario) & ")");
 
-               --  This is the action log. Scenario is in progress
-               Database.Log
-                 (-Report.Key, -Report.Project_Name, -Report.Scenario,
-                  Actions.Id_Utils.To_String (Report.Action), -Report.Output,
-                  Report.Result, Report.Job_Id);
-            end if;
+                  --  This is the action log. Scenario is in progress
+                  Database.Log
+                    (-Report.Key, -Report.Project_Name, -Report.Scenario,
+                     Actions.Id_Utils.To_String (Report.Action), -Report.Output,
+                     Report.Result, Report.Job_Id);
+               end if;
 
-            if not Report.Result then
-               --  In all cases, if result is an error we send an e-amil to all
-               --  committers.
+               if not Report.Result then
+                  --  In all cases, if result is an error we send an e-amil to
+                  --  all committers.
 
-               Send_Mails :
-               for K in Report.Diff_Data.Committers.Item'Range loop
-                  Savadur.Notifications.Send_Mail
-                    (Email   =>
-                       To_String (Report.Diff_Data.Committers.Item (K)),
-                     Subject => "Regression on project "
-                       & To_String (Report.Project_Name),
-                     Content =>  "Diff from " & To_String (Report.Diff_Data.V1)
-                       & " to " & To_String (Report.Diff_Data.V2) & ASCII.LF
-                       & "when running scenario "
-                       & To_String (Report.Scenario) & ASCII.LF);
-               end loop Send_Mails;
-            end if;
-         exception
-            when E : others =>
-               Logs.Write
-                 ("Update_Status exception : " & Exception_Information (E),
-                  Kind => Morzhol.Logs.Error);
-         end Handle_Report;
+                  Send_Mails :
+                  for K in Report.Diff_Data.Committers.Item'Range loop
+                     Savadur.Notifications.Send_Mail
+                       (Email   =>
+                          To_String (Report.Diff_Data.Committers.Item (K)),
+                        Subject => "Regression on project "
+                        & To_String (Report.Project_Name),
+                        Content =>  "Diff from "
+                        & To_String (Report.Diff_Data.V1)
+                        & " to " & To_String (Report.Diff_Data.V2) & ASCII.LF
+                        & "when running scenario "
+                        & To_String (Report.Scenario) & ASCII.LF);
+                  end loop Send_Mails;
+               end if;
+            exception
+               when E : others =>
+                  Logs.Write
+                    ("Update_Status exception : " & Exception_Information (E),
+                     Kind => Morzhol.Logs.Error);
+            end Handle_Report;
+         end if;
       end loop For_Every_Report;
    end Update_Status;
 
