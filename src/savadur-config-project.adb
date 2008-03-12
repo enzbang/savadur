@@ -238,7 +238,7 @@ package body Savadur.Config.Project is
       else
          Logs.Write (Content => "Try loading unknown project " & Project_Name,
                      Kind    => Logs.Handler.Error);
-         raise Config_Error
+         raise IO_Exceptions.Name_Error
            with "Try loading unknown project " & Project_Name;
       end if;
    end Get;
