@@ -74,13 +74,11 @@ package body Savadur.Config.Filters is
 
    function Get (Id : in Filter_Id) return Filter is
    begin
-      return Maps.Element (Id);
-   exception
-      when Constraint_Error =>
-         Logs.Write
-           ("Cannot found filter Id=" & Id_Utils.To_String (Id),
-            Logs.Handler.Error);
-         raise;
+      if Maps.Contains (Id) then
+         return Maps.Element (Id);
+      else
+         return Null_Filter;
+      end if;
    end Get;
 
    ------------

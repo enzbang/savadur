@@ -52,7 +52,7 @@ package Savadur.Config.Filters is
    Null_Filter : constant Filter;
 
    function Get (Id : in Filter_Id) return Filter;
-   --  Returns the filter with the given Id
+   --  Returns the filter with the given Id or Null_Filter if not found
 
    procedure Start_Element
      (Prefix        : in String;
