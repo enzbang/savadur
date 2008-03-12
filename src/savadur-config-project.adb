@@ -460,6 +460,7 @@ package body Savadur.Config.Project is
                      then
                         Handler.Action.Id :=
                           Actions.Id_Utils.Value (Get_Value (Atts, Position));
+
                      else
                         Handler.Ref_Action.Id :=
                           Actions.Id_Utils.Value (Get_Value (Atts, Position));
@@ -488,7 +489,7 @@ package body Savadur.Config.Project is
 
                   when Action | SCM_Action =>
                      if not Handler.Inside_Scenario then
-                        raise Config_Error with "Unknow attribute "
+                        raise Config_Error with "(Project) Unknown attribute "
                           & Node_Value'Image (NV) & "."
                           & Get_Qname (Atts, Position);
                      end if;
@@ -502,7 +503,7 @@ package body Savadur.Config.Project is
                case NV is
                   when Action | SCM_Action =>
                      if Handler.Inside_Scenario then
-                        raise Config_Error with "Unknow attribute "
+                        raise Config_Error with "(Project) Unknown attribute "
                           & Node_Value'Image (NV) & "."
                           & Get_Qname (Atts, Position);
                      end if;
@@ -512,10 +513,11 @@ package body Savadur.Config.Project is
                             (Get_Value (Atts, Position));
                      exception
                         when Constraint_Error =>
-                           raise Config_Error with "Unknow attribute value "
-                             & Node_Value'Image (NV) & "."
-                             & Get_Qname (Atts, Position)
-                             & " value = " & Get_Value (Atts, Position);
+                           raise Config_Error
+                             with "(Project) Unknown attribute value "
+                               & Node_Value'Image (NV) & "."
+                               & Get_Qname (Atts, Position)
+                               & " value = " & Get_Value (Atts, Position);
                      end Get_Action_Result_Type;
 
                   when others =>
@@ -526,9 +528,10 @@ package body Savadur.Config.Project is
                case NV is
                   when Action | SCM_Action =>
                      if not Handler.Inside_Scenario then
-                        raise Config_Error with "Unknow attribute "
-                          & Node_Value'Image (NV) & "."
-                          & Get_Qname (Atts, Position);
+                        raise Config_Error
+                          with "(Project) Unknown attribute "
+                            & Node_Value'Image (NV) & "."
+                            & Get_Qname (Atts, Position);
                      end if;
 
                      Get_Require_Change_Value : begin
@@ -536,10 +539,11 @@ package body Savadur.Config.Project is
                           Boolean'Value (Get_Value (Atts, Position));
                      exception
                         when Constraint_Error =>
-                           raise Config_Error with "Unknow attribute value "
-                             & Node_Value'Image (NV) & "."
-                             & Get_Qname (Atts, Position)
-                             & " value = " & Get_Value (Atts, Position);
+                           raise Config_Error
+                             with "(Project) Unknown attribute value "
+                               & Node_Value'Image (NV) & "."
+                               & Get_Qname (Atts, Position)
+                               & " value = " & Get_Value (Atts, Position);
                      end Get_Require_Change_Value;
 
                   when others =>
@@ -550,7 +554,7 @@ package body Savadur.Config.Project is
                case NV is
                   when Action | SCM_Action =>
                      if not Handler.Inside_Scenario then
-                        raise Config_Error with "Unknow attribute "
+                        raise Config_Error with "(Project) Unknown attribute "
                           & Node_Value'Image (NV) & "."
                           & Get_Qname (Atts, Position);
                      end if;
@@ -561,10 +565,11 @@ package body Savadur.Config.Project is
                             (Get_Value (Atts, Position));
                      exception
                         when Constraint_Error =>
-                           raise Config_Error with "Unknow attribute value "
-                             & Node_Value'Image (NV) & "."
-                             & Get_Qname (Atts, Position)
-                             & " value = " & Get_Value (Atts, Position);
+                           raise Config_Error
+                             with "(Project) Unknown attribute value "
+                               & Node_Value'Image (NV) & "."
+                               & Get_Qname (Atts, Position)
+                               & " value = " & Get_Value (Atts, Position);
                      end Get_On_Error_Value;
 
                   when others =>

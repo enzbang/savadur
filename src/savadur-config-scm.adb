@@ -51,11 +51,11 @@ package body Savadur.Config.SCM is
    type XML_Schema is array (Node_Value) of XML_Attribute;
 
    Schema : constant XML_Schema := XML_Schema'
-     (SCM           => XML_Attribute'(Id            => False, others => False),
-      Cmd           => XML_Attribute'(others => False),
-      Action        => XML_Attribute'(Id | Result   => True, others => False),
-      Name          => XML_Attribute'(Id            => True, others => False),
-      Filter        => XML_Attribute'(others => False));
+     (SCM    => XML_Attribute'(Id            => False, others => False),
+      Cmd    => XML_Attribute'(others => False),
+      Action => XML_Attribute'(Id | Result   => True, others => False),
+      Name   => XML_Attribute'(Id            => True, others => False),
+      Filter => XML_Attribute'(others => False));
 
    function Get_Node_Value (S : in String) return Node_Value;
    --  Returns the node value matching the given string or raise Config_Error
