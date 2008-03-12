@@ -21,6 +21,7 @@
 
 with Ada.Characters.Handling;
 with Ada.Streams.Stream_IO;
+with Ada.Strings.Fixed;
 
 with GNAT.Regpat;
 
@@ -145,7 +146,11 @@ package body Savadur.Utils is
             Append (Result, ASCII.LF);
          end if;
 
-         Append (Result, Content (Matches (N).First .. Matches (N).Last));
+         Append
+           (Result,
+            Strings.Fixed.Trim
+              (Content (Matches (N).First .. Matches (N).Last),
+               Side => Strings.Both));
          First := Matches (1).Last + 1;
       end loop;
 
