@@ -90,9 +90,18 @@ package body Savadur.Build is
                           Projects.Project_State_Directory (Project);
       Result          : Boolean := True;
    begin
+      --  Set the exit status from the return code
+
       if Exec_Action.Result = Actions.Exit_Status then
          if Ref.Value /= "" then
-            Result := Return_Code = Integer'Value (-Ref.Value);
+            begin
+               Result := Return_Code = Integer'Value (-Ref.Value);
+            exception
+               when Constraint_Error =>
+                  raise Command_Parse_Error
+                    with "Value " & (-Ref.Value) & " is not an exit status";
+            end;
+
          else
             Result := Return_Code = 0;
          end if;
@@ -263,10 +272,6 @@ package body Savadur.Build is
       end if;
 
       return Result;
-   exception
-      when Constraint_Error =>
-         raise Command_Parse_Error
-           with "Value " & (-Ref.Value) & " is not an exit status";
    end Check;
 
    -------------
