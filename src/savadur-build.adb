@@ -71,6 +71,51 @@ package body Savadur.Build is
       return Boolean;
    --  ???
 
+   procedure Apply_Filters
+     (Filename : in String;
+      Filters  : in Config.Filters.Set);
+   --  Apply all filters from the content of the given filename. Write output
+   --  into file names computed from the filename and the filter name as
+   --  follow: <filename>.<filter_name>.
+
+   -------------------
+   -- Apply_Filters --
+   -------------------
+
+   procedure Apply_Filters
+     (Filename : in String;
+      Filters  : in Config.Filters.Set)
+   is
+      use type Config.Filters.Filter_Id;
+   begin
+      for K in Filters'Range loop
+         if not (Filters (K) = Config.Filters.Id_Utils.Nil) then
+            Logs.Write
+              ("Apply_Filters on " & Filename, Logs.Handler.Very_Verbose);
+
+            declare
+               Content       : constant String := Utils.Content (Filename);
+               Filter        : constant Config.Filters.Filter :=
+                                 Config.Filters.Get (Filters (K));
+               Filter_Output : constant String :=
+                                 Filename & "."
+                                   & Config.Filters.Simple_Name (Filter.Id);
+               Result        : Unbounded_String;
+            begin
+               Result := Utils.Parse
+                 (Content,
+                  Config.Filters.Pattern_Utils.To_String (Filter.Pattern));
+
+               Utils.Set_Content (Filter_Output, To_String (Result));
+            end;
+         end if;
+      end loop;
+
+   exception
+      when Text_IO.Name_Error =>
+         Logs.Write ("Cannot open file : " & Filename, Logs.Handler.Error);
+   end Apply_Filters;
+
    -----------
    -- Check --
    -----------
@@ -287,7 +332,6 @@ package body Savadur.Build is
    is
       use type Actions.Result_Type;
       use type Config.Cmd.Output_Pattern;
-      use type Config.Filters.Filter_Id;
       use Config.Cmd.External_Command_Utils;
       use GNAT.OS_Lib;
 
@@ -408,30 +452,7 @@ package body Savadur.Build is
 
       --  Now apply all filters
 
-      for K in Exec_Action.Cmd.Filters'Range loop
-         if not
-           (Exec_Action.Cmd.Filters (K) = Config.Filters.Id_Utils.Nil)
-         then
-            declare
-               Content       : constant String :=
-                                 Utils.Content (To_String (Output_Filename));
-               Filter        : constant Config.Filters.Filter :=
-                                 Config.Filters.Get
-                                   (Exec_Action.Cmd.Filters (K));
-               Filter_Output : constant String :=
-                                 To_String (Output_Filename)
-                                   & "."
-                                   & Config.Filters.Simple_Name (Filter.Id);
-               Result        : Unbounded_String;
-            begin
-               Result := Utils.Parse
-                 (Content,
-                  Config.Filters.Pattern_Utils.To_String (Filter.Pattern));
-
-               Utils.Set_Content (Filter_Output, To_String (Result));
-            end;
-         end if;
-      end loop;
+      Apply_Filters (To_String (Output_Filename), Exec_Action.Cmd.Filters);
 
       if not Result then
          --  Command failed to execute, do not read the return code
