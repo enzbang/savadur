@@ -36,6 +36,8 @@ package Savadur.Config.Filters is
 
    type Set is array (1 .. 2) of Filter_Id;
 
+   Null_Set : constant Set;
+
    package Id_Utils is new Generic_Utils (Source => Filter_Id);
 
    type Pattern is new Unbounded_String;
@@ -71,5 +73,7 @@ package Savadur.Config.Filters is
 private
 
    Null_Filter : constant Filter := (Id_Utils.Nil, Pattern_Utils.Nil);
+
+   Null_Set : constant Set := (others => Id_Utils.Nil);
 
 end Savadur.Config.Filters;

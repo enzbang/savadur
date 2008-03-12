@@ -69,6 +69,6 @@ private
 
    Null_Command : constant Command :=
                     (External_Command_Utils.Nil, Output_Pattern_Utils.Nil,
-                     Filters => (others => Filters.Id_Utils.Nil));
+                     Filters => Filters.Null_Set);
 
 end Savadur.Config.Cmd;
