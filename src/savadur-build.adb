@@ -19,6 +19,7 @@
 --  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.       --
 ------------------------------------------------------------------------------
 
+with Ada.Characters.Handling;
 with Ada.Directories;
 with Ada.Exceptions;
 with Ada.Integer_Text_IO;
@@ -746,19 +747,21 @@ package body Savadur.Build is
    is
       Log_Directory : constant String :=
                         Projects.Project_Log_Directory (Project);
+      A_Id          : constant String :=
+                        Characters.Handling.To_Lower
+                          (Actions.To_String (Action_Id));
    begin
       if Directory = "" then
          return Directories.Compose
            (Containing_Directory => Log_Directory,
             Name                 =>
-              AWS.Utils.Image (Job_Id) & "-" & Prefix
-            & Actions.To_String (Action_Id));
+              AWS.Utils.Image (Job_Id) & "-" & Prefix & A_Id);
+
       else
          return Directories.Compose
            (Containing_Directory => Directory,
             Name                 =>
-              AWS.Utils.Image (Job_Id) & "-" & Prefix
-            & Actions.To_String (Action_Id));
+              AWS.Utils.Image (Job_Id) & "-" & Prefix & A_Id);
       end if;
    end Log_Filename;
 
