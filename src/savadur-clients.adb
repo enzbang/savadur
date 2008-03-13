@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                                Savadur                                   --
 --                                                                          --
---                           Copyright (C) 2007                             --
+--                         Copyright (C) 2007-2008                          --
 --                      Pascal Obry - Olivier Ramonat                       --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -19,7 +19,7 @@
 --  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.       --
 ------------------------------------------------------------------------------
 
-with Ada.Strings.Hash;
+with Ada.Strings.Hash_Case_Insensitive;
 
 with Savadur.Logs;
 with Savadur.Utils;
@@ -140,7 +140,7 @@ package body Savadur.Clients is
 
    function Hash (Client : in Clients.Client) return Containers.Hash_Type is
    begin
-      return Strings.Hash (To_String (Client.Key));
+      return Strings.Hash_Case_Insensitive (To_String (Client.Key));
    end Hash;
 
    -----------

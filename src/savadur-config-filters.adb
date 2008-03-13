@@ -22,7 +22,7 @@
 with Ada.Characters.Handling;
 with Ada.Containers.Hashed_Maps;
 with Ada.Strings.Fixed;
-with Ada.Strings.Unbounded.Hash;
+with Ada.Strings.Hash_Case_Insensitive;
 
 with Sax.Attributes;
 
@@ -60,7 +60,7 @@ package body Savadur.Config.Filters is
 
    function Hash (Key : in Filter_Id) return Containers.Hash_Type is
    begin
-      return Strings.Unbounded.Hash (Id_Utils.To_Unbounded_String (Key));
+      return Strings.Hash_Case_Insensitive (Id_Utils.To_String (Key));
    end Hash;
 
    package Filters_Map is

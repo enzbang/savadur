@@ -19,7 +19,7 @@
 --  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.       --
 ------------------------------------------------------------------------------
 
-with Ada.Strings.Hash;
+with Ada.Strings.Hash_Case_Insensitive;
 
 package body Savadur.Actions is
 
@@ -38,7 +38,7 @@ package body Savadur.Actions is
 
    function Hash (Key : in Id) return Containers.Hash_Type is
    begin
-      return Ada.Strings.Hash (To_String (Key));
+      return Ada.Strings.Hash_Case_Insensitive (To_String (Key));
    end Hash;
    -----------
    -- Image --
