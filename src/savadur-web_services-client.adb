@@ -299,7 +299,9 @@ package body Savadur.Web_Services.Client is
 
             if Report.Action = Actions.End_Action.Id then
                Clients.Set_Status (-Report.Key, Clients.Idle);
+
                --  End of scenario. Final status
+
                Database.Final_Status
                  (-Report.Key, -Report.Project_Name, -Report.Scenario,
                   Report.Result, Report.Job_Id);
@@ -323,10 +325,12 @@ package body Savadur.Web_Services.Client is
                Clients.Set_Status
                  (Key     => -Report.Key,
                   Status  => Clients.Busy,
-                  Message => Actions.Id_Utils.To_String (Report.Action) & " on "
-                  & (-Report.Project_Name) & " (" & (-Report.Scenario) & ")");
+                  Message => Actions.Id_Utils.To_String (Report.Action)
+                  & " on " & (-Report.Project_Name)
+                  & " (" & (-Report.Scenario) & ")");
 
                --  This is the action log. Scenario is in progress
+
                Database.Log
                  (-Report.Key, -Report.Project_Name, -Report.Scenario,
                   Actions.Id_Utils.To_String (Report.Action), -Report.Output,
