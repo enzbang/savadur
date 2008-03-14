@@ -90,7 +90,11 @@
                   <a href="/log/@_LOGS_ID_@">
                     <span class="timestamp">@_LOGS_START_DATE_@</span>
                     <span class="timestamp">@_LOGS_STOP_DATE_@</span>
-                    <span class="timestamp">@_LOGS_DURATION_@</span>
+                    @@IF@@ @_LOGS_STOP_DATE_@ /= ""
+                      <span class="timestamp">@_LOGS_DURATION_@</span>
+                    @@ELSE@@
+                      <span class="timestamp">@_LOGS_LAST_DURATION_@</span>
+                    @END_IF@@
                     @_LOGS_ACTION_@
                   </a>
                 </td>

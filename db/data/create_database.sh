@@ -39,8 +39,23 @@ create table logs (
 "job_id" integer,
 "start_date" date default current_timestamp,
 "stop_date" date,
+"last_duration" integer default -1,
 "duration" integer default -1
 );
+
+create trigger set_action_last_duration after insert on logs
+   begin
+      update logs set last_duration =
+        (select duration from logs
+                         where client = new.client
+                           and project = new.project
+                           and scenario = new.scenario
+                           and action = new.action
+                           and rowid != new.rowid
+                         order by job_id desc
+                         limit 1)
+       where rowid = new.rowid;
+   end;
 
 create trigger set_action_duration after update on logs
    begin

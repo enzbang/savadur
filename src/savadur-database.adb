@@ -195,7 +195,10 @@ package body Savadur.Database is
 
       DBH.Handle.Prepare_Select
         (Iter, "select log, project, scenario, status, start_date,"
-         & " stop_date, duration, action"
+         & " stop_date, case when stop_date is null then"
+         & " (last_duration -(julianday(datetime('now'))*86000 -"
+         & " julianday(start_date)*86000)) else duration end,"
+         & " action"
          & " from logs where rowid = " & DB.Tools.I (Id));
 
       if Iter.More then
@@ -222,9 +225,18 @@ package body Savadur.Database is
             Templates.Insert
               (Set, Templates.Assoc
                  ("STOP_DATE", DB.String_Vectors.Element (Line, 6)));
-            Templates.Insert
-              (Set, Templates.Assoc
-                 ("DURATION", DB.String_Vectors.Element (Line, 7)));
+
+            declare
+               Get_Duration : Float := Float'Value (DB.String_Vectors.Element (Line, 7));
+               Duration : Natural := 0;
+            begin
+               if Get_Duration > 0.0 then
+                  Duration := Natural (Float'Rounding (Get_Duration));
+               end if;
+               Templates.Insert
+                 (Set, Templates.Assoc
+                    ("DURATION", Natural'Image (Duration)));
+            end;
             Templates.Insert
               (Set, Templates.Assoc
                  ("ACTION", DB.String_Vectors.Element (Line, 8)));
