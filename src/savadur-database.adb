@@ -304,8 +304,11 @@ package body Savadur.Database is
 
       DBH.Handle.Prepare_Select
         (Iter, "select client, scenario, status, "
-           & "start_date, stop_date, duration, action, job_id, rowid from logs "
-           & "where project = " & DB.Tools.Q (Project_Name)
+           & "start_date, stop_date, case when stop_date is null then"
+           & " (last_duration -(julianday(datetime('now'))*86000 -"
+           & " julianday(start_date)*86000)) else duration end,"
+           & " action, job_id, rowid from logs"
+           & " where project = " & DB.Tools.Q (Project_Name)
            & " order by client ASC, rowid DESC");
 
       while Iter.More loop
@@ -391,8 +394,18 @@ package body Savadur.Database is
            & DB.String_Vectors.Element (Line, 4);
          Stop_Date_Job_Id  := Stop_Date_Job_Id
            & DB.String_Vectors.Element (Line, 5);
-         Duration_Job_Id := Duration_Job_Id
-           & DB.String_Vectors.Element (Line, 6);
+
+         Set_Duration : declare
+            Get_Duration : Float := Float'Value (DB.String_Vectors.Element (Line, 6));
+            Duration : Natural := 0;
+         begin
+            if Get_Duration > 0.0 then
+               Duration := Natural (Float'Rounding (Get_Duration));
+            end if;
+            Duration_Job_Id := Duration_Job_Id
+              & Natural'Image (Duration);
+         end Set_Duration;
+
          Action_Job_Id     := Action_Job_Id
            & DB.String_Vectors.Element (Line, 7);
          Rowid_Job_Id      := Rowid_Job_Id
