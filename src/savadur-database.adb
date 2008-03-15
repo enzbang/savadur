@@ -472,9 +472,10 @@ package body Savadur.Database is
       DBH.Handle.Execute (SQL);
    exception
       when E : DB.DB_Error =>
-         Logs.Handler.Write (Name    => Module,
-                             Content => Exception_Message (E),
-                             Kind    => Logs.Handler.Error);
+         Logs.Handler.Write
+           (Name    => Module,
+            Content => Exception_Message (E),
+            Kind    => Logs.Handler.Error);
    end Log;
 
    -----------
@@ -495,9 +496,10 @@ package body Savadur.Database is
       DBH.Handle.Execute (SQL);
    exception
       when E : DB.DB_Error =>
-         Logs.Handler.Write (Name    => Module,
-                             Content => Exception_Message (E),
-                             Kind    => Logs.Handler.Error);
+         Logs.Handler.Write
+           (Name    => Module,
+            Content => Exception_Message (E),
+            Kind    => Logs.Handler.Error);
    end Login;
 
    ------------
@@ -516,9 +518,10 @@ package body Savadur.Database is
       DBH.Handle.Execute (SQL);
    exception
       when E : DB.DB_Error =>
-         Logs.Handler.Write (Name    => Module,
-                             Content => Exception_Message (E),
-                             Kind    => Logs.Handler.Error);
+         Logs.Handler.Write
+           (Name    => Module,
+            Content => Exception_Message (E),
+            Kind    => Logs.Handler.Error);
    end Logout;
 
    ------------------------
