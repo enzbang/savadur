@@ -52,6 +52,7 @@ package body Savadur.Web_Services.Client is
       Project_Name : Unbounded_String;
       Scenario     : Unbounded_String;
       Action       : Actions.Id;
+      Log_Filename : Unbounded_String;
       Output       : Unbounded_String;
       Result       : Boolean;
       Job_Id       : Natural;
@@ -255,6 +256,7 @@ package body Savadur.Web_Services.Client is
       Project_Name : in String;
       Scenario     : in String;
       Action       : in String;
+      Log_Filename : in String;
       Output       : in String;
       Result       : in Boolean;
       Job_Id       : in Natural;
@@ -269,6 +271,7 @@ package body Savadur.Web_Services.Client is
                       Project_Name => +Project_Name,
                       Scenario     => +Scenario,
                       Action       => Actions.Id_Utils.Value (Action),
+                      Log_Filename => +Log_Filename,
                       Output       => +Output,
                       Result       => Result,
                       Job_Id       => Job_Id,
@@ -333,7 +336,8 @@ package body Savadur.Web_Services.Client is
 
                Database.Log
                  (-Report.Key, -Report.Project_Name, -Report.Scenario,
-                  Actions.Id_Utils.To_String (Report.Action), -Report.Output,
+                  Actions.Id_Utils.To_String (Report.Action),
+                  -Report.Log_Filename, -Report.Output,
                   Report.Result, Report.Job_Id);
             end if;
 

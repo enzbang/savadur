@@ -31,6 +31,7 @@ with Morzhol.Strings;
 
 with Savadur.Config;
 with Savadur.Logs;
+with Savadur.Utils;
 
 package body Savadur.Database is
 
@@ -186,41 +187,52 @@ package body Savadur.Database is
    function Get_Log_Content
      (Id : in Positive) return Templates.Translate_Set
    is
+      use Savadur.Utils;
+
       DBH  : constant TLS_DBH_Access := TLS_DBH_Access (DBH_TLS.Reference);
       Iter : DB.SQLite.Iterator;
       Line : DB.String_Vectors.Vector;
       Set  : Templates.Translate_Set;
+      Log  : Unbounded_String;
    begin
       Connect (DBH);
 
       DBH.Handle.Prepare_Select
-        (Iter, "select log, project, scenario, status, date, action"
+        (Iter, "select filename, log, project, scenario, status, date, action"
            & " from logs where rowid = " & DB.Tools.I (Id));
 
       if Iter.More then
          Iter.Get_Line (Line);
 
          Get_Content : begin
+            --  Get the log content in priority from the specified filename as
+            --  the log is not cut here. If filename is not defined then return
+            --  the stored log in the database.
+
+            if DB.String_Vectors.Element (Line, 1) /= "" then
+               Log := +Utils.Content (DB.String_Vectors.Element (Line, 1));
+            else
+               Log := +DB.String_Vectors.Element (Line, 2);
+            end if;
+
             Templates.Insert
               (Set, Templates.Assoc
-                 ("LOG_CONTENT",
-                  Morzhol.Strings.HTML_To_Text
-                    (DB.String_Vectors.Element (Line, 1))));
+                 ("LOG_CONTENT", Morzhol.Strings.HTML_To_Text (-Log)));
             Templates.Insert
               (Set, Templates.Assoc
-                 ("PROJECT_NAME", DB.String_Vectors.Element (Line, 2)));
+                 ("PROJECT_NAME", DB.String_Vectors.Element (Line, 3)));
             Templates.Insert
               (Set, Templates.Assoc
-                 ("SCENARIO", DB.String_Vectors.Element (Line, 3)));
+                 ("SCENARIO", DB.String_Vectors.Element (Line, 4)));
             Templates.Insert
               (Set, Templates.Assoc
-                 ("STATUS", DB.String_Vectors.Element (Line, 4)));
+                 ("STATUS", DB.String_Vectors.Element (Line, 5)));
             Templates.Insert
               (Set, Templates.Assoc
-                 ("DATE", DB.String_Vectors.Element (Line, 5)));
+                 ("DATE", DB.String_Vectors.Element (Line, 6)));
             Templates.Insert
               (Set, Templates.Assoc
-                 ("ACTION", DB.String_Vectors.Element (Line, 6)));
+                 ("ACTION", DB.String_Vectors.Element (Line, 7)));
 
             Line.Clear;
             Iter.End_Select;
@@ -441,6 +453,7 @@ package body Savadur.Database is
       Project_Name : in String;
       Scenario     : in String;
       Action       : in String;
+      Filename     : in String;
       Output       : in String;
       Result       : in Boolean;
       Job_Id       : in Natural)
@@ -449,10 +462,10 @@ package body Savadur.Database is
 
       DBH : constant TLS_DBH_Access := TLS_DBH_Access (DBH_TLS.Reference);
       SQL : constant String := "insert into logs (project, client, scenario,"
-        & "action, log, status, job_id) values ("
+        & "action, filename, log, status, job_id) values ("
         & Q (Project_Name) & ", " & Q (Key)
         & ", " & Q (Scenario) & ", " & Q (Action)
-        & ", " & Q (Output) & ", " & Q (Result)
+        & ", " & Q (Filename) & ", " & Q (Output) & ", " & Q (Result)
         & ", " & I (Job_Id) & ")";
    begin
       Connect (DBH);

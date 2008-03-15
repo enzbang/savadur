@@ -32,6 +32,7 @@ package Savadur.Database is
       Project_Name : in String;
       Scenario     : in String;
       Action       : in String;
+      Filename     : in String;
       Output       : in String;
       Result       : in Boolean;
       Job_Id       : in Natural);

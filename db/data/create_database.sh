@@ -35,6 +35,7 @@ create table logs (
 "scenario" varchar(50) not null,
 "action" varchar(50) not null,
 "log" longtext,
+"filename" varchar(255),
 "status" boolean,
 "job_id" integer,
 "date" date default current_timestamp

@@ -78,6 +78,7 @@ package Savadur.Web_Services.Client is
       Project_Name : in String;
       Scenario     : in String;
       Action       : in String;
+      Log_Filename : in String;
       Output       : in String;
       Result       : in Boolean;
       Job_Id       : in Natural;

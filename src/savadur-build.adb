@@ -839,6 +839,8 @@ package body Savadur.Build is
             end if;
          end Log_Content;
 
+         L_Filename : Unbounded_String;
+
       begin
          if Config.Client_Server then
 
@@ -855,12 +857,12 @@ package body Savadur.Build is
                if Servers.Log_Path (Server) /= "" then
                   --  Write log to this location
                   if Directories.Exists (Servers.Log_Path (Server)) then
-                     Utils.Set_Content
-                       (Log_Filename
-                          (Project, Action_Id, Job_Id,
-                           Directory => Servers.Log_Path (Server),
-                           Prefix    => Servers.Log_Prefix (Server)),
-                        Log_Content);
+                     L_Filename := +Log_Filename
+                         (Project, Action_Id, Job_Id,
+                          Directory => Servers.Log_Path (Server),
+                          Prefix    => Servers.Log_Prefix (Server));
+
+                     Utils.Set_Content (-L_Filename, Log_Content);
                   else
                      Logs.Write
                        ("log directory does not exists: "
@@ -874,6 +876,7 @@ package body Savadur.Build is
                     Projects.Id_Utils.To_String (Project.Project_Id),
                   Scenario     => Scenarios.Id_Utils.To_String (Id),
                   Action       => Actions.Id_Utils.To_String (Action_Id),
+                  Log_Filename => -L_Filename,
                   Output       => Log_Content (Servers.Send_Log (Server)),
                   Result       => Status,
                   Job_Id       => Job_Id,
