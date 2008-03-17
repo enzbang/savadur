@@ -275,7 +275,6 @@ package body Savadur.Web_Services.Client is
                       Action       => Actions.Id_Utils.Value (Action),
                       Job_Id       => Job_Id,
                       Number       => <>));
---      Database.Log_Start (Key, Project_Name, Scenario, Action, Job_Id);
    end Status_Start;
 
    ------------
