@@ -39,7 +39,7 @@
         <h3>With the following log : </h3>
 
         <pre>@_LOG_CONTENT_@</pre>
-      @END_IF@@
+      @@END_IF@@
     </div>
   </body>
 </html>
