@@ -87,16 +87,15 @@
                    class="log-success"
                    @@END_IF@@
                    >
-                  <a href="/log/@_LOGS_ID_@">
-                    <span class="timestamp">@_LOGS_START_DATE_@</span>
-                    <span class="timestamp">@_LOGS_STOP_DATE_@</span>
+                  <a href="/log/@_LOGS_ID_@" title="Started at @_LOGS_START_DATE_@
+
+Stop at @_LOGS_STOP_DATE_@">
+                    @_LOGS_ACTION_@</a>
                     @@IF@@ @_LOGS_STOP_DATE_@ /= ""
-                      <span class="timestamp">@_LOGS_DURATION_@</span>
+                      <span class="timestamp">@_LOGS_DURATION_@s</span>
                     @@ELSE@@
-                      <span class="timestamp">@_LOGS_LAST_DURATION_@</span>
-                    @END_IF@@
-                    @_LOGS_ACTION_@
-                  </a>
+                      <span class="timestamp">ETA in @_LOGS_LAST_DURATION_@s</span>
+                    @@END_IF@@
                 </td>
               </tr>
               @@END_IF@@
@@ -106,6 +105,8 @@
                    href="/run?p=@_PROJECT_NAME_@&amp;s=@_LOGS_SCENARIO_@&amp;l=1">
                   <img src="/img/restart.png" alt="restart job" />
                 </a>
+                <br/>
+                <span class="timestamp">Started at @_LOGS_SCENARIO_START_DATE_@</span>
               </th>
             </table>
             @@END_IF@@
