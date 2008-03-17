@@ -34,6 +34,7 @@ with Ada.Text_IO;
 
 with Savadur.Client_Service.Client;
 with Savadur.Client_Service.Types;
+with Savadur.Clients;
 with Savadur.Config.Client;
 with Savadur.Config.Environment_Variables;
 with Savadur.Config.Project;
@@ -43,6 +44,7 @@ with Savadur.Config.SCM;
 with Savadur.Config.Server;
 with Savadur.Jobs.Client;
 with Savadur.Logs;
+with Savadur.Project_List;
 with Savadur.Projects;
 with Savadur.Utils;
 with Savadur.Version;
@@ -52,6 +54,7 @@ with Savadur.Servers;
 with Savadur.Signed_Files;
 with Savadur.Web.Client;
 with Savadur.Web.Server;
+with Savadur.Web_Services.Client;
 
 with SOAP;
 
@@ -324,6 +327,10 @@ procedure Savadur.Bin is
       Config.Project.Parse;
       Config.Project_List.Parse;
       Config.Notifications.Parse;
+
+      Project_List.Iterate_On_Clients
+        (Project_List => Config.Project_List.Configurations,
+         Action       => Clients.Register'Access);
 
       Web.Server.Start;
 

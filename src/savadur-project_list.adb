@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                                Savadur                                   --
 --                                                                          --
---                           Copyright (C) 2007                             --
+--                         Copyright (C) 2007-2008                          --
 --                      Pascal Obry - Olivier Ramonat                       --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -20,8 +20,11 @@
 ------------------------------------------------------------------------------
 
 with Savadur.Config.Project_List;
+with Savadur.Utils;
 
 package body Savadur.Project_List is
+
+   use Savadur.Utils;
 
    -----------------
    -- Get_Clients --
@@ -103,6 +106,50 @@ package body Savadur.Project_List is
 
       return To_String (Result);
    end Image;
+
+   ------------------------
+   -- Iterate_On_Clients --
+   ------------------------
+
+   procedure Iterate_On_Clients
+     (Project_List : in Projects.Map; Action : in Iterate_Action) is
+      Position : Projects.Cursor := Project_List.First;
+   begin
+      --  For all projects
+
+      while Projects.Has_Element (Position) loop
+         Get_Scenarios_List : declare
+            M_Scerarios                : constant Scenarios.Map :=
+                                            Projects.Element (Position);
+            Scenarios_Position         : Scenarios.Cursor       :=
+                                            M_Scerarios.First;
+         begin
+            --  For all projects scenarios
+
+            while Scenarios.Has_Element (Scenarios_Position) loop
+
+               Get_Projects_List : declare
+                  V_Clients          : constant Clients.Vector :=
+                                          Scenarios.Element
+                                              (Scenarios_Position);
+                  Clients_Position   : Clients.Cursor := V_Clients.First;
+               begin
+
+                  --  For all clients registered for this scenario
+
+                  while Clients.Has_Element (Clients_Position) loop
+                     Action.all (-Clients.Element (Clients_Position).Key);
+                     Clients.Next (Clients_Position);
+                  end loop;
+               end Get_Projects_List;
+
+               Scenarios.Next (Scenarios_Position);
+            end loop;
+         end Get_Scenarios_List;
+
+         Projects.Next (Position);
+      end loop;
+   end Iterate_On_Clients;
 
    ------------
    -- To_Set --

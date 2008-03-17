@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                                Savadur                                   --
 --                                                                          --
---                           Copyright (C) 2007                             --
+--                         Copyright (C) 2007-2008                          --
 --                      Pascal Obry - Olivier Ramonat                       --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -69,5 +69,11 @@ package Savadur.Project_List is
    function To_Set
      (Project_List : in Projects.Map) return AWS.Templates.Translate_Set;
    --  Returns a translate set
+
+   type Iterate_Action is access procedure (Client : in String);
+
+   procedure Iterate_On_Clients
+     (Project_List : in Projects.Map; Action : in Iterate_Action);
+   --  Iterate the given action on all clients
 
 end Savadur.Project_List;

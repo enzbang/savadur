@@ -50,6 +50,9 @@ package Savadur.Clients is
       Callback_Endpoint : in String);
    --  Register a new client
 
+   procedure Register (Key : in String);
+   --  Register a new offline client
+
    procedure Set_Status
      (Key : in String; Status : in Client_Status; Message : in String := "");
    --  Update the client status

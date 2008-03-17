@@ -252,6 +252,20 @@ package body Savadur.Clients is
 
    end Register;
 
+   --------------
+   -- Register --
+   --------------
+
+   procedure Register (Key : in String) is
+   begin
+      if not Has_Element (Find (Key)) then
+         Clients.Registered.Insert
+           (New_Item => Client'(+Key, Savadur.Web_Services.Client.No_Metadata,
+                                Clients.Offline, +"", +"",
+                                Running  => <>));
+      end if;
+   end Register;
+
    ----------------
    -- Set_Status --
    ----------------
