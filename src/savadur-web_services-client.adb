@@ -251,6 +251,10 @@ package body Savadur.Web_Services.Client is
 
    end Report_Handler;
 
+   ------------------
+   -- Status_Start --
+   ------------------
+
    procedure Status_Start
      (Key          : in String;
       Project_Name : in String;
@@ -323,17 +327,20 @@ package body Savadur.Web_Services.Client is
               ("Running Job Id" & Natural'Image (Report.Job_Id)
                & " :: " & (-Report.Scenario)
                & "/" & (Actions.Id_Utils.To_String (Report.Action)));
+
             Database.Log_Start
               (Key          => -Report.Key,
                Project_Name => -Report.Project_Name,
                Scenario     => -Report.Scenario,
                Action       => Actions.Id_Utils.To_String (Report.Action),
                Job_Id       => Report.Job_Id);
+
          else
 
             Handle_Report : begin
                Logs.Write ("Output is " & (-Report.Output));
                Logs.Write (Boolean'Image (Report.Result));
+
                if Report.Action = Actions.End_Action.Id then
                   Clients.Set_Status (-Report.Key, Clients.Idle);
                   --  End of scenario. Final status
@@ -367,8 +374,8 @@ package body Savadur.Web_Services.Client is
                   --  This is the action log. Scenario is in progress
                   Database.Log
                     (-Report.Key, -Report.Project_Name, -Report.Scenario,
-                     Actions.Id_Utils.To_String (Report.Action), -Report.Output,
-                     Report.Result, Report.Job_Id);
+                     Actions.Id_Utils.To_String (Report.Action),
+                     -Report.Output, Report.Result, Report.Job_Id);
                end if;
 
                if not Report.Result then
@@ -389,6 +396,7 @@ package body Savadur.Web_Services.Client is
                         & To_String (Report.Scenario) & ASCII.LF);
                   end loop Send_Mails;
                end if;
+
             exception
                when E : others =>
                   Logs.Write
