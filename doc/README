@@ -27,18 +27,18 @@ revision number.
 
    <scm>
      <name id="git" />
-     <files_updated regexp=" ([^\n]*) \|  "/>
+     <filter id="files_updated" regexp=" ([^\n]*) *\|  "/>
 
      <action id="init">
        <cmd>git-clone $url $sources</cmd>
      </action>
 
      <action id="pull">
-       <cmd>git-pull</cmd>
+       <cmd filter1="files_updated">git-pull</cmd>
      </action>
 
      <action id="version" result="value">
-       <cmd>git show-ref -s refs/heads/master</cmd>
+       <cmd regexp="^([^\t]*)">git-ls-remote origin refs/heads/master</cmd>
      </action>
    </scm>
 
