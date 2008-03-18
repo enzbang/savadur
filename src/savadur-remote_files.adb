@@ -70,9 +70,9 @@ package body Savadur.Remote_Files is
               ("Try loading " & Project_Name & " from " & Server);
 
             Data := Client_Service.Client.Load_Project
-              (Web_Services.Client.Signed_Project
+              (Signed_Project => Web_Services.Client.Signed_Project
                  (Signed_Files.To_External_Handler (Signed_Project)),
-                  Server);
+               Endpoint       => Server);
 
             if Data /= Web_Services.Client.No_File then
                Logs.Write ("   found new or updated");
@@ -81,7 +81,8 @@ package body Savadur.Remote_Files is
                   Name                 => -Data.Filename);
 
                Utils.Set_Content (-Data.Filename, -Data.Content);
-               Config.Project.Reload (Project_Name, -Data.Filename);
+               Config.Project.Reload (Project_Name => Project_Name,
+                                      Filename     => -Data.Filename);
                Loaded := True;
             end if;
          end if;
@@ -94,7 +95,7 @@ package body Savadur.Remote_Files is
         (Config.Project.Configurations, Project_Name)
       then
          Logs.Write ("   project exists");
-         declare
+         Read_Project : declare
             Project          : aliased Projects.Project_Config :=
                                  Config.Project.Get (Project_Name);
             Project_Filename : constant String :=
@@ -103,7 +104,7 @@ package body Savadur.Remote_Files is
             Signed_Files.Create
               (Signed_Project, Project_Name, Project_Filename);
             Found := True;
-         end;
+         end Read_Project;
 
       else
          Logs.Write ("   project does not exist");
@@ -149,9 +150,9 @@ package body Savadur.Remote_Files is
               ("Try loading " & SCM_Name & " from " & Server);
 
             Data := Client_Service.Client.Load_SCM
-              (Web_Services.Client.Signed_SCM
+              (Signed_SCM => Web_Services.Client.Signed_SCM
                  (Signed_Files.To_External_Handler (Signed_SCM)),
-                  Server);
+               Endpoint   => Server);
 
             if Data /= Web_Services.Client.No_File then
                Logs.Write ("   found new or updated");
@@ -161,7 +162,8 @@ package body Savadur.Remote_Files is
                   Name                 => -Data.Filename);
 
                Utils.Set_Content (-Data.Filename, -Data.Content);
-               Config.SCM.Reload (SCM_Name, -Data.Filename);
+               Config.SCM.Reload (SCM_Name => SCM_Name,
+                                  Filename => -Data.Filename);
                Loaded := True;
             end if;
          end if;
@@ -172,14 +174,14 @@ package body Savadur.Remote_Files is
 
       if SCM.Keys.Contains (Config.SCM.Configurations, Value (SCM_Name)) then
          Logs.Write ("   SCM exists");
-         declare
+         Read_SCM : declare
             S            : aliased constant SCM.SCM :=
                              Config.SCM.Get (SCM_Name);
             SCM_Filename : constant String := -S.Filename;
          begin
             Signed_Files.Create (Signed_SCM, SCM_Name, SCM_Filename);
             Found := True;
-         end;
+         end Read_SCM;
 
       else
          Logs.Write ("   SCM does not exist");

@@ -13,7 +13,5 @@
 +RRaising_External_Exceptions
 +RUncommented_BEGIN_In_Package_Bodies
 +RFunction_Style_Procedures
-+RNumeric_Literals
 +ROverly_Nested_Control_Structures:3
-+RUniversal_Ranges
 +RUnnamed_Blocks_And_Loops

@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                                Savadur                                   --
 --                                                                          --
---                           Copyright (C) 2007                             --
+--                         Copyright (C) 2007-2008                          --
 --                      Pascal Obry - Olivier Ramonat                       --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -43,7 +43,7 @@ package body Savadur.Times is
            with "non conforming periodic time '" & From & ''';
       end if;
 
-      declare
+      Create_Perodic : declare
          H : constant Calendar.Formatting.Hour_Number :=
                Calendar.Formatting.Hour_Number'Value
                  (From (From'First .. S1 - 1));
@@ -51,7 +51,7 @@ package body Savadur.Times is
                Calendar.Formatting.Minute_Number'Value
                  (From (S1 + 1 .. S2 - 1));
       begin
-         return
+         return Periodic'
            (Event => Calendar.Time_Of
               (Year    => Calendar.Year (Now),
                Month   => Calendar.Month (Now),
@@ -60,7 +60,7 @@ package body Savadur.Times is
                  Duration (Calendar.Formatting.Second (Now))),
             Every => Duration'Value (From (S2 + 2 .. From'Last)) * 60.0,
             From  => +From);
-      end;
+      end Create_Perodic;
    exception
       when others =>
          raise Constraint_Error
@@ -96,7 +96,7 @@ package body Savadur.Times is
          return 0.0;
 
       else
-         declare
+         Compute_Delay : declare
             Now     : constant Calendar.Time := Calendar.Clock;
             S_Now   : constant Duration := Calendar.Seconds (Now);
             S_Event : Duration := Calendar.Seconds (Time.Event);
@@ -119,7 +119,7 @@ package body Savadur.Times is
 
                return S_Event - S_Now;
             end if;
-         end;
+         end Compute_Delay;
       end if;
    end Next_Run_In;
 

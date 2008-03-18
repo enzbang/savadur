@@ -42,7 +42,7 @@ package body Savadur.Build.Notification is
    begin
       if Success then
          for K in 1 .. Project.Notifications.On_Success.Length loop
-            declare
+            Notify_Success : declare
                Ref         : constant Actions.Ref_Action :=
                                Project.Notifications.On_Success.Element
                                  (Integer (K));
@@ -52,7 +52,10 @@ package body Savadur.Build.Notification is
                                   Ref_Action => Ref);
                Log_File    : constant String :=
                                Log_Filename
-                                 (Project, Ref.Id, Job_Id, "on_success_");
+                                 (Project   => Project,
+                                  Action_Id => Ref.Id,
+                                  Job_Id    => Job_Id,
+                                  Prefix    => "on_success_");
                Return_Code : Integer;
                Result      : Boolean;
             begin
@@ -61,12 +64,12 @@ package body Savadur.Build.Notification is
                         Log_Filename  => Log_File,
                         Return_Code   => Return_Code,
                         Result        => Result);
-            end;
+            end Notify_Success;
          end loop;
 
       else
          for K in 1 .. Project.Notifications.On_Failure.Length loop
-            declare
+            Notify_Failure : declare
                Ref         : constant Actions.Ref_Action :=
                                Project.Notifications.On_Failure.Element
                                  (Integer (K));
@@ -75,7 +78,10 @@ package body Savadur.Build.Notification is
                   Ref_Action => Ref);
                Log_File    : constant String :=
                                Log_Filename
-                                 (Project, Ref.Id, Job_Id, "on_failure_");
+                                 (Project   => Project,
+                                  Action_Id => Ref.Id,
+                                  Job_Id    => Job_Id,
+                                  Prefix    => "on_failure_");
                Return_Code : Integer;
                Result      : Boolean;
             begin
@@ -84,7 +90,7 @@ package body Savadur.Build.Notification is
                         Log_Filename  => Log_File,
                         Return_Code   => Return_Code,
                         Result        => Result);
-            end;
+            end Notify_Failure;
          end loop;
       end if;
    end Notify;

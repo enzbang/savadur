@@ -33,6 +33,8 @@ package Savadur.Config.Cmd is
    use Ada.Strings.Unbounded;
    use Savadur.Utils;
 
+   Config_Error : exception renames Config.Config_Error;
+
    type External_Command is new Unbounded_String;
    package External_Command_Utils is
      new Generic_Utils (Source => External_Command);
@@ -68,7 +70,8 @@ package Savadur.Config.Cmd is
 private
 
    Null_Command : constant Command :=
-                    (External_Command_Utils.Nil, Output_Pattern_Utils.Nil,
-                     Filters => Filters.Null_Set);
+                    Command'(Cmd     => External_Command_Utils.Nil,
+                             Output  => Output_Pattern_Utils.Nil,
+                             Filters => Filters.Null_Set);
 
 end Savadur.Config.Cmd;

@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                                Savadur                                   --
 --                                                                          --
---                           Copyright (C) 2007                             --
+--                         Copyright (C) 2007-2008                          --
 --                      Pascal Obry - Olivier Ramonat                       --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -56,8 +56,8 @@ private
    end record;
 
    No_Time : constant Periodic :=
-               (From  => Null_Unbounded_String,
-                Event => <>,
-                Every => 0.0);
+               Periodic'(From  => Null_Unbounded_String,
+                         Event => <>,
+                         Every => 0.0);
 
 end Savadur.Times;

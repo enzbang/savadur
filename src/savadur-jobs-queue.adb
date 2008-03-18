@@ -54,14 +54,14 @@ package body Savadur.Jobs.Queue is
    end record;
 
    End_Job : constant Job_Data :=
-               (Project  => <>,
-                Scenario => Null_Unbounded_String,
-                Server   => Null_Unbounded_String,
-                Time     => Times.No_Time,
-                Start    => 0.0,
-                Created  => <>,
-                Number   => Integer'First,
-                Id       => 0);
+               Job_Data'(Project  => <>,
+                         Scenario => Null_Unbounded_String,
+                         Server   => Null_Unbounded_String,
+                         Time     => Times.No_Time,
+                         Start    => 0.0,
+                         Created  => <>,
+                         Number   => Integer'First,
+                         Id       => 0);
 
    function "=" (J1, J2 : in Job_Data) return Boolean;
    --  Returns True and J1 and J2 are equivalent jobs
@@ -69,7 +69,7 @@ package body Savadur.Jobs.Queue is
    function "<" (J1, J2 : in Job_Data) return Boolean;
    --  Returns the True if J1 must be executed before J2
 
-   package Job_Set is new Containers.Ordered_Sets (Job_Data);
+   package Job_Set is new Containers.Ordered_Sets (Element_Type => Job_Data);
    --  Job ordered on time
 
    function Image (Job : in Job_Data) return String;
@@ -189,7 +189,10 @@ package body Savadur.Jobs.Queue is
                          Scenarios.Sets.Element (Position);
          begin
             if Scenario.Periodic /= Times.No_Time then
-               Add (Project.Signature, "", -Scenario.Id, Scenario.Periodic);
+               Add (Project  => Project.Signature,
+                    Server   => "",
+                    Scenario => -Scenario.Id,
+                    Time     => Scenario.Periodic);
             end if;
          end Handle_Scenario;
 
@@ -269,7 +272,7 @@ package body Savadur.Jobs.Queue is
             --  Remove current non periodic job that could have already been
             --  sceduled.
 
-            declare
+            Delete_Non_Periodic_Jobs : declare
                Pos : Job_Set.Cursor := Jobs.First;
             begin
                Delete_Current_Job : while Pos /= Job_Set.No_Element loop
@@ -298,7 +301,7 @@ package body Savadur.Jobs.Queue is
                end if;
 
                Jobs.Insert (Local_Job);
-            end;
+            end Delete_Non_Periodic_Jobs;
 
          else
             --  This is periodic job, replace existing one if present
@@ -447,12 +450,12 @@ package body Savadur.Jobs.Queue is
             --  Check if we know about this SCM
 
             if Project.SCM_Id /= SCM.Null_Id then
-               declare
+               Load_SCM : declare
                   SCM : Savadur.SCM.SCM;
                   pragma Unreferenced (SCM);
                begin
                   SCM := Remote_Files.Load_SCM (-Project.SCM_Id);
-               end;
+               end Load_SCM;
             end if;
 
             --  We can run the job

@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                                Savadur                                   --
 --                                                                          --
---                           Copyright (C) 2007                             --
+--                         Copyright (C) 2007-2008                          --
 --                      Pascal Obry - Olivier Ramonat                       --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -41,6 +41,9 @@ package Savadur.Projects.Sets is
    function Key (Project : in Project_Config) return String;
 
    package Keys is new Sets.Generic_Keys
-     (String, Key, Strings.Hash_Case_Insensitive, "=");
+     (Key_Type        => String,
+      Key             => Key,
+      Hash            => Strings.Hash_Case_Insensitive,
+      Equivalent_Keys => "=");
 
 end Savadur.Projects.Sets;

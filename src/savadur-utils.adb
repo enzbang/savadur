@@ -164,7 +164,9 @@ package body Savadur.Utils is
    procedure Set_Content (Filename, Content : in String) is
       File : Stream_IO.File_Type;
    begin
-      Stream_IO.Create (File, Stream_IO.Out_File, Filename);
+      Stream_IO.Create (File => File,
+                        Mode => Stream_IO.Out_File,
+                        Name => Filename);
       String'Write (Stream_IO.Stream (File), Content);
       Stream_IO.Close (File);
    end Set_Content;

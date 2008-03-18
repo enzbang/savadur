@@ -290,8 +290,12 @@ package body Savadur.Config.SCM is
       case NV is
          when Filter =>
             Filters.Start_Element
-              (Savadur.SCM.Id_Utils.To_String (Handler.SCM.Id),
-               Namespace_URI, Local_Name, Qname, Atts);
+              (Prefix        =>
+                 Savadur.SCM.Id_Utils.To_String (Handler.SCM.Id),
+               Namespace_URI => Namespace_URI,
+               Local_Name    => Local_Name,
+               Qname         => Qname,
+               Atts          => Atts);
 
          when Cmd =>
             Config.Cmd.Start_Element

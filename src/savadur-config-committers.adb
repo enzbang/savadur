@@ -41,7 +41,10 @@ package body Savadur.Config.Committers is
    use Savadur.Utils;
 
    package Name_Mail is new Indefinite_Hashed_Maps
-     (String, String, Strings.Hash_Case_Insensitive, "=");
+     (Key_Type        => String,
+      Element_Type    => String,
+      Hash            => Strings.Hash_Case_Insensitive,
+      Equivalent_Keys => "=");
 
    Map : Name_Mail.Map;
 
@@ -190,6 +193,6 @@ package body Savadur.Config.Committers is
       end case;
    end Start_Element;
 
-begin
+begin --  BEGIN Savadur.Config.Committers
    Parse;
 end Savadur.Config.Committers;

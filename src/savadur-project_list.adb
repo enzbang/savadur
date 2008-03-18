@@ -38,7 +38,7 @@ package body Savadur.Project_List is
       Result     : Clients.Vector;
    begin
       if Projects.Has_Element (P_Position) then
-         declare
+         Get_Registered_Clients : declare
             Scenarios  : constant Project_List.Scenarios.Map :=
                            Projects.Element (P_Position);
             S_Position : constant Project_List.Scenarios.Cursor :=
@@ -47,7 +47,7 @@ package body Savadur.Project_List is
             if Project_List.Scenarios.Has_Element (S_Position) then
                Result := Project_List.Scenarios.Element (S_Position);
             end if;
-         end;
+         end Get_Registered_Clients;
       end if;
 
       return Result;
@@ -115,17 +115,17 @@ package body Savadur.Project_List is
      (Project_List : in Projects.Map; Action : in Iterate_Action) is
       Position : Projects.Cursor := Project_List.First;
    begin
-      --  For all projects
-
-      while Projects.Has_Element (Position) loop
+      For_All_Projects : while Projects.Has_Element (Position) loop
          Get_Scenarios_List : declare
             M_Scerarios                : constant Scenarios.Map :=
                                             Projects.Element (Position);
             Scenarios_Position         : Scenarios.Cursor       :=
                                             M_Scerarios.First;
          begin
+
             --  For all projects scenarios
 
+            For_All_Scenarios :
             while Scenarios.Has_Element (Scenarios_Position) loop
 
                Get_Projects_List : declare
@@ -137,18 +137,19 @@ package body Savadur.Project_List is
 
                   --  For all clients registered for this scenario
 
+                  For_All_Clients :
                   while Clients.Has_Element (Clients_Position) loop
                      Action.all (-Clients.Element (Clients_Position).Key);
                      Clients.Next (Clients_Position);
-                  end loop;
+                  end loop For_All_Clients;
                end Get_Projects_List;
 
                Scenarios.Next (Scenarios_Position);
-            end loop;
+            end loop For_All_Scenarios;
          end Get_Scenarios_List;
 
          Projects.Next (Position);
-      end loop;
+      end loop For_All_Projects;
    end Iterate_On_Clients;
 
    ------------
@@ -169,9 +170,7 @@ package body Savadur.Project_List is
 
    begin
 
-      --  For all projects
-
-      while Projects.Has_Element (Position) loop
+      For_All_Projects : while Projects.Has_Element (Position) loop
          Get_Scenarios_List : declare
             T_Project_Scenarios        : Tag;
             T_Project_Scenario_Clients : Tag;
@@ -183,6 +182,7 @@ package body Savadur.Project_List is
          begin
             --  For all projects scenarios
 
+            For_All_Scenarios :
             while Scenarios.Has_Element (Scenarios_Position) loop
                Get_Projects_List : declare
                   T_Scenarios_Client : Tag;
@@ -194,12 +194,13 @@ package body Savadur.Project_List is
 
                   --  For all clients registered for this scenario
 
+                  For_All_Clients :
                   while Clients.Has_Element (Clients_Position) loop
                      T_Scenarios_Client := T_Scenarios_Client
                        & Clients.Element (Clients_Position).Key;
 
                      Clients.Next (Clients_Position);
-                  end loop;
+                  end loop For_All_Clients;
                   T_Project_Scenarios := T_Project_Scenarios
                     & Scenarios.Key (Scenarios_Position);
                   T_Project_Scenario_Clients := T_Project_Scenario_Clients
@@ -207,7 +208,7 @@ package body Savadur.Project_List is
                end Get_Projects_List;
 
                Scenarios.Next (Scenarios_Position);
-            end loop;
+            end loop For_All_Scenarios;
 
             T_Projects  := T_Projects & Projects.Key (Position);
             T_Scenarios := T_Scenarios & T_Project_Scenarios;
@@ -216,7 +217,7 @@ package body Savadur.Project_List is
          end Get_Scenarios_List;
 
          Projects.Next (Position);
-      end loop;
+      end loop For_All_Projects;
 
       AWS.Templates.Insert (Set  => Result,
                             Item => AWS.Templates.Assoc

@@ -91,10 +91,10 @@ package body Savadur.Build is
    begin
       for K in Filters'Range loop
          if not (Filters (K) = Config.Filters.Id_Utils.Nil) then
-            Logs.Write
-              ("Apply_Filters on " & Filename, Logs.Handler.Very_Verbose);
+            Logs.Write (Content => "Apply_Filters on " & Filename,
+                        Kind    => Logs.Handler.Very_Verbose);
 
-            declare
+            Apply_Filter : declare
                Content       : constant String := Utils.Content (Filename);
                Filter        : constant Config.Filters.Filter :=
                                  Config.Filters.Get (Filters (K));
@@ -108,13 +108,14 @@ package body Savadur.Build is
                   Config.Filters.Pattern_Utils.To_String (Filter.Pattern));
 
                Utils.Set_Content (Filter_Output, To_String (Result));
-            end;
+            end Apply_Filter;
          end if;
       end loop;
 
    exception
       when Text_IO.Name_Error =>
-         Logs.Write ("Cannot open file : " & Filename, Logs.Handler.Error);
+         Logs.Write (Content => "Cannot open file : " & Filename,
+                     Kind    => Logs.Handler.Error);
    end Apply_Filters;
 
    -----------
@@ -153,13 +154,13 @@ package body Savadur.Build is
 
       if Exec_Action.Result = Actions.Exit_Status then
          if Ref.Value /= "" then
-            begin
+            Get_Return_Code : begin
                Result := Return_Code = Integer'Value (-Ref.Value);
             exception
                when Constraint_Error =>
                   raise Command_Parse_Error
                     with "Value " & (-Ref.Value) & " is not an exit status";
-            end;
+            end Get_Return_Code;
 
          else
             Result := Return_Code = 0;
@@ -174,7 +175,7 @@ package body Savadur.Build is
       --  Check filter result, should we continue or exit now
 
       if Filter_Based (-Ref.Status) then
-         declare
+         Check_Filters : declare
             function Get_Filter
               (Name : in String) return Config.Filters.Filter;
             --  Returns the filter give the name. First look in the project
@@ -201,7 +202,8 @@ package body Savadur.Build is
                end if;
 
                if Filter = Config.Filters.Null_Filter then
-                  Logs.Write ("Unknown filter " & Name, Logs.Handler.Error);
+                  Logs.Write (Content => "Unknown filter " & Name,
+                              Kind    => Logs.Handler.Error);
                   raise Command_Parse_Error with "Unknown filter " & Name;
                end if;
 
@@ -235,7 +237,7 @@ package body Savadur.Build is
             Filter1 := Get_Filter (-F1_Name);
             Filter2 := Get_Filter (-F2_Name);
 
-            declare
+            Compare_Filters_Results : declare
                L1 : constant String :=
                       Utils.Content
                         (Log_File & "."
@@ -256,8 +258,8 @@ package body Savadur.Build is
                      & " filters check is false: " & Status,
                      Kind    => Logs.Handler.Verbose);
                end if;
-            end;
-         end;
+            end Compare_Filters_Results;
+         end Check_Filters;
 
       elsif Ref.Status = "require_change" then
          Check_Last_State : declare
@@ -864,9 +866,9 @@ package body Savadur.Build is
 
                      Utils.Set_Content (-L_Filename, Log_Content);
                   else
-                     Logs.Write
-                       ("log directory does not exists: "
-                        & Servers.Log_Path (Server), Logs.Handler.Warnings);
+                     Logs.Write (Content => "log directory does not exists: "
+                                   & Servers.Log_Path (Server),
+                                 Kind    => Logs.Handler.Warnings);
                   end if;
                end if;
 
@@ -877,7 +879,8 @@ package body Savadur.Build is
                   Scenario     => Scenarios.Id_Utils.To_String (Id),
                   Action       => Actions.Id_Utils.To_String (Action_Id),
                   Log_Filename => -L_Filename,
-                  Output       => Log_Content (Servers.Send_Log (Server)),
+                  Output       => Log_Content
+                    (Activated => Servers.Send_Log (Server)),
                   Result       => Status,
                   Job_Id       => Job_Id,
                   Diff_Data    => Web_Services.Client.No_Diff_Data,
@@ -885,10 +888,9 @@ package body Savadur.Build is
             end Notify_Server;
 
          else
-            Logs.Write
-              (Actions.Id_Utils.To_String (Action_Id)
-               & " [" & Log_Content & ']',
-               Kind => Logs.Handler.Very_Verbose);
+            Logs.Write (Content => Actions.Id_Utils.To_String (Action_Id)
+                          & " [" & Log_Content & ']',
+                        Kind => Logs.Handler.Very_Verbose);
          end if;
       end Send_Status;
 
@@ -925,7 +927,7 @@ package body Savadur.Build is
                Directories.Create_Directory (Sources_Directory);
 
             else
-               declare
+               Run_SCM_Init : declare
                   Return_Code : Integer;
                   Result      : Boolean;
                begin
@@ -969,8 +971,10 @@ package body Savadur.Build is
                   Send_Status
                     (Server,
                      Savadur.SCM.Init.Id,
-                     Log_Filename (Project, SCM.Init.Id, Job_Id));
-               end;
+                     Log_Filename (Project   => Project,
+                                   Action_Id => SCM.Init.Id,
+                                   Job_Id    => Job_Id));
+               end Run_SCM_Init;
             end if;
          end if;
 
@@ -1027,7 +1031,9 @@ package body Savadur.Build is
                                 Log_File    => Log_File,
                                 Diff_Data   => Diff_Data'Access);
 
-               Send_Status (Server, Ref.Id, Log_File);
+               Send_Status (Server_Name => Server,
+                            Action_Id   => Ref.Id,
+                            Log_File    => Log_File);
 
                if not Status then
                   case Ref.On_Error is

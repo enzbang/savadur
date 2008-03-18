@@ -238,7 +238,7 @@ package body Savadur.Database is
               (Set, Templates.Assoc
                  ("STOP_DATE", DB.String_Vectors.Element (Line, 7)));
 
-            declare
+            Compute_Duration : declare
                Get_Duration : Float
                  := Float'Value (DB.String_Vectors.Element (Line, 7));
                Duration : Natural := 0;
@@ -249,7 +249,7 @@ package body Savadur.Database is
                Templates.Insert
                  (Set, Templates.Assoc
                     ("DURATION", Natural'Image (Duration)));
-            end;
+            end Compute_Duration;
             Templates.Insert
               (Set, Templates.Assoc
                  ("ACTION", DB.String_Vectors.Element (Line, 8)));

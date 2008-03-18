@@ -128,8 +128,9 @@ package body Savadur.Web.Server is
                return Response.File (MIME.Text_XML, RSS_File);
             else
                return Response.Build
-                 (MIME.Text_HTML,
-                  "<p>File " & RSS_File & " not found</p>", Messages.S404);
+                 (Content_Type => MIME.Text_HTML,
+                  Message_Body => "<p>File " & RSS_File & " not found</p>",
+                  Status_Code  => Messages.S404);
             end if;
          end Get_RSS;
 
@@ -180,7 +181,6 @@ package body Savadur.Web.Server is
                   Status_Code => Messages.S404);
             end if;
          end Get_Img;
-
 
       elsif Savadur.Config.Project.Is_Project_Name
         (URI (URI'First + 1 .. URI'Last))
@@ -362,7 +362,8 @@ package body Savadur.Web.Server is
       Configuration : constant Projects.Project_Config :=
                         Savadur.Remote_Files.Load_Project (Project_Name);
       Set           : Templates.Translate_Set :=
-                        Savadur.Database.Get_Final_Status (Project_Name);
+                        Savadur.Database.Get_Final_Status
+                          (Project_Name => Project_Name);
    begin
       Templates.Insert
         (Set, Templates.Assoc ("PROJECT_NAME", Project_Name));
