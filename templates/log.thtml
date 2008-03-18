@@ -21,18 +21,25 @@
       <ul><li><a href="/@_PROJECT_NAME_@">Back to @_PROJECT_NAME_@ page</a></li></ul>
     </div>
     <div id="content">
-      <p
-         @@IF@@ @_STATUS_@ = FALSE
-         class="log-failure"
-         @@ELSE@@
-         class="log-success"
-         @@END_IF@@
-         >@_ACTION_@ run by the scenario @_SCENARIO_@
-        has terminated with the status @_STATUS_@ at @_DATE_@</p>
+      @@IF@@ @_STOP_DATE_@ = ""
+      <p>Project started at @_START_DATE_@.
+        Estimated completion in @_DURATION_@ seconds</p>
+      @@ELSE@@
+        <p
+           @@IF@@ @_STATUS_@ = FALSE
+           class="log-failure"
+           @@ELSE@@
+           class="log-success"
+           @@END_IF@@
+           >@_ACTION_@ run by the scenario @_SCENARIO_@
+          has terminated with the status @_STATUS_@ at @_STOP_DATE_@
+          after @_DURATION_@ seconds</p>
 
-      <h3>With the following log : </h3>
+        <!-- Project started at @_START_DATE_@ -->
+        <h3>With the following log : </h3>
 
-      <pre>@_LOG_CONTENT_@</pre>
+        <pre>@_LOG_CONTENT_@</pre>
+      @@END_IF@@
     </div>
   </body>
 </html>

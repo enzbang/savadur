@@ -96,6 +96,7 @@ package body Savadur.Jobs.Server is
                Key : constant String := Clients.Key (Client);
             begin
                Logs.Write ("Send job request to " & Key);
+
                Server_Service.Client.Run
                  (Server_Name    => Clients.Server_Name (Client),
                   Scenario       => -Scenario,
