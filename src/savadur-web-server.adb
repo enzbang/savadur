@@ -47,6 +47,7 @@ with Savadur.Notifications;
 with Savadur.Projects;
 with Savadur.Project_List;
 with Savadur.Remote_Files;
+with Savadur.Scenarios;
 with Savadur.Server_Service.Client;
 with Savadur.Signed_Files;
 with Savadur.Utils;
@@ -354,6 +355,10 @@ package body Savadur.Web.Server is
    --------------------
 
    function Show_Project (Request : in Status.Data) return Response.Data is
+
+      procedure Process_Scenario (Position : in Savadur.Scenarios.Sets.Cursor);
+      --  Add given scenario into the corresponding vector tag
+
       URI           : constant String := Status.URI (Request);
       Project_Name  : constant String := URI (URI'First + 1 .. URI'Last);
       Configuration : constant Projects.Project_Config :=
@@ -361,13 +366,33 @@ package body Savadur.Web.Server is
       Set           : Templates.Translate_Set :=
                         Savadur.Database.Get_Final_Status
                           (Project_Name => Project_Name);
+      Scenarios     : Templates.Tag;
+
+      ----------------------
+      -- Process_Scenario --
+      ----------------------
+
+      procedure Process_Scenario
+        (Position : in Savadur.Scenarios.Sets.Cursor)
+      is
+         Scenario : constant Savadur.Scenarios.Scenario :=
+                      Savadur.Scenarios.Sets.Element (Position);
+      begin
+         Templates.Append
+           (Scenarios, Savadur.Scenarios.Id_Utils.To_String (Scenario.Id));
+      end Process_Scenario;
+
    begin
+      Configuration.Scenarios.Iterate (Process_Scenario'Access);
+
       Templates.Insert
         (Set, Templates.Assoc ("PROJECT_NAME", Project_Name));
       Templates.Insert
         (Set, Templates.Assoc
            ("PROJECT_DESCRIPTION",
             Projects.Desc_Utils.To_String (Configuration.Description)));
+      Templates.Insert
+        (Set, Templates.Assoc ("SCENARIOS", Scenarios));
 
       Templates.Insert (Set, Savadur.Database.Get_Logs (Project_Name));
 

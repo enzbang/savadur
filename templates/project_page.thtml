@@ -27,7 +27,11 @@
     <form action="/run" method="put">
       <p><input type="hidden" id="p" name="p" value="@_PROJECT_NAME_@"/>
         <label for="s">scenario</label>
-        <input type="text" id="s" name="s" value="web"/></p>
+        <select id="s" name="s">
+        @@TABLE@@
+	   <option value="@_SCENARIOS_@">@_SCENARIOS_@</option>
+	@@END_TABLE@@
+	</select></p>
       <p><label for="l">latency (in seconds)</label>
         <input type="text" id="l" name="l" value="1"/></p>
       <p><input type="submit" value="Envoyer" /></p>
