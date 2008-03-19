@@ -341,12 +341,12 @@ package body Savadur.Web.Server is
                   Name                 => "log",
                   Extension            => "thtml"),
                Translations => Database.Get_Log_Content (Id)));
-      exception
-         when Constraint_Error =>
-            return Response.Build
-              (MIME.Text_HTML, "<p>Wrong request</p>",
-               Status_Code => Messages.S200);
       end Get_Content;
+   exception
+      when Constraint_Error =>
+         return Response.Build
+           (MIME.Text_HTML, "<p>Wrong request</p>",
+            Status_Code => Messages.S200);
    end Show_Log;
 
    --------------------
