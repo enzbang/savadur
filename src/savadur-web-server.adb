@@ -92,6 +92,10 @@ package body Savadur.Web.Server is
 
    function HTTP_Callback (Request : in Status.Data) return Response.Data is
       URI      : constant String := Status.URI (Request);
+      Root_URI : constant String := "/";
+      Run_URI  : constant String := "/run";
+      Ping_URI : constant String := "/ping";
+      RSS_URI  : constant String := "/rss/all";
       Log_URI  : constant String := "/log/";
       CSS_URI  : constant String := "/css/";
       Img_URI  : constant String := "/img/";
@@ -100,16 +104,16 @@ package body Savadur.Web.Server is
         (Content => "Calling => " & URI,
          Kind    => Logs.Handler.Very_Verbose);
 
-      if URI = "/" then
+      if URI = Root_URI then
          return List (Request);
 
-      elsif URI = "/run" then
+      elsif URI = Run_URI then
          return Run (Request);
 
-      elsif URI = "/ping" then
+      elsif URI = Ping_URI then
          return Ping;
 
-      elsif URI = "/rss/all" then
+      elsif URI = RSS_URI then
          Get_RSS : declare
             RSS_File : constant String := Savadur.Config.RSS_Directory;
          begin
