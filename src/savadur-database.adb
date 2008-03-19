@@ -240,7 +240,7 @@ package body Savadur.Database is
 
             Compute_Duration : declare
                Get_Duration : Float
-                 := Float'Value (DB.String_Vectors.Element (Line, 7));
+                 := Float'Value (DB.String_Vectors.Element (Line, 8));
                Duration : Natural := 0;
             begin
                if Get_Duration > 0.0 then
@@ -252,7 +252,7 @@ package body Savadur.Database is
             end Compute_Duration;
             Templates.Insert
               (Set, Templates.Assoc
-                 ("ACTION", DB.String_Vectors.Element (Line, 8)));
+                 ("ACTION", DB.String_Vectors.Element (Line, 9)));
 
             Line.Clear;
             Iter.End_Select;
