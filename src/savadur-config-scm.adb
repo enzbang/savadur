@@ -233,6 +233,11 @@ package body Savadur.Config.SCM is
                         Kind    => Logs.Handler.Verbose);
 
             Configurations.Insert (Internal_Parse (Filename));
+         exception
+            when Config_Error =>
+               Logs.Write
+                 (Content => "Wrong SCM file : " & Filename,
+                  Kind    => Logs.Handler.Error);
          end Load_Config;
       end loop Walk_Directories;
    exception

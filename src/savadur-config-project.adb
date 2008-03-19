@@ -358,6 +358,11 @@ package body Savadur.Config.Project is
               (Content => "Read Project config file : " & Filename,
                Kind    => Logs.Handler.Verbose);
             Project := Parse (Filename);
+         exception
+            when Config_Error =>
+               Logs.Write
+                 (Content => "Wrong project file : " & Filename,
+                  Kind    => Logs.Handler.Error);
          end Load_Config;
       end loop Walk_Directories;
    exception
