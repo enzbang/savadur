@@ -15,7 +15,10 @@
     </style>
   </head>
   <body id="menu_page">
-    <h1>Projects list</h1>
+
+    <h1>Savadur running on @_SERVER_NAME_@</h1>
+
+    <h2>Projects list</h2>
 
     <div id="content">
 
@@ -37,12 +40,25 @@
         @@END_TABLE@@
       </table>
 
-      <h2>Online clients</h2>
+      <h2>Bots</h2>
 
-      @_CLIENTS_NAME_@
-      @_CLIENTS_STATUS_@
+      @@IF@@ @_CLIENTS_NAME_@ = ""
+        <h2>No bots registered</h2>
+      @@ELSE@@
 
-      <p><a href="/ping">Ping clients</a></p>
+        <table class="list">
+          <tr><th>Bot</th><th>Status</th><th>Running</th></tr>
+          @@TABLE@@
+          <tr>
+            <td>@_CLIENTS_NAME_@</td>
+            <td>@_CLIENTS_STATUS_@</td>
+            <td>@_CLIENTS_RUNNING_@</td>
+          </tr>
+          @@END_TABLE@@
+        </table>
+      @@END_IF@@
+      <p class="right"><a href="/ping">Ping clients</a></p>
+
     </div>
   </body>
 </html>

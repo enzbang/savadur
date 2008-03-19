@@ -9,17 +9,14 @@ h1 {
     color:#ccc;
     font-size:2.3em
 }
-h1 a {
-    color:#ccc;
-    text-decoration:none;
-}
 table {
     background-color:white;
     border:5px solid white;
     border-collapse:collapse;
     margin:1em 0;
+    color:#555;
 }
-table td {
+table td, table th {
     border-color:-moz-use-text-color #99B195 rgb(242, 242, 242);
     border-style:none solid solid;
     border-width:medium 1px 1px;
@@ -36,16 +33,17 @@ table.job_id_table {
 table.job_id_table td {
     border:thin solid #777;
 }
-table.list td {
+table.list td, table.list th {
     border:none;
     vertical-align:middle;
+}
+table.list td ul {
+    text-align:left;
+    list-style-type:circle;
 }
 table.list td.project_name {
     font-size:large;
     font-weight:bold;
-}
-td a {
-    color:#081E75;
 }
 span.timestamp {
     font-size:x-small;
@@ -118,6 +116,14 @@ input[type=submit]
 {
     font-size:1em;
     margin-left: 12.5em;
+}
+
+a {
+    color:#ccc;
+    text-decoration:none;
+}
+td a {
+    color:#081E75;
 }
 a.restart_job img
 {
