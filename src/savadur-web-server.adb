@@ -233,9 +233,7 @@ package body Savadur.Web.Server is
    begin
       Logs.Write ("Ping client " & Key);
       Logs.Write
-        ("Get " &
-         Server_Service.Client.Ping
-           (Endpoint => Endpoint));
+        ("Get " & Server_Service.Client.Ping (Endpoint => Endpoint));
 
    exception
       when SOAP.SOAP_Error =>
@@ -255,7 +253,6 @@ package body Savadur.Web.Server is
       use Ada.Strings.Unbounded;
       use Savadur.Utils;
    begin
-
       Clients.Iterate (Clients.Idle, Ping'Access);
 
       return Response.Build (MIME.Text_HTML, "<p>Pinging clients...</p>");
