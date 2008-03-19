@@ -18,7 +18,11 @@
 
     <h1>Savadur running on @_SERVER_NAME_@</h1>
 
-    <h2>Projects list</h2>
+    <h2>Projects
+      <a href="/rss/all" title="Projects activities feed">
+        <img src="/img/rss.png" alt="RSS" />
+      </a>
+    </h2>
 
     <div id="content">
 

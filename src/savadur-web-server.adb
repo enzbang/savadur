@@ -115,7 +115,11 @@ package body Savadur.Web.Server is
 
       elsif URI = RSS_URI then
          Get_RSS : declare
-            RSS_File : constant String := Savadur.Config.RSS_Directory;
+            RSS_File : constant String :=
+              (Directories.Compose
+                 (Containing_Directory => Savadur.Config.RSS_Directory,
+                  Name                 => "all",
+                  Extension            => "xml"));
          begin
             if Directories.Exists (RSS_File) then
                return Response.File (MIME.Text_XML, RSS_File);
