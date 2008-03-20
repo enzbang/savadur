@@ -48,7 +48,7 @@ and compile if there are some new commits. You'll need to:
 
 - Create a server savadur directory :
 
-$ ls server-savadurdir/
+$ ls savadurdir/server
 config  htdocs  logs.db  projects  scm  scripts
 
 Where config contains a file named project_list.xml
@@ -64,16 +64,16 @@ Where config contains a file named project_list.xml
       </project>
    </project_list>
 
-server-savadurdir/htdocs
+savadurdir/server/htdocs
 	contains some css and templates for webpages
 
-server-savadurdir/logs.db
+savadurdir/server/logs.db
 	is the database where ALL logs and built status are collected
 
-server-savadurdir/scm/
+savadurdir/server/scm/
 	contains all SCM description. Here savadur use git.
 
-server-savadurdir/projects
+savadurdir/server/projects
 	contains all project descriptions.
 
 The project file savadur.xml:
@@ -106,7 +106,7 @@ This project file describes:
  - The project name "savadur",
 
  - The scm type "git", all scm_action will reference actions in the
-   SCM xml file (here server-savadurdir/scm/git.xml),
+   SCM xml file (here savadurdir/server/scm/git.xml),
 
 -  The repository URL (referenced into the SCM as $url),
 

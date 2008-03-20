@@ -34,6 +34,12 @@ package body Savadur.Config is
 
    use Savadur.Utils;
 
+   Server_Dir : aliased constant String := "server";
+   Client_Dir : aliased constant String := "client";
+
+   Sub_Dir : array (False .. True) of access constant String
+     := (Client_Dir'Access, Server_Dir'Access);
+
    Cached_Config_Templates_Directory : access String := null;
    Cached_Directory                  : access String := null;
    Cached_Project_Env_Directory      : access String := null;
@@ -126,13 +132,20 @@ package body Savadur.Config is
       if Cached_Directory = null then
          if Environment_Variables.Exists ("SAVADUR_DIR") then
             Cached_Directory := new String'
-              (Environment_Variables.Value ("SAVADUR_DIR"));
+              (Directories.Compose
+                 (Containing_Directory =>
+                    Environment_Variables.Value ("SAVADUR_DIR"),
+                 Name                  => Sub_Dir (Is_Server).all));
 
          elsif Environment_Variables.Exists ("HOME") then
             Cached_Directory := new String'
               (Directories.Compose
-                 (Containing_Directory => Environment_Variables.Value ("HOME"),
-                  Name                 => ".savadur"));
+                 (Containing_Directory =>
+                    (Directories.Compose
+                       (Containing_Directory =>
+                          Environment_Variables.Value ("HOME"),
+                        Name                 => ".savadur")),
+                  Name                  => Sub_Dir (Is_Server).all));
          else
             --  All tries fail raise exception
 
@@ -192,7 +205,10 @@ package body Savadur.Config is
    procedure Set_Savadur_Directory (Dir : in String) is
    begin
       Cached_Directory := new String'
-        (Morzhol.OS.Compose (Directories.Current_Directory, Dir));
+        (Directories.Compose
+           (Containing_Directory =>
+              Morzhol.OS.Compose (Directories.Current_Directory, Dir),
+            Name                 => Sub_Dir (Is_Server).all));
    end Set_Savadur_Directory;
 
    -----------------------
@@ -258,7 +274,6 @@ package body Savadur.Config is
 
       return Cached_Web_Templates_Directory.all;
    end Web_Templates_Directory;
-
 
    --------------------
    -- Work_Directory --

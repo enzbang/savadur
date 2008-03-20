@@ -321,8 +321,6 @@ procedure Savadur.Bin is
 
    procedure Run_Server_Mode is
    begin
-      Config.Is_Server := True;
-
       Config.SCM.Parse;
       Config.Project.Parse;
       Config.Project_List.Parse;
@@ -508,6 +506,7 @@ begin
             Full : constant String := GNAT.Command_Line.Full_Switch;
          begin
             if Full = "-server" then
+               Config.Is_Server := True;
                Mode := Savadur_Server;
             elsif Full = "-client" then
                Mode := Savadur_Client;
