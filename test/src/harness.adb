@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                                Savadur                                   --
 --                                                                          --
---                           Copyright (C) 2007                             --
+--                         Copyright (C) 2007-2008                          --
 --                      Pascal Obry - Olivier Ramonat                       --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -21,7 +21,6 @@
 
 with Ada.Command_Line;
 with Ada.Directories;
-with Ada.Text_IO;
 
 with AUnit;
 with AUnit_Framework;
@@ -41,8 +40,6 @@ begin
      (Directories.Compose
         (Containing_Directory => Directories.Current_Directory,
          Name                 => "test-dir"));
-
-   Ada.Text_IO.Put_Line (Directories.Current_Directory);
 
    if Run = Failure then
       Command_Line.Set_Exit_Status (Command_Line.Failure);

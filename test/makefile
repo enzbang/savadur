@@ -29,7 +29,13 @@ regtests: setup build
 	./harness
 
 setup:
-	$(CP) -r ../config/scm test-dir/
+	$(RM) -r test-dir/client
+	$(MKDIR) test-dir/client
+	$(CP) -r ../config/scm test-dir/client
+	$(CP) -r config/servers test-dir/client
+	$(CP) -r config/config test-dir/client
+	$(CP) -r test-dir/projects test-dir/client
+	$(CP) -r test-dir/env test-dir/client
 
 regtests_bootstrap: setup
 	$(GNATMAKE) -XPRJ_BUILD=$(MODE) -XIN_TEST=TRUE -P \
