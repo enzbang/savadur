@@ -44,7 +44,7 @@ package Savadur.Jobs.Queue is
    --  Schedules a new job from the given server.
    --  10 minutes default latency (time before starting a non periodic job).
    --  Each request to build the same scenario will push the build in time to
-   --  at least wait for Latency seconds.x
+   --  at least wait for Latency seconds.
 
    procedure Add_Periodic_Scenario;
    --  Adds all known periodic scenarios found in loaded projects into the task

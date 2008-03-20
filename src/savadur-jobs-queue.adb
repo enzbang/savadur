@@ -290,7 +290,7 @@ package body Savadur.Jobs.Queue is
                   Pos := Job_Set.Next (Pos);
                end loop Delete_Current_Job;
 
-               if Pos =  Job_Set.No_Element then
+               if Pos = Job_Set.No_Element then
                   Size := Size + 1;
                else
                   Logs.Write

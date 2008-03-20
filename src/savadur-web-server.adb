@@ -213,7 +213,6 @@ package body Savadur.Web.Server is
       Set          : Templates.Translate_Set := Project_List.To_Set
         (Savadur.Config.Project_List.Configurations);
    begin
-
       Templates.Insert (Set, Clients.Clients_Set);
       Templates.Insert
         (Set, Templates.Assoc ("SERVER_NAME", Savadur.Config.Client.Get_Key));
