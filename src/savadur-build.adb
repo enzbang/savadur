@@ -932,22 +932,25 @@ package body Savadur.Build is
                   Result      : Boolean;
                begin
 
-                  --  Notify the server that the action is starting
+                  if Savadur.Config.Client_Server then
 
-                  Notify_Start : declare
-                     Server_URL : constant String :=
-                                    Servers.URL (Servers.Get (Server));
-                  begin
-                     Client_Service.Client.Status_Start
-                       (Key          => Config.Client.Get_Key,
-                        Project_Name =>
-                          Projects.Id_Utils.To_String (Project.Project_Id),
-                        Scenario     => Scenarios.Id_Utils.To_String (Id),
-                        Action       =>
-                          Actions.Id_Utils.To_String (SCM.Init.Id),
-                        Job_Id       => Job_Id,
-                        Endpoint     => Server_URL);
-                  end Notify_Start;
+                     --  Notify the server that the action is starting
+
+                     Notify_Start : declare
+                        Server_URL : constant String :=
+                                       Servers.URL (Servers.Get (Server));
+                     begin
+                        Client_Service.Client.Status_Start
+                          (Key          => Config.Client.Get_Key,
+                           Project_Name =>
+                             Projects.Id_Utils.To_String (Project.Project_Id),
+                           Scenario     => Scenarios.Id_Utils.To_String (Id),
+                           Action       =>
+                             Actions.Id_Utils.To_String (SCM.Init.Id),
+                           Job_Id       => Job_Id,
+                           Endpoint     => Server_URL);
+                     end Notify_Start;
+                  end if;
 
                   Execute
                     (Exec_Action   => Get_Action
@@ -968,12 +971,14 @@ package body Savadur.Build is
                      raise Command_Parse_Error with "SCM init failed !";
                   end if;
 
-                  Send_Status
-                    (Server_Name => Server,
-                     Action_Id   => Savadur.SCM.Init.Id,
-                     Log_File    => Log_Filename (Project   => Project,
-                                                  Action_Id => SCM.Init.Id,
-                                                  Job_Id    => Job_Id));
+                  if Savadur.Config.Client_Server then
+                     Send_Status
+                       (Server_Name => Server,
+                        Action_Id   => Savadur.SCM.Init.Id,
+                        Log_File    => Log_Filename (Project   => Project,
+                                                     Action_Id => SCM.Init.Id,
+                                                     Job_Id    => Job_Id));
+                  end if;
                end Run_SCM_Init;
             end if;
          end if;
@@ -993,21 +998,24 @@ package body Savadur.Build is
                Return_Code : Integer;
                Result      : Boolean;
             begin
-               --  Notify the server that the action is starting
 
-               Notify_Start_Action : declare
-                  Server_URL : constant String :=
-                                 Servers.URL (Servers.Get (Server));
-               begin
-                  Client_Service.Client.Status_Start
-                    (Key          => Config.Client.Get_Key,
-                     Project_Name =>
-                       Projects.Id_Utils.To_String (Project.Project_Id),
-                     Scenario     => Scenarios.Id_Utils.To_String (Id),
-                     Action       => Actions.Id_Utils.To_String (Ref.Id),
-                     Job_Id       => Job_Id,
-                     Endpoint     => Server_URL);
-               end Notify_Start_Action;
+               if Savadur.Config.Client_Server then
+                  --  Notify the server that the action is starting
+
+                  Notify_Start_Action : declare
+                     Server_URL : constant String :=
+                                    Servers.URL (Servers.Get (Server));
+                  begin
+                     Client_Service.Client.Status_Start
+                       (Key          => Config.Client.Get_Key,
+                        Project_Name =>
+                          Projects.Id_Utils.To_String (Project.Project_Id),
+                        Scenario     => Scenarios.Id_Utils.To_String (Id),
+                        Action       => Actions.Id_Utils.To_String (Ref.Id),
+                        Job_Id       => Job_Id,
+                        Endpoint     => Server_URL);
+                  end Notify_Start_Action;
+               end if;
 
                Execute (Exec_Action  => Exec_Action,
                         Directory    => Sources_Directory,
@@ -1018,7 +1026,9 @@ package body Savadur.Build is
                if not Result then
                   Status := False; --  Exit with error
 
-                  Send_Status (Server, Ref.Id);
+                  if Savadur.Config.Client_Server then
+                     Send_Status (Server, Ref.Id);
+                  end if;
 
                   exit Run_Actions;
                end if;
@@ -1031,9 +1041,11 @@ package body Savadur.Build is
                                 Log_File    => Log_File,
                                 Diff_Data   => Diff_Data'Access);
 
-               Send_Status (Server_Name => Server,
-                            Action_Id   => Ref.Id,
-                            Log_File    => Log_File);
+               if Savadur.Config.Client_Server then
+                  Send_Status (Server_Name => Server,
+                               Action_Id   => Ref.Id,
+                               Log_File    => Log_File);
+               end if;
 
                if not Status then
                   case Ref.On_Error is
@@ -1070,9 +1082,11 @@ package body Savadur.Build is
             end if;
       end For_All_Ref_Actions;
 
-      --  Final server notification
+      if Savadur.Config.Client_Server then
+         --  Final server notification
 
-      Send_Status (Server, Actions.End_Action.Id);
+         Send_Status (Server, Actions.End_Action.Id);
+      end if;
 
       --  Execute notifications hooks
 
