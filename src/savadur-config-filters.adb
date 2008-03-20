@@ -64,7 +64,11 @@ package body Savadur.Config.Filters is
    end Hash;
 
    package Filters_Map is
-     new Containers.Hashed_Maps (Filter_Id, Filter, Hash, "=");
+     new Containers.Hashed_Maps
+       (Key_Type        => Filter_Id,
+        Element_Type    => Filter,
+        Hash            => Hash,
+        Equivalent_Keys => "=");
 
    Maps : Filters_Map.Map;
 
@@ -100,8 +104,8 @@ package body Savadur.Config.Filters is
    begin
       if K = 0 then
          Logs.Write
-           ("(Filters) wrong If received in Simple_Name: " & I,
-            Logs.Handler.Error);
+           (Content => "(Filters) wrong If received in Simple_Name: " & I,
+            Kind    => Logs.Handler.Error);
          raise Constraint_Error
            with "(Filters) wrong If received in Simple_Name: " & I;
 
@@ -138,12 +142,13 @@ package body Savadur.Config.Filters is
       end loop;
 
       if F.Id = Id_Utils.Nil then
-         Logs.Write ("(Filters) missing Id attribute", Logs.Handler.Error);
+         Logs.Write (Content => "(Filters) missing Id attribute",
+                     Kind    => Logs.Handler.Error);
       end if;
 
       if F.Pattern = Pattern_Utils.Nil then
-         Logs.Write
-           ("(Filters) missing Pattern attribute", Logs.Handler.Error);
+         Logs.Write (Content => "(Filters) missing Pattern attribute",
+                     Kind    => Logs.Handler.Error);
       end if;
 
       Maps.Insert (F.Id, F);

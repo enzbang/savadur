@@ -193,6 +193,6 @@ package body Savadur.Config.Committers is
       end case;
    end Start_Element;
 
-begin --  BEGIN Savadur.Config.Committers
+begin  --  Savadur.Config.Committers : Parse committers.xml
    Parse;
 end Savadur.Config.Committers;

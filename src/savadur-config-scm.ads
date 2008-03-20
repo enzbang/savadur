@@ -19,11 +19,14 @@
 --  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.       --
 ------------------------------------------------------------------------------
 
+with IO_Exceptions;
+
 with Savadur.SCM;
 
 package Savadur.Config.SCM is
 
    Config_Error : exception renames Savadur.Config.Config_Error;
+   Name_Error   : exception renames IO_Exceptions.Name_Error;
 
    Configurations : Savadur.SCM.Sets.Set;
 
@@ -32,6 +35,7 @@ package Savadur.Config.SCM is
 
    function Get (SCM_Name : in String) return Savadur.SCM.SCM;
    --  Returns the SCM with the given name
+   --  or raise Name_Error if there is no SCM with the given name
 
    procedure Reload (SCM_Name : in String; Filename : in String := "");
    --  Reloads SCM name or load the given filename if no SCM found

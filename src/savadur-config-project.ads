@@ -19,11 +19,14 @@
 --  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.       --
 ------------------------------------------------------------------------------
 
+with IO_Exceptions;
 with Savadur.Projects.Sets;
 
 package Savadur.Config.Project is
 
    Config_Error : exception renames Savadur.Config.Config_Error;
+
+   Name_Error : exception renames IO_Exceptions.Name_Error;
 
    Configurations : Savadur.Projects.Sets.Set;
 
@@ -31,7 +34,8 @@ package Savadur.Config.Project is
    --  Parses all projects
 
    function Get (Project_Name : in String) return Projects.Project_Config;
-   --  Returns the project with the given name
+   --  Returns the project with the given name or
+   --  raise Name_Error if there is no project with the given name
 
    function Is_Project_Name (Project_Name : in String) return Boolean;
    --  Returns TRUE if a project with the given name exists

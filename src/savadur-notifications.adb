@@ -89,8 +89,9 @@ package body Savadur.Notifications is
 
       if not SMTP.Is_Ok (Result) then
          Logs.Write
-           ("Send_Mail error : (TO=" & Email & ", subject=" & Subject & ")",
-            Logs.Handler.Error);
+           (Content => "Send_Mail error : (TO=" & Email
+            & ", subject=" & Subject & ")",
+            Kind    => Logs.Handler.Error);
       end if;
    end Send_Mail;
 
@@ -148,8 +149,8 @@ package body Savadur.Notifications is
 
       else
          Logs.Write
-           ("Cannot find RSS template: " & RSS_Template_File.all,
-            Logs.Handler.Warnings);
+           (Content => "Cannot find RSS template: " & RSS_Template_File.all,
+            Kind    => Logs.Handler.Warnings);
       end if;
    end Update_RSS;
 
@@ -180,8 +181,9 @@ package body Savadur.Notifications is
       Jabber.Close (Server);
    exception
       when E : others =>
-         Logs.Write ("Unknown_Error " & Exceptions.Exception_Information (E),
-                     Logs.Handler.Error);
+         Logs.Write
+           (Content => "Unknown_Error " & Exceptions.Exception_Information (E),
+            Kind    => Logs.Handler.Error);
    end XMPP_Send;
 
 end Savadur.Notifications;

@@ -969,11 +969,11 @@ package body Savadur.Build is
                   end if;
 
                   Send_Status
-                    (Server,
-                     Savadur.SCM.Init.Id,
-                     Log_Filename (Project   => Project,
-                                   Action_Id => SCM.Init.Id,
-                                   Job_Id    => Job_Id));
+                    (Server_Name => Server,
+                     Action_Id   => Savadur.SCM.Init.Id,
+                     Log_File    => Log_Filename (Project   => Project,
+                                                  Action_Id => SCM.Init.Id,
+                                                  Job_Id    => Job_Id));
                end Run_SCM_Init;
             end if;
          end if;

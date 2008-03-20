@@ -32,6 +32,8 @@ package Savadur.Config.Filters is
    use Ada.Strings.Unbounded;
    use Savadur.Utils;
 
+   Config_Error : exception renames Savadur.Config.Config_Error;
+
    type Filter_Id is new Unbounded_String;
 
    type Set is array (1 .. 2) of Filter_Id;
@@ -72,8 +74,9 @@ package Savadur.Config.Filters is
 
 private
 
-   Null_Filter : constant Filter := (Id_Utils.Nil, Pattern_Utils.Nil);
+   Null_Filter : constant Filter :=
+                   Filter'(Id => Id_Utils.Nil, Pattern => Pattern_Utils.Nil);
 
-   Null_Set : constant Set := (others => Id_Utils.Nil);
+   Null_Set : constant Set := Set'(others => Id_Utils.Nil);
 
 end Savadur.Config.Filters;

@@ -231,7 +231,7 @@ package body Savadur.Config.Project is
       else
          Logs.Write (Content => "Try loading unknown project " & Project_Name,
                      Kind    => Logs.Handler.Error);
-         raise IO_Exceptions.Name_Error
+         raise Name_Error
            with "Try loading unknown project " & Project_Name;
       end if;
    end Get;
@@ -366,7 +366,7 @@ package body Savadur.Config.Project is
          end Load_Config;
       end loop Walk_Directories;
    exception
-      when IO_Exceptions.Name_Error =>
+      when Name_Error =>
          raise Config_Error with " No Project Directory ? (" & Dir & ')';
    end Parse;
 
@@ -394,7 +394,7 @@ package body Savadur.Config.Project is
       end Try_Reload;
 
    exception
-      when IO_Exceptions.Name_Error =>
+      when Name_Error =>
 
          --  Project is new. Load the given filename
 

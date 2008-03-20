@@ -20,7 +20,6 @@
 ------------------------------------------------------------------------------
 
 with Ada.Characters.Handling;
-with Ada.IO_Exceptions;
 with Ada.Directories;
 with Ada.Strings.Unbounded;
 
@@ -145,7 +144,7 @@ package body Savadur.Config.SCM is
       if Savadur.SCM.Sets.Has_Element (C) then
          return Savadur.SCM.Sets.Element (C);
       else
-         raise IO_Exceptions.Name_Error
+         raise Name_Error
            with "Try loading unknown scm " & SCM_Name;
       end if;
    end Get;
@@ -241,7 +240,7 @@ package body Savadur.Config.SCM is
          end Load_Config;
       end loop Walk_Directories;
    exception
-      when IO_Exceptions.Name_Error =>
+      when Name_Error =>
          raise Config_Error with " No SCM Directory ?";
    end Parse;
 
@@ -260,7 +259,7 @@ package body Savadur.Config.SCM is
       end Try_Reload;
 
    exception
-      when IO_Exceptions.Name_Error =>
+      when Name_Error =>
 
          --  SCM is new. Load the given filename
 
@@ -304,9 +303,13 @@ package body Savadur.Config.SCM is
 
          when Cmd =>
             Config.Cmd.Start_Element
-              (Handler.Action.Cmd,
-               Savadur.SCM.Id_Utils.To_String (Handler.SCM.Id),
-               Namespace_URI, Local_Name, Qname, Atts);
+              (Command       => Handler.Action.Cmd,
+               Prefix        =>
+                 Savadur.SCM.Id_Utils.To_String (Handler.SCM.Id),
+               Namespace_URI => Namespace_URI,
+               Local_Name    => Local_Name,
+               Qname         => Qname,
+               Atts          => Atts);
 
          when others =>
             for J in 0 .. Get_Length (Atts) - 1 loop

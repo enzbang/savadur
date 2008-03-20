@@ -41,30 +41,33 @@ package body Savadur.Times is
       if S1 = 0 or else S2 = 0 then
          raise Constraint_Error
            with "non conforming periodic time '" & From & ''';
-      end if;
+      else
 
-      Create_Perodic : declare
-         H : constant Calendar.Formatting.Hour_Number :=
-               Calendar.Formatting.Hour_Number'Value
-                 (From (From'First .. S1 - 1));
-         M : constant Calendar.Formatting.Minute_Number :=
-               Calendar.Formatting.Minute_Number'Value
-                 (From (S1 + 1 .. S2 - 1));
-      begin
-         return Periodic'
-           (Event => Calendar.Time_Of
-              (Year    => Calendar.Year (Now),
-               Month   => Calendar.Month (Now),
-               Day     => Calendar.Day (Now),
-               Seconds => H * 3600.0 + M * 60.0 +
-                 Duration (Calendar.Formatting.Second (Now))),
-            Every => Duration'Value (From (S2 + 2 .. From'Last)) * 60.0,
-            From  => +From);
-      end Create_Perodic;
-   exception
-      when others =>
-         raise Constraint_Error
-           with "non conforming periodic time '" & From & ''';
+         begin
+            Create_Perodic : declare
+               H : constant Calendar.Formatting.Hour_Number :=
+                     Calendar.Formatting.Hour_Number'Value
+                       (From (From'First .. S1 - 1));
+               M : constant Calendar.Formatting.Minute_Number :=
+                     Calendar.Formatting.Minute_Number'Value
+                       (From (S1 + 1 .. S2 - 1));
+            begin
+               return Periodic'
+                 (Event => Calendar.Time_Of
+                    (Year    => Calendar.Year (Now),
+                     Month   => Calendar.Month (Now),
+                     Day     => Calendar.Day (Now),
+                     Seconds => H * 3600.0 + M * 60.0 +
+                       Duration (Calendar.Formatting.Second (Now))),
+                  Every => Duration'Value (From (S2 + 2 .. From'Last)) * 60.0,
+                  From  => +From);
+            end Create_Perodic;
+         exception
+            when others =>
+               raise Constraint_Error
+                 with "non conforming periodic time '" & From & ''';
+         end;
+      end if;
    end Create;
 
    -----------
