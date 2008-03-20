@@ -2,7 +2,7 @@
   <name id="bootstrap" />
   <scm id="git" />
 
-  <variable id="url" value="../../../../" />
+  <variable id="url" value="../../../../../" />
 
   <action id="make">
     <cmd>make build</cmd>

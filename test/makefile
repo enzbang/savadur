@@ -38,10 +38,9 @@ setup:
 	$(CP) -r test-dir/env test-dir/client
 
 regtests_bootstrap: setup
-	$(GNATMAKE) -XPRJ_BUILD=$(MODE) -XIN_TEST=TRUE -P \
-		 ../savadur --client
-	./bin/savadur --client -project bootstrap \
-		-savadurdir $(PWD)/test/test-dir
+	$(GNATMAKE) -XPRJ_BUILD=$(MODE) -XIN_TEST=TRUE -P ../savadur-main
+	SAVADUR_DIR=$(PWD)/test/test-dir ./bin/savadur --standalone \
+		--project bootstrap
 
 clean:
 	$(RM) -r test-dir/work test-dir/scm
