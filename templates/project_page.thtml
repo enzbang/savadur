@@ -98,7 +98,7 @@ Stop at @_LOGS_STOP_DATE_@">
                     @@IF@@ @_LOGS_STOP_DATE_@ /= ""
                       <span class="timestamp">@_LOGS_DURATION_@s</span>
                     @@ELSE@@
-                      <span class="timestamp">ETA in @_LOGS_LAST_DURATION_@s</span>
+                      <span class="timestamp">ETA in @_LOGS_DURATION_@s</span>
                     @@END_IF@@
                 </td>
               </tr>
