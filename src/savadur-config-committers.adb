@@ -61,9 +61,6 @@ package body Savadur.Config.Committers is
    --  Returns the attribute value matching the given string or raise
    --  Config_Error.
 
-   procedure Parse;
-   --  Fills the Set with committers e-mails
-
    overriding procedure Start_Element
      (Handler       : in out Tree_Reader;
       Namespace_URI : in     Unicode.CES.Byte_Sequence := "";
@@ -192,7 +189,4 @@ package body Savadur.Config.Committers is
             end Get_Name_Value;
       end case;
    end Start_Element;
-
-begin  --  Savadur.Config.Committers : Parse committers.xml
-   Parse;
 end Savadur.Config.Committers;

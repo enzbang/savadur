@@ -36,6 +36,7 @@ with Savadur.Client_Service.Client;
 with Savadur.Client_Service.Types;
 with Savadur.Clients;
 with Savadur.Config.Client;
+with Savadur.Config.Committers;
 with Savadur.Config.Environment_Variables;
 with Savadur.Config.Project;
 with Savadur.Config.Project_List;
@@ -325,6 +326,7 @@ procedure Savadur.Bin is
       Config.Project.Parse;
       Config.Project_List.Parse;
       Config.Notifications.Parse;
+      Config.Committers.Parse;
 
       Project_List.Iterate_On_Clients
         (Project_List => Config.Project_List.Configurations,

@@ -26,4 +26,7 @@ package Savadur.Config.Committers is
    function Get (Name : in String) return String;
    --  Given the name, returns the e-mail
 
+   procedure Parse;
+   --  Fills the Set with committers e-mails
+
 end Savadur.Config.Committers;
