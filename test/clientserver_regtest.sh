@@ -41,14 +41,16 @@ echo '   <endpoint url="http://localhost:8181"/>' >> $SCONF
 echo '</client>' >> $SCONF
 #######
 
-SAVADUR_DIR=$PWD/test-dir/server ./bin/savadur --server -VV & PID_SERVER=$!
+SAVADUR_DIR=$PWD/test-dir/
+export SAVADUR_DIR
+
+echo ./bin/savadur --server -VV & PID_SERVER=$!
+./bin/savadur --server -VV & PID_SERVER=$!
 sleep 1
-SAVADUR_DIR=$PWD/test-dir/client ./bin/savadur --client -VV  \
-  --config --id me
-SAVADUR_DIR=$PWD/test-dir/client ./bin/savadur --client -VV  \
-  --config --endpoint http://localhost:8282
-SAVADUR_DIR=$PWD/test-dir/client ./bin/savadur --client -VV  &
-PID_CLIENT=$!
+./bin/savadur --client -VV --config --id me
+./bin/savadur --client -VV --config --endpoint http://localhost:8282
+echo ./bin/savadur --client -VV  & PID_CLIENT=$!
+./bin/savadur --client -VV  & PID_CLIENT=$!
 
 trap 'kill $PID_SERVER $PID_CLIENT; exit' 2
 
