@@ -43,7 +43,7 @@ package body Signed_Files is
       Savadur.Signed_Files.Create (H, Name => "another", Filename => Filename);
       Assertions.Assert
         (Savadur.Signed_Files.SHA1 (H) =
-           "bff41a9ad47479a2a5fd2804ff20d440f13ffea6",
+           "9e19c4459741e6960aeac0481e5c60b6dacc9e79",
          "Wrong file signature for " & Filename
          & " found '" & String (Savadur.Signed_Files.SHA1 (H)) & ''');
    end Check_Signed_Files;

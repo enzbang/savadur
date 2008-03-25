@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <environment_variables>
   <project name="ex_project" />
   <var name="PATH" value="/usr/bin" mode="append" />
