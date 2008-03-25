@@ -43,7 +43,7 @@ package body Savadur.Config.SCM is
 
    type Node_Value is (SCM, Name, Action, Cmd, Filter);
 
-   type Attribute is (Id, Result);
+   type Attribute is (Id, Result, Skip_On_Init);
 
    type XML_Attribute is array (Attribute) of Boolean;
 
@@ -52,7 +52,8 @@ package body Savadur.Config.SCM is
    Schema : constant XML_Schema := XML_Schema'
      (SCM    => XML_Attribute'(Id            => False, others => False),
       Cmd    => XML_Attribute'(others => False),
-      Action => XML_Attribute'(Id | Result   => True, others => False),
+      Action => XML_Attribute'(Id | Result | Skip_On_Init => True,
+                               others                     => False),
       Name   => XML_Attribute'(Id            => True, others => False),
       Filter => XML_Attribute'(others => False));
 
@@ -338,6 +339,16 @@ package body Savadur.Config.SCM is
                         when Action =>
                            Handler.Action.Result :=
                              Actions.Result_Type'Value (Get_Value (Atts, J));
+
+                        when Name | SCM | Cmd | Filter =>
+                           null;
+                     end case;
+
+                  when Skip_On_Init =>
+                     case NV is
+                        when Action =>
+                           Handler.Action.Skip_On_Init :=
+                             Boolean'Value (Get_Value (Atts, J));
 
                         when Name | SCM | Cmd | Filter =>
                            null;

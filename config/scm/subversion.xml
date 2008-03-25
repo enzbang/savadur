@@ -26,7 +26,7 @@
     <cmd>svn checkout $url $sources</cmd>
   </action>
 
-  <action id="update">
+  <action id="update" skip_on_init="true">
     <cmd filter1="files_updated">svn update</cmd>
   </action>
 

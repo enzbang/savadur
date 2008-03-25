@@ -42,9 +42,10 @@ package Savadur.Actions is
    type Result_Type is (Exit_Status, Value);
 
    type Action is record
-      Id     : Actions.Id;
-      Cmd    : Config.Cmd.Command;
-      Result : Result_Type := Exit_Status;
+      Id           : Actions.Id;
+      Cmd          : Config.Cmd.Command;
+      Result       : Result_Type := Exit_Status;
+      Skip_On_Init : Boolean := False;
    end record;
 
    Null_Action : constant Action;
@@ -113,14 +114,16 @@ package Savadur.Actions is
 private
 
    Null_Action     : constant Action :=
-                       Action'(Id     => Id_Utils.Nil,
-                               Cmd    => Config.Cmd.Null_Command,
-                               Result => <>);
+                       Action'(Id           => Id_Utils.Nil,
+                               Cmd          => Config.Cmd.Null_Command,
+                               Result       => <>,
+                               Skip_On_Init => <>);
 
    End_Action      : constant Action :=
-                       Action'(Id     => Id_Utils.Value ("@ENDACTION@"),
-                               Cmd    => Config.Cmd.Null_Command,
-                               Result => <>);
+                       Action'(Id           => Id_Utils.Value ("@ENDACTION@"),
+                               Cmd          => Config.Cmd.Null_Command,
+                               Result       => <>,
+                               Skip_On_Init => <>);
 
    Null_Ref_Action : constant Ref_Action :=
                        Ref_Action'(Id          => Id_Utils.Nil,

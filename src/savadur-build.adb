@@ -902,7 +902,8 @@ package body Savadur.Build is
    begin
       For_All_Ref_Actions : declare
          use Savadur.Actions.Vectors;
-         Position    : Cursor := Selected_Scenario.Actions.First;
+         Is_Init     : Boolean := False;
+         Position    : Cursor  := Selected_Scenario.Actions.First;
          Project_SCM : Savadur.SCM.SCM;
       begin
 
@@ -922,6 +923,8 @@ package body Savadur.Build is
             --  this project we create the directory.
 
             Logs.Write ("Create directory : " & Sources_Directory);
+
+            Is_Init := True;
 
             if Project.SCM_Id = SCM.Null_Id then
                Directories.Create_Directory (Sources_Directory);
@@ -999,61 +1002,62 @@ package body Savadur.Build is
                Result      : Boolean;
             begin
 
-               if Savadur.Config.Client_Server then
-                  --  Notify the server that the action is starting
-
-                  Notify_Start_Action : declare
-                     Server_URL : constant String :=
-                                    Servers.URL (Servers.Get (Server));
-                  begin
-                     Client_Service.Client.Status_Start
-                       (Key          => Config.Client.Get_Key,
-                        Project_Name =>
-                          Projects.Id_Utils.To_String (Project.Project_Id),
-                        Scenario     => Scenarios.Id_Utils.To_String (Id),
-                        Action       => Actions.Id_Utils.To_String (Ref.Id),
-                        Job_Id       => Job_Id,
-                        Endpoint     => Server_URL);
-                  end Notify_Start_Action;
-               end if;
-
-               Execute (Exec_Action  => Exec_Action,
-                        Directory    => Sources_Directory,
-                        Log_Filename => Log_File,
-                        Return_Code  => Return_Code,
-                        Result       => Result);
-
-               if not Result then
-                  Status := False; --  Exit with error
-
+               if not Is_Init or not Exec_Action.Skip_On_Init then
                   if Savadur.Config.Client_Server then
-                     Send_Status (Server, Ref.Id);
+                     --  Notify the server that the action is starting
+
+                     Notify_Start_Action : declare
+                        Server_URL : constant String :=
+                                       Servers.URL (Servers.Get (Server));
+                     begin
+                        Client_Service.Client.Status_Start
+                          (Key          => Config.Client.Get_Key,
+                           Project_Name =>
+                             Projects.Id_Utils.To_String (Project.Project_Id),
+                           Scenario     => Scenarios.Id_Utils.To_String (Id),
+                           Action       => Actions.Id_Utils.To_String (Ref.Id),
+                           Job_Id       => Job_Id,
+                           Endpoint     => Server_URL);
+                     end Notify_Start_Action;
                   end if;
 
-                  exit Run_Actions;
-               end if;
+                  Execute (Exec_Action  => Exec_Action,
+                           Directory    => Sources_Directory,
+                           Log_Filename => Log_File,
+                           Return_Code  => Return_Code,
+                           Result       => Result);
 
-               Status := Check (Project     => Project,
-                                Exec_Action => Exec_Action,
-                                Ref         => Ref,
-                                Return_Code => Return_Code,
-                                Job_Id      => Job_Id,
-                                Log_File    => Log_File,
-                                Diff_Data   => Diff_Data'Access);
+                  if not Result then
+                     Status := False; --  Exit with error
 
-               if Savadur.Config.Client_Server then
-                  Send_Status (Server_Name => Server,
-                               Action_Id   => Ref.Id,
-                               Log_File    => Log_File);
-               end if;
+                     if Savadur.Config.Client_Server then
+                        Send_Status (Server, Ref.Id);
+                     end if;
 
-               if not Status then
-                  case Ref.On_Error is
+                     exit Run_Actions;
+                  end if;
+
+                  Status := Check (Project     => Project,
+                                   Exec_Action => Exec_Action,
+                                   Ref         => Ref,
+                                   Return_Code => Return_Code,
+                                   Job_Id      => Job_Id,
+                                   Log_File    => Log_File,
+                                   Diff_Data   => Diff_Data'Access);
+
+                  if Savadur.Config.Client_Server then
+                     Send_Status (Server_Name => Server,
+                                  Action_Id   => Ref.Id,
+                                  Log_File    => Log_File);
+                  end if;
+
+                  if not Status then
+                     case Ref.On_Error is
                      when Actions.Quit =>
                         Status := True;
                         exit Run_Actions;
 
-                     when Actions.Error =>
+                        when Actions.Error =>
                         Project.Variables.Insert
                           (New_Item =>
                            Variables.Variable'
@@ -1063,12 +1067,13 @@ package body Savadur.Build is
                                 To_Unbounded_String (Ref.Id)));
                         exit Run_Actions;
 
-                     when Actions.Continue =>
+                        when Actions.Continue =>
                         null;
-                  end case;
-               end if;
+                     end case;
+                  end if;
 
-               Next (Position);
+                  Next (Position);
+               end if;
             end Execute_Command;
          end loop Run_Actions;
 
