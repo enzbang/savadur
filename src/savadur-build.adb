@@ -1001,8 +1001,7 @@ package body Savadur.Build is
                Return_Code : Integer;
                Result      : Boolean;
             begin
-
-               if not Is_Init or not Exec_Action.Skip_On_Init then
+               if not Is_Init or else not Exec_Action.Skip_On_Init then
                   if Savadur.Config.Client_Server then
                      --  Notify the server that the action is starting
 
