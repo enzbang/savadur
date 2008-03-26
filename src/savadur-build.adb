@@ -1071,9 +1071,9 @@ package body Savadur.Build is
                         null;
                      end case;
                   end if;
-
-                  Next (Position);
                end if;
+
+               Next (Position);
             end Execute_Command;
          end loop Run_Actions;
 

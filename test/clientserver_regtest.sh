@@ -178,7 +178,7 @@ check_file $MS/.build/debug/lib morzhol.ali true
 check_file $ML 2-init true
 check_file $ML 2-make true
 check_file $ML 2-regtests true
-check_file $ML 2-update true
+check_file $ML 2-update false
 check_file $ML 2-version true
 
 versize=$(wc -w $ML/2-version | cut -c1)
@@ -204,7 +204,7 @@ check_file $SCS style_checker$EXEEXT true
 check_file $SCL 1-init true
 check_file $SCL 1-make true
 check_file $SCL 1-regtests true
-check_file $SCL 1-pull true
+check_file $SCL 1-pull false
 check_file $SCL 1-version true
 
 versize=$(wc -w $SCL/1-version | cut -c1)
@@ -234,14 +234,6 @@ check_file $NPL 5-pull.files_updated true
 check_file $NPL 5-make false
 check_file $NPL 5-regtests false
 
-filesu=$(cat $NPL/3-pull.files_updated)
-
-if [ "$filesu" == "" ]; then
-    echo OK: files_updated is empty
-else
-    echo NOK: files_updated is wrong, should be empty
-fi;
-
 filesi=$(cat $NPL/4-pull.files_ignored)
 
 if [ "$filesi" == "readme.txt" ]; then
@@ -263,19 +255,19 @@ echo === Check log directory $TL
 check_file $TL 1-machine-init true
 check_file $TL 1-machine-make true
 check_file $TL 1-machine-regtests true
-check_file $TL 1-machine-pull true
+check_file $TL 1-machine-pull false
 check_file $TL 1-machine-version true
 
 check_file $TL 2-machine-init true
 check_file $TL 2-machine-make true
 check_file $TL 2-machine-regtests true
-check_file $TL 2-machine-update true
+check_file $TL 2-machine-update false
 check_file $TL 2-machine-version true
 
 check_file $TL 3-machine-init true
 check_file $TL 3-machine-make true
 check_file $TL 3-machine-regtests true
-check_file $TL 3-machine-pull true
+check_file $TL 3-machine-pull false
 check_file $TL 3-machine-version true
 
 check_file $TL 4-machine-make true
