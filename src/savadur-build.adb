@@ -1052,22 +1052,22 @@ package body Savadur.Build is
 
                   if not Status then
                      case Ref.On_Error is
-                     when Actions.Quit =>
-                        Status := True;
-                        exit Run_Actions;
+                        when Actions.Quit =>
+                           Status := True;
+                           exit Run_Actions;
 
                         when Actions.Error =>
-                        Project.Variables.Insert
-                          (New_Item =>
-                           Variables.Variable'
-                             (Name  =>
-                              Variables.Name_Utils.Value ("failed_action"),
-                              Value => Actions.Id_Utils.
-                                To_Unbounded_String (Ref.Id)));
-                        exit Run_Actions;
+                           Project.Variables.Insert
+                             (New_Item =>
+                              Variables.Variable'
+                                (Name  =>
+                                 Variables.Name_Utils.Value ("failed_action"),
+                                 Value => Actions.Id_Utils.
+                                   To_Unbounded_String (Ref.Id)));
+                           exit Run_Actions;
 
                         when Actions.Continue =>
-                        null;
+                           null;
                      end case;
                   end if;
                end if;
