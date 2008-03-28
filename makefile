@@ -67,25 +67,25 @@ check:
 		-rules -from=savadur.check
 install:
 	@$(MKDIR) $(INSTALL)/example
-	@$(MKDIR) $(INSTALL)/client-savadurdir/scm
-	@$(MKDIR) $(INSTALL)/client-savadurdir/servers
-	@$(MKDIR) $(INSTALL)/client-savadurdir/share/templates
-	@$(MKDIR) $(INSTALL)/server-savadurdir/config
-	@$(MKDIR) $(INSTALL)/server-savadurdir/projects
-	@$(MKDIR) $(INSTALL)/server-savadurdir/scripts
-	@$(MKDIR) $(INSTALL)/server-savadurdir/htdocs/templates
-	@$(MKDIR) $(INSTALL)/server-savadurdir/htdocs/img
-	@$(MKDIR) $(INSTALL)/server-savadurdir/htdocs/css
-	@$(MKDIR) $(INSTALL)/server-savadurdir/share/templates
-	@$(MKDIR) $(INSTALL)/server-savadurdir/scm
-	@$(CP) db/data/create_database.sh $(INSTALL)/server-savadurdir/scripts/
-	@$(CP) config/scm/* $(INSTALL)/server-savadurdir/scm
-	@$(CP) templates/*.thtml $(INSTALL)/server-savadurdir/htdocs/templates
-	@$(CP) templates/*.txml $(INSTALL)/server-savadurdir/htdocs/templates
-	@$(CP) templates/*.css $(INSTALL)/server-savadurdir/htdocs/css
-	@$(CP) templates/img/*.* $(INSTALL)/server-savadurdir/htdocs/img
-	@$(CP) templates/config/*.txml $(INSTALL)/server-savadurdir/share/templates/
-	@$(CP) templates/config/*.txml $(INSTALL)/client-savadurdir/share/templates/
+	@$(MKDIR) $(INSTALL)/savadurdir/client/scm
+	@$(MKDIR) $(INSTALL)/savadurdir/client/servers
+	@$(MKDIR) $(INSTALL)/savadurdir/client/share/templates
+	@$(MKDIR) $(INSTALL)/savadurdir/server/config
+	@$(MKDIR) $(INSTALL)/savadurdir/server/projects
+	@$(MKDIR) $(INSTALL)/savadurdir/server/scripts
+	@$(MKDIR) $(INSTALL)/savadurdir/server/htdocs/templates
+	@$(MKDIR) $(INSTALL)/savadurdir/server/htdocs/img
+	@$(MKDIR) $(INSTALL)/savadurdir/server/htdocs/css
+	@$(MKDIR) $(INSTALL)/savadurdir/server/share/templates
+	@$(MKDIR) $(INSTALL)/savadurdir/server/scm
+	@$(CP) db/data/create_database.sh $(INSTALL)/savadurdir/server/scripts/
+	@$(CP) config/scm/* $(INSTALL)/savadurdir/server/scm
+	@$(CP) templates/*.thtml $(INSTALL)/savadurdir/server/htdocs/templates
+	@$(CP) templates/*.txml $(INSTALL)/savadurdir/server/htdocs/templates
+	@$(CP) templates/*.css $(INSTALL)/savadurdir/server/htdocs/css
+	@$(CP) templates/img/*.* $(INSTALL)/savadurdir/server/htdocs/img
+	@$(CP) templates/config/*.txml $(INSTALL)/savadurdir/server/share/templates/
+	@$(CP) templates/config/*.txml $(INSTALL)/savadurdir/client/share/templates/
 	@$(CP) test/config/*.xml $(INSTALL)/example/
 	cp $(BIN_DIR)/savadur $(INSTALL)
 	@echo savadur is installed in $(INSTALL)
