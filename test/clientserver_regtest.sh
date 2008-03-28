@@ -61,7 +61,7 @@ wget --no-proxy "http://localhost:8181/run?p=style_checker&s=default&l=5"
 sleep 1
 
 #  Reschedule same job, check output for deleted job
-wget --no-proxy "http://localhost:8181/run?p=style_checker&s=default&l=5"
+wget --no-proxy "http://localhost:8181/run?p=style_checker&s=default"
 
 wget --no-proxy "http://localhost:8181/run?p=morzhol&s=default&l=5"
 
