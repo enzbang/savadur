@@ -627,6 +627,13 @@ package body Savadur.Config.Project is
                      null;
                end case;
          end case;
+
+      exception
+         when E : Constraint_Error =>
+            Logs.Write
+              (Content => Exception_Information (E),
+               Kind    => Logs.Handler.Very_Verbose);
+            raise Config_Error;
       end Get_Attribute_Value;
 
    begin
