@@ -39,7 +39,7 @@ package Savadur.Jobs.Queue is
       Server   : in String;
       Scenario : in String;
       Time     : in Times.Periodic := Times.No_Time;
-      Latency  : in Duration := 10.0 * 60.0;
+      Latency  : in Duration := 1.0;
       Id       : in Natural := 0);
    --  Schedules a new job from the given server.
    --  10 minutes default latency (time before starting a non periodic job).
