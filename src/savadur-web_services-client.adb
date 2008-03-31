@@ -54,12 +54,14 @@ package body Savadur.Web_Services.Client is
       Action       : Actions.Id;
       Job_Id       : Natural;
       Number       : Natural := 0;
+
       case Start_Only is
-        when False =>
-          Output       : Unbounded_String;
-          Log_Filename : Unbounded_String;
-          Result       : Boolean;
-          Diff_Data    : Client.Diff_Data;
+         when False =>
+            Output       : Unbounded_String;
+            Log_Filename : Unbounded_String;
+            Result       : Boolean;
+            Diff_Data    : Client.Diff_Data;
+
          when True =>
             null;
       end case;
@@ -214,8 +216,8 @@ package body Savadur.Web_Services.Client is
       Logs.Write (Content => "Client Metadata are OS = " & (-Data.OS),
                   Kind    => Logs.Handler.Very_Verbose);
 
-      Clients.Register (Key, Data, Clients.Idle,
-                        Server_Name, Callback_Endpoint);
+      Clients.Register
+        (Key, Data, Clients.Idle, Server_Name, Callback_Endpoint);
 
       Database.Login (Key);
    end Register;
@@ -337,7 +339,6 @@ package body Savadur.Web_Services.Client is
                Job_Id       => Report.Job_Id);
 
          else
-
             Handle_Report : begin
                Logs.Write ("Output is " & (-Report.Output));
                Logs.Write (Boolean'Image (Report.Result));

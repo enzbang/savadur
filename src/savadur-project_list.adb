@@ -112,15 +112,15 @@ package body Savadur.Project_List is
    ------------------------
 
    procedure Iterate_On_Clients
-     (Project_List : in Projects.Map; Action : in Iterate_Action) is
+     (Project_List : in Projects.Map; Action : in Iterate_Action)
+   is
       Position : Projects.Cursor := Project_List.First;
    begin
       For_All_Projects : while Projects.Has_Element (Position) loop
          Get_Scenarios_List : declare
-            M_Scerarios                : constant Scenarios.Map :=
-                                            Projects.Element (Position);
-            Scenarios_Position         : Scenarios.Cursor       :=
-                                            M_Scerarios.First;
+            M_Scerarios        : constant Scenarios.Map :=
+                                   Projects.Element (Position);
+            Scenarios_Position : Scenarios.Cursor := M_Scerarios.First;
          begin
 
             --  For all projects scenarios

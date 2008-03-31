@@ -23,7 +23,7 @@ with Savadur.Project_List;
 
 package Savadur.Config.Project_List is
 
-   Config_Error : exception renames Config.Config_Error;
+   Config_Error   : exception renames Config.Config_Error;
 
    function Configurations
      return not null access constant Savadur.Project_List.Projects.Map;
