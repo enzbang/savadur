@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                                Savadur                                   --
 --                                                                          --
---                           Copyright (C) 2007                             --
+--                         Copyright (C) 2007-2008                          --
 --                      Pascal Obry - Olivier Ramonat                       --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -25,9 +25,14 @@ package Savadur.Config.Project_List is
 
    Config_Error : exception renames Config.Config_Error;
 
-   Configurations : Savadur.Project_List.Projects.Map;
+   function Configurations
+     return not null access constant Savadur.Project_List.Projects.Map;
 
    procedure Parse;
    --  Fills the server configuration map
+
+   procedure Reload;
+   --  Checks if the on-disk project list has been modified and reload if
+   --  necessary.
 
 end Savadur.Config.Project_List;

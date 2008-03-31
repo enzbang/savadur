@@ -211,7 +211,7 @@ package body Savadur.Web.Server is
       use type Templates.Tag;
       Clients_List : Templates.Tag;
       Set          : Templates.Translate_Set := Project_List.To_Set
-        (Savadur.Config.Project_List.Configurations);
+        (Savadur.Config.Project_List.Configurations.all);
    begin
       Templates.Insert (Set, Clients.Clients_Set);
       Templates.Insert

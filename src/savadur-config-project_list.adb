@@ -29,8 +29,9 @@ with Sax.Attributes;
 with Input_Sources.File;
 with Unicode.CES;
 
-with Savadur.Utils;
 with Savadur.Logs;
+with Savadur.Signed_Files;
+with Savadur.Utils;
 
 package body Savadur.Config.Project_List is
 
@@ -38,6 +39,10 @@ package body Savadur.Config.Project_List is
    use Ada.Strings.Unbounded;
    use Savadur;
    use Savadur.Utils;
+
+   Config_Filename : constant String := "project_list.xml";
+
+   Internal_Configurations : aliased Savadur.Project_List.Projects.Map;
 
    type Node_Value is (Project_List, Project, Scenario, Client);
 
@@ -67,6 +72,40 @@ package body Savadur.Config.Project_List is
       Scenario : in String;
       Client   : in String);
    --  Registers a new client which handle the given project/scenario
+
+   function Config_Signature return Signed_Files.Signature;
+   --  Returns the on-disk configuation file signature
+
+   Signature : Signed_Files.Signature;
+
+   ----------------------
+   -- Config_Signature --
+   ----------------------
+
+   function Config_Signature return Signed_Files.Signature is
+      H : Signed_Files.Handler;
+   begin
+      Signed_Files.Create
+        (File     => H,
+         Name     => Config_Filename,
+         Filename => Directories.Compose
+           (Directories.Compose
+              (Containing_Directory => Config.Savadur_Directory,
+               Name                 => "config"),
+            Config_Filename));
+      return Signed_Files.SHA1 (H);
+   end Config_Signature;
+
+   --------------------
+   -- Configurations --
+   --------------------
+
+   function Configurations
+     return not null access constant Savadur.Project_List.Projects.Map is
+   begin
+      Reload;
+      return Internal_Configurations'Access;
+   end Configurations;
 
    -------------------
    -- Get_Attribute --
@@ -113,12 +152,14 @@ package body Savadur.Config.Project_List is
       S : Search_Type;
       D : Directory_Entry_Type;
    begin
+      Signature := Config_Signature;
+
       Start_Search
         (Search    => S,
          Directory => Directories.Compose
            (Containing_Directory => Config.Savadur_Directory,
             Name                 => "config"),
-         Pattern   => "project_list.xml",
+         Pattern   => Config_Filename,
          Filter    => Filter_Type'(Ordinary_File => True,
                                    Directory     => False,
                                    Special_File  => False));
@@ -202,7 +243,7 @@ package body Savadur.Config.Project_List is
       end Update_Scenario;
 
       Position : Savadur.Project_List.Projects.Cursor :=
-                   Configurations.Find (Project);
+                   Internal_Configurations.Find (Project);
 
    begin
       if not Savadur.Project_List.Projects.Has_Element (Position) then
@@ -210,13 +251,31 @@ package body Savadur.Config.Project_List is
             M : Savadur.Project_List.Scenarios.Map;
             I : Boolean;
          begin
-            Configurations.Insert
+            Internal_Configurations.Insert
               (Project, New_Item => M, Position => Position, Inserted => I);
          end Add_To_Project;
       end if;
 
-      Configurations.Update_Element (Position, Update_Scenario'Access);
+      Internal_Configurations.Update_Element
+        (Position, Update_Scenario'Access);
    end Register_Client;
+
+   ------------
+   -- Reload --
+   ------------
+
+   procedure Reload is
+      use type Signed_Files.Signature;
+      S : constant Signed_Files.Signature := Config_Signature;
+   begin
+      if Signature /= S then
+         --  File has changed
+         Signature := S;
+
+         Internal_Configurations.Clear;
+         Parse;
+      end if;
+   end Reload;
 
    -------------------
    -- Start_Element --

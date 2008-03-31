@@ -19,8 +19,9 @@
 --  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.       --
 ------------------------------------------------------------------------------
 
-with Ada.Strings.Unbounded;
 with Ada.Directories;
+with Ada.Strings.Unbounded;
+with Ada.Text_IO;
 
 with AWS.Jabber;
 
@@ -225,7 +226,7 @@ package body Config_Parse is
       Savadur.Config.Project_List.Parse;
       Assertions.Assert
         (Utils.Strip (Savadur.Project_List.Image
-         (Savadur.Config.Project_List.Configurations)) =
+         (Savadur.Config.Project_List.Configurations.all)) =
            Utils.Strip ("* style_checker"
              & " - nightly"
              & "["
@@ -242,7 +243,43 @@ package body Config_Parse is
              & " . and_just_me"
              & "]"),
          "Wrong Project_List parse" & Savadur.Project_List.Image
-           (Savadur.Config.Project_List.Configurations));
+           (Savadur.Config.Project_List.Configurations.all));
+
+      --  Change it, check that it is properly reloaded
+
+      declare
+         Filename : constant String :=
+                      "test-dir/client/config/project_list.xml";
+         F        : Text_IO.File_Type;
+      begin
+         Text_IO.Create (F, Text_IO.Out_File, Filename);
+         Text_IO.Put_Line (F, "<?xml version=""1.0"" encoding=""utf-8""?>");
+         Text_IO.Put_Line (F, "<project_list>");
+         Text_IO.Put_Line (F, "   <project id=""uiop"">");
+         Text_IO.Put_Line (F, "      <scenario id=""po"">");
+         Text_IO.Put_Line (F, "         <client key=""wbot""/>");
+         Text_IO.Put_Line (F, "         <client key=""lbot""/>");
+         Text_IO.Put_Line (F, "      </scenario>");
+         Text_IO.Put_Line (F, "  </project>");
+         Text_IO.Put_Line (F, "</project_list>");
+         Text_IO.Close (F);
+
+         declare
+            Conf_Image : constant String :=
+                           Savadur.Project_List.Image
+                             (Savadur.Config.Project_List.Configurations.all);
+         begin
+            Assertions.Assert
+              (Utils.Strip (Conf_Image) =
+                 Utils.Strip ("* uiop"
+                   & " - po"
+                   & "["
+                   & " . wbot"
+                   & " . lbot"
+                   & "]"),
+               "Wrong Project_List reloaded " & Conf_Image);
+         end;
+      end;
    end Check_Project_List;
 
    ----------------------

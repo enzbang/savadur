@@ -329,7 +329,7 @@ procedure Savadur.Bin is
       Config.Committers.Parse;
 
       Project_List.Iterate_On_Clients
-        (Project_List => Config.Project_List.Configurations,
+        (Project_List => Config.Project_List.Configurations.all,
          Action       => Clients.Register'Access);
 
       Web.Server.Start;
