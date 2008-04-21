@@ -381,7 +381,7 @@ package body Savadur.Config.Client is
       File      : Text_IO.File_Type;
       Set       : Templates.Translate_Set;
    begin
-      if Configuration = Empty then
+      if Directories.Exists (Filename) and then Configuration = Empty then
          Parse;
       end if;
 
