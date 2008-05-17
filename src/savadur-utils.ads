@@ -74,4 +74,7 @@ package Savadur.Utils is
    --  Parse content using regexp and returns the result which is the
    --  catenation of all Nth matches.
 
+   procedure Copy_Tree (Left, Right : in String);
+   --  Copies a tree
+
 end Savadur.Utils;

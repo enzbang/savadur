@@ -20,9 +20,9 @@
 ------------------------------------------------------------------------------
 
 with Ada.Characters.Handling;
+with Ada.Directories;
 with Ada.Streams.Stream_IO;
 with Ada.Strings.Fixed;
-
 with GNAT.Regpat;
 
 with AWS.Translator;
@@ -84,6 +84,69 @@ package body Savadur.Utils is
 
       return -Content;
    end Content;
+
+   ---------------
+   -- Copy_Tree --
+   ---------------
+
+   procedure Copy_Tree (Left, Right : in String) is
+      use Ada.Directories;
+
+   begin
+
+      if Exists (Right) then
+         Delete_Tree (Right);
+      end if;
+
+      Create_Directory (New_Directory => Right);
+
+      --  Create subdirs (recursively)
+
+      Copy_Subdirs : declare
+         S        : Search_Type;
+         D        : Directory_Entry_Type;
+         Get_Dirs : Filter_Type := (Directory     => True,
+                                    Ordinary_File => False,
+                                    Special_File  => False);
+      begin
+         Start_Search (Search    => S,
+                       Directory => Left,
+                       Pattern   => "*",
+                       Filter    => Get_Dirs);
+
+         while More_Entries (S) loop
+            Get_Next_Entry (S, D);
+            if Simple_Name (D) /= "." and Simple_Name (D) /= ".." then
+               Copy_Tree
+                 (Left  => Full_Name (D),
+                  Right =>
+                    Compose (Containing_Directory => Right,
+                             Name                 => Simple_Name (D)));
+            end if;
+         end loop;
+      end Copy_Subdirs;
+
+      Copy_Files : declare
+         S         : Search_Type;
+         D         : Directory_Entry_Type;
+         Get_Files : Filter_Type := (Directory     => False,
+                                     Ordinary_File => True,
+                                     Special_File  => False);
+      begin
+         Start_Search (Search    => S,
+                       Directory => Left,
+                       Pattern   => "*",
+                       Filter    => Get_Files);
+
+         while More_Entries (S) loop
+            Get_Next_Entry (S, D);
+            Copy_File (Source_Name => Full_Name (D),
+                       Target_Name =>
+                         Compose (Containing_Directory => Right,
+                                  Name                 => Simple_Name (D)));
+         end loop;
+      end Copy_Files;
+   end Copy_Tree;
 
    -------------
    -- Convert --

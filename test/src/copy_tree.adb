@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                                Savadur                                   --
 --                                                                          --
---                         Copyright (C) 2007-2008                          --
+--                            Copyright (C) 2008                            --
 --                      Pascal Obry - Olivier Ramonat                       --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -19,35 +19,48 @@
 --  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.       --
 ------------------------------------------------------------------------------
 
-with Config_Parse;
-with Copy_Tree;
-with Signed_Files;
-with Periodic_Times;
-with SCM_Specific;
+with Ada.Directories;
+with Savadur.Utils;
 
-package body Savadur_Suite is
+package body Copy_Tree is
 
-   use AUnit.Test_Suites;
+   use Savadur;
 
-   Result : aliased Test_Suite;
-   Test_1 : aliased Config_Parse.Test_Case;
-   Test_2 : aliased Signed_Files.Test_Case;
-   Test_3 : aliased Periodic_Times.Test_Case;
-   Test_4 : aliased SCM_Specific.Test_Case;
-   Test_5 : aliased Copy_Tree.Test_Case;
+   procedure Check_Copy_Tree
+     (T : in out AUnit.Test_Cases.Test_Case'Class);
 
-   -----------
-   -- Suite --
-   -----------
-
-   function Suite return Access_Test_Suite is
+   procedure Check_Copy_Tree
+     (T : in out AUnit.Test_Cases.Test_Case'Class)
+   is
+      pragma Unreferenced (T);
    begin
-      Add_Test (Result'Access, Test_1'Access);
-      Add_Test (Result'Access, Test_2'Access);
-      Add_Test (Result'Access, Test_3'Access);
-      Add_Test (Result'Access, Test_4'Access);
-      Add_Test (Result'Access, Test_5'Access);
-      return Result'Access;
-   end Suite;
+      Savadur.Utils.Copy_Tree ("config", "config_duplicated");
 
-end Savadur_Suite;
+      Assertions.Assert
+        (Ada.Directories.Exists ("config_duplicated/ex_project.xml")
+           and then  Ada.Directories.Exists
+           ("config_duplicated/servers/another.xml"),
+         "Error copy_tree failed");
+   end Check_Copy_Tree;
+
+   ----------
+   -- Name --
+   ----------
+
+   function Name (T : in Test_Case) return Test_String is
+      pragma Unreferenced (T);
+   begin
+      return Format ("Check copy directory");
+   end Name;
+
+   --------------------
+   -- Register_Tests --
+   --------------------
+
+   procedure Register_Tests (T : in out Test_Case) is
+   begin
+      Registration.Register_Routine
+        (T, Check_Copy_Tree'Access, "check copy tree");
+   end Register_Tests;
+
+end Copy_Tree;

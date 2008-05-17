@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                                Savadur                                   --
 --                                                                          --
---                         Copyright (C) 2007-2008                          --
+--                           Copyright (C) 2008                             --
 --                      Pascal Obry - Olivier Ramonat                       --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -19,35 +19,20 @@
 --  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.       --
 ------------------------------------------------------------------------------
 
-with Config_Parse;
-with Copy_Tree;
-with Signed_Files;
-with Periodic_Times;
-with SCM_Specific;
+with AUnit;
 
-package body Savadur_Suite is
+package Copy_Tree is
 
-   use AUnit.Test_Suites;
+   use AUnit;
+   use AUnit.Test_Cases;
+   use AUnit.Test_Results;
 
-   Result : aliased Test_Suite;
-   Test_1 : aliased Config_Parse.Test_Case;
-   Test_2 : aliased Signed_Files.Test_Case;
-   Test_3 : aliased Periodic_Times.Test_Case;
-   Test_4 : aliased SCM_Specific.Test_Case;
-   Test_5 : aliased Copy_Tree.Test_Case;
+   type Test_Case is new AUnit.Test_Cases.Test_Case with null record;
 
-   -----------
-   -- Suite --
-   -----------
+   procedure Register_Tests (T : in out Test_Case);
+   --  Register routines to be run
 
-   function Suite return Access_Test_Suite is
-   begin
-      Add_Test (Result'Access, Test_1'Access);
-      Add_Test (Result'Access, Test_2'Access);
-      Add_Test (Result'Access, Test_3'Access);
-      Add_Test (Result'Access, Test_4'Access);
-      Add_Test (Result'Access, Test_5'Access);
-      return Result'Access;
-   end Suite;
+   function Name (T : in Test_Case) return Test_String;
+   --  Returns name identifying the test case
 
-end Savadur_Suite;
+end Copy_Tree;
