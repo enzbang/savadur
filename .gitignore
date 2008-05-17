@@ -8,7 +8,7 @@
 .gpsrcs
 bin
 db/data/logs.db
-kernel/src/savadur-version.ads
+src/savadur-version.ads
 savadur.tar.gz
 soap/*.ad?
 soap/*.wsdl
