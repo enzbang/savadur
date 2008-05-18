@@ -195,7 +195,7 @@ package body Savadur.Remote_Files is
       if Found or else Loaded then
          return Config.SCM.Get (SCM_Name);
       else
-         raise Unknown_File with "Cannot found project " & SCM_Name;
+         raise Unknown_File with "Cannot found SCM " & SCM_Name;
       end if;
    end Load_SCM;
 
