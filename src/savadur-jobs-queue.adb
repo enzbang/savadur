@@ -33,6 +33,7 @@ with Savadur.Logs;
 with Savadur.Projects.Sets;
 with Savadur.Remote_Files;
 with Savadur.SCM;
+with Savadur.Servers;
 with Savadur.Utils;
 
 package body Savadur.Jobs.Queue is
@@ -43,25 +44,27 @@ package body Savadur.Jobs.Queue is
    use Savadur.Utils;
 
    type Job_Data is record
-      Project  : aliased Signed_Files.Handler;
-      Server   : Unbounded_String;
-      Scenario : Unbounded_String;
-      Time     : Times.Periodic;  -- periodic job
-      Start    : Duration;        -- non periodic job start delay
-      Created  : Calendar.Time;
-      Number   : Integer;
-      Id       : Natural;
+      Project        : aliased Signed_Files.Handler;
+      Patch_Filename : Unbounded_String;
+      Server         : Unbounded_String;
+      Scenario       : Unbounded_String;
+      Time           : Times.Periodic;  -- periodic job
+      Start          : Duration;        -- non periodic job start delay
+      Created        : Calendar.Time;
+      Number         : Integer;
+      Id             : Natural;
    end record;
 
    End_Job : constant Job_Data :=
-               Job_Data'(Project  => <>,
-                         Scenario => Null_Unbounded_String,
-                         Server   => Null_Unbounded_String,
-                         Time     => Times.No_Time,
-                         Start    => 0.0,
-                         Created  => <>,
-                         Number   => Integer'First,
-                         Id       => 0);
+               Job_Data'(Project        => <>,
+                         Patch_Filename => Null_Unbounded_String,
+                         Scenario       => Null_Unbounded_String,
+                         Server         => Null_Unbounded_String,
+                         Time           => Times.No_Time,
+                         Start          => 0.0,
+                         Created        => <>,
+                         Number         => Integer'First,
+                         Id             => 0);
 
    function "=" (J1, J2 : in Job_Data) return Boolean;
    --  Returns True and J1 and J2 are equivalent jobs
@@ -141,6 +144,7 @@ package body Savadur.Jobs.Queue is
 
    procedure Add
      (Project  : in Signed_Files.Handler;
+      Patch    : in String;
       Server   : in String;
       Scenario : in String;
       Time     : in Times.Periodic := Times.No_Time;
@@ -148,14 +152,15 @@ package body Savadur.Jobs.Queue is
       Id       : in Natural := 0) is
    begin
       Job_Handler.Add
-        (Job_Data'(Project  => Project,
-                   Scenario => +Scenario,
-                   Server   => +Server,
-                   Time     => Time,
-                   Start    => Latency,
-                   Created  => Calendar.Clock,
-                   Number   => 0,
-                   Id       => Id));
+        (Job_Data'(Project        => Project,
+                   Patch_Filename => +Patch,
+                   Scenario       => +Scenario,
+                   Server         => +Server,
+                   Time           => Time,
+                   Start          => Latency,
+                   Created        => Calendar.Clock,
+                   Number         => 0,
+                   Id             => Id));
    end Add;
 
    ---------------------------
@@ -189,7 +194,9 @@ package body Savadur.Jobs.Queue is
                          Scenarios.Sets.Element (Position);
          begin
             if Scenario.Periodic /= Times.No_Time then
+               --  A periodic scenario can not use Patch feature
                Add (Project  => Project.Signature,
+                    Patch    => "",
                     Server   => "",
                     Scenario => -Scenario.Id,
                     Time     => Scenario.Periodic);
@@ -431,6 +438,14 @@ package body Savadur.Jobs.Queue is
             Project := Remote_Files.Load_Project
               (Signed_Files.Name (Job.Project));
 
+            --  Look for patch if exists
+
+            if Job.Patch_Filename /= Null_Unbounded_String then
+               Remote_Files.Load_Patch
+                 (-Job.Patch_Filename,
+                  -Job.Server);
+            end if;
+
             Logs.Write ("Project Id : " & (-Project.Project_Id));
 
             Logs.Write
@@ -465,6 +480,7 @@ package body Savadur.Jobs.Queue is
 
             if Run
               (Project  => Project'Access,
+               Patch    => -Job.Patch_Filename,
                Server   => -Job.Server,
                Env_Var  => Env_Var,
                Scenario => Scenarios.Id (Job.Scenario),

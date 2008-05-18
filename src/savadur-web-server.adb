@@ -271,6 +271,26 @@ package body Savadur.Web.Server is
       Project_Name : constant String := Parameters.Get (P, "p");
       Scenario_Id  : constant String := Parameters.Get (P, "s");
       Latency      : constant String := Parameters.Get (P, "l");
+
+      function Patch_Filename return String;
+      --  Returns the patch filename or "" if none
+
+      --------------------
+      -- Patch_Filename --
+      --------------------
+
+      function Patch_Filename return String is
+         Filename : constant String := Parameters.Get (P, "filename");
+         Handler  : Signed_Files.Handler;
+      begin
+         if Filename /= "" then
+            Logs.Write ("Get patch " & Filename);
+
+            return Utils.Unique_Filename (Filename);
+         end if;
+         return "";
+      end Patch_Filename;
+
    begin
       if Project_Name = "" or else Scenario_Id = "" then
          return Response.Build
@@ -290,11 +310,18 @@ package body Savadur.Web.Server is
          Signed_Files.Create (Signed_Project, Project_Name, Project_Filename);
 
          if Latency = "" then
-            Jobs.Server.Queue.Add (Signed_Project, "", Scenario_Id);
+            Jobs.Server.Queue.Add
+              (Project  => Signed_Project,
+               Patch    => Patch_Filename,
+               Server   => "",
+               Scenario => Scenario_Id);
          else
             Jobs.Server.Queue.Add
-              (Signed_Project, "", Scenario_Id,
-               Latency => Duration'Value (Latency));
+              (Project  => Signed_Project,
+               Patch    => Patch_Filename,
+               Server   => "",
+               Scenario => Scenario_Id,
+               Latency  => Duration'Value (Latency));
          end if;
 
          return Response.Build

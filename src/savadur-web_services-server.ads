@@ -23,6 +23,8 @@ package Savadur.Web_Services.Server is
 
    type Signed_Project is new String;
 
+   type Signed_Patch is new String;
+
    function Ping return String;
    --  Pings a client
 
@@ -30,6 +32,7 @@ package Savadur.Web_Services.Server is
      (Server_Name    : in String;
       Scenario       : in String;
       Signed_Project : in Server.Signed_Project;
+      Patch_Filename : in String;
       Id             : in Natural);
    --  Asks a client to run a specific scenario
 

@@ -41,6 +41,7 @@ package body Savadur.Web_Services.Server is
      (Server_Name    : in String;
       Scenario       : in String;
       Signed_Project : in Server.Signed_Project;
+      Patch_Filename : in String;
       Id             : in Natural) is
    begin
       --  This is run on the client side, no latency as this is already dealt
@@ -48,6 +49,7 @@ package body Savadur.Web_Services.Server is
       Jobs.Client.Queue.Add
         (Project  => Signed_Files.To_Handler
            (Signed_Files.External_Handler (Signed_Project)),
+         Patch    => Patch_Filename,
          Server   => Server_Name,
          Scenario => Scenario,
          Id       => Id,

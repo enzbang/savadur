@@ -59,7 +59,8 @@ package body Savadur.Config.Project is
       Project, Name, Description, Filter);
 
    type Attribute is
-     (Id, Value, Result, On_Error, Status, Periodic, Filter1, Filter2);
+     (Id, Value, Result, On_Error, Status, Periodic,
+      Filter1, Filter2, Use_Tmp, Patch_File);
 
    type XML_Attribute is array (Attribute) of Boolean;
 
@@ -73,7 +74,8 @@ package body Savadur.Config.Project is
          others                                             => False),
       Action        => XML_Attribute'
         (Id | Value | Status | On_Error => True,             others => False),
-      Scenario      => XML_Attribute'(Id | Periodic => True, others => False),
+      Scenario      => XML_Attribute'
+        (Id | Periodic | Use_Tmp | Patch_File => True,       others => False),
       Project       => XML_Attribute'(others => False),
       Description   => XML_Attribute'(others => False),
       Notifications => XML_Attribute'(others => False),
@@ -626,6 +628,24 @@ package body Savadur.Config.Project is
                   when others =>
                      null;
                end case;
+
+            when Use_Tmp =>
+               case NV is
+                  when Scenario =>
+                        Handler.Scenario.Use_Tmp := True;
+
+                  when others =>
+                     null;
+               end case;
+
+         when Patch_File =>
+            case NV is
+               when Scenario =>
+                  Handler.Scenario.Patch_File := True;
+
+               when others =>
+                    null;
+            end case;
          end case;
 
       exception

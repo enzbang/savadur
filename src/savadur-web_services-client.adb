@@ -96,6 +96,16 @@ package body Savadur.Web_Services.Client is
       return R1.Number < R2.Number;
    end "<";
 
+   function Load_Patch (Filename : in String) return File_Data is
+   begin
+      --  ??? Why using file_data as filename not used ?
+      return File_Data'
+        (Filename => +
+           Filename,
+         Content  => +Utils.Content
+           (Directories.Compose (Config.Patch_Directory, Filename)));
+   end Load_Patch;
+
    ------------------
    -- Load_Project --
    ------------------

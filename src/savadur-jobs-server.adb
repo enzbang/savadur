@@ -62,11 +62,12 @@ package body Savadur.Jobs.Server is
    ---------
 
    function Run
-     (Project  : access Projects.Project_Config;
-      Server   : in     String;
-      Env_Var  : in     Environment_Variables.Maps.Map;
-      Scenario : in     Scenarios.Id;
-      Id       : in     Natural := 0) return Boolean
+     (Project        : access Projects.Project_Config;
+      Patch_Filename : in     String;
+      Server         : in     String;
+      Env_Var        : in     Environment_Variables.Maps.Map;
+      Scenario       : in     Scenarios.Id;
+      Id             : in     Natural := 0) return Boolean
    is
       pragma Unreferenced (Env_Var, Id, Server);
 
@@ -99,6 +100,7 @@ package body Savadur.Jobs.Server is
 
                Server_Service.Client.Run
                  (Server_Name    => Clients.Server_Name (Client),
+                  Patch_Filename => Patch_Filename,
                   Scenario       => -Scenario,
                   Signed_Project =>
                     Web_Services.Server.Signed_Project

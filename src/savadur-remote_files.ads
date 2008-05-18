@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                                Savadur                                   --
 --                                                                          --
---                           Copyright (C) 2007                             --
+--                         Copyright (C) 2007-2008                          --
 --                      Pascal Obry - Olivier Ramonat                       --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -27,12 +27,16 @@ package Savadur.Remote_Files is
    Unknown_File : exception;
 
    function Load_Project
-     (Project_Name : in String) return Projects.Project_Config;
+     (Project_Name : in String)
+     return Projects.Project_Config;
    --  Returns the project, try to download it from all known server if not
    --  found locally. Raises Unknown_File if the file cannot be found.
 
    function Load_SCM (SCM_Name : in String) return SCM.SCM;
    --  Returns the SCM, try to download it from all known server if not
    --  found locally. Raises Unknown_File if the file cannot be found.
+
+   procedure Load_Patch (Patch_Filename : in String; Server : in String);
+   --  Download the patch from remote server
 
 end Savadur.Remote_Files;

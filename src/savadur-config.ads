@@ -38,6 +38,7 @@ package Savadur.Config is
    --      scm/
    --      env/
    --      servers/
+   --      patchs/
    --      work/
    --           $(project_name)/
    --                           log
@@ -50,6 +51,9 @@ package Savadur.Config is
 
    function SCM_Directory return String;
    --  Returns SCM directory,  creates it if it does not exist
+
+   function Patch_Directory return String;
+   --  Returns Patch directory, creates it if it does not exist
 
    function Config_Templates_Directory return String;
    --  Returns config templates directory

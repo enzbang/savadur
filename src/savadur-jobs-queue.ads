@@ -28,6 +28,7 @@ with Savadur.Times;
 generic
    with function Run
      (Project  : access Projects.Project_Config;
+      Patch    : in     String;
       Server   : in     String;
       Env_Var  : in     Environment_Variables.Maps.Map;
       Scenario : in     Scenarios.Id;
@@ -36,6 +37,7 @@ package Savadur.Jobs.Queue is
 
    procedure Add
      (Project  : in Signed_Files.Handler;
+      Patch    : in String;
       Server   : in String;
       Scenario : in String;
       Time     : in Times.Periodic := Times.No_Time;

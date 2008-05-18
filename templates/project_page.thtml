@@ -24,16 +24,18 @@
       <ul><li><a href="/">Back to project list</a></li></ul>
     </div>
 
-    <form action="/run" method="put">
+    <form enctype="multipart/form-data" action="/run" method="POST">
       <p><input type="hidden" id="p" name="p" value="@_PROJECT_NAME_@"/>
         <label for="s">scenario</label>
         <select id="s" name="s">
         @@TABLE@@
-	   <option value="@_SCENARIOS_@">@_SCENARIOS_@</option>
-	@@END_TABLE@@
-	</select></p>
+          <option value="@_SCENARIOS_@">@_SCENARIOS_@</option>
+        @@END_TABLE@@
+        </select></p>
       <p><label for="l">latency (in seconds)</label>
-        <input type="text" id="l" name="l" value="1"/></p>
+              <input type="text" id="l" name="l" value="1"/></p>
+      <p><label for="filename">Patch file (optional)</label>
+              <input type="file" name="filename" /></p>
       <p><input type="submit" value="Envoyer" /></p>
     </form>
 

@@ -42,6 +42,7 @@ package body Savadur.Config is
 
    Cached_Config_Templates_Directory : access String := null;
    Cached_Directory                  : access String := null;
+   Cached_Patch_Directory            : access String := null;
    Cached_Project_Env_Directory      : access String := null;
    Cached_Project_File_Directory     : access String := null;
    Cached_RSS_Directory              : access String := null;
@@ -71,6 +72,25 @@ package body Savadur.Config is
 
       return Cached_Config_Templates_Directory.all;
    end Config_Templates_Directory;
+
+   ---------------------
+   -- Patch_Directory --
+   ---------------------
+
+   function Patch_Directory return String is
+   begin
+      if Cached_Patch_Directory = null then
+         Cached_Patch_Directory := new String'
+           (Directories.Compose
+              (Containing_Directory => Savadur_Directory,
+               Name                 => "patchs"));
+
+         if not Directories.Exists (Cached_Patch_Directory.all) then
+            Directories.Create_Directory (Cached_Patch_Directory.all);
+         end if;
+      end if;
+      return Cached_Patch_Directory.all;
+   end Patch_Directory;
 
    ---------------------------
    -- Project_Env_Directory --

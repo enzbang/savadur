@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                                Savadur                                   --
 --                                                                          --
---                           Copyright (C) 2007                             --
+--                        Copyright (C) 2007-2008                           --
 --                      Pascal Obry - Olivier Ramonat                       --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -40,9 +40,11 @@ package Savadur.Scenarios is
    Default_Scenario : constant Id;
 
    type Scenario is record
-      Id       : Scenarios.Id;
-      Actions  : Savadur.Actions.Vectors.Vector;
-      Periodic : Savadur.Times.Periodic := Savadur.Times.No_Time;
+      Id         : Scenarios.Id;
+      Actions    : Savadur.Actions.Vectors.Vector;
+      Periodic   : Savadur.Times.Periodic := Savadur.Times.No_Time;
+      Use_Tmp    : Boolean := False;
+      Patch_File : Boolean := False;
    end record;
 
    Null_Scenario : constant Scenario;
@@ -79,9 +81,11 @@ package Savadur.Scenarios is
 private
 
    Null_Scenario    : constant Scenario :=
-                        Scenario'(Id       => Id_Utils.Nil,
-                                  Actions  => Actions.Vectors.Empty_Vector,
-                                  Periodic => <>);
+                        Scenario'(Id         => Id_Utils.Nil,
+                                  Actions    => Actions.Vectors.Empty_Vector,
+                                  Periodic   => <>,
+                                  Use_Tmp    => <>,
+                                  Patch_File => <>);
 
    Default_Scenario : constant Id := Id (+"default");
 

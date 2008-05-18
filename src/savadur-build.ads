@@ -22,6 +22,7 @@
 with Savadur.Scenarios;
 with Savadur.Projects;
 with Savadur.Environment_Variables;
+with Savadur.Web_Services.Client;
 
 private with Savadur.Actions;
 private with Savadur.Variables;
@@ -32,7 +33,8 @@ package Savadur.Build is
 
    function Run
      (Project : access Projects.Project_Config;
-      Server  : in     String;
+      Patch   : in     String;
+      server  : in     String;
       Env_Var : in     Environment_Variables.Maps.Map;
       Id      : in     Scenarios.Id;
       Job_Id  : in     Natural := 0) return Boolean;

@@ -773,6 +773,7 @@ package body Savadur.Build is
 
    function Run
      (Project : access Projects.Project_Config;
+      Patch   : in     String;
       Server  : in     String;
       Env_Var : in     Environment_Variables.Maps.Map;
       Id      : in     Scenarios.Id;
@@ -896,8 +897,8 @@ package body Savadur.Build is
 
       Selected_Scenario : constant Savadur.Scenarios.Scenario := Init;
 
-      Sources_Directory : constant String :=
-                            Projects.Project_Sources_Directory (Project);
+      Sources_Directory : Unbounded_String :=
+                            +Projects.Project_Sources_Directory (Project);
 
    begin
       For_All_Ref_Actions : declare
@@ -915,19 +916,19 @@ package body Savadur.Build is
 
          --  Check first if the source directory exists
 
-         if not Directories.Exists (Sources_Directory) then
+         if not Directories.Exists (-Sources_Directory) then
             --  No sources directory. This means that the project has not been
             --  initialized.
             --  The sources directory has to be created by the SCM Call SCM
             --  init from current directory. If there is no SCM defined for
             --  this project we create the directory.
 
-            Logs.Write ("Create directory : " & Sources_Directory);
+            Logs.Write ("Create directory : " & (-Sources_Directory));
 
             Is_Init := True;
 
             if Project.SCM_Id = SCM.Null_Id then
-               Directories.Create_Directory (Sources_Directory);
+               Directories.Create_Directory (-Sources_Directory);
 
             else
                Run_SCM_Init : declare
@@ -967,7 +968,7 @@ package body Savadur.Build is
                      Result        => Result);
 
                   if not Result or else Return_Code /= 0
-                    or else not Directories.Exists (Sources_Directory)
+                    or else not Directories.Exists (-Sources_Directory)
                   then
                      Status := False;
                      Send_Status (Server, Savadur.SCM.Init.Id);
@@ -984,6 +985,13 @@ package body Savadur.Build is
                   end if;
                end Run_SCM_Init;
             end if;
+         end if;
+
+         if Selected_Scenario.Use_Tmp then
+            Utils.Copy_Tree (-Sources_Directory, -Sources_Directory & "tmp");
+
+            --  Change source directory to the new temporary copy
+            Sources_Directory := Sources_Directory & "tmp";
          end if;
 
          --  Now run all actions
@@ -1021,7 +1029,7 @@ package body Savadur.Build is
                   end if;
 
                   Execute (Exec_Action  => Exec_Action,
-                           Directory    => Sources_Directory,
+                           Directory    => -Sources_Directory,
                            Log_Filename => Log_File,
                            Return_Code  => Return_Code,
                            Result       => Result);

@@ -60,6 +60,9 @@ package Savadur.Web_Services.Client is
    function Load_SCM (Signed_SCM : in Client.Signed_SCM) return File_Data;
    --  Returns the project content from a server
 
+   function Load_Patch (Filename : in String) return File_Data;
+   --  Returns the patch content from a server
+
    type Name_Set is array (Positive range <>) of Unbounded_String;
    type Name_Set_Access is access Name_Set;
 

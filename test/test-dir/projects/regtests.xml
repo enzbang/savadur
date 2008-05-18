@@ -31,6 +31,10 @@
     <action id="regtests" />
   </scenario>
 
+  <scenario id="try_patch" patch_file="true" use_tmp="true">
+    <scm_action id="apply" />
+  </scenario>
+
   <notifications>
     <on_failure>
       <action id="mail" />

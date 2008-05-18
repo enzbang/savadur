@@ -39,6 +39,36 @@ package body Savadur.Remote_Files is
    use Ada.Strings.Unbounded;
    use Savadur.Utils;
 
+   ----------------
+   -- Load_Patch --
+   ----------------
+
+   procedure Load_Patch (Patch_Filename : in String; Server : in String) is
+      use type Savadur.Web_Services.Client.File_Data;
+      Filename : constant String := Directories.Compose
+        (Containing_Directory => Config.Patch_Directory,
+         Name                 => Patch_Filename);
+      Data     : Web_Services.Client.File_Data;
+   begin
+
+      if not Directories.Exists (Filename) then
+         Logs.Write ("Get patch from " & Server);
+         Data := Client_Service.Client.Load_Patch
+           (Filename => Patch_Filename,
+            Endpoint => Servers.URL (Servers.Get (Server)));
+
+         if Data /= Web_Services.Client.No_File then
+            Logs.Write ("   found");
+            Data.Filename := +Directories.Compose
+              (Containing_Directory => Config.Patch_Directory,
+               Name                 => -Data.Filename);
+            Utils.Set_Content (-Data.Filename, -Data.Content);
+         end if;
+      else
+         Logs.Write ("Patch exists");
+      end if;
+   end Load_Patch;
+
    ------------------
    -- Load_Project --
    ------------------

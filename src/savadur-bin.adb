@@ -384,6 +384,7 @@ procedure Savadur.Bin is
                      Kind    => Logs.Handler.Information);
 
          Jobs.Client.Queue.Add (Project  => Signed_Project,
+                                Patch    => "",
                                 Server   => "",
                                 Scenario => -Scenario_Id,
                                 Latency  => 0.0);
