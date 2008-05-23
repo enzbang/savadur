@@ -33,6 +33,8 @@ package body Savadur.Utils is
    use AWS;
    use GNAT;
 
+   Unique_ID : Natural := 0; --  ID to generate unique filenames
+
    -------------
    -- Content --
    -------------
@@ -233,5 +235,31 @@ package body Savadur.Utils is
       String'Write (Stream_IO.Stream (File), Content);
       Stream_IO.Close (File);
    end Set_Content;
+
+   ---------------------
+   -- Unique_Filename --
+   ---------------------
+
+   function Unique_Filename (Filename : in String) return String is
+   begin
+      if not Directories.Exists (Filename) then
+         return Filename;
+      end if;
+
+      --  Create unique filename
+
+      loop
+         declare
+            I_Img  : constant String := Natural'Image (Unique_ID);
+            Suffix : constant String := I_Img (I_Img'First + 1 .. I_Img'Last);
+         begin
+            if not Directories.Exists (Filename & Suffix) then
+               return Filename & Suffix;
+            end if;
+            Unique_ID := Unique_ID + 1;
+         end;
+      end loop;
+
+   end Unique_Filename;
 
 end Savadur.Utils;

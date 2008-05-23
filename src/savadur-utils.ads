@@ -77,4 +77,7 @@ package Savadur.Utils is
    procedure Copy_Tree (Left, Right : in String);
    --  Copies a tree
 
+   function Unique_Filename (Filename : in String) return String;
+   --  Checks if given filename is unique. Else create a new filename
+
 end Savadur.Utils;
