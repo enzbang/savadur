@@ -44,4 +44,7 @@
     <cmd regexp="Author: (.*)">git-log $v1..$v2</cmd>
   </action>
 
+  <action id="apply">
+    <cmd>git apply ../patch</cmd>
+  </action>
 </scm>
