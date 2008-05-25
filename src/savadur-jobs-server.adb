@@ -30,6 +30,8 @@ with Savadur.Signed_Files;
 with Savadur.Utils;
 with Savadur.Web_Services.Server;
 
+with SOAP;
+
 package body Savadur.Jobs.Server is
 
    use Savadur.Utils;
@@ -108,7 +110,7 @@ package body Savadur.Jobs.Server is
                   Id             => Generated_Job_Id,
                   Endpoint       => Clients.Callback_Endpoint (Client));
             exception
-               when AWS.Client.Connection_Error =>
+               when SOAP.SOAP_Error =>
                   --  Client if offline.
                   --  Removes it from online clients and add logout info
                   --  into database.
