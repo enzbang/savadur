@@ -151,7 +151,7 @@ package body Savadur.Config.Filters is
                      Kind    => Logs.Handler.Error);
       end if;
 
-      Maps.Insert (F.Id, F);
+      Maps.Include (F.Id, F);
    end Start_Element;
 
 end Savadur.Config.Filters;
