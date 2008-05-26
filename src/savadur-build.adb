@@ -21,6 +21,7 @@
 
 with Ada.Characters.Handling;
 with Ada.Directories;
+with Ada.Environment_Variables;
 with Ada.Exceptions;
 with Ada.Integer_Text_IO;
 with Ada.Strings.Fixed;
@@ -793,6 +794,7 @@ package body Savadur.Build is
 
       Status    : Boolean := True;
       Diff_Data : aliased Web_Services.Client.Diff_Data;
+      Run_Vars  : Variables.Sets.Set;
 
       ----------
       -- Init --
@@ -806,6 +808,12 @@ package body Savadur.Build is
             Key       => Id);
 
          --  Set environment variable for this project
+
+         Ada.Environment_Variables.Set
+           (Name  => "PATCH",
+            Value => Directories.Compose
+              (Savadur.Config.Patch_Directory,
+               Patch));
 
          Savadur.Environment_Variables.Set_Environment (Env_Var);
 
@@ -901,6 +909,19 @@ package body Savadur.Build is
                             +Projects.Project_Sources_Directory (Project);
 
    begin
+
+      if Patch /= "" then
+         --  Adds a PATCH variable for this specific run
+         --  Note that is variable will override all previously defined
+         --  project variables
+
+         Run_Vars.Insert
+           (Variables.Variable'(Name => Variables.Name_Utils.Value ("PATCH"),
+                                Value => +Directories.Compose
+                                  (Savadur.Config.Patch_Directory,
+                                   Patch)));
+      end if;
+
       For_All_Ref_Actions : declare
          use Savadur.Actions.Vectors;
          Is_Init     : Boolean := False;
@@ -959,7 +980,8 @@ package body Savadur.Build is
                   Execute
                     (Exec_Action   => Get_Action
                        (Project    => Project.all,
-                        Ref_Action => Savadur.SCM.Init),
+                        Ref_Action => Savadur.SCM.Init,
+                        Vars       => Run_Vars),
                      Directory     =>
                      Projects.Project_Directory (Project),
                      Log_Filename  => Log_Filename
@@ -1005,7 +1027,8 @@ package body Savadur.Build is
                                Log_Filename (Project, Ref.Id, Job_Id);
                Exec_Action : constant Actions.Action :=
                                Get_Action (Project    => Project.all,
-                                           Ref_Action => Ref);
+                                           Ref_Action => Ref,
+                                           Vars       => Run_Vars);
                Return_Code : Integer;
                Result      : Boolean;
             begin

@@ -45,6 +45,6 @@
   </action>
 
   <action id="apply">
-    <cmd>git apply ../patch</cmd>
+    <cmd>git apply $PATCH</cmd>
   </action>
 </scm>
