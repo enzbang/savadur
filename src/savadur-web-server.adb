@@ -281,13 +281,21 @@ package body Savadur.Web.Server is
 
       function Patch_Filename return String is
          Filename : constant String := Parameters.Get (P, "filename");
-         Handler  : Signed_Files.Handler;
       begin
          if Filename /= "" then
-            Logs.Write ("Get patch " & Filename);
+            Save_File : declare
+               Patch_Filename : constant String := Utils.Unique_Filename
+                 (Directories.Compose
+                    (Savadur.Config.Patch_Directory,
+                     Directories.Simple_Name (Filename)));
+            begin
+               Logs.Write ("Get new patch " & Patch_Filename);
+               Directories.Rename (Filename, Patch_Filename);
 
-            return Utils.Unique_Filename (Filename);
+               return Directories.Simple_Name (Patch_Filename);
+            end Save_File;
          end if;
+
          return "";
       end Patch_Filename;
 
