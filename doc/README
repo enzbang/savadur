@@ -99,6 +99,12 @@ The project file savadur.xml:
        <action id="make" />
        <action id="regtests" />
      </scenario>
+
+     <scenario id="try_patch" patch_file="true" use_tmp="true">
+       <scm_action id="pull" />
+       <scm_action id="apply" />
+       <action id="make" />
+     </scenario>
    </project>
 
 This project file describes:
@@ -113,10 +119,15 @@ This project file describes:
  - The action list. For this small project only two actions : make and
    regtests,
 
- - The scenario list. Here only a "default" scenario, referencing four
-   actions. The scm_action "version" is a special action that requires
-   changes (we want to compile only if there is a new commit) and quit
-   the build process if no change.
+ - The scenario list. We have defined two scenarios:
+
+       * The "default" scenario, referencing four actions. The
+         scm_action "version" is a special action that requires
+         changes (we want to compile only if there is a new commit)
+         and quit the build process if no change.
+
+       * The "try_patch" scenario using a temporary directory and
+         applying the patch file uploaded by the developer.
 
 Now if we have a server running on my_server_machine.my_company.com
 and we'll want to add the two clients turbo (machine turbo_server) and
