@@ -818,11 +818,13 @@ package body Savadur.Build is
 
          --  Set environment variable for this project
 
-         Ada.Environment_Variables.Set
-           (Name  => "PATCH",
-            Value => Directories.Compose
-              (Savadur.Config.Patch_Directory,
-               Patch));
+         if Patch /= "" then
+            Ada.Environment_Variables.Set
+              (Name  => "PATCH",
+               Value => Directories.Compose
+                 (Savadur.Config.Patch_Directory,
+                  Patch));
+         end if;
 
          Savadur.Environment_Variables.Set_Environment (Env_Var);
 
