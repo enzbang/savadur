@@ -228,7 +228,7 @@ package body Savadur.Clients is
 
    procedure Register
      (Key               : in String;
-      Metadata          : in Clients.Metadata;
+      Metadata          : in Web_Services.Client.Metadata;
       Status            : in Client_Status;
       Server_Name       : in String;
       Callback_Endpoint : in String)

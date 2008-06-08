@@ -33,6 +33,7 @@ with Savadur.Database;
 with Savadur.Logs;
 with Savadur.Notifications;
 with Savadur.Projects.Sets;
+with Savadur.Scenarios;
 with Savadur.SCM;
 with Savadur.Signed_Files;
 with Savadur.Utils;
@@ -59,7 +60,7 @@ package body Savadur.Web_Services.Client is
          when False =>
             Output       : Unbounded_String;
             Log_Filename : Unbounded_String;
-            Result       : Boolean;
+            Result       : Scenarios.Run_Status;
             Diff_Data    : Client.Diff_Data;
 
          when True =>
@@ -301,7 +302,7 @@ package body Savadur.Web_Services.Client is
       Action       : in String;
       Log_Filename : in String;
       Output       : in String;
-      Result       : in Boolean;
+      Result       : in Natural;
       Job_Id       : in Natural;
       Diff_Data    : in Client.Diff_Data) is
    begin
@@ -317,7 +318,7 @@ package body Savadur.Web_Services.Client is
                       Action       => Actions.Id_Utils.Value (Action),
                       Log_Filename => +Log_Filename,
                       Output       => +Output,
-                      Result       => Result,
+                      Result       => Scenarios.Run_Status'Val (Result),
                       Job_Id       => Job_Id,
                       Diff_Data    => Diff_Data,
                       Number       => <>));
@@ -329,6 +330,7 @@ package body Savadur.Web_Services.Client is
 
    task body Update_Status is
       use type Actions.Id;
+      use type Scenarios.Run_Status;
       Report : Report_Data;
    begin
       For_Every_Report : loop
@@ -351,16 +353,34 @@ package body Savadur.Web_Services.Client is
          else
             Handle_Report : begin
                Logs.Write ("Output is " & (-Report.Output));
-               Logs.Write (Boolean'Image (Report.Result));
+               Logs.Write (Scenarios.Run_Status'Image (Report.Result));
 
                if Report.Action = Actions.End_Action.Id then
                   Clients.Set_Status (-Report.Key, Clients.Idle);
 
                   --  End of scenario. Final status
 
-                  Database.Final_Status
-                    (-Report.Key, -Report.Project_Name, -Report.Scenario,
-                     Report.Result, Report.Job_Id);
+                  Set_Final_Status : declare
+                     Report_Status : Boolean;
+                  begin
+
+                     --  If result is skipped do to change the last built
+                     --  status in database.
+                     --  We do not want to set the status if the VCS version
+                     --  has not changed for e.g.
+
+                     if Report.Result /= Scenarios.Skipped then
+                        if Report.Result = Scenarios.Success then
+                           Report_Status := True;
+                        else
+                           Report_Status := False;
+                        end if;
+
+                        Database.Final_Status
+                          (-Report.Key, -Report.Project_Name, -Report.Scenario,
+                           Report_Status, Report.Job_Id);
+                     end if;
+                  end Set_Final_Status;
 
                   --  Send notification messages
 
@@ -370,7 +390,7 @@ package body Savadur.Web_Services.Client is
                      Send_XMPP_Hook => Savadur.Notifications.XMPP_Send'Access,
                      Subject        => "Running " & (-Report.Project_Name),
                      Content        => "End with "
-                     & Boolean'Image (Report.Result)
+                     & Scenarios.Run_Status'Image (Report.Result)
                      & " when running scenario " & (-Report.Scenario));
 
                   --  Update RSS file
@@ -390,10 +410,10 @@ package body Savadur.Web_Services.Client is
                     (-Report.Key, -Report.Project_Name, -Report.Scenario,
                      Actions.Id_Utils.To_String (Report.Action),
                      -Report.Log_Filename, -Report.Output,
-                     Report.Result, Report.Job_Id);
+                     Scenarios.Run_Status'Pos (Report.Result), Report.Job_Id);
                end if;
 
-               if not Report.Result then
+               if Report.Result = Scenarios.Failure then
                   --  In all cases, if result is an error we send an e-amil to
                   --  all committers.
 

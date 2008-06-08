@@ -20,12 +20,13 @@
 ------------------------------------------------------------------------------
 
 with Savadur.Projects;
+with Savadur.Scenarios;
 
 private package Savadur.Build.Notification is
 
    procedure Notify
      (Project : access Projects.Project_Config;
-      Success : in     Boolean;
+      Success : in     Scenarios.Run_Status;
       Job_Id  : in     Natural);
    --  Runs notify hooks
 

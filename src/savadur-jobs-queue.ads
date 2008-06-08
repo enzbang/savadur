@@ -32,7 +32,7 @@ generic
       Server   : in     String;
       Env_Var  : in     Environment_Variables.Maps.Map;
       Scenario : in     Scenarios.Id;
-      Id       : in     Natural) return Boolean;
+      Id       : in     Natural) return Scenarios.Run_Status;
 package Savadur.Jobs.Queue is
 
    procedure Add

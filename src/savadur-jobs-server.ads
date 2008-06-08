@@ -32,7 +32,7 @@ package Savadur.Jobs.Server is
       Server            : in     String;
       Env_Var           : in     Environment_Variables.Maps.Map;
       Scenario          : in     Scenarios.Id;
-      Id                : in     Natural := 0) return Boolean;
+      Id                : in     Natural := 0) return Scenarios.Run_Status;
    --  This is the server side run routine, it does not call directly the
    --  Build.Run routine as nothing is actually run on the server but send run
    --  requests to the clients.

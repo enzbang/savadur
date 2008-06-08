@@ -535,7 +535,7 @@ package body Savadur.Database is
       Action       : in String;
       Filename     : in String;
       Output       : in String;
-      Result       : in Boolean;
+      Result       : in Natural;
       Job_Id       : in Natural)
    is
       use DB.Tools;
@@ -543,7 +543,7 @@ package body Savadur.Database is
       DBH : constant TLS_DBH_Access := TLS_DBH_Access (DBH_TLS.Reference);
       SQL : constant String := "update logs set log = "
         & Q (Output) & ", filename = " & Q (Filename)
-        & ", status = " & Q (Result) & ", stop_date = datetime('now')"
+        & ", status = " & I (Result) & ", stop_date = datetime('now')"
         & " where project = " & Q (Project_Name) & " and client = " & Q (Key)
         & " and scenario = " & Q (Scenario) & " and action = " & Q (Action)
         & " and job_id = " & I (Job_Id);

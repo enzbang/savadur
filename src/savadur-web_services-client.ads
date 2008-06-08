@@ -21,6 +21,7 @@
 
 with Ada.Strings.Unbounded;
 
+with Savadur.Scenarios;
 with SOAP.Utils;
 
 package Savadur.Web_Services.Client is
@@ -83,7 +84,7 @@ package Savadur.Web_Services.Client is
       Action       : in String;
       Log_Filename : in String;
       Output       : in String;
-      Result       : in Boolean;
+      Result       : in Natural; -- Scenarios.Run_Status
       Job_Id       : in Natural;
       Diff_Data    : in Client.Diff_Data);
    --  Status is called by the client to register status of each action in the

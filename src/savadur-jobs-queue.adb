@@ -394,6 +394,7 @@ package body Savadur.Jobs.Queue is
       use Projects.Id_Utils;
       use SCM.Id_Utils;
       use type Times.Periodic;
+      use type Scenarios.Run_Status;
       use type SCM.Id;
 
       Project : aliased Projects.Project_Config;
@@ -484,7 +485,7 @@ package body Savadur.Jobs.Queue is
                Server   => -Job.Server,
                Env_Var  => Env_Var,
                Scenario => Scenarios.Id (Job.Scenario),
-               Id       => Job.Id)
+               Id       => Job.Id) = Scenarios.Success
             then
                Logs.Write ("Success");
             else

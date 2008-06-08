@@ -34,8 +34,6 @@ package Savadur.Clients is
 
    use AWS;
 
-   subtype Metadata is Web_Services.Client.Metadata;
-
    type Client_Status is (Idle, Busy, Offline);
 
    type Client is private;
@@ -44,7 +42,7 @@ package Savadur.Clients is
 
    procedure Register
      (Key               : in String;
-      Metadata          : in Clients.Metadata;
+      Metadata          : in Web_Services.Client.Metadata;
       Status            : in Client_Status;
       Server_Name       : in String;
       Callback_Endpoint : in String);
@@ -87,7 +85,7 @@ package Savadur.Clients is
 private
    type Client is record
       Key               : Unbounded_String;
-      Metadata          : Clients.Metadata;
+      Metadata          : Web_Services.Client.Metadata;
       Status            : Client_Status;
       Server_Name       : Unbounded_String;
       Callback_Endpoint : Unbounded_String;

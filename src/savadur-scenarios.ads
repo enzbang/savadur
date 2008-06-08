@@ -49,6 +49,8 @@ package Savadur.Scenarios is
 
    Null_Scenario : constant Scenario;
 
+   type Run_Status is (Success, Failure, Skipped);
+
    function Image (Scenario : in Scenarios.Scenario) return String;
    --  Returns Scenario image
 

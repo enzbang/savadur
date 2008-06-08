@@ -22,7 +22,6 @@
 with Savadur.Scenarios;
 with Savadur.Projects;
 with Savadur.Environment_Variables;
-with Savadur.Web_Services.Client;
 
 private with Savadur.Actions;
 private with Savadur.Variables;
@@ -37,7 +36,7 @@ package Savadur.Build is
       server  : in     String;
       Env_Var : in     Environment_Variables.Maps.Map;
       Id      : in     Scenarios.Id;
-      Job_Id  : in     Natural := 0) return Boolean;
+      Job_Id  : in     Natural := 0) return Scenarios.Run_Status;
    --  Runs selected scenario from project config
 
 private

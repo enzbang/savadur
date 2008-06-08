@@ -69,7 +69,7 @@ package body Savadur.Jobs.Server is
       Server         : in     String;
       Env_Var        : in     Environment_Variables.Maps.Map;
       Scenario       : in     Scenarios.Id;
-      Id             : in     Natural := 0) return Boolean
+      Id             : in     Natural := 0) return Scenarios.Run_Status
    is
       pragma Unreferenced (Env_Var, Id, Server);
 
@@ -136,7 +136,7 @@ package body Savadur.Jobs.Server is
       --  Send job request to all clients
 
       Clients.Iterate (Send_Job_Request'Access);
-      return True;
+      return Scenarios.Success;
    end Run;
 
 end Savadur.Jobs.Server;

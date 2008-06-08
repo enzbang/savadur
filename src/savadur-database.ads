@@ -34,7 +34,7 @@ package Savadur.Database is
       Action       : in String;
       Filename     : in String;
       Output       : in String;
-      Result       : in Boolean;
+      Result       : in Natural;
       Job_Id       : in Natural);
    --  Adds log to database
 

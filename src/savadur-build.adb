@@ -70,7 +70,7 @@ package body Savadur.Build is
       Job_Id      : in Natural;
       Log_File    : in String;
       Diff_Data   : not null access Web_Services.Client.Diff_Data)
-      return Boolean;
+      return Scenarios.Run_Status;
    --  ???
 
    procedure Apply_Filters
@@ -131,12 +131,13 @@ package body Savadur.Build is
       Job_Id      : in Natural;
       Log_File    : in String;
       Diff_Data   : not null access Web_Services.Client.Diff_Data)
-      return Boolean
+      return Scenarios.Run_Status
    is
       use type Actions.Result_Type;
+      use type Scenarios.Run_Status;
 
       function Filter_Based (Status : in String) return Boolean;
-      --  Returns true if the status if based on filter's result
+      --  Returns Success if the status if based on filter's result
 
       ------------------
       -- Filter_Based --
@@ -149,14 +150,18 @@ package body Savadur.Build is
 
       State_Directory : constant String :=
                           Projects.Project_State_Directory (Project);
-      Result          : Boolean := True;
+      Result          : Scenarios.Run_Status := Scenarios.Success;
    begin
       --  Set the exit status from the return code
 
       if Exec_Action.Result = Actions.Exit_Status then
          if Ref.Value /= "" then
             Get_Return_Code : begin
-               Result := Return_Code = Integer'Value (-Ref.Value);
+               if Return_Code = Integer'Value (-Ref.Value) then
+                  Result := Scenarios.Success;
+               else
+                  Result := Scenarios.Failure;
+               end if;
             exception
                when Constraint_Error =>
                   raise Command_Parse_Error
@@ -164,7 +169,11 @@ package body Savadur.Build is
             end Get_Return_Code;
 
          else
-            Result := Return_Code = 0;
+            if Return_Code = 0 then
+               Result := Scenarios.Success;
+            else
+               Result := Scenarios.Failure;
+            end if;
          end if;
       end if;
 
@@ -250,10 +259,10 @@ package body Savadur.Build is
             begin
                if (L1 = L2) = Equal then
                   --  Ok if both logs are equal and check is equality.
-                  Result := True;
+                  Result := Scenarios.Success;
 
                else
-                  Result := False;
+                  Result := Scenarios.Failure;
                   Logs.Write
                     (Content => Actions.Id_Utils.To_String (Ref.Id)
                      & " filters check is false: " & Status,
@@ -297,7 +306,7 @@ package body Savadur.Build is
 
                      if Last_Exit_Status = Return_Code then
                         --  No change. Report error
-                        Result := False;
+                        Result := Scenarios.Failure;
                         Logs.Write
                           (Content => Actions.Id_Utils.To_String (Ref.Id)
                            & " has no change",
@@ -325,7 +334,7 @@ package body Savadur.Build is
                   then
                      --  No changes. Report error
 
-                     Result := False;
+                     Result := Scenarios.Failure;
                      Logs.Write (Content => Actions.Id_Utils.To_String (Ref.Id)
                                  & " has no change " & State_Filename,
                                  Kind    => Logs.Handler.Verbose);
@@ -418,7 +427,7 @@ package body Savadur.Build is
          end Set_Versions_Var;
       end if;
 
-      if not Result then
+      if Result = Scenarios.Failure then
          Logs.Write
            (Config.Cmd.External_Command_Utils.To_String
               (Exec_Action.Cmd.Cmd) & " failed");
@@ -778,7 +787,7 @@ package body Savadur.Build is
       Server  : in     String;
       Env_Var : in     Environment_Variables.Maps.Map;
       Id      : in     Scenarios.Id;
-      Job_Id  : in     Natural := 0) return Boolean
+      Job_Id  : in     Natural := 0) return Scenarios.Run_Status
    is
       use type SCM.Id;
 
@@ -792,7 +801,7 @@ package body Savadur.Build is
       --  Sends the status to savadur server, this must be called only in
       --  client/server mode.
 
-      Status    : Boolean := True;
+      Status    : Scenarios.Run_Status := Scenarios.Success;
       Diff_Data : aliased Web_Services.Client.Diff_Data;
       Run_Vars  : Variables.Sets.Set;
 
@@ -890,7 +899,7 @@ package body Savadur.Build is
                   Log_Filename => -L_Filename,
                   Output       => Log_Content
                     (Activated => Servers.Send_Log (Server)),
-                  Result       => Status,
+                  Result       => Scenarios.Run_Status'Pos (Status),
                   Job_Id       => Job_Id,
                   Diff_Data    => Web_Services.Client.No_Diff_Data,
                   Endpoint     => Server_URL);
@@ -992,7 +1001,7 @@ package body Savadur.Build is
                   if not Result or else Return_Code /= 0
                     or else not Directories.Exists (-Sources_Directory)
                   then
-                     Status := False;
+                     Status := Scenarios.Failure;
                      Send_Status (Server, Savadur.SCM.Init.Id);
                      raise Command_Parse_Error with "SCM init failed !";
                   end if;
@@ -1022,6 +1031,7 @@ package body Savadur.Build is
 
             Execute_Command : declare
                use type Actions.Ref_Action;
+               use type Scenarios.Run_Status;
                Ref         : constant Actions.Ref_Action := Element (Position);
                Log_File    : constant String :=
                                Log_Filename (Project, Ref.Id, Job_Id);
@@ -1058,7 +1068,7 @@ package body Savadur.Build is
                            Result       => Result);
 
                   if not Result then
-                     Status := False; --  Exit with error
+                     Status := Scenarios.Failure; --  Exit with error
 
                      if Savadur.Config.Client_Server then
                         Send_Status (Server, Ref.Id);
@@ -1081,10 +1091,10 @@ package body Savadur.Build is
                                   Log_File    => Log_File);
                   end if;
 
-                  if not Status then
+                  if Status = Scenarios.Failure then
                      case Ref.On_Error is
                         when Actions.Quit =>
-                           Status := True;
+                           Status := Scenarios.Skipped;
                            exit Run_Actions;
 
                         when Actions.Error =>
