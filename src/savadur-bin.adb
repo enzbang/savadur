@@ -27,10 +27,12 @@
 with Ada.Calendar;
 with Ada.Command_Line;
 with Ada.Containers;
-with Ada.Exceptions;
 with Ada.Directories;
+with Ada.Exceptions;
 with Ada.Strings.Unbounded;
 with Ada.Text_IO;
+
+with GNAT.Command_Line;
 
 with Savadur.Client_Service.Client;
 with Savadur.Client_Service.Types;
@@ -38,28 +40,26 @@ with Savadur.Clients;
 with Savadur.Config.Client;
 with Savadur.Config.Committers;
 with Savadur.Config.Environment_Variables;
+with Savadur.Config.Notifications;
 with Savadur.Config.Project;
 with Savadur.Config.Project_List;
-with Savadur.Config.Notifications;
 with Savadur.Config.SCM;
 with Savadur.Config.Server;
 with Savadur.Jobs.Client;
 with Savadur.Logs;
 with Savadur.Project_List;
 with Savadur.Projects;
-with Savadur.Utils;
-with Savadur.Version;
 with Savadur.SCM;
 with Savadur.Scenarios;
 with Savadur.Servers;
 with Savadur.Signed_Files;
+with Savadur.Utils;
+with Savadur.Version;
 with Savadur.Web.Client;
 with Savadur.Web.Server;
 with Savadur.Web_Services.Client;
 
 with SOAP;
-
-with GNAT.Command_Line;
 
 procedure Savadur.Bin is
 
