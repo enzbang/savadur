@@ -176,6 +176,14 @@ package body Savadur.Config.Project_List is
             Input_Sources.File.Close (Source);
          end Load_Config;
       end loop Walk_Directories;
+
+      --  Check that the project list contains only valid scenarios
+
+      if not Savadur.Project_List.Force_Validity_Check
+        (Internal_Configurations) then
+         raise Config_Error with "Project_List not valid !";
+      end if;
+
    exception
       when IO_Exceptions.Name_Error =>
          raise Config_Error

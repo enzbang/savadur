@@ -19,12 +19,66 @@
 --  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.       --
 ------------------------------------------------------------------------------
 
+with Ada.Text_IO;
+
+with Savadur.Config.Project;
 with Savadur.Config.Project_List;
+
+with Savadur.Projects;
+with Savadur.Scenarios;
 with Savadur.Utils;
 
 package body Savadur.Project_List is
 
    use Savadur.Utils;
+
+   function Force_Validity_Check
+     (Project_List : in Projects.Map) return Boolean is
+
+      Is_Valid : Boolean := True;
+
+      procedure Check_Project (Position : in Projects.Cursor);
+      --  Check if the project scenarios are defined in the corresponding
+      --  project description
+
+      -------------------
+      -- Check_Project --
+      -------------------
+
+      procedure Check_Project (Position : in Projects.Cursor) is
+         Name   : constant String := Projects.Key (Position);
+         Config : constant Savadur.Projects.Project_Config
+           := Savadur.Config.Project.Get (Name);
+         Project_Scenarios : constant Scenarios.Map :=
+                               Projects.Element (Position);
+         Scenario_Position : Scenarios.Cursor := Project_Scenarios.First;
+      begin
+         For_All : while Scenarios.Has_Element (Scenario_Position) loop
+            Check_Scenario : declare
+               Current_Scenario : constant String :=
+                                    Scenarios.Key (Scenario_Position);
+               Scenario_Id      : constant Savadur.Scenarios.Id :=
+                                    Savadur.Scenarios.Id_Utils.Value
+                                      (Current_Scenario);
+            begin
+               if not Savadur.Scenarios.Keys.Contains
+                 (Container => Config.Scenarios,
+                  Key       => Scenario_Id) then
+                  Is_Valid := False;
+                  Text_IO.Put_Line ("Error: unknown scenario "
+                                    & Current_Scenario & " in project "
+                                    & Name);
+               end if;
+            end Check_Scenario;
+            Scenarios.Next (Scenario_Position);
+         end loop For_All;
+      end Check_Project;
+
+   begin
+
+      Project_List.Iterate (Check_Project'Access);
+      return Is_Valid;
+   end Force_Validity_Check;
 
    -----------------
    -- Get_Clients --

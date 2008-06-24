@@ -76,4 +76,9 @@ package Savadur.Project_List is
      (Project_List : in Projects.Map; Action : in Iterate_Action);
    --  Iterate the given action on all clients
 
+   function Force_Validity_Check
+     (Project_List : in Projects.Map) return Boolean;
+   --  Check that all scenarios, projects defined in project list are defined
+   --  Returns False if a scenario is undefined.
+
 end Savadur.Project_List;
