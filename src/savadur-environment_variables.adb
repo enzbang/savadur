@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                                Savadur                                   --
 --                                                                          --
---                           Copyright (C) 2007                             --
+--                         Copyright (C) 2007-2008                          --
 --                      Pascal Obry - Olivier Ramonat                       --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -39,62 +39,22 @@ package body Savadur.Environment_Variables is
         & "   action is " & Var_Action'Image (Variable.Action);
    end Image;
 
-   -----------
-   -- Image --
-   -----------
+   ----------------
+   -- Set_Action --
+   ----------------
 
-   function Image (Map : in Maps.Map) return String is
-      Position : Maps.Cursor := Maps.First (Map);
-      Result   : Unbounded_String := +"[" & ASCII.Lf;
+   procedure Set_Action (V : in out Var; Action : in Var_Action) is
    begin
-      while Maps.Has_Element (Position) loop
-         Append (Result, Maps.Key (Position) & " : "
-                 & Image (Maps.Element (Position)) & ASCII.Lf);
-         Maps.Next (Position);
-      end loop;
-      return -Result & "]";
-   end Image;
+      V.Action := Action;
+   end Set_Action;
 
-   ---------------------
-   -- Set_Environment --
-   ---------------------
+   ---------------
+   -- Set_Value --
+   ---------------
 
-   procedure Set_Environment (Map : in Maps.Map) is
-      Position : Maps.Cursor := Map.First;
+   procedure Set_Value (V : in out Var; Value : in String) is
    begin
-      while Maps.Has_Element (Position) loop
-         Set_Var : declare
-            V : constant Var    := Maps.Element (Position);
-            N : constant String := Maps.Key (Position);
-         begin
-            case V.Action is
-               when Replace =>
-                  Ada.Environment_Variables.Set (N, -V.Value);
-
-               when Append  =>
-                  if Ada.Environment_Variables.Exists (N) then
-                     Ada.Environment_Variables.Set
-                       (N,
-                        -V.Value & ":" & Ada.Environment_Variables.Value (N));
-                  else
-                     Ada.Environment_Variables.Set (N, -V.Value);
-                  end if;
-
-               when Clear =>
-                  Ada.Environment_Variables.Clear (N);
-            end case;
-            Maps.Next (Position);
-         end Set_Var;
-      end loop;
-
-   exception
-      when E : Constraint_Error =>
-         Logs.Write (Content => "Unable to set environment",
-                     Kind    => Logs.Handler.Error);
-         Logs.Write (Content => "Set_Environment failed with " &
-                     Exceptions.Exception_Information (E),
-                     Kind    => Logs.Handler.Error);
-
-   end Set_Environment;
+      V.Value := +Value;
+   end Set_Value;
 
 end Savadur.Environment_Variables;

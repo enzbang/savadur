@@ -19,7 +19,7 @@
 --  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.       --
 ------------------------------------------------------------------------------
 
-with Savadur.Environment_Variables;
+with Savadur.Environment_Variables.Containers;
 with Savadur.Projects;
 
 package Savadur.Config.Environment_Variables is
@@ -28,7 +28,7 @@ package Savadur.Config.Environment_Variables is
 
    function Parse
      (Project : access Projects.Project_Config)
-      return Savadur.Environment_Variables.Maps.Map;
+      return Savadur.Environment_Variables.Containers.Maps.Map;
    --  Returns the project configuration read in the given file
 
 end Savadur.Config.Environment_Variables;

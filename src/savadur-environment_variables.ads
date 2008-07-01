@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                                Savadur                                   --
 --                                                                          --
---                           Copyright (C) 2007                             --
+--                         Copyright (C) 2007-2008                          --
 --                      Pascal Obry - Olivier Ramonat                       --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -30,25 +30,20 @@ package Savadur.Environment_Variables is
 
    type Var_Action is (Append, Clear, Replace);
 
-   type Var is record
-      Value  : Unbounded_String;
-      Action : Var_Action;
-   end record;
+   type Var is private;
+
+   procedure Set_Value (V : in out Var; Value : in String);
+   --  Set var value
+
+   procedure Set_Action (V : in out Var; Action : in Var_Action);
+   --  Set var action
 
    function Image (Variable : in Var) return String;
    --  Returns variable image
 
-   package Maps is new Containers.Indefinite_Hashed_Maps
-     (Key_Type        => String,
-      Element_Type    => Var,
-      Hash            => Strings.Hash_Case_Insensitive,
-      Equivalent_Keys => "=");
-
-   function Image (Map : in Maps.Map) return String;
-   --  Returns map image
-
-   procedure Set_Environment (Map : in Maps.Map);
-   --  Reads environment variable in env/$project_name$.xml
-   --  and sets environment variables according to rules
-
+private
+   type Var is record
+      Value  : Unbounded_String;
+      Action : Var_Action;
+   end record;
 end Savadur.Environment_Variables;

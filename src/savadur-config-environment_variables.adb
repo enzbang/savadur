@@ -63,7 +63,7 @@ package body Savadur.Config.Environment_Variables is
    --  SAX overloaded routines to parse the incoming XML stream.
 
    type Tree_Reader is new Sax.Readers.Reader with record
-      Map : Savadur.Environment_Variables.Maps.Map;
+      Map : Savadur.Environment_Variables.Containers.Maps.Map;
    end record;
 
    overriding procedure Start_Element
@@ -111,7 +111,7 @@ package body Savadur.Config.Environment_Variables is
 
    function Parse
      (Project : access Projects.Project_Config)
-      return Savadur.Environment_Variables.Maps.Map
+      return Savadur.Environment_Variables.Containers.Maps.Map
    is
       Reader : Tree_Reader;
       Source : Input_Sources.File.File_Input;
@@ -166,15 +166,17 @@ package body Savadur.Config.Environment_Variables is
 
                   case Attr is
                      when Name  => Var_Name  := +Get_Value (Atts, J);
-                     when Value => Var.Value := +Get_Value (Atts, J);
+                     when Value => Savadur.Environment_Variables.Set_Value
+                          (Var, Get_Value (Atts, J));
                      when Mode  =>
-                        Var.Action :=
-                          Savadur.Environment_Variables.
-                            Var_Action'Value (Get_Value (Atts, J));
+                        Savadur.Environment_Variables.Set_Action
+                          (Var,
+                           Savadur.Environment_Variables.
+                             Var_Action'Value (Get_Value (Atts, J)));
                   end case;
                end loop;
 
-               Savadur.Environment_Variables.Maps.Insert
+               Savadur.Environment_Variables.Containers.Maps.Insert
                  (Container => Handler.Map,
                   Key       => -Var_Name,
                   New_Item  => Var);

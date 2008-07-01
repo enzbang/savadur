@@ -785,7 +785,7 @@ package body Savadur.Build is
      (Project : access Projects.Project_Config;
       Patch   : in     String;
       Server  : in     String;
-      Env_Var : in     Environment_Variables.Maps.Map;
+      Env_Var : in     Environment_Variables.Containers.Maps.Map;
       Id      : in     Scenarios.Id;
       Job_Id  : in     Natural := 0) return Scenarios.Run_Status
    is
@@ -826,7 +826,7 @@ package body Savadur.Build is
                   Patch));
          end if;
 
-         Savadur.Environment_Variables.Set_Environment (Env_Var);
+         Savadur.Environment_Variables.Containers.Set_Environment (Env_Var);
 
          return Selected_Scenario;
       exception

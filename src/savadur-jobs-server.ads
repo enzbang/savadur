@@ -19,7 +19,7 @@
 --  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.       --
 ------------------------------------------------------------------------------
 
-with Savadur.Environment_Variables;
+with Savadur.Environment_Variables.Containers;
 with Savadur.Jobs.Queue;
 with Savadur.Projects;
 with Savadur.Scenarios;
@@ -30,7 +30,7 @@ package Savadur.Jobs.Server is
      (Project           : access Projects.Project_Config;
       Patch_Filename    : in     String;
       Server            : in     String;
-      Env_Var           : in     Environment_Variables.Maps.Map;
+      Env_Var           : in     Environment_Variables.Containers.Maps.Map;
       Scenario          : in     Scenarios.Id;
       Id                : in     Natural := 0) return Scenarios.Run_Status;
    --  This is the server side run routine, it does not call directly the

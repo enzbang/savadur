@@ -399,7 +399,7 @@ package body Savadur.Jobs.Queue is
 
       Project : aliased Projects.Project_Config;
       Job     : Job_Data;
-      Env_Var : Environment_Variables.Maps.Map;
+      Env_Var : Environment_Variables.Containers.Maps.Map;
       Seconds : Duration;
    begin
       Jobs_Loop : loop
