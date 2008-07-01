@@ -107,9 +107,9 @@ package body Savadur.Utils is
       Copy_Subdirs : declare
          S        : Search_Type;
          D        : Directory_Entry_Type;
-         Get_Dirs : Filter_Type := (Directory     => True,
-                                    Ordinary_File => False,
-                                    Special_File  => False);
+         Get_Dirs : Filter_Type := Filter_Type'(Directory     => True,
+                                                Ordinary_File => False,
+                                                Special_File  => False);
       begin
          Start_Search (Search    => S,
                        Directory => Left,
@@ -118,7 +118,7 @@ package body Savadur.Utils is
 
          while More_Entries (S) loop
             Get_Next_Entry (S, D);
-            if Simple_Name (D) /= "." and Simple_Name (D) /= ".." then
+            if Simple_Name (D) /= "." and then Simple_Name (D) /= ".." then
                Copy_Tree
                  (Left  => Full_Name (D),
                   Right =>
@@ -131,9 +131,9 @@ package body Savadur.Utils is
       Copy_Files : declare
          S         : Search_Type;
          D         : Directory_Entry_Type;
-         Get_Files : Filter_Type := (Directory     => False,
-                                     Ordinary_File => True,
-                                     Special_File  => False);
+         Get_Files : Filter_Type := Filter_Type'(Directory     => False,
+                                                 Ordinary_File => True,
+                                                 Special_File  => False);
       begin
          Start_Search (Search    => S,
                        Directory => Left,
@@ -199,10 +199,10 @@ package body Savadur.Utils is
       Result  : Unbounded_String;
       Matches : Regpat.Match_Array (0 .. N);
    begin
-      while First <= Content'Last loop
+      While_Match : while First <= Content'Last loop
          Regpat.Match (Pattern, Content, Matches, Data_First => First);
 
-         exit when Matches (0) = Regpat.No_Match
+         exit While_Match when Matches (0) = Regpat.No_Match
            or else Matches (N) = Regpat.No_Match;
 
          --  Each result on a separate line
@@ -211,13 +211,12 @@ package body Savadur.Utils is
             Append (Result, ASCII.LF);
          end if;
 
-         Append
-           (Result,
-            Strings.Fixed.Trim
-              (Content (Matches (N).First .. Matches (N).Last),
-               Side => Strings.Both));
+         Append (Result,
+                 Strings.Fixed.Trim
+                   (Source => Content (Matches (N).First .. Matches (N).Last),
+                    Side   => Strings.Both));
          First := Matches (1).Last + 1;
-      end loop;
+      end loop While_Match;
 
       return Result;
    end Parse;

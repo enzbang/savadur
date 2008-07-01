@@ -822,8 +822,8 @@ package body Savadur.Build is
             Ada.Environment_Variables.Set
               (Name  => "PATCH",
                Value => Directories.Compose
-                 (Savadur.Config.Patch_Directory,
-                  Patch));
+                 (Containing_Directory => Savadur.Config.Patch_Directory,
+                  Name                 => Patch));
          end if;
 
          Savadur.Environment_Variables.Containers.Set_Environment (Env_Var);

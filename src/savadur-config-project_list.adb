@@ -84,15 +84,17 @@ package body Savadur.Config.Project_List is
 
    function Config_Signature return Signed_Files.Signature is
       H : Signed_Files.Handler;
+      Config_Dir : constant String :=
+        Directories.Compose
+        (Containing_Directory => Config.Savadur_Directory,
+         Name                 => "config");
    begin
       Signed_Files.Create
         (File     => H,
          Name     => Config_Filename,
          Filename => Directories.Compose
-           (Directories.Compose
-              (Containing_Directory => Config.Savadur_Directory,
-               Name                 => "config"),
-            Config_Filename));
+           (Containing_Directory => Config_Dir,
+            Name                 => Config_Filename));
       return Signed_Files.SHA1 (H);
    end Config_Signature;
 

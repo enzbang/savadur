@@ -97,14 +97,19 @@ package body Savadur.Web_Services.Client is
       return R1.Number < R2.Number;
    end "<";
 
+   ----------------
+   -- Load_Patch --
+   ----------------
+
    function Load_Patch (Filename : in String) return File_Data is
    begin
       --  ??? Why using file_data as filename not used ?
       return File_Data'
-        (Filename => +
-           Filename,
+        (Filename => +Filename,
          Content  => +Utils.Content
-           (Directories.Compose (Config.Patch_Directory, Filename)));
+           (Directories.Compose
+              (Containing_Directory => Config.Patch_Directory,
+               Name                 => Filename)));
    end Load_Patch;
 
    ------------------
@@ -370,11 +375,7 @@ package body Savadur.Web_Services.Client is
                      --  has not changed for e.g.
 
                      if Report.Result /= Scenarios.Skipped then
-                        if Report.Result = Scenarios.Success then
-                           Report_Status := True;
-                        else
-                           Report_Status := False;
-                        end if;
+                        Report_Status := (Report.Result = Scenarios.Success);
 
                         Database.Final_Status
                           (-Report.Key, -Report.Project_Name, -Report.Scenario,

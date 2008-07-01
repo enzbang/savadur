@@ -427,7 +427,7 @@ package body Savadur.Jobs.Queue is
 
          exit Jobs_Loop when Job = End_Job;
 
-         begin
+         Run_Job : begin
             Logs.Write
               (Natural'Image (Job.Number)
                & ") Run : " & (-Job.Scenario) & ", "
@@ -495,7 +495,7 @@ package body Savadur.Jobs.Queue is
          exception
             when E : others =>
                Logs.Write ("ERROR: " & Exception_Information (E));
-         end;
+         end Run_Job;
       end loop Jobs_Loop;
    end Run_Jobs;
 

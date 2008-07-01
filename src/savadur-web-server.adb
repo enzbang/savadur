@@ -284,10 +284,12 @@ package body Savadur.Web.Server is
       begin
          if Filename /= "" then
             Save_File : declare
+               Simple_Name    : constant String :=
+                                  Directories.Simple_Name (Filename);
                Patch_Filename : constant String := Utils.Unique_Filename
                  (Directories.Compose
-                    (Savadur.Config.Patch_Directory,
-                     Directories.Simple_Name (Filename)));
+                    (Containing_Directory => Savadur.Config.Patch_Directory,
+                     Name                 => Simple_Name));
             begin
                Logs.Write ("Get new patch " & Patch_Filename);
                Directories.Rename (Filename, Patch_Filename);

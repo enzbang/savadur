@@ -43,7 +43,10 @@ package body Savadur.Times is
            with "non conforming periodic time '" & From & ''';
       else
 
-         begin
+         --  Add a local exception handler to avoid catching the previous
+         --  Contraint_Error
+
+         Safe_Creation : begin
             Create_Perodic : declare
                H : constant Calendar.Formatting.Hour_Number :=
                      Calendar.Formatting.Hour_Number'Value
@@ -66,7 +69,7 @@ package body Savadur.Times is
             when others =>
                raise Constraint_Error
                  with "non conforming periodic time '" & From & ''';
-         end;
+         end Safe_Creation;
       end if;
    end Create;
 
