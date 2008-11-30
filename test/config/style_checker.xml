@@ -20,4 +20,17 @@
     <action id="make" />
     <action id="regtests" />
   </scenario>
+
+  <scenario id="nightly">
+    <scm_action id="version" status="require_change" on_error="continue" />
+    <scm_action id="pull" />
+    <action id="make" />
+    <action id="regtests" />
+  </scenario>
+
+  <scenario id="daily">
+    <scm_action id="version" status="require_change" on_error="quit" />
+    <scm_action id="pull" />
+    <action id="make" />
+  </scenario>
 </project>

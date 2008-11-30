@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<project>
+  <name id="dummy" />
+  <scm id="git" />
+  <filter id="files_ignored" regexp=" ([^\n]*\.txt) \|  "/>
+
+  <variable id="url"
+     value="../../../newproj" />
+
+  <action id="make">
+    <cmd>make</cmd>
+  </action>
+
+  <action id="regtests">
+    <cmd>make regtests</cmd>
+  </action>
+
+  <scenario id="donotcare">
+    <scm_action id="version" status="require_change" on_error="quit" />
+    <scm_action id="pull" filter1="files_ignored"
+		status="files_ignored/=files_updated" on_error="quit" />
+    <action id="make" />
+    <action id="regtests" />
+  </scenario>
+</project>

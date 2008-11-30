@@ -36,6 +36,9 @@ setup:
 	$(CP) -r config/config test-dir/client
 	$(CP) -r test-dir/projects test-dir/client
 	$(CP) -r test-dir/env test-dir/client
+	$(CP) config/style_checker.xml test-dir/client/projects/
+	$(CP) config/dummy.xml test-dir/client/projects/
+	$(CP) config/uiop.xml test-dir/client/projects/
 
 regtests_bootstrap: setup
 	$(GNATMAKE) -XPRJ_BUILD=$(MODE) -XIN_TEST=TRUE -P ../savadur-main

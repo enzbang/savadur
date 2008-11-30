@@ -23,7 +23,7 @@ with Ada.Directories;
 with Ada.Strings.Unbounded;
 with Ada.Text_IO;
 
-with AWS.Jabber;
+with AWS.Jabber.Client;
 
 with Savadur.Actions;
 with Savadur.Config.Environment_Variables;
@@ -33,7 +33,7 @@ with Savadur.Config.Project_List;
 with Savadur.Config.SCM;
 with Savadur.Config.Server;
 with Savadur.Config;
-with Savadur.Environment_Variables;
+with Savadur.Environment_Variables.Containers;
 with Savadur.Notifications;
 with Savadur.Projects;
 with Savadur.Project_List;
@@ -48,6 +48,7 @@ with Utils;
 package body Config_Parse is
 
    use Ada;
+   use AWS;
    use Savadur;
    use Savadur.Utils;
 
@@ -81,20 +82,20 @@ package body Config_Parse is
       pragma Unreferenced (T);
       use Ada.Strings.Unbounded;
 
-      Env_Var : constant Savadur.Environment_Variables.Maps.Map :=
+      Env_Var : constant Savadur.Environment_Variables.Containers.Maps.Map :=
                   Savadur.Config.
                     Environment_Variables.Parse (Project'Access);
    begin
       Assertions.Assert
-        (Utils.Strip (Savadur.Environment_Variables.Image (Env_Var)) =
-           Utils.Strip ("["
-         & "LD_LIBRARY_PATH : value = /opt/lib"
-         & "action is REPLACE"
-         & "PATH : value = /usr/bin"
-         & "action is APPEND"
-         & "SAVADUR_DIR : value = "
-         & "action is CLEAR"
-         & "]"),
+        (Utils.Strip (Savadur.Environment_Variables.
+           Containers.Image (Env_Var)) = Utils.Strip ("["
+           & "LD_LIBRARY_PATH : value = /opt/lib"
+           & "action is REPLACE"
+           & "PATH : value = /usr/bin"
+           & "action is APPEND"
+           & "SAVADUR_DIR : value = "
+           & "action is CLEAR"
+           & "]"),
          "Wrong env variable list");
    end Check_Env_Var_Config;
 
@@ -106,7 +107,7 @@ package body Config_Parse is
      (T : in out AUnit.Test_Cases.Test_Case'Class)
    is
       pragma Unreferenced (T);
-      use type AWS.Jabber.Authentication_Type;
+      use type AWS.Jabber.Client.Authentication_Mechanism;
    begin
       Config.Notifications.Parse;
 
@@ -123,7 +124,7 @@ package body Config_Parse is
          "Wrong jabber password");
 
       Assertions.Assert
-        (Config.Notifications.XMPP.Auth_Type = AWS.Jabber.PLAIN,
+        (Config.Notifications.XMPP.Auth_Type = Jabber.Client.Plain_Mechanism,
          "Wrong jabber authentication type");
 
       Assertions.Assert
@@ -193,14 +194,17 @@ package body Config_Parse is
 
       Assertions.Assert
         (Utils.Strip (Savadur.Scenarios.Image (Project.Scenarios)) =
-           Utils.Strip ("* default"
-         & "["
-         & "SCM version status=require_change on error = QUIT"
-         & "SCM pull"
-         & "DEFAULT make"
-         & "DEFAULT regtests"
-         & "] periodic = 23:30/+60"),
-         "Wrong scenarios list");
+           Utils.Strip ("* try_patch"
+             & "[ SCM apply ] periodic = "
+             & "* default"
+             & "["
+             & "SCM version status=require_change on error = QUIT"
+             & "SCM pull"
+             & "DEFAULT make"
+             & "DEFAULT regtests"
+             & "] periodic = 23:30/+60"),
+         "Wrong scenarios list " &
+         Utils.Strip (Savadur.Scenarios.Image (Project.Scenarios)));
 
       Assertions.Assert
         (Utils.Strip (Savadur.Notifications.Image (Project.Notifications)) =
@@ -294,6 +298,7 @@ package body Config_Parse is
       Git_SCM : constant String := "* git"
         & "["
         & "init => git-clone $url $sources  result type : EXIT_STATUS"
+        & "apply => git apply $PATCH  result type : EXIT_STATUS"
         & "pull => git-pull  result type : EXIT_STATUS"
         & "committers_1 => git-show --pretty=short $v1 (Author:(.*))"
         & "result type : VALUE"
