@@ -19,7 +19,7 @@
 --  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.       --
 ------------------------------------------------------------------------------
 
-with AWS.Jabber;
+with AWS.Jabber.Client;
 
 package Savadur.Config.Notifications is
 
@@ -41,7 +41,7 @@ package Savadur.Config.Notifications is
       function Password return String;
       --  Returns configured jabber password
 
-      function Auth_Type return AWS.Jabber.Authentication_Type;
+      function Auth_Type return AWS.Jabber.Client.Authentication_Mechanism;
       --  Returns configured jabber auth_type
 
    end XMPP;

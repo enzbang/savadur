@@ -23,7 +23,7 @@ with Ada.Exceptions;
 with Ada.Directories;
 with Ada.Text_IO;
 
-with AWS.Jabber;
+with AWS.Jabber.Client;
 with AWS.SMTP.Authentication.Plain;
 with AWS.SMTP.Client;
 with AWS.Templates;
@@ -40,6 +40,12 @@ package body Savadur.Notifications is
 
    RSS_All_File      : access String := null;
    RSS_Template_File : access String := null;
+
+   Jabber_Is_Connected : Boolean := False;
+   Account : aliased Jabber.Client.Account;
+
+   procedure Jabber_Connect (Account : Jabber.Client.Account_Access);
+   --  Connect to the jabber account
 
    -----------
    -- Image --
@@ -154,6 +160,24 @@ package body Savadur.Notifications is
       end if;
    end Update_RSS;
 
+   procedure Jabber_Connect (Account : Jabber.Client.Account_Access) is
+   begin
+      Jabber.Client.Set_Host (Account => Account.all,
+                              Host    => Config.Notifications.XMPP.Server);
+
+      Jabber.Client.Set_Login_Information
+        (Account  => Account.all,
+         User     => Config.Notifications.XMPP.JID,
+         Password => Config.Notifications.XMPP.Password,
+         Resource => "savadur");
+
+      Jabber.Client.Set_Authentication_Type
+        (Account   => Account.all,
+         Auth_Type => Config.Notifications.XMPP.Auth_Type);
+
+      Jabber.Client.Connect (Account.all);
+   end Jabber_Connect;
+
    ---------------
    -- XMPP_Send --
    ---------------
@@ -163,22 +187,17 @@ package body Savadur.Notifications is
       Subject : in String;
       Content : in String)
    is
-      Server : AWS.Jabber.Server;
    begin
-      Jabber.Connect
-        (Server    => Server,
-         Host      => Config.Notifications.XMPP.Server,
-         User      => Config.Notifications.XMPP.JID,
-         Password  => Config.Notifications.XMPP.Password,
-         Auth_Type => Config.Notifications.XMPP.Auth_Type);
+      if not Jabber_Is_Connected then
+         Jabber_Connect (Account'Access);
+      end if;
 
-      Jabber.Send_Message
-        (Server  => Server,
-         JID     => JID,
-         Subject => Subject,
-         Content => Content);
-
-      Jabber.Close (Server);
+      Jabber.Client.Send (Account      => Account,
+                          JID          => Jabber.Client.Jabber_ID (JID),
+                          Content      => Content,
+                          Subject      => Subject,
+                          Message_Type => Jabber.Client.M_Normal);
+      Jabber.Client.Close (Account);
    exception
       when E : others =>
          Logs.Write

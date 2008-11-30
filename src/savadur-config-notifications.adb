@@ -70,7 +70,7 @@ package body Savadur.Config.Notifications is
       Server    : Unbounded_String;
       JID       : Unbounded_String;
       Password  : Unbounded_String;
-      Auth_Type : AWS.Jabber.Authentication_Type;
+      Auth_Type : AWS.Jabber.Client.Authentication_Mechanism;
    end record;
 
    XMPP_Config : XMPP_Config_Data;
@@ -108,7 +108,7 @@ package body Savadur.Config.Notifications is
       -- Auth_Type --
       ---------------
 
-      function Auth_Type return AWS.Jabber.Authentication_Type is
+      function Auth_Type return AWS.Jabber.Client.Authentication_Mechanism is
       begin
          return XMPP_Config.Auth_Type;
       end Auth_Type;
@@ -215,7 +215,8 @@ package body Savadur.Config.Notifications is
 
          when Auth_Type =>
             XMPP_Config.Auth_Type :=
-              AWS.Jabber.Authentication_Type'Value (-Handler.Content_Value);
+              AWS.Jabber.Client.
+                Authentication_Mechanism'Value (-Handler.Content_Value);
 
          when User =>
             SMTP_Config.User := Handler.Content_Value;

@@ -19,9 +19,7 @@
 --  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.       --
 ------------------------------------------------------------------------------
 
-with Ada.Strings.Hash_Case_Insensitive;
 with Ada.Strings.Unbounded;
-with Ada.Containers.Indefinite_Hashed_Maps;
 
 package Savadur.Environment_Variables is
 
