@@ -19,6 +19,8 @@
 ##  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.       ##
 ##############################################################################
 
+RUNTEST=
+
 all: build
 
 build:
@@ -26,7 +28,7 @@ build:
 
 regtests: setup build
 	@echo "Harness ..."
-	./harness
+	$(RUNTEST) ./harness
 
 setup:
 	$(RM) -r test-dir/client
@@ -42,7 +44,7 @@ setup:
 
 regtests_bootstrap: setup
 	$(GNATMAKE) -XPRJ_BUILD=$(MODE) -XIN_TEST=TRUE -P ../savadur-main
-	SAVADUR_DIR=$(PWD)/test/test-dir ./bin/savadur --standalone \
+	SAVADUR_DIR=$(PWD)/test/test-dir $(RUNTEST) ./bin/savadur --standalone \
 		--project bootstrap
 
 clean:

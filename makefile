@@ -1,7 +1,7 @@
 ##############################################################################
 ##                                Savadur                                   ##
 ##                                                                          ##
-##                           Copyright (C) 2007                             ##
+##                        Copyright (C) 2007-2008                           ##
 ##                     Pascal Obry - Olivier Ramonat                        ##
 ##                                                                          ##
 ##  This library is free software; you can redistribute it and/or modify    ##
@@ -25,7 +25,7 @@ GENERAL_OPTIONS = CP="$(CP)" MKDIR="$(MKDIR)" RM="$(RM)" SED="$(SED)" \
 	GNATMAKE="$(GNATMAKE)" GNATCLEAN="$(GNATCLEAN)" \
 	GNATCHECK="$(GNATCHECK)" GNATCHOP="$(GNATCHOP)" \
 	EXEEXT="$(EXEEXT)" DIFF="$(DIFF)" ADA2WSDL="$(ADA2WSDL)" \
-	WSDL2AWS="$(WSDL2AWS)"
+	WSDL2AWS="$(WSDL2AWS)" RUNTEST="$(RUNTEST)"
 
 OPTIONS = MODE="$(MODE)" $(GENERAL_OPTIONS)
 
@@ -40,7 +40,7 @@ build: setup
 	$(GNATMAKE) -XPRJ_BUILD=$(MODE) -P savadur-main
 
 setup:
-# If git is not present then use the version.ads provided in distrib
+#  If git is not present then use the version.ads provided in distrib
 ifneq ("$(VERSION)", "")
 	sed -e 's,\$$VERSION\$$,$(VERSION),g' \
 	-e 's,\$$VERSION_ALL\$$,$(VERSION_ALL),g' \
