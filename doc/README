@@ -191,7 +191,6 @@ For XMPP:
      <server value="jabber.org" />
      <jid value="savadur-bot" />
      <password value="savadur_pwd" />
-     <auth_type value="PLAIN" />
    </jabber>
    <smtp>
       <server value="smtp.example.com"/>
@@ -202,7 +201,7 @@ For XMPP:
 
 For SMTP, user and password are optional.
 
-For now only PLAIN authentication is supported for XMPP and SMTP.
+For now only PLAIN authentication is supported for SMTP.
 
 Then for each project an entry must be inserted into the server database:
 
