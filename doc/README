@@ -51,6 +51,10 @@ and compile if there are some new commits. You'll need to:
 $ ls savadurdir/server
 config  htdocs  logs.db  projects  scm  scripts
 
+First thing to do is to create the database:
+
+   $ ./scripts/create_database.sh
+
 Where config contains a file named project_list.xml
 
    $ cat config/project_list.xml
