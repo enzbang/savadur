@@ -2,7 +2,7 @@
 
 <!--                          Savadur
 
-		       Copyright (C) 2007-2008
+		       Copyright (C) 2007-2009
 		    Pascal Obry - Olivier Ramonat
 
      This library is free software; you can redistribute it and/or modify
@@ -25,23 +25,23 @@
   <filter id="files_updated" regexp=" ([^\n]*) *\|  "/>
 
   <action id="init">
-    <cmd>git-clone $url $sources</cmd>
+    <cmd>git clone $url $sources</cmd>
   </action>
 
   <action id="pull" skip_on_init="true">
-    <cmd filter1="files_updated">git-pull</cmd>
+    <cmd filter1="files_updated">git pull</cmd>
   </action>
 
   <action id="version" result="value">
-    <cmd regexp="^([^\t]*)">git-ls-remote origin refs/heads/master</cmd>
+    <cmd regexp="^([^\t]*)">git ls-remote origin refs/heads/master</cmd>
   </action>
 
   <action id="committers_1" result="value">
-    <cmd regexp="Author: (.*)">git-show --pretty=short $v1</cmd>
+    <cmd regexp="Author: (.*)">git show --pretty=short $v1</cmd>
   </action>
 
   <action id="committers_n" result="value">
-    <cmd regexp="Author: (.*)">git-log $v1..$v2</cmd>
+    <cmd regexp="Author: (.*)">git log $v1..$v2</cmd>
   </action>
 
   <action id="apply">
