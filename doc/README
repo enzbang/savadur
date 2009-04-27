@@ -158,9 +158,9 @@ Now you just have to launch the server:
 
 And start the two clients:
 
-   turbo_server$ ./savadur --client --server
+   turbo_server$ ./savadur --client
 
-   enzbang_server$ ./savadur --client --server
+   enzbang_server$ ./savadur --client
 
 And you're done!
 
