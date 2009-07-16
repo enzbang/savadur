@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+          "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>Savadur : @_PROJECT_NAME_@ - Notifications</title>
+
+    <meta name="description" content="notifications" />
+
+    <meta http-equiv="Content-Type"
+          content="text/html; charset=utf-8" />
+
+    <style type="text/css">
+      @import url("/css/style.css");
+    </style>
+  </head>
+  <body id="notif_page">
+    <h1><a href="/@_PROJECT_NAME_@" title="Back to project page">@_PROJECT_NAME_@</a></h1>
+    <div id="menu">
+      <ul><li><a href="/">Back to project list</a></li></ul>
+      <ul><li><a href="/@_PROJECT_NAME_@">Back to @_PROJECT_NAME_@ page</a></li></ul>
+    </div>
+    <div id="content">
+      <table>	
+        <tr><td>e-mail</td><td>jabber</td></tr>
+        @@TABLE@@
+        <tr>
+          <td>@_E_MAIL_@</td>
+          <td>@_JABBER_@</td>
+        </tr>
+        @@END_TABLE@@
+      </table>
+    </div>
+  </body>
+</html>

@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                                Savadur                                   --
 --                                                                          --
---                        Copyright (C) 2007-2008                           --
+--                        Copyright (C) 2007-2009                           --
 --                      Pascal Obry - Olivier Ramonat                       --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -77,6 +77,10 @@ package Savadur.Database is
    -------------------
    -- Notifications --
    -------------------
+
+   function Get_Notifications
+     (Project_Name : in String) return Templates.Translate_Set;
+   --  Get notifications for given project
 
    type Send_Mail is
      access procedure (Email        : in String;
