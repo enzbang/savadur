@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                                Savadur                                   --
 --                                                                          --
---                           Copyright (C) 2008                             --
+--                         Copyright (C) 2008-2009                          --
 --                      Pascal Obry - Olivier Ramonat                       --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -723,6 +723,7 @@ begin
 
    if Action /= null then
       Action.all;
+
    else
       case Mode is
          when Savadur_Client =>

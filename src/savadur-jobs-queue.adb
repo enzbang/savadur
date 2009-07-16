@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                                Savadur                                   --
 --                                                                          --
---                         Copyright (C) 2007-2008                          --
+--                         Copyright (C) 2007-2009                          --
 --                      Pascal Obry - Olivier Ramonat                       --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -299,6 +299,7 @@ package body Savadur.Jobs.Queue is
 
                if Pos = Job_Set.No_Element then
                   Size := Size + 1;
+
                else
                   Logs.Write
                     ("Delete already scheduled job for this scenario: "
