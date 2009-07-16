@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                                Savadur                                   --
 --                                                                          --
---                         Copyright (C) 2007-2008                          --
+--                         Copyright (C) 2007-2009                          --
 --                      Pascal Obry - Olivier Ramonat                       --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -275,6 +275,27 @@ package body Savadur.Web.Server is
       function Patch_Filename return String;
       --  Returns the patch filename or "" if none
 
+      function Response
+        (Set : in Templates.Translate_Set) return AWS.Response.Data;
+
+      --------------
+      -- Response --
+      --------------
+
+      function Response
+        (Set : in Templates.Translate_Set) return AWS.Response.Data is
+      begin
+         return AWS.Response.Build
+           (Content_Type => MIME.Text_HTML,
+            Message_Body => AWS.Templates.Parse
+              (Filename     => Directories.Compose
+                 (Containing_Directory =>
+                    Savadur.Config.Web_Templates_Directory,
+                  Name                 => "run",
+                  Extension            => "thtml"),
+               Translations => Set));
+      end Response;
+
       --------------------
       -- Patch_Filename --
       --------------------
@@ -301,13 +322,17 @@ package body Savadur.Web.Server is
          return "";
       end Patch_Filename;
 
+      Set : Templates.Translate_Set;
+
    begin
       if Project_Name = "" or else Scenario_Id = "" then
-         return Response.Build
-           (MIME.Text_HTML,
-            "<p>A project and a scenario must be specified</p>"
-            & "<p>http://server:port/run?p=project&s=scenario</p>",
-            Status_Code => Messages.S200);
+         Templates.Insert
+           (Set,
+            Templates.Assoc
+              ("ERROR_MESSAGE",
+               "A project and a scenario must be specified : "
+               & " http://server:port/run?p=project&s=scenario"));
+         return Response (Set);
       end if;
 
       Run_Project : declare
@@ -334,16 +359,22 @@ package body Savadur.Web.Server is
                Latency  => Duration'Value (Latency));
          end if;
 
-         return Response.Build
-           (MIME.Text_HTML,
-            "<p>Running " & Project_Name & "...</p>");
+
+         Templates.Insert
+           (Set, Templates.Assoc ("PROJECT_NAME", Project_Name));
+         Templates.Insert
+           (Set, Templates.Assoc ("SCENARIO", Scenario_Id));
+
+         return Response (Set);
       end Run_Project;
    exception
       when IO_Exceptions.Name_Error =>
-         return Response.Build
-           (MIME.Text_HTML,
-            "<p>Project " & Project_Name & " Not found</p>",
-            Status_Code => Messages.S200);
+         Templates.Insert
+           (Set,
+            Templates.Assoc
+              ("ERROR_MESSAGE",
+               "Project " & Project_Name & " Not found."));
+         return Response (Set);
    end Run;
 
    ----------------
