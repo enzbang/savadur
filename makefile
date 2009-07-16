@@ -81,6 +81,7 @@ install:
 	@$(CP) db/data/create_database.sh $(INSTALL)/savadurdir/server/scripts/
 	@$(CP) config/scm/* $(INSTALL)/savadurdir/server/scm
 	@$(CP) templates/*.thtml $(INSTALL)/savadurdir/server/htdocs/templates
+	@$(CP) templates/*.html $(INSTALL)/savadurdir/server/htdocs/templates
 	@$(CP) templates/*.txml $(INSTALL)/savadurdir/server/htdocs/templates
 	@$(CP) templates/*.css $(INSTALL)/savadurdir/server/htdocs/css
 	@$(CP) templates/img/*.* $(INSTALL)/savadurdir/server/htdocs/img

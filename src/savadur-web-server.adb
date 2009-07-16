@@ -258,7 +258,13 @@ package body Savadur.Web.Server is
    begin
       Clients.Iterate (Clients.Idle, Ping'Access);
 
-      return Response.Build (MIME.Text_HTML, "<p>Pinging clients...</p>");
+      return AWS.Response.File
+        (Content_Type => MIME.Text_HTML,
+         Filename     => Directories.Compose
+           (Containing_Directory =>
+              Savadur.Config.Web_Templates_Directory,
+            Name                 => "ping",
+            Extension            => "html"));
    end Ping;
 
    ---------
