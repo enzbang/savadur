@@ -207,11 +207,6 @@ For SMTP, user and password are optional.
 
 For now only PLAIN authentication is supported for SMTP.
 
-Then for each project an entry must be inserted into the server database:
-
-   (sql) insert into notify values
-           ("savadur", "mail@here.com", "savadur@jabber.org");
-
 Committers e-mail
 -----------------
 

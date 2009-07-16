@@ -245,8 +245,11 @@ package body Savadur.Web.Server is
       Project_Name : constant String := Parameters.Get (P, "p");
       Set          : Templates.Translate_Set;
    begin
-      if Action = "list" then
-         null;
+      if Action = "add" then
+         Database.Add_Notification
+           (Project_Name,
+            Parameters.Get (P, "email"),
+            Parameters.Get (P, "xmpp"));
       end if;
 
       Set := Database.Get_Notifications (Project_Name);

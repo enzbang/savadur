@@ -59,6 +59,25 @@ package body Savadur.Database is
    procedure Connect (DBH : in TLS_DBH_Access);
    --  Connects to the database if needed
 
+   ----------------------
+   -- Add_Notification --
+   ----------------------
+
+   procedure Add_Notification
+     (Project_Name : in String;
+      E_Mail, XMPP : in String)
+   is
+      DBH : constant TLS_DBH_Access := TLS_DBH_Access (DBH_TLS.Reference);
+   begin
+      Connect (DBH);
+
+      DBH.Handle.Execute
+        ("insert into notify values ("
+         & DB.Tools.Q (Project_Name)
+         & ", " & DB.Tools.Q (E_Mail)
+         & ", " & DB.Tools.Q (XMPP) & ")");
+   end Add_Notification;
+
    -------------
    -- Connect --
    -------------

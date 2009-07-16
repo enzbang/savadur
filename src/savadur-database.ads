@@ -82,6 +82,11 @@ package Savadur.Database is
      (Project_Name : in String) return Templates.Translate_Set;
    --  Get notifications for given project
 
+   procedure Add_Notification
+     (Project_Name : in String;
+      E_Mail, XMPP : in String);
+   --  Adds a notification into the database
+
    type Send_Mail is
      access procedure (Email        : in String;
                        Subject      : in String;

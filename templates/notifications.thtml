@@ -30,6 +30,12 @@
         </tr>
         @@END_TABLE@@
       </table>
+      <p>Add notification:</p>
+      <form action="/notif?p=@_PROJECT_NAME_@&a=add" method="POST">
+	<input type="text" width="20" name="email"/>
+	<input type="text" width="20" name="xmpp"/>
+	<input type="submit" value="Add"/>
+      </form>
     </div>
   </body>
 </html>
