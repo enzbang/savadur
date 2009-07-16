@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                                Savadur                                   --
 --                                                                          --
---                           Copyright (C) 2007                             --
+--                         Copyright (C) 2007-2009                          --
 --                      Pascal Obry - Olivier Ramonat                       --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -22,6 +22,35 @@
 with Ada.Strings.Hash_Case_Insensitive;
 
 package body Savadur.Scenarios is
+
+   ------------------
+   -- Has_Scenario --
+   ------------------
+
+   function Has_Scenario
+     (Scenarios   : in Sets.Set;
+      Scenario_Id : in String) return Boolean
+   is
+      procedure Check (Cursor : in Sets.Cursor);
+      --  Look for Scenario_Id
+
+      Found : Boolean := False;
+
+      -----------
+      -- Check --
+      -----------
+
+      procedure Check (Cursor : in Sets.Cursor) is
+      begin
+         if Sets.Element (Cursor).Id = Scenario_Id then
+            Found := True;
+         end if;
+      end Check;
+
+   begin
+      Scenarios.Iterate (Check'Access);
+      return Found;
+   end Has_Scenario;
 
    ----------
    -- Hash --

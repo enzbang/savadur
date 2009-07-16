@@ -335,6 +335,25 @@ package body Savadur.Web.Server is
          return Response (Set);
       end if;
 
+      --  Check if scenario exists for this project
+
+      Check_Scenario : declare
+         use Savadur.Utils;
+         Configuration : constant Projects.Project_Config :=
+                           Savadur.Remote_Files.Load_Project (Project_Name);
+      begin
+         if not Scenarios.Has_Scenario
+           (Configuration.Scenarios, Scenario_Id)
+         then
+            Templates.Insert
+              (Set,
+               Templates.Assoc
+                 ("ERROR_MESSAGE",
+                  "The given scenario (" & Scenario_Id & ") does not exists"));
+            return Response (Set);
+         end if;
+      end Check_Scenario;
+
       Run_Project : declare
          Project          : aliased Projects.Project_Config :=
                               Savadur.Config.Project.Get (Project_Name);

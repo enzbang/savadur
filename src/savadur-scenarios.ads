@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                                Savadur                                   --
 --                                                                          --
---                        Copyright (C) 2007-2008                           --
+--                        Copyright (C) 2007-2009                           --
 --                      Pascal Obry - Olivier Ramonat                       --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -79,6 +79,11 @@ package Savadur.Scenarios is
 
    function Image (Scenarios : in Sets.Set) return String;
    --  Returns Scenario map image
+
+   function Has_Scenario
+     (Scenarios   : in Sets.Set;
+      Scenario_Id : in String) return Boolean;
+   --  Returns True if the given scenario exists into the set
 
 private
 
