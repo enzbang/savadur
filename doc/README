@@ -68,6 +68,10 @@ Where config contains a file named project_list.xml
       </project>
    </project_list>
 
+   The project list must have an entry for every scenario. It associate one
+   or many nodes for each scenario. Here the "default" scenatio will run on
+   "enzbang" and "turbo" machines.
+
 savadurdir/server/htdocs
 	contains some css and templates for webpages
 
