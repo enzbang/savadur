@@ -170,7 +170,8 @@ package body Savadur.Database is
                     TLS_DBH_Access (DBH_TLS.Reference);
       SQL_Sel   : constant String :=
                    "select client, scenario, status, "
-                     & "max(date), job_id, project from lastbuilt ";
+                      & "datetime(max(date), 'localtime'), job_id, project"
+                      & " from lastbuilt ";
       SQL_Group : constant String := " group by client order by client";
       Iter      : DB.SQLite.Iterator;
       Line      :  DB.String_Vectors.Vector;
@@ -236,8 +237,10 @@ package body Savadur.Database is
       Connect (DBH);
 
       DBH.Handle.Prepare_Select
-        (Iter, "select filename, log, project, scenario, status, start_date,"
-         & " stop_date, case when stop_date is null then"
+        (Iter, "select filename, log, project, scenario, status,"
+         & " datetime(start_date, 'localtime'),"
+         & " datetime(stop_date, 'localtime'), case"
+         & " when stop_date is null then"
          & " (last_duration -(julianday(datetime('now'))*86000 -"
          & " julianday(start_date)*86000)) else duration end,"
          & " action"
@@ -361,12 +364,14 @@ package body Savadur.Database is
 
       DBH.Handle.Prepare_Select
         (Iter, "select client, scenario, status, "
-           & "start_date, stop_date, case when stop_date is null then"
-           & " (last_duration -(julianday(datetime('now'))*86000 -"
-           & " julianday(start_date)*86000)) else duration end,"
-           & " action, job_id, rowid from logs"
-           & " where project = " & DB.Tools.Q (Project_Name)
-           & " order by client ASC, rowid DESC");
+         & "datetime(start_date, 'localtime'), "
+         & "datetime(stop_date, 'localtime'), case"
+         & " when stop_date is null then"
+         & " (last_duration -(julianday(datetime('now'))*86000 -"
+         & " julianday(start_date)*86000)) else duration end,"
+         & " action, job_id, rowid from logs"
+         & " where project = " & DB.Tools.Q (Project_Name)
+         & " order by client ASC, rowid DESC");
 
       while Iter.More loop
          Iter.Get_Line (Line);
