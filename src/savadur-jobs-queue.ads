@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                                Savadur                                   --
 --                                                                          --
---                         Copyright (C) 2007-2008                          --
+--                         Copyright (C) 2007-2009                          --
 --                      Pascal Obry - Olivier Ramonat                       --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -56,5 +56,8 @@ package Savadur.Jobs.Queue is
    procedure Stop;
    --  Sends a stop signal to the job task. All currently registered jobs will
    --  be terminated first.
+
+   function Next_Job_In (Project : in Signed_Files.Handler) return Duration;
+   --  Returns number of seconds for next job
 
 end Savadur.Jobs.Queue;
