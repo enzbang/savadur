@@ -21,15 +21,21 @@
       <ul><li><a href="/@_PROJECT_NAME_@">Back to @_PROJECT_NAME_@ page</a></li></ul>
     </div>
     <div id="content">
-      <table>	
-        <tr><td>e-mail</td><td>jabber</td></tr>
-        @@TABLE@@
-        <tr>
-          <td>@_E_MAIL_@</td>
-          <td>@_JABBER_@</td>
-        </tr>
-        @@END_TABLE@@
-      </table>
+      <form action="/notif?p=@_PROJECT_NAME_@&a=del" method="POST">
+        <table>
+          <tr><td></td><td>e-mail</td><td>jabber</td></tr>
+          @@TABLE@@
+          <tr>
+            <td><input type="checkbox" name="delid"
+		       value="@_E_MAIL_@/@_JABBER_@"/></td>
+            <td>@_E_MAIL_@</td>
+            <td>@_JABBER_@</td>
+          </tr>
+          @@END_TABLE@@
+        </table>
+	<input type="submit" value="Remove selected"/>
+      </form>
+      <p/>
       <p>Add notification:</p>
       <form action="/notif?p=@_PROJECT_NAME_@&a=add" method="POST">
 	<input type="text" width="20" name="email"/>

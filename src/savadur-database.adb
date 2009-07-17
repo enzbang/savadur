@@ -110,6 +110,25 @@ package body Savadur.Database is
       end if;
    end Connect;
 
+   ----------------------
+   -- Del_Notification --
+   ----------------------
+
+   procedure Del_Notification
+     (Project_Name : in String;
+      E_Mail, XMPP : in String)
+   is
+      DBH : constant TLS_DBH_Access := TLS_DBH_Access (DBH_TLS.Reference);
+   begin
+      Connect (DBH);
+
+      DBH.Handle.Execute
+        ("delete from notify where"
+         & " project=" & DB.Tools.Q (Project_Name)
+         & " and email=" & DB.Tools.Q (E_Mail)
+         & " and xmpp=" & DB.Tools.Q (XMPP));
+   end Del_Notification;
+
    ------------------
    -- Final_Status --
    ------------------

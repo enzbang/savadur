@@ -87,6 +87,11 @@ package Savadur.Database is
       E_Mail, XMPP : in String);
    --  Adds a notification into the database
 
+   procedure Del_Notification
+     (Project_Name : in String;
+      E_Mail, XMPP : in String);
+   --  Removes a notification from the database
+
    type Send_Mail is
      access procedure (Email        : in String;
                        Subject      : in String;

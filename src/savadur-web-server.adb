@@ -250,6 +250,25 @@ package body Savadur.Web.Server is
            (Project_Name,
             Parameters.Get (P, "email"),
             Parameters.Get (P, "xmpp"));
+
+      elsif Action = "del" then
+         declare
+            use Ada.Strings.Unbounded;
+            Ids : constant Parameters.VString_Array :=
+                    Parameters.Get_Values (P, "delid");
+            Sep : Natural;
+         begin
+            for K in Ids'Range loop
+               Sep := Index (Ids (K), "/");
+
+               if Sep /= 0 then
+                  Database.Del_Notification
+                    (Project_Name,
+                     Slice (Ids (K), 1, Sep - 1),
+                     Slice (Ids (K), Sep + 1, Length (Ids (K))));
+               end if;
+            end loop;
+         end;
       end if;
 
       Set := Database.Get_Notifications (Project_Name);
