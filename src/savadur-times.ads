@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                                Savadur                                   --
 --                                                                          --
---                         Copyright (C) 2007-2008                          --
+--                         Copyright (C) 2007-2009                          --
 --                      Pascal Obry - Olivier Ramonat                       --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -34,7 +34,7 @@ package Savadur.Times is
    function Create (From : in String) return Periodic;
    --  Converts a periodic time external representation to a periodic object.
    --  Current supported format is:
-   --     H:M/+H   - event sceduled at H:M, runs every H hours
+   --     H:M/+X   - event sceduled at H:M, runs every X minutes
    --  Raises Constraint_Error if format is not recognized.
 
    function Image (Time : in Periodic) return String;

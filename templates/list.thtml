@@ -10,6 +10,9 @@
 
     <meta http-equiv="Content-Type"
           content="text/html; charset=utf-8" />
+
+    <meta http-equiv="refresh" content="15;url=/">
+
     <style type="text/css">
       @import url("/css/style.css");
     </style>
@@ -27,10 +30,15 @@
     <div id="content">
 
       <table class="list">
-        <tr><th>Projects Name</th><th>Scenarios (Clients list)</th></tr>
+        <tr>
+	  <th>Projects Name</th>
+	  <th>Next Run</th>
+	  <th>Scenarios (Clients list)</th>
+	</tr>
         @@TABLE@@
         <tr>
           <td class="project_name"><a href="/@_PROJECTS_@">@_PROJECTS_@</a></td>
+	  <td>@_PROJECTS_NEXT_RUN_@</td>
           <td>
             <ul>
               @@TABLE@@

@@ -68,6 +68,10 @@ Where config contains a file named project_list.xml
       </project>
    </project_list>
 
+   The project list must have an entry for every scenario. It associate one
+   or many nodes for each scenario. Here the "default" scenatio will run on
+   "enzbang" and "turbo" machines.
+
 savadurdir/server/htdocs
 	contains some css and templates for webpages
 
@@ -104,6 +108,13 @@ The project file savadur.xml:
        <action id="regtests" />
      </scenario>
 
+     <scenario id="check" periodic="03:00/+60">
+       <scm_action id="version" status="require_change" on_error="quit" />
+       <scm_action id="pull" />
+       <action id="make" />
+       <action id="regtests" />
+     </scenario>
+
      <scenario id="try_patch" patch_file="true" use_tmp="true">
        <scm_action id="pull" />
        <scm_action id="apply" />
@@ -123,12 +134,14 @@ This project file describes:
  - The action list. For this small project only two actions : make and
    regtests,
 
- - The scenario list. We have defined two scenarios:
+ - The scenario list. We have defined three scenarios:
 
        * The "default" scenario, referencing four actions. The
          scm_action "version" is a special action that requires
          changes (we want to compile only if there is a new commit)
          and quit the build process if no change.
+
+       * The "check" scenario which is run at 03:00 and every 60 minutes.
 
        * The "try_patch" scenario using a temporary directory and
          applying the patch file uploaded by the developer.

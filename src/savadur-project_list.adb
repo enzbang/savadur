@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                                Savadur                                   --
 --                                                                          --
---                         Copyright (C) 2007-2008                          --
+--                         Copyright (C) 2007-2009                          --
 --                      Pascal Obry - Olivier Ramonat                       --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -24,7 +24,8 @@ with Ada.Text_IO;
 with Savadur.Config.Project;
 with Savadur.Config.Project_List;
 
-with Savadur.Projects;
+with Savadur.Jobs.Server;
+with Savadur.Projects.Sets;
 with Savadur.Scenarios;
 with Savadur.Utils;
 
@@ -211,13 +212,15 @@ package body Savadur.Project_List is
    ------------
 
    function To_Set
-     (Project_List : in Projects.Map) return AWS.Templates.Translate_Set is
+     (Project_List : in Projects.Map) return AWS.Templates.Translate_Set
+   is
       use AWS.Templates;
 
       Result      : AWS.Templates.Translate_Set;
 
       T_Clients   : AWS.Templates.Tag;
       T_Projects  : AWS.Templates.Tag;
+      T_Next_Run  : AWS.Templates.Tag;
       T_Scenarios : AWS.Templates.Tag;
 
       Position : Projects.Cursor := Project_List.First;
@@ -226,13 +229,12 @@ package body Savadur.Project_List is
 
       For_All_Projects : while Projects.Has_Element (Position) loop
          Get_Scenarios_List : declare
-            T_Project_Scenarios        : Tag;
-            T_Project_Scenario_Clients : Tag;
             M_Scerarios                : constant Scenarios.Map :=
                                             Projects.Element (Position);
             Scenarios_Position         : Scenarios.Cursor       :=
                                             M_Scerarios.First;
-
+            T_Project_Scenarios        : Tag;
+            T_Project_Scenario_Clients : Tag;
          begin
             --  For all projects scenarios
 
@@ -245,7 +247,6 @@ package body Savadur.Project_List is
                                            (Scenarios_Position);
                   Clients_Position   : Clients.Cursor := V_Clients.First;
                begin
-
                   --  For all clients registered for this scenario
 
                   For_All_Clients :
@@ -264,7 +265,37 @@ package body Savadur.Project_List is
                Scenarios.Next (Scenarios_Position);
             end loop For_All_Scenarios;
 
-            T_Projects  := T_Projects & Projects.Key (Position);
+            declare
+               Project_Key : constant String := Projects.Key (Position);
+               Position    : constant Savadur.Projects.Sets.Sets.Cursor :=
+                               Config.Project.Configurations.Find
+                                 (Savadur.Projects.Project_Config'
+                                    (Project_Id =>
+                                       Savadur.Projects.Id_Utils.Value
+                                         (Project_Key),
+                                     others     => <>));
+               Project     : constant Savadur.Projects.Project_Config :=
+                               Savadur.Projects.Sets.Sets.Element (Position);
+               D           : Duration;
+            begin
+               T_Projects := T_Projects & Project_Key;
+
+               D := Jobs.Server.Queue.Next_Job_In (Project.Signature);
+
+               if D = 0.0 then
+                  T_Next_Run := T_Next_Run & "";
+
+               else
+                  if D > 60.0 then
+                     T_Next_Run := T_Next_Run
+                       & (Integer'Image (Integer (D / 60.0)) & " mins");
+                  else
+                     T_Next_Run := T_Next_Run
+                       & (Integer'Image (Integer (D)) & " secs");
+                  end if;
+               end if;
+            end;
+
             T_Scenarios := T_Scenarios & T_Project_Scenarios;
             T_Clients   := T_Clients & T_Project_Scenario_Clients;
 
@@ -277,6 +308,11 @@ package body Savadur.Project_List is
                             Item => AWS.Templates.Assoc
                               (Variable  => "PROJECTS",
                                Value     => T_Projects));
+
+      AWS.Templates.Insert (Set  => Result,
+                            Item => AWS.Templates.Assoc
+                              (Variable  => "PROJECTS_NEXT_RUN",
+                               Value     => T_Next_Run));
 
       AWS.Templates.Insert (Set  => Result,
                             Item => AWS.Templates.Assoc

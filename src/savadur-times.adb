@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                                Savadur                                   --
 --                                                                          --
---                         Copyright (C) 2007-2008                          --
+--                         Copyright (C) 2007-2009                          --
 --                      Pascal Obry - Olivier Ramonat                       --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -44,7 +44,7 @@ package body Savadur.Times is
       else
 
          --  Add a local exception handler to avoid catching the previous
-         --  Contraint_Error
+         --  Contraint_Error.
 
          Safe_Creation : begin
             Create_Perodic : declare
@@ -68,7 +68,8 @@ package body Savadur.Times is
          exception
             when others =>
                raise Constraint_Error
-                 with "non conforming periodic time '" & From & ''';
+                 with "non conforming periodic time '" & From & '''
+                   & " (format is HH:MM/+X - run at HH:MM every X minutes)";
          end Safe_Creation;
       end if;
    end Create;

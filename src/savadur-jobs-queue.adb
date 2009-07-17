@@ -99,6 +99,10 @@ package body Savadur.Jobs.Queue is
       procedure Stop;
       --  Schedule a terminating job into the queue
 
+      function Next_Job_In
+        (Project : in Signed_Files.Handler) return Duration;
+      --  Returns seconds to next job for the given project
+
    private
       Jobs    : Job_Set.Set;
       Size    : Natural := 0;
@@ -320,6 +324,7 @@ package body Savadur.Jobs.Queue is
                Jobs.Replace_Element (Position, Local_Job);
             else
                Jobs.Insert (Local_Job);
+               Size := Size + 1;
             end if;
          end if;
 
@@ -351,6 +356,32 @@ package body Savadur.Jobs.Queue is
          New_Job := False;
       end Next;
 
+      -----------------
+      -- Next_Job_In --
+      -----------------
+
+      function Next_Job_In
+        (Project : in Signed_Files.Handler) return Duration
+      is
+         use type Signed_Files.Handler;
+         Position : Job_Set.Cursor := Jobs.First;
+         Result   : Duration := 0.0;
+      begin
+         while Job_Set.Has_Element (Position) loop
+            declare
+               Job : constant Job_Data := Job_Set.Element (Position);
+            begin
+               if Job.Project = Project then
+                  return Run_In (Job);
+               end if;
+            end;
+
+            Job_Set.Next (Position);
+         end loop;
+
+         return Result;
+      end Next_Job_In;
+
       ---------------
       -- Rescedule --
       ---------------
@@ -372,6 +403,15 @@ package body Savadur.Jobs.Queue is
       end Stop;
 
    end Job_Handler;
+
+   -----------------
+   -- Next_Job_In --
+   -----------------
+
+   function Next_Job_In (Project : in Signed_Files.Handler) return Duration is
+   begin
+      return Job_Handler.Next_Job_In (Project);
+   end Next_Job_In;
 
    ------------
    -- Run_In --

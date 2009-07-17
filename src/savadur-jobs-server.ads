@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                                Savadur                                   --
 --                                                                          --
---                         Copyright (C) 2007-2008                          --
+--                         Copyright (C) 2007-2009                          --
 --                      Pascal Obry - Olivier Ramonat                       --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -27,12 +27,12 @@ with Savadur.Scenarios;
 package Savadur.Jobs.Server is
 
    function Run
-     (Project           : access Projects.Project_Config;
-      Patch_Filename    : in     String;
-      Server            : in     String;
-      Env_Var           : in     Environment_Variables.Containers.Maps.Map;
-      Scenario          : in     Scenarios.Id;
-      Id                : in     Natural := 0) return Scenarios.Run_Status;
+     (Project        : access Projects.Project_Config;
+      Patch_Filename : in     String;
+      Server         : in     String;
+      Env_Var        : in     Environment_Variables.Containers.Maps.Map;
+      Scenario       : in     Scenarios.Id;
+      Id             : in     Natural := 0) return Scenarios.Run_Status;
    --  This is the server side run routine, it does not call directly the
    --  Build.Run routine as nothing is actually run on the server but send run
    --  requests to the clients.
