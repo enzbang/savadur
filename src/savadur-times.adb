@@ -68,7 +68,8 @@ package body Savadur.Times is
          exception
             when others =>
                raise Constraint_Error
-                 with "non conforming periodic time '" & From & ''';
+                 with "non conforming periodic time '" & From & '''
+                   & " (format is HH:MM/+X - run at HH:MM every X minutes)";
          end Safe_Creation;
       end if;
    end Create;
