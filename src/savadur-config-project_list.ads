@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                                Savadur                                   --
 --                                                                          --
---                         Copyright (C) 2007-2008                          --
+--                         Copyright (C) 2007-2009                          --
 --                      Pascal Obry - Olivier Ramonat                       --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -23,7 +23,7 @@ with Savadur.Project_List;
 
 package Savadur.Config.Project_List is
 
-   Config_Error   : exception renames Config.Config_Error;
+   Config_Error : exception renames Config.Config_Error;
 
    function Configurations
      return not null access constant Savadur.Project_List.Projects.Map;

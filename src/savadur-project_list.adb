@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                                Savadur                                   --
 --                                                                          --
---                         Copyright (C) 2007-2008                          --
+--                         Copyright (C) 2007-2009                          --
 --                      Pascal Obry - Olivier Ramonat                       --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -226,13 +226,12 @@ package body Savadur.Project_List is
 
       For_All_Projects : while Projects.Has_Element (Position) loop
          Get_Scenarios_List : declare
-            T_Project_Scenarios        : Tag;
-            T_Project_Scenario_Clients : Tag;
             M_Scerarios                : constant Scenarios.Map :=
                                             Projects.Element (Position);
             Scenarios_Position         : Scenarios.Cursor       :=
                                             M_Scerarios.First;
-
+            T_Project_Scenarios        : Tag;
+            T_Project_Scenario_Clients : Tag;
          begin
             --  For all projects scenarios
 
@@ -245,7 +244,6 @@ package body Savadur.Project_List is
                                            (Scenarios_Position);
                   Clients_Position   : Clients.Cursor := V_Clients.First;
                begin
-
                   --  For all clients registered for this scenario
 
                   For_All_Clients :

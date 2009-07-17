@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                                Savadur                                   --
 --                                                                          --
---                         Copyright (C) 2007-2008                          --
+--                         Copyright (C) 2007-2009                          --
 --                      Pascal Obry - Olivier Ramonat                       --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -44,7 +44,7 @@ package body Savadur.Times is
       else
 
          --  Add a local exception handler to avoid catching the previous
-         --  Contraint_Error
+         --  Contraint_Error.
 
          Safe_Creation : begin
             Create_Perodic : declare
