@@ -320,6 +320,7 @@ package body Savadur.Jobs.Queue is
                Jobs.Replace_Element (Position, Local_Job);
             else
                Jobs.Insert (Local_Job);
+               Size := Size + 1;
             end if;
          end if;
 
