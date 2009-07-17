@@ -86,19 +86,23 @@ package body Savadur.Web.Server is
    function Show_Project (Request : in Status.Data) return Response.Data;
    --  Displays the project status
 
+   function Notifications (Request : in Status.Data) return Response.Data;
+   --  The notifications page
+
    -------------------
    -- HTTP_Callback --
    -------------------
 
    function HTTP_Callback (Request : in Status.Data) return Response.Data is
-      URI      : constant String := Status.URI (Request);
-      Root_URI : constant String := "/";
-      Run_URI  : constant String := "/run";
-      Ping_URI : constant String := "/ping";
-      RSS_URI  : constant String := "/rss/all";
-      Log_URI  : constant String := "/log/";
-      CSS_URI  : constant String := "/css/";
-      Img_URI  : constant String := "/img/";
+      URI       : constant String := Status.URI (Request);
+      Root_URI  : constant String := "/";
+      Run_URI   : constant String := "/run";
+      Ping_URI  : constant String := "/ping";
+      RSS_URI   : constant String := "/rss/all";
+      Log_URI   : constant String := "/log/";
+      CSS_URI   : constant String := "/css/";
+      Img_URI   : constant String := "/img/";
+      Notif_URI : constant String := "/notif";
    begin
       Logs.Write
         (Content => "Calling => " & URI,
@@ -109,6 +113,9 @@ package body Savadur.Web.Server is
 
       elsif URI = Run_URI then
          return Run (Request);
+
+      elsif URI = Notif_URI then
+         return Notifications (Request);
 
       elsif URI = Ping_URI then
          return Ping;
@@ -226,6 +233,58 @@ package body Savadur.Web.Server is
                Extension            => "thtml"),
             Translations => Set));
    end List;
+
+   -------------------
+   -- Notifications --
+   -------------------
+
+   function Notifications (Request : in Status.Data) return Response.Data is
+      P            : constant AWS.Parameters.List :=
+                       Status.Parameters (Request);
+      Action       : constant String := Parameters.Get (P, "a");
+      Project_Name : constant String := Parameters.Get (P, "p");
+      Set          : Templates.Translate_Set;
+   begin
+      if Action = "add" then
+         Database.Add_Notification
+           (Project_Name,
+            Parameters.Get (P, "email"),
+            Parameters.Get (P, "xmpp"));
+
+      elsif Action = "del" then
+         declare
+            use Ada.Strings.Unbounded;
+            Ids : constant Parameters.VString_Array :=
+                    Parameters.Get_Values (P, "delid");
+            Sep : Natural;
+         begin
+            for K in Ids'Range loop
+               Sep := Index (Ids (K), "/");
+
+               if Sep /= 0 then
+                  Database.Del_Notification
+                    (Project_Name,
+                     Slice (Ids (K), 1, Sep - 1),
+                     Slice (Ids (K), Sep + 1, Length (Ids (K))));
+               end if;
+            end loop;
+         end;
+      end if;
+
+      Set := Database.Get_Notifications (Project_Name);
+
+      Templates.Insert (Set, Templates.Assoc ("PROJECT_NAME", Project_Name));
+
+      return AWS.Response.Build
+        (Content_Type => MIME.Text_HTML,
+         Message_Body => AWS.Templates.Parse
+           (Filename     => Directories.Compose
+              (Containing_Directory =>
+                 Savadur.Config.Web_Templates_Directory,
+               Name                 => "notifications",
+               Extension            => "thtml"),
+            Translations => Set));
+   end Notifications;
 
    ----------
    -- Ping --

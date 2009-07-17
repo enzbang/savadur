@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                                Savadur                                   --
 --                                                                          --
---                         Copyright (C) 2007-2008                          --
+--                         Copyright (C) 2007-2009                          --
 --                      Pascal Obry - Olivier Ramonat                       --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -59,6 +59,25 @@ package body Savadur.Database is
    procedure Connect (DBH : in TLS_DBH_Access);
    --  Connects to the database if needed
 
+   ----------------------
+   -- Add_Notification --
+   ----------------------
+
+   procedure Add_Notification
+     (Project_Name : in String;
+      E_Mail, XMPP : in String)
+   is
+      DBH : constant TLS_DBH_Access := TLS_DBH_Access (DBH_TLS.Reference);
+   begin
+      Connect (DBH);
+
+      DBH.Handle.Execute
+        ("insert into notify values ("
+         & DB.Tools.Q (Project_Name)
+         & ", " & DB.Tools.Q (E_Mail)
+         & ", " & DB.Tools.Q (XMPP) & ")");
+   end Add_Notification;
+
    -------------
    -- Connect --
    -------------
@@ -90,6 +109,25 @@ package body Savadur.Database is
             DBH_TLS.Set_Value (DBH.all);
       end if;
    end Connect;
+
+   ----------------------
+   -- Del_Notification --
+   ----------------------
+
+   procedure Del_Notification
+     (Project_Name : in String;
+      E_Mail, XMPP : in String)
+   is
+      DBH : constant TLS_DBH_Access := TLS_DBH_Access (DBH_TLS.Reference);
+   begin
+      Connect (DBH);
+
+      DBH.Handle.Execute
+        ("delete from notify where"
+         & " project=" & DB.Tools.Q (Project_Name)
+         & " and email=" & DB.Tools.Q (E_Mail)
+         & " and xmpp=" & DB.Tools.Q (XMPP));
+   end Del_Notification;
 
    ------------------
    -- Final_Status --
@@ -489,6 +527,46 @@ package body Savadur.Database is
 
       return Set;
    end Get_Logs;
+
+   -----------------------
+   -- Get_Notifications --
+   -----------------------
+
+   function Get_Notifications
+     (Project_Name : in String) return Templates.Translate_Set
+   is
+      use type Templates.Tag;
+
+      DBH  : constant TLS_DBH_Access := TLS_DBH_Access (DBH_TLS.Reference);
+      Iter : DB.SQLite.Iterator;
+      Line : DB.String_Vectors.Vector;
+
+      Set    : Templates.Translate_Set;
+      E_Mail : Templates.Tag;
+      Jabber : Templates.Tag;
+   begin
+      Connect (DBH);
+
+      DBH.Handle.Prepare_Select
+        (Iter,
+         "select email, xmpp from notify where project="
+         & DB.Tools.Q (Project_Name));
+
+      while Iter.More loop
+         Iter.Get_Line (Line);
+
+         E_Mail := E_Mail & DB.String_Vectors.Element (Line, 1);
+         Jabber := Jabber & DB.String_Vectors.Element (Line, 2);
+         Line.Clear;
+      end loop;
+
+      Iter.End_Select;
+
+      Templates.Insert (Set, Templates.Assoc ("E_MAIL", E_Mail));
+      Templates.Insert (Set, Templates.Assoc ("JABBER", Jabber));
+
+      return Set;
+   end Get_Notifications;
 
    --------------
    --  Job_Id  --
