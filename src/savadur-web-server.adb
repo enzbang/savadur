@@ -444,7 +444,6 @@ package body Savadur.Web.Server is
                Latency  => Duration'Value (Latency));
          end if;
 
-
          Templates.Insert
            (Set, Templates.Assoc ("PROJECT_NAME", Project_Name));
          Templates.Insert

@@ -48,8 +48,13 @@ package body Savadur.Project_List is
         and then Left.Log_Size = Right.Log_Size;
    end "=";
 
+   --------------------------
+   -- Force_Validity_Check --
+   --------------------------
+
    function Force_Validity_Check
-     (Project_List : in Projects.Map) return Boolean is
+     (Project_List : in Projects.Map) return Boolean
+   is
 
       Is_Valid : Boolean := True;
 
@@ -62,9 +67,9 @@ package body Savadur.Project_List is
       -------------------
 
       procedure Check_Project (Position : in Projects.Cursor) is
-         Name   : constant String := Projects.Key (Position);
-         Config : constant Savadur.Projects.Project_Config
-           := Savadur.Config.Project.Get (Name);
+         Name              : constant String := Projects.Key (Position);
+         Config            : constant Savadur.Projects.Project_Config :=
+                               Savadur.Config.Project.Get (Name);
          Project_Scenarios : constant Scenarios.Map :=
                                Projects.Element (Position).S_Map;
          Scenario_Position : Scenarios.Cursor := Project_Scenarios.First;
@@ -79,7 +84,8 @@ package body Savadur.Project_List is
             begin
                if not Savadur.Scenarios.Keys.Contains
                  (Container => Config.Scenarios,
-                  Key       => Scenario_Id) then
+                  Key       => Scenario_Id)
+               then
                   Is_Valid := False;
                   Text_IO.Put_Line ("Error: unknown scenario "
                                     & Current_Scenario & " in project "
@@ -250,19 +256,16 @@ package body Savadur.Project_List is
                                    Projects.Element (Position).S_Map;
             Scenarios_Position : Scenarios.Cursor := M_Scerarios.First;
          begin
-
             --  For all projects scenarios
 
             For_All_Scenarios :
             while Scenarios.Has_Element (Scenarios_Position) loop
 
                Get_Projects_List : declare
-                  V_Clients          : constant Clients.Vector :=
-                                          Scenarios.Element
-                                              (Scenarios_Position);
-                  Clients_Position   : Clients.Cursor := V_Clients.First;
+                  V_Clients        : constant Clients.Vector :=
+                                       Scenarios.Element (Scenarios_Position);
+                  Clients_Position : Clients.Cursor := V_Clients.First;
                begin
-
                   --  For all clients registered for this scenario
 
                   For_All_Clients :
@@ -304,7 +307,7 @@ package body Savadur.Project_List is
       T_Next_Run  : AWS.Templates.Tag;
       T_Scenarios : AWS.Templates.Tag;
 
-      Position : Projects.Cursor := Project_List.First;
+      Position    : Projects.Cursor := Project_List.First;
 
    begin
 

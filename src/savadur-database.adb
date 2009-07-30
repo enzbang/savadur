@@ -379,9 +379,11 @@ package body Savadur.Database is
       while Iter.More loop
          Iter.Get_Line (Line);
 
+         --  We are parsing a new client
+
          if To_String (Last_Client) /= ""
-           and then To_String
-             (Last_Client) /= DB.String_Vectors.Element (Line, 1)
+           and then
+             To_String (Last_Client) /= DB.String_Vectors.Element (Line, 1)
          then
             Size := 0;
 
@@ -390,6 +392,7 @@ package body Savadur.Database is
             Scenario_Date_Client := Scenario_Date_Client & Last_Scenario_Date;
 
             --  Reset last Job_ID
+
             Last_Job_Id := 0;
 
             Status_Client     := Status_Client     & Status_Job_Id;
@@ -399,7 +402,8 @@ package body Savadur.Database is
             Action_Client     := Action_Client     & Action_Job_Id;
             Rowid_Client      := Rowid_Client      & Rowid_Job_Id;
 
-            --  Clear temp tag
+            --  Clear temp tags
+
             Templates.Clear (Status_Job_Id);
             Templates.Clear (Start_Date_Job_Id);
             Templates.Clear (Stop_Date_Job_Id);
@@ -408,6 +412,7 @@ package body Savadur.Database is
             Templates.Clear (Rowid_Job_Id);
 
             --  New client column
+
             Client        := Client        & Last_Client;
             Scenario      := Scenario      & Scenario_Client;
             Scenario_Date := Scenario_Date & Scenario_Date_Client;
@@ -419,7 +424,8 @@ package body Savadur.Database is
             Rowid         := Rowid         & Rowid_Client;
             Job_Id        := Job_Id        & Job_Id_Client;
 
-            --  Clear temp tag
+            --  Clear temp tags
+
             Templates.Clear (Scenario_Client);
             Templates.Clear (Scenario_Date_Client);
             Templates.Clear (Status_Client);

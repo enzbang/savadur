@@ -86,7 +86,7 @@ package body Savadur.Config.Project_List is
    ----------------------
 
    function Config_Signature return Signed_Files.Signature is
-      H : Signed_Files.Handler;
+      H          : Signed_Files.Handler;
       Config_Dir : constant String :=
         Directories.Compose
         (Containing_Directory => Config.Savadur_Directory,
@@ -185,7 +185,8 @@ package body Savadur.Config.Project_List is
       --  Check that the project list contains only valid scenarios
 
       if not Savadur.Project_List.Force_Validity_Check
-        (Internal_Configurations) then
+        (Internal_Configurations)
+      then
          raise Config_Error with "Project_List not valid !";
       end if;
 
@@ -227,7 +228,7 @@ package body Savadur.Config.Project_List is
          pragma Unreferenced (Key);
       begin
          Element.Append
-           (New_Item  => Savadur.Project_List.Client'(+Client, True));
+           (New_Item => Savadur.Project_List.Client'(+Client, True));
       end Update_Client;
 
       ---------------------
