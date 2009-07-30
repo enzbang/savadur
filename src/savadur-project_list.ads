@@ -70,10 +70,9 @@ package Savadur.Project_List is
      (Project_List : in Projects.Map) return AWS.Templates.Translate_Set;
    --  Returns a translate set
 
-   type Iterate_Action is access procedure (Client : in String);
-
    procedure Iterate_On_Clients
-     (Project_List : in Projects.Map; Action : in Iterate_Action);
+     (Project_List : in Projects.Map;
+      Action       : access procedure (Client : in String));
    --  Iterate the given action on all clients
 
    function Force_Validity_Check

@@ -172,7 +172,8 @@ package body Savadur.Project_List is
    ------------------------
 
    procedure Iterate_On_Clients
-     (Project_List : in Projects.Map; Action : in Iterate_Action)
+     (Project_List : in Projects.Map;
+      Action       : access procedure (Client : in String))
    is
       Position : Projects.Cursor := Project_List.First;
       Set      : Client_Set.Set;
