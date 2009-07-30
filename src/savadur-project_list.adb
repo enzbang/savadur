@@ -19,6 +19,8 @@
 --  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.       --
 ------------------------------------------------------------------------------
 
+with Ada.Containers.Indefinite_Hashed_Sets;
+with Ada.Strings.Hash;
 with Ada.Text_IO;
 
 with Savadur.Config.Project;
@@ -32,6 +34,9 @@ with Savadur.Utils;
 package body Savadur.Project_List is
 
    use Savadur.Utils;
+
+   package Client_Set is new Containers.Indefinite_Hashed_Sets
+     (String, Strings.Hash, "=");
 
    function Force_Validity_Check
      (Project_List : in Projects.Map) return Boolean is
@@ -170,6 +175,7 @@ package body Savadur.Project_List is
      (Project_List : in Projects.Map; Action : in Iterate_Action)
    is
       Position : Projects.Cursor := Project_List.First;
+      Set      : Client_Set.Set;
    begin
       For_All_Projects : while Projects.Has_Element (Position) loop
          Get_Scenarios_List : declare
@@ -194,8 +200,16 @@ package body Savadur.Project_List is
 
                   For_All_Clients :
                   while Clients.Has_Element (Clients_Position) loop
-                     Action.all (-Clients.Element (Clients_Position).Key);
-                     Clients.Next (Clients_Position);
+                     declare
+                        Client_Key : constant String :=
+                                       -Clients.Element (Clients_Position).Key;
+                     begin
+                        if not Set.Contains (Client_Key) then
+                           Action (Client_Key);
+                           Set.Insert (Client_Key);
+                        end if;
+                        Clients.Next (Clients_Position);
+                     end;
                   end loop For_All_Clients;
                end Get_Projects_List;
 

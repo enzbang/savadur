@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                                Savadur                                   --
 --                                                                          --
---                         Copyright (C) 2007-2008                          --
+--                         Copyright (C) 2007-2009                          --
 --                      Pascal Obry - Olivier Ramonat                       --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -258,12 +258,10 @@ package body Savadur.Clients is
 
    procedure Register (Key : in String) is
    begin
-      if not Has_Element (Find (Key)) then
-         Clients.Registered.Insert
-           (New_Item => Client'(+Key, Savadur.Web_Services.Client.No_Metadata,
-                                Clients.Offline, +"", +"",
-                                Running  => <>));
-      end if;
+      Clients.Registered.Insert
+        (New_Item => Client'(+Key, Savadur.Web_Services.Client.No_Metadata,
+         Clients.Offline, +"", +"",
+         Running  => <>));
    end Register;
 
    ----------------
