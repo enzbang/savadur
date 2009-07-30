@@ -46,7 +46,7 @@ package body Savadur.Config.Project_List is
 
    type Node_Value is (Project_List, Project, Scenario, Client);
 
-   type Attribute is (Id, Key);
+   type Attribute is (Id, Key, Log_Size);
 
    function Get_Node_Value (S : in String) return Node_Value;
    --  Returns the node value matching the given string or raise Config_Error
@@ -58,6 +58,8 @@ package body Savadur.Config.Project_List is
    type Tree_Reader is new Sax.Readers.Reader with record
       Project  : Unbounded_String;
       Scenario : Unbounded_String;
+      Client   : Unbounded_String;
+      Log_Size : Natural := 0;
    end record;
 
    overriding procedure Start_Element
@@ -70,7 +72,8 @@ package body Savadur.Config.Project_List is
    procedure Register_Client
      (Project  : in String;
       Scenario : in String;
-      Client   : in String);
+      Client   : in String;
+      Log_Size : in Natural);
    --  Registers a new client which handle the given project/scenario
 
    function Config_Signature return Signed_Files.Signature;
@@ -202,11 +205,12 @@ package body Savadur.Config.Project_List is
    procedure Register_Client
      (Project  : in String;
       Scenario : in String;
-      Client   : in String)
+      Client   : in String;
+      Log_Size : in Natural)
    is
       procedure Update_Scenario
         (Key     : in     String;
-         Element : in out Savadur.Project_List.Scenarios.Map);
+         Element : in out Savadur.Project_List.Project);
 
       procedure Update_Client
         (Key     : in     String;
@@ -232,24 +236,24 @@ package body Savadur.Config.Project_List is
 
       procedure Update_Scenario
         (Key     : in String;
-         Element : in out Savadur.Project_List.Scenarios.Map)
+         Element : in out Savadur.Project_List.Project)
       is
          pragma Unreferenced (Key);
          Position : Savadur.Project_List.Scenarios.Cursor :=
-                      Element.Find (Scenario);
+                      Element.S_Map.Find (Scenario);
       begin
          if not Savadur.Project_List.Scenarios.Has_Element (Position) then
             Add_To_Scenario : declare
                V : Savadur.Project_List.Clients.Vector;
                I : Boolean;
             begin
-               Element.Insert
+               Element.S_Map.Insert
                  (Scenario,
                   New_Item => V, Position => Position, Inserted => I);
             end Add_To_Scenario;
          end if;
 
-         Element.Update_Element (Position, Update_Client'Access);
+         Element.S_Map.Update_Element (Position, Update_Client'Access);
       end Update_Scenario;
 
       Position : Savadur.Project_List.Projects.Cursor :=
@@ -262,7 +266,10 @@ package body Savadur.Config.Project_List is
             I : Boolean;
          begin
             Internal_Configurations.Insert
-              (Project, New_Item => M, Position => Position, Inserted => I);
+              (Project,
+               New_Item => Savadur.Project_List.Project'(M, Log_Size),
+               Position => Position,
+               Inserted => I);
          end Add_To_Project;
       end if;
 
@@ -312,11 +319,15 @@ package body Savadur.Config.Project_List is
             Handler.Scenario := Null_Unbounded_String;
 
          when Project =>
+            Handler.Log_Size := Savadur.Project_List.Default_Log_Size;
+
             for J in 0 .. Get_Length (Atts) - 1 loop
                Attr := Get_Attribute (Get_Qname (Atts, J));
                case Attr is
                   when Id =>
                      Handler.Project := +Get_Value (Atts, J);
+                  when Log_Size =>
+                     Handler.Log_Size := Natural'Value (Get_Value (Atts, J));
                   when Key =>
                      raise Config_Error with "Unexpected Key attribute";
                end case;
@@ -328,7 +339,7 @@ package body Savadur.Config.Project_List is
                case Attr is
                   when Id =>
                      Handler.Scenario := +Get_Value (Atts, J);
-                  when Key =>
+                  when Key | Log_Size =>
                      raise Config_Error with "Unexpected Key attribute";
                end case;
             end loop;
@@ -338,14 +349,17 @@ package body Savadur.Config.Project_List is
                Attr := Get_Attribute (Get_Qname (Atts, J));
                case Attr is
                   when Key =>
-                     Register_Client
-                       (Project  => -Handler.Project,
-                        Scenario => -Handler.Scenario,
-                        Client   => Get_Value (Atts, J));
-                  when Id =>
+                     Handler.Client := +Get_Value (Atts, J);
+                  when Id | Log_Size =>
                      raise Config_Error with "Unexpected Id attribute";
                end case;
             end loop;
+
+            Register_Client
+              (Project  => -Handler.Project,
+               Scenario => -Handler.Scenario,
+               Client   => -Handler.Client,
+               Log_Size => Handler.Log_Size);
       end case;
    end Start_Element;
 

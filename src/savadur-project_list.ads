@@ -31,6 +31,8 @@ package Savadur.Project_List is
    use Ada;
    use Ada.Strings.Unbounded;
 
+   Default_Log_Size : constant := 100;
+
    --  Client set
 
    type Client is record
@@ -53,15 +55,25 @@ package Savadur.Project_List is
 
    --  For each projects
 
+   type Project is record
+      S_Map    : Scenarios.Map;
+      Log_Size : Natural;
+      --  Max log size to display, 0 means no limit
+   end record;
+
+   function "=" (Left, Right : in Project) return Boolean;
+
    package Projects is new Containers.Indefinite_Hashed_Maps
      (Key_Type        => String,
-      Element_Type    => Scenarios.Map,
+      Element_Type    => Project,
       Hash            => Strings.Hash_Case_Insensitive,
-      Equivalent_Keys => "=",
-      "="             => Scenarios."=");
+      Equivalent_Keys => "=");
 
    function Get_Clients (Project, Scenario : in String) return Clients.Vector;
    --  Returns the list of clients which can handle the give project/scenario
+
+   function Get_Log_Size (Project : in String) return Natural;
+   --  Returns the log size limit for the given project
 
    function Image (Project_List : in Projects.Map) return String;
    --  Returns the Project_List map image

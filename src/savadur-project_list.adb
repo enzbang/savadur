@@ -38,6 +38,16 @@ package body Savadur.Project_List is
    package Client_Set is new Containers.Indefinite_Hashed_Sets
      (String, Strings.Hash, "=");
 
+   ---------
+   -- "=" --
+   ---------
+
+   function "=" (Left, Right : in Project) return Boolean is
+   begin
+      return Scenarios."=" (Left.S_Map, Right.S_Map)
+        and then Left.Log_Size = Right.Log_Size;
+   end "=";
+
    function Force_Validity_Check
      (Project_List : in Projects.Map) return Boolean is
 
@@ -56,7 +66,7 @@ package body Savadur.Project_List is
          Config : constant Savadur.Projects.Project_Config
            := Savadur.Config.Project.Get (Name);
          Project_Scenarios : constant Scenarios.Map :=
-                               Projects.Element (Position);
+                               Projects.Element (Position).S_Map;
          Scenario_Position : Scenarios.Cursor := Project_Scenarios.First;
       begin
          For_All : while Scenarios.Has_Element (Scenario_Position) loop
@@ -100,7 +110,7 @@ package body Savadur.Project_List is
       if Projects.Has_Element (P_Position) then
          Get_Registered_Clients : declare
             Scenarios  : constant Project_List.Scenarios.Map :=
-                           Projects.Element (P_Position);
+                           Projects.Element (P_Position).S_Map;
             S_Position : constant Project_List.Scenarios.Cursor :=
                            Scenarios.Find (Scenario);
          begin
@@ -112,6 +122,21 @@ package body Savadur.Project_List is
 
       return Result;
    end Get_Clients;
+
+   ------------------
+   -- Get_Log_Size --
+   ------------------
+
+   function Get_Log_Size (Project : in String) return Natural is
+      P_Position : constant Projects.Cursor :=
+                     Config.Project_List.Configurations.Find (Project);
+   begin
+      if Projects.Has_Element (P_Position) then
+         return Projects.Element (P_Position).Log_Size;
+      else
+         return Default_Log_Size;
+      end if;
+   end Get_Log_Size;
 
    -----------
    -- Image --
@@ -145,7 +170,7 @@ package body Savadur.Project_List is
       begin
          Result := Result & "* " & Projects.Key (Position) & ASCII.LF;
 
-         Projects.Element (Position).Iterate (Image_Scenarios'Access);
+         Projects.Element (Position).S_Map.Iterate (Image_Scenarios'Access);
       end Image_Projects;
 
       ---------------------
@@ -181,7 +206,7 @@ package body Savadur.Project_List is
       For_All_Projects : while Projects.Has_Element (Position) loop
          Get_Scenarios_List : declare
             M_Scerarios        : constant Scenarios.Map :=
-                                   Projects.Element (Position);
+                                   Projects.Element (Position).S_Map;
             Scenarios_Position : Scenarios.Cursor := M_Scerarios.First;
          begin
 
@@ -245,7 +270,7 @@ package body Savadur.Project_List is
       For_All_Projects : while Projects.Has_Element (Position) loop
          Get_Scenarios_List : declare
             M_Scerarios                : constant Scenarios.Map :=
-                                            Projects.Element (Position);
+                                            Projects.Element (Position).S_Map;
             Scenarios_Position         : Scenarios.Cursor       :=
                                             M_Scerarios.First;
             T_Project_Scenarios        : Tag;
