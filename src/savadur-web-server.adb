@@ -444,7 +444,6 @@ package body Savadur.Web.Server is
                Latency  => Duration'Value (Latency));
          end if;
 
-
          Templates.Insert
            (Set, Templates.Assoc ("PROJECT_NAME", Project_Name));
          Templates.Insert
@@ -532,7 +531,9 @@ package body Savadur.Web.Server is
       Templates.Insert
         (Set, Templates.Assoc ("SCENARIOS", Scenarios));
 
-      Templates.Insert (Set, Savadur.Database.Get_Logs (Project_Name));
+      Templates.Insert
+        (Set, Savadur.Database.Get_Logs
+           (Project_Name, Project_List.Get_Log_Size (Project_Name)));
 
       return AWS.Response.Build
         (Content_Type => MIME.Text_HTML,

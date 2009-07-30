@@ -312,7 +312,8 @@ package body Savadur.Database is
    ----------------
 
    function Get_Logs
-     (Project_Name : in String) return Templates.Translate_Set
+     (Project_Name : in String;
+      Log_Size     : in Natural) return Templates.Translate_Set
    is
       use type Templates.Tag;
       DBH           : constant TLS_DBH_Access :=
@@ -359,6 +360,8 @@ package body Savadur.Database is
       Duration_Job_Id   : Templates.Tag;
       Action_Job_Id     : Templates.Tag;
 
+      Size              : Natural := 0;
+
    begin
       Connect (DBH);
 
@@ -376,16 +379,20 @@ package body Savadur.Database is
       while Iter.More loop
          Iter.Get_Line (Line);
 
+         --  We are parsing a new client
+
          if To_String (Last_Client) /= ""
-           and then To_String
-             (Last_Client) /= DB.String_Vectors.Element (Line, 1)
+           and then
+             To_String (Last_Client) /= DB.String_Vectors.Element (Line, 1)
          then
+            Size := 0;
 
             Job_Id_Client        := Job_Id_Client & Last_Job_Id;
             Scenario_Client      := Scenario_Client & Last_Scenario;
             Scenario_Date_Client := Scenario_Date_Client & Last_Scenario_Date;
 
             --  Reset last Job_ID
+
             Last_Job_Id := 0;
 
             Status_Client     := Status_Client     & Status_Job_Id;
@@ -395,7 +402,8 @@ package body Savadur.Database is
             Action_Client     := Action_Client     & Action_Job_Id;
             Rowid_Client      := Rowid_Client      & Rowid_Job_Id;
 
-            --  Clear temp tag
+            --  Clear temp tags
+
             Templates.Clear (Status_Job_Id);
             Templates.Clear (Start_Date_Job_Id);
             Templates.Clear (Stop_Date_Job_Id);
@@ -404,6 +412,7 @@ package body Savadur.Database is
             Templates.Clear (Rowid_Job_Id);
 
             --  New client column
+
             Client        := Client        & Last_Client;
             Scenario      := Scenario      & Scenario_Client;
             Scenario_Date := Scenario_Date & Scenario_Date_Client;
@@ -415,7 +424,8 @@ package body Savadur.Database is
             Rowid         := Rowid         & Rowid_Client;
             Job_Id        := Job_Id        & Job_Id_Client;
 
-            --  Clear temp tag
+            --  Clear temp tags
+
             Templates.Clear (Scenario_Client);
             Templates.Clear (Scenario_Date_Client);
             Templates.Clear (Status_Client);
@@ -427,66 +437,77 @@ package body Savadur.Database is
             Templates.Clear (Job_Id_Client);
          end if;
 
+            --  We are parsing a new job
+
          if Last_Job_Id /= 0
            and then Last_Job_Id /=
              Natural'Value (DB.String_Vectors.Element (Line, 8))
          then
-            Job_Id_Client        := Job_Id_Client        & Last_Job_Id;
-            Scenario_Client      := Scenario_Client      & Last_Scenario;
-            Scenario_Date_Client := Scenario_Date_Client & Last_Scenario_Date;
+            Size := Size + 1;
 
-            --  Reset last Job_ID
-            Last_Job_Id := 0;
+            if Size < Log_Size then
+               Job_Id_Client        := Job_Id_Client        & Last_Job_Id;
+               Scenario_Client      := Scenario_Client      & Last_Scenario;
+               Scenario_Date_Client :=
+                 Scenario_Date_Client & Last_Scenario_Date;
 
-            Status_Client     := Status_Client     & Status_Job_Id;
-            Start_Date_Client := Start_Date_Client & Start_Date_Job_Id;
-            Stop_Date_Client  := Stop_Date_Client  & Stop_Date_Job_Id;
-            Duration_Client   := Duration_Client   & Duration_Job_Id;
-            Action_Client     := Action_Client     & Action_Job_Id;
-            Rowid_Client      := Rowid_Client      & Rowid_Job_Id;
+               --  Reset last Job_ID
 
-            --  Clear temp tag
-            Templates.Clear (Status_Job_Id);
-            Templates.Clear (Start_Date_Job_Id);
-            Templates.Clear (Stop_Date_Job_Id);
-            Templates.Clear (Duration_Job_Id);
-            Templates.Clear (Action_Job_Id);
-            Templates.Clear (Rowid_Job_Id);
+               Last_Job_Id := 0;
+
+               Status_Client     := Status_Client     & Status_Job_Id;
+               Start_Date_Client := Start_Date_Client & Start_Date_Job_Id;
+               Stop_Date_Client  := Stop_Date_Client  & Stop_Date_Job_Id;
+               Duration_Client   := Duration_Client   & Duration_Job_Id;
+               Action_Client     := Action_Client     & Action_Job_Id;
+               Rowid_Client      := Rowid_Client      & Rowid_Job_Id;
+
+               --  Clear temp tags
+
+               Templates.Clear (Status_Job_Id);
+               Templates.Clear (Start_Date_Job_Id);
+               Templates.Clear (Stop_Date_Job_Id);
+               Templates.Clear (Duration_Job_Id);
+               Templates.Clear (Action_Job_Id);
+               Templates.Clear (Rowid_Job_Id);
+            end if;
          end if;
 
-         Status_Job_Id     := Status_Job_Id
-           & DB.String_Vectors.Element (Line, 3);
-         Start_Date_Job_Id := Start_Date_Job_Id
-           & DB.String_Vectors.Element (Line, 4);
-         Stop_Date_Job_Id  := Stop_Date_Job_Id
-           & DB.String_Vectors.Element (Line, 5);
+         if Size < Log_Size then
+            Status_Job_Id     := Status_Job_Id
+              & DB.String_Vectors.Element (Line, 3);
+            Start_Date_Job_Id := Start_Date_Job_Id
+              & DB.String_Vectors.Element (Line, 4);
+            Stop_Date_Job_Id  := Stop_Date_Job_Id
+              & DB.String_Vectors.Element (Line, 5);
 
-         Set_Duration : declare
-            Get_Duration : Float
-              := Float'Value (DB.String_Vectors.Element (Line, 6));
-            Duration : Natural := 0;
-         begin
-            if Get_Duration > 0.0 then
-               Duration := Natural (Float'Rounding (Get_Duration));
-            end if;
-            Duration_Job_Id := Duration_Job_Id
-              & Natural'Image (Duration);
-         end Set_Duration;
+            Set_Duration : declare
+               Get_Duration : constant String :=
+                                DB.String_Vectors.Element (Line, 6);
+               Duration     : Natural := 0;
+            begin
+               if Get_Duration /= "" then
+                  Duration := Natural
+                    (Float'Rounding (Float'Value (Get_Duration)));
+               end if;
 
-         Action_Job_Id     := Action_Job_Id
-           & DB.String_Vectors.Element (Line, 7);
-         Rowid_Job_Id      := Rowid_Job_Id
-           & DB.String_Vectors.Element (Line, 9);
+               Duration_Job_Id := Duration_Job_Id & Natural'Image (Duration);
+            end Set_Duration;
 
-         Last_Client        := To_Unbounded_String
-           (DB.String_Vectors.Element (Line, 1));
-         Last_Scenario      := To_Unbounded_String
-           (DB.String_Vectors.Element (Line, 2));
-         Last_Scenario_Date := To_Unbounded_String
-           (DB.String_Vectors.Element (Line, 4));
+            Action_Job_Id     := Action_Job_Id
+              & DB.String_Vectors.Element (Line, 7);
+            Rowid_Job_Id      := Rowid_Job_Id
+              & DB.String_Vectors.Element (Line, 9);
 
-         Last_Job_Id        := Natural'Value
-           (DB.String_Vectors.Element (Line, 8));
+            Last_Client        := To_Unbounded_String
+              (DB.String_Vectors.Element (Line, 1));
+            Last_Scenario      := To_Unbounded_String
+              (DB.String_Vectors.Element (Line, 2));
+            Last_Scenario_Date := To_Unbounded_String
+              (DB.String_Vectors.Element (Line, 4));
+            Last_Job_Id        := Natural'Value
+              (DB.String_Vectors.Element (Line, 8));
+         end if;
 
          Line.Clear;
       end loop;

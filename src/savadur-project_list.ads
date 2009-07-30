@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                                Savadur                                   --
 --                                                                          --
---                         Copyright (C) 2007-2008                          --
+--                         Copyright (C) 2007-2009                          --
 --                      Pascal Obry - Olivier Ramonat                       --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -31,12 +31,16 @@ package Savadur.Project_List is
    use Ada;
    use Ada.Strings.Unbounded;
 
+   Default_Log_Size : constant := 100;
+
    --  Client set
 
    type Client is record
       Key       : Unbounded_String;
       Activated : Boolean := True;
    end record;
+
+   No_Data : constant Client;
 
    package Clients is new Containers.Indefinite_Vectors
      (Index_Type      => Positive,
@@ -53,15 +57,29 @@ package Savadur.Project_List is
 
    --  For each projects
 
+   type Project is record
+      S_Map    : Scenarios.Map;
+      Log_Size : Natural;
+      --  Max log size to display, 0 means no limit
+   end record;
+
+   function "=" (Left, Right : in Project) return Boolean;
+
    package Projects is new Containers.Indefinite_Hashed_Maps
      (Key_Type        => String,
-      Element_Type    => Scenarios.Map,
+      Element_Type    => Project,
       Hash            => Strings.Hash_Case_Insensitive,
-      Equivalent_Keys => "=",
-      "="             => Scenarios."=");
+      Equivalent_Keys => "=");
 
    function Get_Clients (Project, Scenario : in String) return Clients.Vector;
    --  Returns the list of clients which can handle the give project/scenario
+
+   function Get_Client (Project, Client_Name : in String) return Client;
+   --  Returns the client's data for the given project/scenario/client, returns
+   --  No_Data if record not found.
+
+   function Get_Log_Size (Project : in String) return Natural;
+   --  Returns the log size limit for the given project
 
    function Image (Project_List : in Projects.Map) return String;
    --  Returns the Project_List map image
@@ -70,15 +88,18 @@ package Savadur.Project_List is
      (Project_List : in Projects.Map) return AWS.Templates.Translate_Set;
    --  Returns a translate set
 
-   type Iterate_Action is access procedure (Client : in String);
-
    procedure Iterate_On_Clients
-     (Project_List : in Projects.Map; Action : in Iterate_Action);
+     (Project_List : in Projects.Map;
+      Action       : access procedure (Client : in String));
    --  Iterate the given action on all clients
 
    function Force_Validity_Check
      (Project_List : in Projects.Map) return Boolean;
    --  Check that all scenarios, projects defined in project list are defined
    --  Returns False if a scenario is undefined.
+
+private
+
+   No_Data : constant Client := (Null_Unbounded_String, False);
 
 end Savadur.Project_List;

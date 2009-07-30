@@ -37,7 +37,7 @@ VERSION_ALL = $(shell git describe 2>/dev/null)
 all: build
 
 build: setup
-	$(GNATMAKE) -XPRJ_BUILD=$(MODE) -P savadur-main
+	$(GNATMAKE) -XPRJ_BUILD=$(MODE) -P savadur-main -bargs -E
 
 setup:
 #  If git is not present then use the version.ads provided in distrib

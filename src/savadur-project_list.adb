@@ -19,6 +19,8 @@
 --  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.       --
 ------------------------------------------------------------------------------
 
+with Ada.Containers.Indefinite_Hashed_Sets;
+with Ada.Strings.Hash;
 with Ada.Text_IO;
 
 with Savadur.Config.Project;
@@ -33,8 +35,26 @@ package body Savadur.Project_List is
 
    use Savadur.Utils;
 
+   package Client_Set is new Containers.Indefinite_Hashed_Sets
+     (String, Strings.Hash, "=");
+
+   ---------
+   -- "=" --
+   ---------
+
+   function "=" (Left, Right : in Project) return Boolean is
+   begin
+      return Scenarios."=" (Left.S_Map, Right.S_Map)
+        and then Left.Log_Size = Right.Log_Size;
+   end "=";
+
+   --------------------------
+   -- Force_Validity_Check --
+   --------------------------
+
    function Force_Validity_Check
-     (Project_List : in Projects.Map) return Boolean is
+     (Project_List : in Projects.Map) return Boolean
+   is
 
       Is_Valid : Boolean := True;
 
@@ -47,11 +67,11 @@ package body Savadur.Project_List is
       -------------------
 
       procedure Check_Project (Position : in Projects.Cursor) is
-         Name   : constant String := Projects.Key (Position);
-         Config : constant Savadur.Projects.Project_Config
-           := Savadur.Config.Project.Get (Name);
+         Name              : constant String := Projects.Key (Position);
+         Config            : constant Savadur.Projects.Project_Config :=
+                               Savadur.Config.Project.Get (Name);
          Project_Scenarios : constant Scenarios.Map :=
-                               Projects.Element (Position);
+                               Projects.Element (Position).S_Map;
          Scenario_Position : Scenarios.Cursor := Project_Scenarios.First;
       begin
          For_All : while Scenarios.Has_Element (Scenario_Position) loop
@@ -64,7 +84,8 @@ package body Savadur.Project_List is
             begin
                if not Savadur.Scenarios.Keys.Contains
                  (Container => Config.Scenarios,
-                  Key       => Scenario_Id) then
+                  Key       => Scenario_Id)
+               then
                   Is_Valid := False;
                   Text_IO.Put_Line ("Error: unknown scenario "
                                     & Current_Scenario & " in project "
@@ -81,6 +102,47 @@ package body Savadur.Project_List is
       return Is_Valid;
    end Force_Validity_Check;
 
+   ----------------
+   -- Get_Client --
+   ----------------
+
+   function Get_Client
+     (Project, Client_Name : in String) return Client
+   is
+      P_Position : constant Projects.Cursor :=
+                     Config.Project_List.Configurations.Find (Project);
+   begin
+      if Projects.Has_Element (P_Position) then
+         Get_Registered_Clients : declare
+            Scenarios  : constant Project_List.Scenarios.Map :=
+                           Projects.Element (P_Position).S_Map;
+            S_Position : constant Project_List.Scenarios.Cursor :=
+                           Scenarios.First;
+         begin
+            if Project_List.Scenarios.Has_Element (S_Position) then
+               declare
+                  Client_List : constant Clients.Vector :=
+                                  Project_List.Scenarios.Element (S_Position);
+                  C_Position  : Clients.Cursor := Clients.First (Client_List);
+                  C           : Client;
+               begin
+                  while Clients.Has_Element (C_Position) loop
+                     C := Clients.Element (C_Position);
+
+                     if -C.Key = Client_Name then
+                        return C;
+                     end if;
+
+                     Clients.Next (C_Position);
+                  end loop;
+               end;
+            end if;
+         end Get_Registered_Clients;
+      end if;
+
+      return No_Data;
+   end Get_Client;
+
    -----------------
    -- Get_Clients --
    -----------------
@@ -95,7 +157,7 @@ package body Savadur.Project_List is
       if Projects.Has_Element (P_Position) then
          Get_Registered_Clients : declare
             Scenarios  : constant Project_List.Scenarios.Map :=
-                           Projects.Element (P_Position);
+                           Projects.Element (P_Position).S_Map;
             S_Position : constant Project_List.Scenarios.Cursor :=
                            Scenarios.Find (Scenario);
          begin
@@ -107,6 +169,21 @@ package body Savadur.Project_List is
 
       return Result;
    end Get_Clients;
+
+   ------------------
+   -- Get_Log_Size --
+   ------------------
+
+   function Get_Log_Size (Project : in String) return Natural is
+      P_Position : constant Projects.Cursor :=
+                     Config.Project_List.Configurations.Find (Project);
+   begin
+      if Projects.Has_Element (P_Position) then
+         return Projects.Element (P_Position).Log_Size;
+      else
+         return Default_Log_Size;
+      end if;
+   end Get_Log_Size;
 
    -----------
    -- Image --
@@ -140,7 +217,7 @@ package body Savadur.Project_List is
       begin
          Result := Result & "* " & Projects.Key (Position) & ASCII.LF;
 
-         Projects.Element (Position).Iterate (Image_Scenarios'Access);
+         Projects.Element (Position).S_Map.Iterate (Image_Scenarios'Access);
       end Image_Projects;
 
       ---------------------
@@ -167,35 +244,42 @@ package body Savadur.Project_List is
    ------------------------
 
    procedure Iterate_On_Clients
-     (Project_List : in Projects.Map; Action : in Iterate_Action)
+     (Project_List : in Projects.Map;
+      Action       : access procedure (Client : in String))
    is
       Position : Projects.Cursor := Project_List.First;
+      Set      : Client_Set.Set;
    begin
       For_All_Projects : while Projects.Has_Element (Position) loop
          Get_Scenarios_List : declare
             M_Scerarios        : constant Scenarios.Map :=
-                                   Projects.Element (Position);
+                                   Projects.Element (Position).S_Map;
             Scenarios_Position : Scenarios.Cursor := M_Scerarios.First;
          begin
-
             --  For all projects scenarios
 
             For_All_Scenarios :
             while Scenarios.Has_Element (Scenarios_Position) loop
 
                Get_Projects_List : declare
-                  V_Clients          : constant Clients.Vector :=
-                                          Scenarios.Element
-                                              (Scenarios_Position);
-                  Clients_Position   : Clients.Cursor := V_Clients.First;
+                  V_Clients        : constant Clients.Vector :=
+                                       Scenarios.Element (Scenarios_Position);
+                  Clients_Position : Clients.Cursor := V_Clients.First;
                begin
-
                   --  For all clients registered for this scenario
 
                   For_All_Clients :
                   while Clients.Has_Element (Clients_Position) loop
-                     Action.all (-Clients.Element (Clients_Position).Key);
-                     Clients.Next (Clients_Position);
+                     declare
+                        Client_Key : constant String :=
+                                       -Clients.Element (Clients_Position).Key;
+                     begin
+                        if not Set.Contains (Client_Key) then
+                           Action (Client_Key);
+                           Set.Insert (Client_Key);
+                        end if;
+                        Clients.Next (Clients_Position);
+                     end;
                   end loop For_All_Clients;
                end Get_Projects_List;
 
@@ -223,14 +307,14 @@ package body Savadur.Project_List is
       T_Next_Run  : AWS.Templates.Tag;
       T_Scenarios : AWS.Templates.Tag;
 
-      Position : Projects.Cursor := Project_List.First;
+      Position    : Projects.Cursor := Project_List.First;
 
    begin
 
       For_All_Projects : while Projects.Has_Element (Position) loop
          Get_Scenarios_List : declare
             M_Scerarios                : constant Scenarios.Map :=
-                                            Projects.Element (Position);
+                                            Projects.Element (Position).S_Map;
             Scenarios_Position         : Scenarios.Cursor       :=
                                             M_Scerarios.First;
             T_Project_Scenarios        : Tag;

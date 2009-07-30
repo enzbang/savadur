@@ -47,7 +47,8 @@ package Savadur.Database is
    --  Logs that action is started
 
    function Get_Logs
-     (Project_Name : in String) return Templates.Translate_Set;
+     (Project_Name : in String;
+      Log_Size     : in Natural) return Templates.Translate_Set;
    --  Get logs
 
    function Get_Log_Content (Id : in Positive) return Templates.Translate_Set;

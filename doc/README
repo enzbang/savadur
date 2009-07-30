@@ -60,7 +60,7 @@ Where config contains a file named project_list.xml
    $ cat config/project_list.xml
 
    <project_list>
-      <project id="savadur">
+      <project id="savadur" log_size="10">
          <scenario id="default">
             <client key="enzbang"/>
             <client key="turbo"/>
@@ -71,6 +71,8 @@ Where config contains a file named project_list.xml
    The project list must have an entry for every scenario. It associate one
    or many nodes for each scenario. Here the "default" scenatio will run on
    "enzbang" and "turbo" machines.
+
+   Only the 10 last actions will be shown. The default is 100.
 
 savadurdir/server/htdocs
 	contains some css and templates for webpages
