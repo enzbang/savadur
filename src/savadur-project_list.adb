@@ -96,6 +96,47 @@ package body Savadur.Project_List is
       return Is_Valid;
    end Force_Validity_Check;
 
+   ----------------
+   -- Get_Client --
+   ----------------
+
+   function Get_Client
+     (Project, Client_Name : in String) return Client
+   is
+      P_Position : constant Projects.Cursor :=
+                     Config.Project_List.Configurations.Find (Project);
+   begin
+      if Projects.Has_Element (P_Position) then
+         Get_Registered_Clients : declare
+            Scenarios  : constant Project_List.Scenarios.Map :=
+                           Projects.Element (P_Position).S_Map;
+            S_Position : constant Project_List.Scenarios.Cursor :=
+                           Scenarios.First;
+         begin
+            if Project_List.Scenarios.Has_Element (S_Position) then
+               declare
+                  Client_List : constant Clients.Vector :=
+                                  Project_List.Scenarios.Element (S_Position);
+                  C_Position  : Clients.Cursor := Clients.First (Client_List);
+                  C           : Client;
+               begin
+                  while Clients.Has_Element (C_Position) loop
+                     C := Clients.Element (C_Position);
+
+                     if -C.Key = Client_Name then
+                        return C;
+                     end if;
+
+                     Clients.Next (C_Position);
+                  end loop;
+               end;
+            end if;
+         end Get_Registered_Clients;
+      end if;
+
+      return No_Data;
+   end Get_Client;
+
    -----------------
    -- Get_Clients --
    -----------------

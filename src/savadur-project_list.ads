@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                                Savadur                                   --
 --                                                                          --
---                         Copyright (C) 2007-2008                          --
+--                         Copyright (C) 2007-2009                          --
 --                      Pascal Obry - Olivier Ramonat                       --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -40,6 +40,8 @@ package Savadur.Project_List is
       Activated : Boolean := True;
    end record;
 
+   No_Data : constant Client;
+
    package Clients is new Containers.Indefinite_Vectors
      (Index_Type      => Positive,
       Element_Type    => Client);
@@ -72,6 +74,10 @@ package Savadur.Project_List is
    function Get_Clients (Project, Scenario : in String) return Clients.Vector;
    --  Returns the list of clients which can handle the give project/scenario
 
+   function Get_Client (Project, Client_Name : in String) return Client;
+   --  Returns the client's data for the given project/scenario/client, returns
+   --  No_Data if record not found.
+
    function Get_Log_Size (Project : in String) return Natural;
    --  Returns the log size limit for the given project
 
@@ -91,5 +97,9 @@ package Savadur.Project_List is
      (Project_List : in Projects.Map) return Boolean;
    --  Check that all scenarios, projects defined in project list are defined
    --  Returns False if a scenario is undefined.
+
+private
+
+   No_Data : constant Client := (Null_Unbounded_String, False);
 
 end Savadur.Project_List;
