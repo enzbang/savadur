@@ -393,6 +393,7 @@ package body Savadur.Web_Services.Client is
                      Content        => "End with "
                      & Scenarios.Run_Status'Image (Report.Result)
                      & " when running scenario " & (-Report.Scenario)
+                     & " on " & (-Report.Key)
                      & ASCII.LF
                      & "Job id " & Natural'Image (Report.Job_Id)
                      & ASCII.LF);
@@ -432,7 +433,8 @@ package body Savadur.Web_Services.Client is
                         & To_String (Report.Diff_Data.V1)
                         & " to " & To_String (Report.Diff_Data.V2) & ASCII.LF
                         & "when running scenario "
-                        & To_String (Report.Scenario) & ASCII.LF
+                        & To_String (Report.Scenario)
+                        & " on " & (-Report.Key) & ASCII.LF
                         & "Job id " & Natural'Image (Report.Job_Id)
                         & ASCII.LF);
                   end loop Send_Mails;
