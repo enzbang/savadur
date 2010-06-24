@@ -64,7 +64,7 @@ package body Savadur.Config.Client is
 
    Configuration : Config := Empty;
 
-   type Node_Value is (Client, Connection_Retry_Delay,
+   type Node_Value is (Server, Client, Connection_Retry_Delay,
                        Description,  Endpoint, Metadata,
                        Name, OS, Ping_Delay);
 
@@ -88,6 +88,23 @@ package body Savadur.Config.Client is
 
    procedure Parse;
    --  Parses client configuration file
+
+   function Config_Filename return String;
+   --  Returns the base name (without extension) of the XML configuration file
+   --  (either client or server).
+
+   ---------------------
+   -- Config_Filename --
+   ---------------------
+
+   function Config_Filename return String is
+   begin
+      if Savadur.Config.Is_Server then
+         return "server";
+      else
+         return "client";
+      end if;
+   end Config_Filename;
 
    -------------------
    -- Get_Attribute --
@@ -210,7 +227,7 @@ package body Savadur.Config.Client is
    procedure Parse is
       Filename : constant String := Directories.Compose
         (Containing_Directory => Savadur.Config.Savadur_Directory,
-         Name                 => "client",
+         Name                 => Config_Filename,
          Extension            => "xml");
       Reader   : Tree_Reader;
       Source   : Input_Sources.File.File_Input;
@@ -228,7 +245,7 @@ package body Savadur.Config.Client is
 
       if not Directories.Exists (Filename) then
          if Savadur.Config.Client_Server or else Savadur.Config.Is_Server then
-            raise Config_Error with "No client.xml file !";
+            raise Config_Error with "Cannot open " & Filename;
          else
             Configuration.Key := +"default";
          end if;
@@ -264,28 +281,43 @@ package body Savadur.Config.Client is
 
    begin
       case NV is
-         when Client | Metadata =>
+         when Server =>
+            if not Savadur.Config.Is_Server then
+               raise Config_Error with "Unexpected Server for client.";
+            end if;
+
+         when Client =>
+            if Savadur.Config.Is_Server then
+               raise Config_Error with "Unexpected Client for server.";
+            end if;
+
+         when Metadata =>
             null;
 
          when Connection_Retry_Delay =>
-            Connection_Retry_Delay_In_Seconds : begin
-               for J in 0 .. Get_Length (Atts) - 1 loop
-                  Attr := Get_Attribute (Get_Qname (Atts, J));
-                  if Attr = Seconds then
-                     Configuration.Connection_Retry_Delay :=
-                       Duration'Value (Get_Value (Atts, J));
+            if Savadur.Config.Is_Server then
+               raise Config_Error with "Unexpected Retry_Delay for server.";
 
-                  else
-                     raise Config_Error with "Wrong node attr "
+            else
+               Connection_Retry_Delay_In_Seconds : begin
+                  for J in 0 .. Get_Length (Atts) - 1 loop
+                     Attr := Get_Attribute (Get_Qname (Atts, J));
+                     if Attr = Seconds then
+                        Configuration.Connection_Retry_Delay :=
+                          Duration'Value (Get_Value (Atts, J));
+
+                     else
+                        raise Config_Error with "Wrong node attr "
+                          & Attribute'Image (Attr);
+                     end if;
+                  end loop;
+
+               exception
+                  when Constraint_Error =>
+                     raise Config_Error with "Wrong node value for attr "
                        & Attribute'Image (Attr);
-                  end if;
-               end loop;
-
-            exception
-               when Constraint_Error =>
-                  raise Config_Error with "Wrong node value for attr "
-                    & Attribute'Image (Attr);
-            end Connection_Retry_Delay_In_Seconds;
+               end Connection_Retry_Delay_In_Seconds;
+            end if;
 
          when Description =>
             for J in 0 .. Get_Length (Atts) - 1 loop
@@ -343,24 +375,29 @@ package body Savadur.Config.Client is
             end loop;
 
          when Ping_Delay =>
-            Ping_Delay_In_Seconds : begin
-               for J in 0 .. Get_Length (Atts) - 1 loop
-                  Attr := Get_Attribute (Get_Qname (Atts, J));
-                  if Attr = Seconds then
-                     Configuration.Ping_Delay :=
-                       Duration'Value (Get_Value (Atts, J));
+            if Savadur.Config.Is_Server then
+               raise Config_Error with "Unexpected Ping_Delay for server.";
 
-                  else
-                     raise Config_Error with "Wrong node attr "
+            else
+               Ping_Delay_In_Seconds : begin
+                  for J in 0 .. Get_Length (Atts) - 1 loop
+                     Attr := Get_Attribute (Get_Qname (Atts, J));
+                     if Attr = Seconds then
+                        Configuration.Ping_Delay :=
+                          Duration'Value (Get_Value (Atts, J));
+
+                     else
+                        raise Config_Error with "Wrong node attr "
+                          & Attribute'Image (Attr);
+                     end if;
+                  end loop;
+
+               exception
+                  when Constraint_Error =>
+                     raise Config_Error with "Wrong node value for attr "
                        & Attribute'Image (Attr);
-                  end if;
-               end loop;
-
-            exception
-               when Constraint_Error =>
-                  raise Config_Error with "Wrong node value for attr "
-                    & Attribute'Image (Attr);
-            end Ping_Delay_In_Seconds;
+               end Ping_Delay_In_Seconds;
+            end if;
       end case;
    end Start_Element;
 
@@ -371,12 +408,12 @@ package body Savadur.Config.Client is
    procedure Write (Key, Endpoint : in String) is
       Filename  : constant String := Directories.Compose
         (Containing_Directory => Savadur.Config.Savadur_Directory,
-         Name                 => "client",
+         Name                 => Config_Filename,
          Extension            => "xml");
       Template  : constant String := Directories.Compose
         (Containing_Directory =>
            Savadur.Config.Config_Templates_Directory,
-         Name                 => "client",
+         Name                 => Config_Filename,
          Extension            => "txml");
       File      : Text_IO.File_Type;
       Set       : Templates.Translate_Set;
