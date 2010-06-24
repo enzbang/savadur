@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                                Savadur                                   --
 --                                                                          --
---                         Copyright (C) 2008-2009                          --
+--                         Copyright (C) 2008-2010                          --
 --                      Pascal Obry - Olivier Ramonat                       --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -493,6 +493,10 @@ begin
       procedure Mode_Usage;
       --  Display mode usage
 
+      ----------------
+      -- Mode_Usage --
+      ----------------
+
       procedure Mode_Usage is
       begin
          Text_IO.Put_Line
@@ -504,23 +508,23 @@ begin
 
    begin
       case GNAT.Command_Line.Getopt ("-server -client -standalone") is
-      when '-' =>
-         Long_Running_Mode : declare
-            Full : constant String := GNAT.Command_Line.Full_Switch;
-         begin
-            if Full = "-server" then
-               Config.Is_Server := True;
-               Mode := Savadur_Server;
-            elsif Full = "-client" then
-               Mode := Savadur_Client;
-            elsif Full = "-standalone" then
-               Mode := Savadur_Standalone;
-            end if;
-         end Long_Running_Mode;
+         when '-' =>
+            Long_Running_Mode : declare
+               Full : constant String := GNAT.Command_Line.Full_Switch;
+            begin
+               if Full = "-server" then
+                  Config.Is_Server := True;
+                  Mode := Savadur_Server;
+               elsif Full = "-client" then
+                  Mode := Savadur_Client;
+               elsif Full = "-standalone" then
+                  Mode := Savadur_Standalone;
+               end if;
+            end Long_Running_Mode;
 
-      when others =>
-         Mode_Usage;
-         return;
+         when others =>
+            Mode_Usage;
+            return;
       end case;
 
    exception

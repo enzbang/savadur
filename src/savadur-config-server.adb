@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                                Savadur                                   --
 --                                                                          --
---                         Copyright (C) 2007-2008                          --
+--                         Copyright (C) 2007-2010                          --
 --                      Pascal Obry - Olivier Ramonat                       --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -237,12 +237,12 @@ package body Savadur.Config.Server is
                      (Containing_Directory => Config.Server_Directory,
                       Name                 => Name,
                       Extension            => "xml");
-      Template  : constant String :=
-                    Directories.Compose
-                      (Containing_Directory =>
-                                       Config.Config_Templates_Directory,
-                       Name                 => "remote",
-                       Extension            => "txml");
+      Template : constant String :=
+                   Directories.Compose
+                     (Containing_Directory =>
+                                     Config.Config_Templates_Directory,
+                      Name                 => "remote",
+                      Extension            => "txml");
 
       File     : Text_IO.File_Type;
       Set      : Templates.Translate_Set;
@@ -255,7 +255,8 @@ package body Savadur.Config.Server is
                         Item => Templates.Assoc (Variable => "SERVER_URL",
                                                  Value    => Url));
 
-      Text_IO.Create (File => File, Mode => Text_IO.Out_File, Name => Filename);
+      Text_IO.Create
+        (File => File, Mode => Text_IO.Out_File, Name => Filename);
       Text_IO.Put (File,
                    Templates.Parse
                      (Filename     => Template,
