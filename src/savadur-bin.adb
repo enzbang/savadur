@@ -115,13 +115,6 @@ procedure Savadur.Bin is
    -----------------------
 
    procedure Add_Remote_Server is
-      use Ada.Text_IO;
-      Filename : constant String :=
-                   Directories.Compose
-                     (Containing_Directory => Config.Server_Directory,
-                      Name                 => -New_Server_Name,
-                      Extension            => "xml");
-      File     : File_Type;
    begin
       if New_Server_Name = Null_Unbounded_String
         or else New_Server_URL = Null_Unbounded_String
@@ -398,12 +391,6 @@ procedure Savadur.Bin is
    -------------------------
 
    procedure Set_Client_Config is
-      use Ada.Text_IO;
-      File     : File_Type;
-      Filename : constant String := Directories.Compose
-        (Containing_Directory => Config.Savadur_Directory,
-         Name                 => "client",
-         Extension            => "xml");
    begin
       if not Directories.Exists (Config.Savadur_Directory) then
          Directories.Create_Directory (Config.Savadur_Directory);
