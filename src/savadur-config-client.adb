@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                                Savadur                                   --
 --                                                                          --
---                         Copyright (C) 2007-2008                          --
+--                         Copyright (C) 2007-2010                          --
 --                      Pascal Obry - Olivier Ramonat                       --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -393,7 +393,7 @@ package body Savadur.Config.Client is
          Configuration.Endpoint := +Endpoint;
       end if;
 
-      Text_IO.Put_Line ("key is " & Key);
+      Text_IO.Put_Line ("key is " & (-Configuration.Key));
 
       Templates.Insert
         (Set  => Set,
