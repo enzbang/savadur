@@ -76,9 +76,11 @@ procedure Savadur.Bin is
    Action : access procedure;
    --  Action to execute after Command Line parsing
 
-   --  client.xml configuration
-   Client_Id       : Unbounded_String;
-   Client_Endpoint : Unbounded_String;
+   --  client/server.xml configuration
+   Client_Id          : Unbounded_String;
+   Client_Endpoint    : Unbounded_String;
+   Client_Description : Unbounded_String;
+   Client_OS          : Unbounded_String;
 
    --  Savadur-Client remote server
    New_Server_Name : Unbounded_String;
@@ -396,7 +398,8 @@ procedure Savadur.Bin is
          Directories.Create_Directory (Config.Savadur_Directory);
       end if;
 
-      Savadur.Config.Client.Write (-Client_Id, -Client_Endpoint);
+      Savadur.Config.Client.Write
+        (-Client_Id, -Client_Endpoint, -Client_Description, -Client_OS);
    end Set_Client_Config;
 
    -----------
@@ -405,22 +408,27 @@ procedure Savadur.Bin is
 
    procedure Usage (Error_Message : in String := "") is
 
-      procedure Endpoint_Config;
-      --  Prints Usage for configuring endpoint and id
+      procedure CS_Config;
+      --  Prints usage for client/server configuration
 
       procedure Global_Options;
       --  Prints global options
 
-      ---------------------
-      -- Endpoint_Config --
-      ---------------------
+      ---------------
+      -- CS_Config --
+      ---------------
 
-      procedure Endpoint_Config is
+      procedure CS_Config is
       begin
          Logs.Write
-           ("    --config --endpoint endpoint : Set client endpoint");
-         Logs.Write ("    --config --id  client_id : Set client id");
-      end Endpoint_Config;
+           ("    --config --endpoint endpoint      : Set endpoint");
+         Logs.Write
+           ("    --config --id  client_id          : Set id");
+         Logs.Write
+           ("    --config --os  os_name            : Set the OS name");
+         Logs.Write
+           ("    --config --description ""des..."" : Set description");
+      end CS_Config;
 
       --------------------
       -- Global_Options --
@@ -453,7 +461,7 @@ procedure Savadur.Bin is
          when Savadur_Client =>
             Logs.Write ("usage : savadur --client [OPTIONS]");
             Global_Options;
-            Endpoint_Config;
+            CS_Config;
             Logs.Write ("    --remote --list      : List new remote server");
             Logs.Write ("    --remote --add server_name server_url"
                         & " : Add a new remote server");
@@ -465,7 +473,7 @@ procedure Savadur.Bin is
 
          when Savadur_Server =>
             Global_Options;
-            Endpoint_Config;
+            CS_Config;
             null;
       end case;
    end Usage;
@@ -683,7 +691,7 @@ begin
    GNAT.Command_Line.Goto_Section (Name => "-config");
 
    Config_Opt : loop
-      case GNAT.Command_Line.Getopt ("-id: -endpoint:") is
+      case GNAT.Command_Line.Getopt ("-id: -endpoint: -description: -os:") is
          when ASCII.NUL =>
             exit Config_Opt;
 
@@ -699,6 +707,16 @@ begin
                elsif Full = "-id" then
                   Action := Set_Client_Config'Access;
                   Client_Id :=
+                    To_Unbounded_String (GNAT.Command_Line.Parameter);
+
+               elsif Full = "-description" then
+                  Action := Set_Client_Config'Access;
+                  Client_Description :=
+                    To_Unbounded_String (GNAT.Command_Line.Parameter);
+
+               elsif Full = "-os" then
+                  Action := Set_Client_Config'Access;
+                  Client_OS :=
                     To_Unbounded_String (GNAT.Command_Line.Parameter);
 
                else

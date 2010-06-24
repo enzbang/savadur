@@ -405,7 +405,7 @@ package body Savadur.Config.Client is
    -- Write --
    -----------
 
-   procedure Write (Key, Endpoint : in String) is
+   procedure Write (Key, Endpoint, Description, OS : in String) is
       Filename  : constant String := Directories.Compose
         (Containing_Directory => Savadur.Config.Savadur_Directory,
          Name                 => Config_Filename,
@@ -428,6 +428,14 @@ package body Savadur.Config.Client is
 
       if Endpoint /= "" then
          Configuration.Endpoint := +Endpoint;
+      end if;
+
+      if Description /= "" then
+         Configuration.Description := +Description;
+      end if;
+
+      if OS /= "" then
+        Configuration.Client_Metadata.OS := +OS;
       end if;
 
       Text_IO.Put_Line ("key is " & (-Configuration.Key));
