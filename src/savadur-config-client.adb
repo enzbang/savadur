@@ -255,6 +255,9 @@ package body Savadur.Config.Client is
            (Filename => Filename,
             Input    => Source);
 
+         Logs.Write (Content => "Read config file : " & Filename,
+                     Kind    => Logs.Handler.Verbose);
+
          Parse (Reader, Source);
 
          Input_Sources.File.Close (Source);
@@ -438,8 +441,6 @@ package body Savadur.Config.Client is
         Configuration.Client_Metadata.OS := +OS;
       end if;
 
-      Text_IO.Put_Line ("key is " & (-Configuration.Key));
-
       Templates.Insert
         (Set  => Set,
          Item => Templates.Assoc
@@ -498,6 +499,10 @@ package body Savadur.Config.Client is
              (Filename     => Template,
               Translations => Set));
          Text_IO.Close (File);
+
+         Text_IO.Put_Line
+           ("Write configuration for " & (-Configuration.Key) &
+            " in " & Filename);
 
       else
          Logs.Write (Content => "Missing template file: " & Template,

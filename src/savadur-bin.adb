@@ -126,8 +126,9 @@ procedure Savadur.Bin is
          return;
       end if;
 
-      Put_Line ("Add new remote server : "
-                & (-New_Server_Name) & " " & (-New_Server_URL));
+      Text_IO.Put_Line
+        ("Add new remote server : "
+         & (-New_Server_Name) & " -> " & (-New_Server_URL));
 
       Config.Server.Write (-New_Server_Name, -New_Server_URL);
    end Add_Remote_Server;
