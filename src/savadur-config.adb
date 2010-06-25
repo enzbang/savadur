@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                                Savadur                                   --
 --                                                                          --
---                         Copyright (C) 2007-2008                          --
+--                         Copyright (C) 2007-2010                          --
 --                      Pascal Obry - Olivier Ramonat                       --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -37,8 +37,8 @@ package body Savadur.Config is
    Server_Dir : aliased constant String := "server";
    Client_Dir : aliased constant String := "client";
 
-   Sub_Dir : array (False .. True) of access constant String
-     := (Client_Dir'Access, Server_Dir'Access);
+   Sub_Dir : array (False .. True) of access constant String :=
+               (Client_Dir'Access, Server_Dir'Access);
 
    Cached_Config_Templates_Directory : access String := null;
    Cached_Directory                  : access String := null;
@@ -268,7 +268,7 @@ package body Savadur.Config is
    -----------------------
 
    function Web_Img_Directory return String is
-         begin
+   begin
       if Cached_Web_Img_Directory = null then
          Cached_Web_Img_Directory := new String'
            (Directories.Compose

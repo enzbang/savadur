@@ -1,0 +1,8 @@
+<server>
+  <name id="@_KEY_@"/>
+  <endpoint url="@_ENDPOINT_@"/>
+  <description value="@_DESCRIPTION_@"/>
+  <metadata>
+    <os value="@_METADATA_OS_@"/>
+  </metadata>
+</server>
