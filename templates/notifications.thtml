@@ -27,20 +27,26 @@
           @@TABLE@@
           <tr>
             <td><input type="checkbox" name="delid"
-		       value="@_E_MAIL_@/@_JABBER_@"/></td>
+                       value="@_E_MAIL_@/@_JABBER_@"/></td>
             <td>@_E_MAIL_@</td>
             <td>@_JABBER_@</td>
           </tr>
           @@END_TABLE@@
         </table>
-	<input type="submit" value="Remove selected"/>
+        <input type="submit" value="Remove selected"/>
       </form>
       <p/>
       <p>Add notification:</p>
       <form action="/notif?p=@_PROJECT_NAME_@&a=add" method="POST">
-	<input type="text" width="20" name="email"/>
-	<input type="text" width="20" name="xmpp"/>
-	<input type="submit" value="Add"/>
+        <p>
+        <label for="email">E-Mail</label>
+        <input type="text" width="30" id="email" name="email"/>
+        </p>
+        <p>
+        <label for="xmpp">XMPP</label>
+        <input type="text" width="30" id="xmpp" name="xmpp"/>
+        </p>
+        <p><input type="submit" value="Add"/></p>
       </form>
     </div>
   </body>
