@@ -1,0 +1,32 @@
+#! /bin/sh
+
+PATH=/sbin:/bin:/opt/gnat/2009/bin
+
+USER=obry
+
+export SAVADUR_DIR=/opt/savadur/savadurdir
+
+do_start () {
+	 cd $SAVADUR_DIR/..
+	 su $USER - -c "./savadur --server > $SAVADUR_DIR/log.server 2>&1 &"
+	 sleep 2
+	 su $USER - -c "./savadur --client > $SAVADUR_DIR/log.client 2>&1 &"
+}
+
+case "$1" in
+  start)
+	do_start
+	;;
+  restart|reload|force-reload)
+	echo "Error: argument '$1' not supported" >&2
+	exit 3
+	;;
+  stop)
+	# No-op
+	killall savadur
+	;;
+  *)
+	echo "Usage: $0 start|stop" >&2
+	exit 3
+	;;
+esac
