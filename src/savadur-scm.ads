@@ -36,7 +36,8 @@ package Savadur.SCM is
    --  Special actions references
 
    Init         : constant Actions.Ref_Action;
-   --  Mandatory, needed to initialize the repository
+   --  Mandatory, needed to initialize the repository. This action is run when
+   --  the sources directory is not present.
 
    Committers_1 : constant Actions.Ref_Action;
    Committers_N : constant Actions.Ref_Action;
