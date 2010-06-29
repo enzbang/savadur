@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                                Savadur                                   --
 --                                                                          --
---                         Copyright (C) 2007-2009                          --
+--                         Copyright (C) 2007-2010                          --
 --                      Pascal Obry - Olivier Ramonat                       --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -174,13 +174,13 @@ package body Savadur.Database is
                       & " from lastbuilt ";
       SQL_Group : constant String := " group by client order by client";
       Iter      : DB.SQLite.Iterator;
-      Line      :  DB.String_Vectors.Vector;
-      Set       :  Templates.Translate_Set;
-      Name      :  Templates.Tag;
-      Client    :  Templates.Tag;
-      Scenario  :  Templates.Tag;
-      Status    :  Templates.Tag;
-      Date      :  Templates.Tag;
+      Line      : DB.String_Vectors.Vector;
+      Set       : Templates.Translate_Set;
+      Name      : Templates.Tag;
+      Client    : Templates.Tag;
+      Scenario  : Templates.Tag;
+      Status    : Templates.Tag;
+      Date      : Templates.Tag;
       Job_Id    : Templates.Tag;
    begin
       Connect (DBH);

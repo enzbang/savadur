@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                                Savadur                                   --
 --                                                                          --
---                         Copyright (C) 2007-2008                          --
+--                         Copyright (C) 2007-2010                          --
 --                      Pascal Obry - Olivier Ramonat                       --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -90,13 +90,13 @@ private
 
    use Config;
 
-   Init     : constant Actions.Ref_Action :=
-                Actions.Ref_Action'(Action_Type => Actions.SCM,
-                                    Id          => Actions.Id (+"init"),
-                                    Value       => <>,
-                                    Status      => <>,
-                                    On_Error    => <>,
-                                    Filters     => Filters.Null_Set);
+   Init        : constant Actions.Ref_Action :=
+                   Actions.Ref_Action'(Action_Type => Actions.SCM,
+                                       Id          => Actions.Id (+"init"),
+                                       Value       => <>,
+                                       Status      => <>,
+                                       On_Error    => <>,
+                                       Filters     => Filters.Null_Set);
 
    Committers_1 : constant Actions.Ref_Action :=
                     Actions.Ref_Action'(Action_Type => Actions.SCM,
