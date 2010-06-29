@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                                Savadur                                   --
 --                                                                          --
---                           Copyright (C) 2008                             --
+--                         Copyright (C) 2008-2010                          --
 --                      Pascal Obry - Olivier Ramonat                       --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -20,7 +20,6 @@
 ------------------------------------------------------------------------------
 
 with Ada.Strings.Hash_Case_Insensitive;
-with Ada.Strings.Unbounded;
 with Ada.Containers.Indefinite_Hashed_Maps;
 
 package Savadur.Environment_Variables.Containers is

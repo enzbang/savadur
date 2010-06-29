@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                                 Savadur                                  --
 --                                                                          --
---                            Copyright (C) 2008                            --
+--                         Copyright (C) 2008-2010                          --
 --                      Pascal Obry - Olivier Ramonat                       --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -77,14 +77,14 @@ package body Savadur.Config.Notifications is
 
    package body XMPP is
 
-      ------------
-      -- Server --
-      ------------
+      ---------------
+      -- Auth_Type --
+      ---------------
 
-      function Server return String is
+      function Auth_Type return AWS.Jabber.Client.Authentication_Mechanism is
       begin
-         return -XMPP_Config.Server;
-      end Server;
+         return XMPP_Config.Auth_Type;
+      end Auth_Type;
 
       ---------
       -- JID --
@@ -104,14 +104,14 @@ package body Savadur.Config.Notifications is
          return -XMPP_Config.Password;
       end Password;
 
-      ---------------
-      -- Auth_Type --
-      ---------------
+      ------------
+      -- Server --
+      ------------
 
-      function Auth_Type return AWS.Jabber.Client.Authentication_Mechanism is
+      function Server return String is
       begin
-         return XMPP_Config.Auth_Type;
-      end Auth_Type;
+         return -XMPP_Config.Server;
+      end Server;
 
    end XMPP;
 
@@ -133,24 +133,6 @@ package body Savadur.Config.Notifications is
 
    package body SMTP is
 
-      ------------
-      -- Server --
-      ------------
-
-      function Server return String is
-      begin
-         return -SMTP_Config.Server;
-      end Server;
-
-      ----------
-      -- User --
-      ----------
-
-      function User return String is
-      begin
-         return -SMTP_Config.User;
-      end User;
-
       --------------
       -- Password --
       --------------
@@ -168,6 +150,24 @@ package body Savadur.Config.Notifications is
       begin
          return -SMTP_Config.Sender;
       end Sender;
+
+      ------------
+      -- Server --
+      ------------
+
+      function Server return String is
+      begin
+         return -SMTP_Config.Server;
+      end Server;
+
+      ----------
+      -- User --
+      ----------
+
+      function User return String is
+      begin
+         return -SMTP_Config.User;
+      end User;
 
    end SMTP;
 

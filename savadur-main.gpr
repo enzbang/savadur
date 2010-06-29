@@ -60,17 +60,7 @@ project Savadur.Main is
    -- Compiler --
    --------------
 
-   package Compiler is
-      case Savadur.Build is
-         when "Debug" | "Profile" =>
-            for Default_Switches ("Ada") use
-              Savadur.Debug_Options & ("-gnat05");
-
-         when "Release" =>
-            for Default_Switches ("Ada") use
-              Savadur.Release_Options  & ("-gnat05");
-      end case;
-   end Compiler;
+   package Compiler renames Savadur.Compiler;
 
    -------------
    -- Builder --

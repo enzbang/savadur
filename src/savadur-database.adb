@@ -91,7 +91,7 @@ package body Savadur.Database is
                Name                 => "logs",
                Extension            => "db"));
 
-      if not Directories.Exists (Name => DB_Path.all) then
+         if not Directories.Exists (Name => DB_Path.all) then
             Logs.Handler.Write
               (Name    => Module,
                Kind    => Logs.Handler.Error,

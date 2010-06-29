@@ -438,7 +438,7 @@ package body Savadur.Config.Client is
       end if;
 
       if OS /= "" then
-        Configuration.Client_Metadata.OS := +OS;
+         Configuration.Client_Metadata.OS := +OS;
       end if;
 
       Templates.Insert

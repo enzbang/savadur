@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                                Savadur                                   --
 --                                                                          --
---                         Copyright (C) 2007-2008                          --
+--                         Copyright (C) 2007-2010                          --
 --                      Pascal Obry - Olivier Ramonat                       --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -19,14 +19,10 @@
 --  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.       --
 ------------------------------------------------------------------------------
 
-with Ada.Directories;
-
 with Savadur.Actions;
 with Savadur.Config;
 
 package body Savadur.Build.Notification is
-
-   use Ada;
 
    ------------
    -- Notify --
@@ -35,10 +31,7 @@ package body Savadur.Build.Notification is
    procedure Notify
      (Project : access Projects.Project_Config;
       Success : in     Scenarios.Run_Status;
-      Job_Id  : in     Natural)
-   is
-      Log_Directory : constant String :=
-                        Projects.Project_Log_Directory (Project);
+      Job_Id  : in     Natural) is
    begin
       case Success is
          when Scenarios.Success =>

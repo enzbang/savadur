@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                                Savadur                                   --
 --                                                                          --
---                         Copyright (C) 2007-2008                          --
+--                         Copyright (C) 2007-2010                          --
 --                      Pascal Obry - Olivier Ramonat                       --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -21,7 +21,7 @@
 
 package Savadur.Config.Server is
 
-   Config_Error : Exception renames Config.Config_Error;
+   Config_Error : exception renames Config.Config_Error;
 
    procedure Parse;
    --  Fills the server configuration map

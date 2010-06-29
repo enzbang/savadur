@@ -39,7 +39,6 @@ with Savadur.Client_Service.Types;
 with Savadur.Clients;
 with Savadur.Config.Client;
 with Savadur.Config.Committers;
-with Savadur.Config.Environment_Variables;
 with Savadur.Config.Notifications;
 with Savadur.Config.Project;
 with Savadur.Config.Project_List;
@@ -655,7 +654,7 @@ begin
    if Mode = Savadur_Standalone then
       Project_Opt : loop
          case GNAT.Command_Line.Getopt ("* -scenario:") is
-            when ASCII.Nul =>
+            when ASCII.NUL =>
                exit Project_Opt;
 
             when '*' =>

@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                                Savadur                                   --
 --                                                                          --
---                         Copyright (C) 2007-2009                          --
+--                         Copyright (C) 2007-2010                          --
 --                      Pascal Obry - Olivier Ramonat                       --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -19,8 +19,6 @@
 --  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.       --
 ------------------------------------------------------------------------------
 
-with Ada.Strings.Hash_Case_Insensitive;
-
 with Savadur.Logs;
 with Savadur.Utils;
 
@@ -30,8 +28,7 @@ package body Savadur.Clients is
 
    function Image (Clients_Set : in Sets.Set) return String;
    --  Returns the Client_Set image
-
-   subtype Set is Sets.Set;
+   pragma Unreferenced (Image);
 
    function Key (Client : in Clients.Client) return String;
 
@@ -67,7 +64,7 @@ package body Savadur.Clients is
    begin
       while Sets.Has_Element (P_Client) loop
          Get_Status : declare
-            Element : Client := Sets.Element (P_Client);
+            Element : constant Client := Sets.Element (P_Client);
          begin
             Names   := Names & Element.Key;
             Status  := Status & Client_Status'Image (Element.Status);
@@ -101,7 +98,7 @@ package body Savadur.Clients is
    begin
       while Sets.Has_Element (P_Client) loop
          Get_Status : declare
-            Element : Client := Sets.Element (P_Client);
+            Element : constant Client := Sets.Element (P_Client);
          begin
             if Element.Status = Status then
                Clients_List := Clients_List & Element.Key;
@@ -264,6 +261,16 @@ package body Savadur.Clients is
          Running  => <>));
    end Register;
 
+   -----------------
+   -- Server_Name --
+   -----------------
+
+   function Server_Name (Position : in Cursor) return String is
+      Element : constant Client := Sets.Element (Sets.Cursor (Position));
+   begin
+      return -Element.Server_Name;
+   end Server_Name;
+
    ----------------
    -- Set_Status --
    ----------------
@@ -276,16 +283,6 @@ package body Savadur.Clients is
       Element.Running := +Message;
       Registered.Replace (Element);
    end Set_Status;
-
-   -----------------
-   -- Server_Name --
-   -----------------
-
-   function Server_Name (Position : in Cursor) return String is
-      Element : constant Client := Sets.Element (Sets.Cursor (Position));
-   begin
-      return -Element.Server_Name;
-   end Server_Name;
 
    ------------
    -- Status --

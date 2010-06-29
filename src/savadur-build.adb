@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                                Savadur                                   --
 --                                                                          --
---                         Copyright (C) 2007-2008                          --
+--                         Copyright (C) 2007-2010                          --
 --                      Pascal Obry - Olivier Ramonat                       --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -29,7 +29,6 @@ with Ada.Strings.Unbounded;
 with Ada.Text_IO;
 
 with GNAT.OS_Lib;
-with GNAT.Regpat;
 
 with AWS.Utils;
 with Morzhol.OS;
@@ -258,7 +257,7 @@ package body Savadur.Build is
                          & Config.Filters.Simple_Name (Filter2.Id));
             begin
                if (L1 = L2) = Equal then
-                  --  Ok if both logs are equal and check is equality.
+                  --  Ok if both logs are equal and check is equality
                   Result := Scenarios.Success;
 
                else
@@ -938,6 +937,7 @@ package body Savadur.Build is
          Is_Init     : Boolean := False;
          Position    : Cursor  := Selected_Scenario.Actions.First;
          Project_SCM : Savadur.SCM.SCM;
+         pragma Unreferenced (Project_SCM);
       begin
 
          if Project.SCM_Id /= SCM.Null_Id then

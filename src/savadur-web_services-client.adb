@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                                Savadur                                   --
 --                                                                          --
---                        Copyright (C) 2007-2008                           --
+--                        Copyright (C) 2007-2010                           --
 --                      Pascal Obry - Olivier Ramonat                       --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -270,32 +270,6 @@ package body Savadur.Web_Services.Client is
 
    end Report_Handler;
 
-   ------------------
-   -- Status_Start --
-   ------------------
-
-   procedure Status_Start
-     (Key          : in String;
-      Project_Name : in String;
-      Scenario     : in String;
-      Action       : in String;
-      Job_Id       : in Natural)
-   is
-   begin
-      if Status_Updater = null then
-         Status_Updater := new Update_Status;
-      end if;
-
-      Report_Handler.Add
-        (Report_Data'(Start_Only   => True,
-                      Key          => +Key,
-                      Project_Name => +Project_Name,
-                      Scenario     => +Scenario,
-                      Action       => Actions.Id_Utils.Value (Action),
-                      Job_Id       => Job_Id,
-                      Number       => <>));
-   end Status_Start;
-
    ------------
    -- Status --
    ------------
@@ -328,6 +302,32 @@ package body Savadur.Web_Services.Client is
                       Diff_Data    => Diff_Data,
                       Number       => <>));
    end Status;
+
+   ------------------
+   -- Status_Start --
+   ------------------
+
+   procedure Status_Start
+     (Key          : in String;
+      Project_Name : in String;
+      Scenario     : in String;
+      Action       : in String;
+      Job_Id       : in Natural)
+   is
+   begin
+      if Status_Updater = null then
+         Status_Updater := new Update_Status;
+      end if;
+
+      Report_Handler.Add
+        (Report_Data'(Start_Only   => True,
+                      Key          => +Key,
+                      Project_Name => +Project_Name,
+                      Scenario     => +Scenario,
+                      Action       => Actions.Id_Utils.Value (Action),
+                      Job_Id       => Job_Id,
+                      Number       => <>));
+   end Status_Start;
 
    -------------------
    -- Update_Status --

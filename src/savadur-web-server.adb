@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                                Savadur                                   --
 --                                                                          --
---                         Copyright (C) 2007-2009                          --
+--                         Copyright (C) 2007-2010                          --
 --                      Pascal Obry - Olivier Ramonat                       --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -216,10 +216,9 @@ package body Savadur.Web.Server is
    function List (Request : in Status.Data) return Response.Data is
       pragma Unreferenced (Request);
       use type Templates.Tag;
-      Clients_List : Templates.Tag;
-      Set          : Templates.Translate_Set :=
-                       Project_List.To_Set
-                         (Savadur.Config.Project_List.Configurations.all);
+      Set : Templates.Translate_Set :=
+              Project_List.To_Set
+                (Savadur.Config.Project_List.Configurations.all);
    begin
       Templates.Insert (Set, Clients.Clients_Set);
       Templates.Insert
@@ -292,7 +291,9 @@ package body Savadur.Web.Server is
    ----------
 
    procedure Ping
-     (Key : in String; Server_Name : in String; Endpoint : in String) is
+     (Key : in String; Server_Name : in String; Endpoint : in String)
+   is
+      pragma Unreferenced (Server_Name);
    begin
       Logs.Write ("Ping client " & Key);
       Logs.Write
@@ -344,24 +345,6 @@ package body Savadur.Web.Server is
       function Response
         (Set : in Templates.Translate_Set) return AWS.Response.Data;
 
-      --------------
-      -- Response --
-      --------------
-
-      function Response
-        (Set : in Templates.Translate_Set) return AWS.Response.Data is
-      begin
-         return AWS.Response.Build
-           (Content_Type => MIME.Text_HTML,
-            Message_Body => AWS.Templates.Parse
-              (Filename     => Directories.Compose
-                 (Containing_Directory =>
-                    Savadur.Config.Web_Templates_Directory,
-                  Name                 => "run",
-                  Extension            => "thtml"),
-               Translations => Set));
-      end Response;
-
       --------------------
       -- Patch_Filename --
       --------------------
@@ -387,6 +370,24 @@ package body Savadur.Web.Server is
 
          return "";
       end Patch_Filename;
+
+      --------------
+      -- Response --
+      --------------
+
+      function Response
+        (Set : in Templates.Translate_Set) return AWS.Response.Data is
+      begin
+         return AWS.Response.Build
+           (Content_Type => MIME.Text_HTML,
+            Message_Body => AWS.Templates.Parse
+              (Filename     => Directories.Compose
+                 (Containing_Directory =>
+                    Savadur.Config.Web_Templates_Directory,
+                  Name                 => "run",
+                  Extension            => "thtml"),
+               Translations => Set));
+      end Response;
 
       Set : Templates.Translate_Set;
 

@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                                Savadur                                   --
 --                                                                          --
---                         Copyright (C) 2007-2009                          --
+--                         Copyright (C) 2007-2010                          --
 --                      Pascal Obry - Olivier Ramonat                       --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -33,7 +33,6 @@ with Savadur.Logs;
 with Savadur.Projects.Sets;
 with Savadur.Remote_Files;
 with Savadur.SCM;
-with Savadur.Servers;
 with Savadur.Utils;
 
 package body Savadur.Jobs.Queue is
@@ -365,7 +364,6 @@ package body Savadur.Jobs.Queue is
       is
          use type Signed_Files.Handler;
          Position : Job_Set.Cursor := Jobs.First;
-         Result   : Duration := 0.0;
       begin
          while Job_Set.Has_Element (Position) loop
             declare
@@ -379,7 +377,7 @@ package body Savadur.Jobs.Queue is
             Job_Set.Next (Position);
          end loop;
 
-         return Result;
+         return 0.0;
       end Next_Job_In;
 
       ---------------

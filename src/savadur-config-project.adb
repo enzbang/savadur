@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                                Savadur                                   --
 --                                                                          --
---                         Copyright (C) 2007-2008                          --
+--                         Copyright (C) 2007-2010                          --
 --                      Pascal Obry - Olivier Ramonat                       --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -22,10 +22,8 @@
 with Ada.Characters.Handling;
 with Ada.Directories;
 with Ada.Exceptions;
-with Ada.IO_Exceptions;
 with Ada.Strings.Fixed;
 with Ada.Strings.Unbounded;
-with Ada.Text_IO;
 
 with Sax.Readers;
 with Sax.Attributes;
@@ -97,7 +95,7 @@ package body Savadur.Config.Project is
      (Filename : in String) return Projects.Project_Config;
    --  Parses the given filename and return the parsed project
 
-   --  SAX overloaded routines to parse the incoming XML stream.
+   --  SAX overloaded routines to parse the incoming XML stream
 
    type Tree_Reader is new Sax.Readers.Reader with record
       Content_Value        : Unbounded_String;
@@ -644,7 +642,7 @@ package body Savadur.Config.Project is
                   Handler.Scenario.Patch_File := True;
 
                when others =>
-                    null;
+                  null;
             end case;
          end case;
 

@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                                Savadur                                   --
 --                                                                          --
---                           Copyright (C) 2007                             --
+--                         Copyright (C) 2007-2010                          --
 --                      Pascal Obry - Olivier Ramonat                       --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -45,7 +45,8 @@ package body Savadur.Projects is
            (Name => Project.Directory.Cached_Project_Directory.all)
          then
             Directories.Create_Path
-              (New_Directory => Project.Directory.Cached_Project_Directory.all);
+              (New_Directory =>
+                 Project.Directory.Cached_Project_Directory.all);
          end if;
       end if;
 
@@ -105,7 +106,8 @@ package body Savadur.Projects is
          if not Directories.Exists
            (Name => Project.Directory.Cached_Project_Log_Directory.all) then
             Directories.Create_Path
-              (New_Directory => Project.Directory.Cached_Project_Log_Directory.all);
+              (New_Directory =>
+                 Project.Directory.Cached_Project_Log_Directory.all);
          end if;
       end if;
 
@@ -153,7 +155,8 @@ package body Savadur.Projects is
          if not Directories.Exists
            (Name => Project.Directory.Cached_Project_State_Directory.all) then
             Directories.Create_Path
-              (New_Directory => Project.Directory.Cached_Project_State_Directory.all);
+              (New_Directory =>
+                 Project.Directory.Cached_Project_State_Directory.all);
          end if;
       end if;
 

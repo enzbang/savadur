@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                                Savadur                                   --
 --                                                                          --
---                           Copyright (C) 2008                             --
+--                         Copyright (C) 2008-2010                          --
 --                      Pascal Obry - Olivier Ramonat                       --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -34,8 +34,7 @@ package body Savadur.Environment_Variables.Containers is
    -----------
 
    function Image (M : in Maps.Map) return String is
-      Position : Maps.Cursor := Maps.First (M);
-      Result   : Unbounded_String := +"[" & ASCII.Lf;
+      Result   : Unbounded_String := +"[" & ASCII.LF;
 
       procedure Element_Image (Position : in Maps.Cursor);
       --  Append the variable image
@@ -47,8 +46,9 @@ package body Savadur.Environment_Variables.Containers is
       procedure Element_Image (Position : in Maps.Cursor) is
       begin
          Append (Result, Maps.Key (Position) & " : "
-                 & Image (Maps.Element (Position)) & Ascii.Lf);
+                 & Image (Maps.Element (Position)) & ASCII.LF);
       end Element_Image;
+
    begin
       Maps.Iterate (M, Element_Image'Access);
       return -Result & "]";

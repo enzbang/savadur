@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                                Savadur                                   --
 --                                                                          --
---                            Copyright (C) 2008                            --
+--                         Copyright (C) 2008-2010                          --
 --                      Pascal Obry - Olivier Ramonat                       --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -32,6 +32,17 @@ package body Savadur.Config.Cmd is
    --  Returns the attribute value matching the given string or raise
    --  Config_Error.
 
+   -----------------
+   -- End_Element --
+   -----------------
+
+   procedure End_Element
+     (Command : in out Cmd.Command;
+      Content : in     String) is
+   begin
+      Command.Cmd := External_Command_Utils.Value (Content);
+   end End_Element;
+
    -------------------
    -- Get_Attribute --
    -------------------
@@ -58,7 +69,9 @@ package body Savadur.Config.Cmd is
       Namespace_URI : in     Unicode.CES.Byte_Sequence := "";
       Local_Name    : in     Unicode.CES.Byte_Sequence := "";
       Qname         : in     Unicode.CES.Byte_Sequence := "";
-      Atts          : in     Sax.Attributes.Attributes'Class) is
+      Atts          : in     Sax.Attributes.Attributes'Class)
+   is
+      pragma Unreferenced (Namespace_URI, Local_Name, Qname);
    begin
       for J in 0 .. Get_Length (Atts) - 1 loop
          Handle_Attribute : declare
@@ -80,16 +93,5 @@ package body Savadur.Config.Cmd is
          end Handle_Attribute;
       end loop;
    end Start_Element;
-
-   -----------------
-   -- End_Element --
-   -----------------
-
-   procedure End_Element
-     (Command : in out Cmd.Command;
-      Content : in     String) is
-   begin
-      Command.Cmd := External_Command_Utils.Value (Content);
-   end End_Element;
 
 end Savadur.Config.Cmd;

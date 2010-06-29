@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                                Savadur                                   --
 --                                                                          --
---                         Copyright (C) 2007-2008                          --
+--                         Copyright (C) 2007-2010                          --
 --                      Pascal Obry - Olivier Ramonat                       --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -57,6 +57,30 @@ package body Savadur.Notifications is
         & "On Success = " & Actions.Image (H.On_Success) & ASCII.LF
         & "On Failure = " & Actions.Image (H.On_Failure);
    end Image;
+
+   --------------------
+   -- Jabber_Connect --
+   --------------------
+
+   procedure Jabber_Connect (Account : Jabber.Client.Account_Access) is
+   begin
+      Jabber.Client.Set_Host (Account => Account.all,
+                              Host    => Config.Notifications.XMPP.Server);
+
+      Jabber.Client.Set_Login_Information
+        (Account  => Account.all,
+         User     => Config.Notifications.XMPP.JID,
+         Password => Config.Notifications.XMPP.Password,
+         Resource => "savadur");
+
+      Jabber.Client.Set_Authentication_Type
+        (Account   => Account.all,
+         Auth_Type => Config.Notifications.XMPP.Auth_Type);
+
+      Jabber.Client.Connect (Account.all);
+
+      Jabber_Is_Connected := True;
+   end Jabber_Connect;
 
    ---------------
    -- Send_Mail --
@@ -159,24 +183,6 @@ package body Savadur.Notifications is
             Kind    => Logs.Handler.Warnings);
       end if;
    end Update_RSS;
-
-   procedure Jabber_Connect (Account : Jabber.Client.Account_Access) is
-   begin
-      Jabber.Client.Set_Host (Account => Account.all,
-                              Host    => Config.Notifications.XMPP.Server);
-
-      Jabber.Client.Set_Login_Information
-        (Account  => Account.all,
-         User     => Config.Notifications.XMPP.JID,
-         Password => Config.Notifications.XMPP.Password,
-         Resource => "savadur");
-
-      Jabber.Client.Set_Authentication_Type
-        (Account   => Account.all,
-         Auth_Type => Config.Notifications.XMPP.Auth_Type);
-
-      Jabber.Client.Connect (Account.all);
-   end Jabber_Connect;
 
    ---------------
    -- XMPP_Send --

@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                                Savadur                                   --
 --                                                                          --
---                         Copyright (C) 2007-2008                          --
+--                         Copyright (C) 2007-2010                          --
 --                      Pascal Obry - Olivier Ramonat                       --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -105,11 +105,12 @@ package body Savadur.Utils is
       --  Create subdirs (recursively)
 
       Copy_Subdirs : declare
+         Get_Dirs : constant Filter_Type :=
+                      Filter_Type'(Directory     => True,
+                                   Ordinary_File => False,
+                                   Special_File  => False);
          S        : Search_Type;
          D        : Directory_Entry_Type;
-         Get_Dirs : Filter_Type := Filter_Type'(Directory     => True,
-                                                Ordinary_File => False,
-                                                Special_File  => False);
       begin
          Start_Search (Search    => S,
                        Directory => Left,
@@ -129,11 +130,12 @@ package body Savadur.Utils is
       end Copy_Subdirs;
 
       Copy_Files : declare
+         Get_Files : constant Filter_Type :=
+                       Filter_Type'(Directory     => False,
+                                    Ordinary_File => True,
+                                    Special_File  => False);
          S         : Search_Type;
          D         : Directory_Entry_Type;
-         Get_Files : Filter_Type := Filter_Type'(Directory     => False,
-                                                 Ordinary_File => True,
-                                                 Special_File  => False);
       begin
          Start_Search (Search    => S,
                        Directory => Left,

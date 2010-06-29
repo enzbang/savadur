@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                                Savadur                                   --
 --                                                                          --
---                            Copyright (C) 2008                            --
+--                         Copyright (C) 2008-2010                          --
 --                      Pascal Obry - Olivier Ramonat                       --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -24,8 +24,6 @@ with Ada.Containers.Hashed_Maps;
 with Ada.Strings.Fixed;
 with Ada.Strings.Hash_Case_Insensitive;
 
-with Sax.Attributes;
-
 with Savadur.Logs;
 
 package body Savadur.Config.Filters is
@@ -37,31 +35,6 @@ package body Savadur.Config.Filters is
    --  Config_Error.
 
    function Hash (Key : in Filter_Id) return Containers.Hash_Type;
-
-   -------------------
-   -- Get_Attribute --
-   -------------------
-
-   function Get_Attribute (S : in String) return Attribute is
-      Upper_S : constant String := Ada.Characters.Handling.To_Upper (S);
-   begin
-      for SA in Attribute'Range loop
-         if Attribute'Image (SA) = Upper_S then
-            return SA;
-         end if;
-      end loop;
-
-      raise Config_Error with "(Filters) Unknown attribute " & S;
-   end Get_Attribute;
-
-   ----------
-   -- Hash --
-   ----------
-
-   function Hash (Key : in Filter_Id) return Containers.Hash_Type is
-   begin
-      return Strings.Hash_Case_Insensitive (Id_Utils.To_String (Key));
-   end Hash;
 
    package Filters_Map is
      new Containers.Hashed_Maps
@@ -85,6 +58,22 @@ package body Savadur.Config.Filters is
       end if;
    end Get;
 
+   -------------------
+   -- Get_Attribute --
+   -------------------
+
+   function Get_Attribute (S : in String) return Attribute is
+      Upper_S : constant String := Ada.Characters.Handling.To_Upper (S);
+   begin
+      for SA in Attribute'Range loop
+         if Attribute'Image (SA) = Upper_S then
+            return SA;
+         end if;
+      end loop;
+
+      raise Config_Error with "(Filters) Unknown attribute " & S;
+   end Get_Attribute;
+
    ------------
    -- Get_Id --
    ------------
@@ -93,6 +82,15 @@ package body Savadur.Config.Filters is
    begin
       return Id_Utils.Value (Prefix & "$" & Id);
    end Get_Id;
+
+   ----------
+   -- Hash --
+   ----------
+
+   function Hash (Key : in Filter_Id) return Containers.Hash_Type is
+   begin
+      return Strings.Hash_Case_Insensitive (Id_Utils.To_String (Key));
+   end Hash;
 
    -----------------
    -- Simple_Name --
@@ -125,6 +123,7 @@ package body Savadur.Config.Filters is
       Qname         : in Unicode.CES.Byte_Sequence := "";
       Atts          : in Sax.Attributes.Attributes'Class)
    is
+      pragma Unreferenced (Namespace_URI, Local_Name, Qname);
       use Sax.Attributes;
 
       Attr : Attribute;

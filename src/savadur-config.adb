@@ -19,25 +19,19 @@
 --  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.       --
 ------------------------------------------------------------------------------
 
-with Ada.Strings.Unbounded;
 with Ada.Environment_Variables;
 with Ada.Directories;
 
 with Morzhol.OS;
 
-with Savadur.Utils;
-
 package body Savadur.Config is
 
    use Ada;
-   use Ada.Strings.Unbounded;
-
-   use Savadur.Utils;
 
    Server_Dir : aliased constant String := "server";
    Client_Dir : aliased constant String := "client";
 
-   Sub_Dir : array (False .. True) of access constant String :=
+   Sub_Dir : constant array (False .. True) of access constant String :=
                (Client_Dir'Access, Server_Dir'Access);
 
    Cached_Config_Templates_Directory : access String := null;
@@ -65,7 +59,7 @@ package body Savadur.Config is
            (Directories.Compose
               (Containing_Directory =>
                  Directories.Compose
-                   (Containing_Directory => Savadur_directory,
+                   (Containing_Directory => Savadur_Directory,
                     Name                 => "share"),
                Name                 => "templates"));
       end if;
