@@ -125,15 +125,15 @@ revision number.
      <filter id="files_updated" regexp=" ([^\n]*) *\|  "/>
 
      <action id="init">
-       <cmd>git-clone $url $sources</cmd>
+       <cmd>git clone $url $sources</cmd>
      </action>
 
      <action id="pull">
-       <cmd filter1="files_updated">git-pull</cmd>
+       <cmd filter1="files_updated">git pull</cmd>
      </action>
 
      <action id="version" result="value">
-       <cmd regexp="^([^\t]*)">git-ls-remote origin refs/heads/master</cmd>
+       <cmd regexp="^([^\t]*)">git ls-remote origin refs/heads/master</cmd>
      </action>
    </scm>
 
