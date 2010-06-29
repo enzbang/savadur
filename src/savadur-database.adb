@@ -280,13 +280,15 @@ package body Savadur.Database is
                  ("STOP_DATE", DB.String_Vectors.Element (Line, 7)));
 
             Compute_Duration : declare
-               Get_Duration : constant Float :=
-                                Float'Value
-                                  (DB.String_Vectors.Element (Line, 8));
+               Get_Duration : constant String :=
+                                DB.String_Vectors.Element (Line, 8);
                Duration     : Natural := 0;
             begin
-               if Get_Duration > 0.0 then
-                  Duration := Natural (Float'Rounding (Get_Duration));
+               if Get_Duration /= ""
+                 and then Float'Value (Get_Duration) > 0.0
+               then
+                  Duration := Natural
+                    (Float'Rounding (Float'Value (Get_Duration)));
                end if;
                Templates.Insert
                  (Set, Templates.Assoc
@@ -486,7 +488,9 @@ package body Savadur.Database is
                                 DB.String_Vectors.Element (Line, 6);
                Duration     : Natural := 0;
             begin
-               if Get_Duration /= "" then
+               if Get_Duration /= ""
+                 and then Float'Value (Get_Duration) > 0.0
+               then
                   Duration := Natural
                     (Float'Rounding (Float'Value (Get_Duration)));
                end if;
