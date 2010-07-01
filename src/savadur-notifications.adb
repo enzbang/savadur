@@ -40,6 +40,7 @@ package body Savadur.Notifications is
 
    RSS_All_File      : access String := null;
    RSS_Template_File : access String := null;
+   Auth              : aliased SMTP.Authentication.Plain.Credential;
 
    Jabber_Is_Connected : Boolean := False;
    Account : aliased Jabber.Client.Account;
@@ -92,7 +93,6 @@ package body Savadur.Notifications is
       Content : in String)
    is
       SMTP_Server : SMTP.Receiver;
-      Auth        : aliased SMTP.Authentication.Plain.Credential;
       Result      : SMTP.Status;
    begin
       if Config.Notifications.SMTP.User /= "" then
