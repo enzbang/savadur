@@ -202,6 +202,24 @@ This project file describes:
        * The "try_patch" scenario using a temporary directory and
          applying the patch file uploaded by the developer.
 
+Environment
+-----------
+
+It is possible to set some specific environment variables by adding an XML
+document into "env/<project>.xml" on the client side. The syntax of this
+document is simple:
+
+   <?xml version="1.0" encoding="utf-8"?>
+   <environment_variables>
+     <var name="PATH" value="/opt/gnat/2009/bin:/usr/bin" mode="append" />
+   </environment_variables>
+
+where mode can be:
+
+   append   : add the corresponding value at the end of the variable
+   replace  : replace the variable with the given value
+   clear    : clear the variable
+
 Trigger a build
 ---------------
 
