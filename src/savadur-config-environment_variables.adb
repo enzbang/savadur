@@ -58,7 +58,7 @@ package body Savadur.Config.Environment_Variables is
    --  Returns the attribute value matching the given string or raise
    --  Config_Error.
 
-   --  SAX overloaded routines to parse the incoming XML stream.
+   --  SAX overloaded routines to parse the incoming XML stream
 
    type Tree_Reader is new Sax.Readers.Reader with record
       Map : Savadur.Environment_Variables.Containers.Maps.Map;
@@ -116,7 +116,7 @@ package body Savadur.Config.Environment_Variables is
    begin
       if Directories.Exists (Projects.Project_Env_Filename (Project)) then
          --  Skip parsing without errors if file not found as having an env
-         --  file is not required
+         --  file is not required.
 
          Input_Sources.File.Open
            (Filename => Projects.Project_Env_Filename (Project),
