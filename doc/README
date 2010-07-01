@@ -31,12 +31,19 @@ Server
    $ cd $SAVADUR_DIR/server
    $ ./scripts/create_database.sh
 
-We allow a single client named "builder" which can run the default scenario:
+We allow a single client named "builder" which can run the default, check and
+try_patch scenarii:
 
    $ cat <<EOF > config/project_list.xml
    <project_list>
         <project id="v2p" log_size="50">
                 <scenario id="default">
+                        <client key="builder"/>
+                </scenario>
+                <scenario id="check">
+                        <client key="builder"/>
+                </scenario>
+                <scenario id="try_patch">
                         <client key="builder"/>
                 </scenario>
         </project>
