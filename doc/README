@@ -247,19 +247,19 @@ and/or the Jabber server.
 
 For XMPP:
 
-<notifications>
-   <jabber>
-     <server value="jabber.org" />
-     <jid value="savadur-bot" />
-     <password value="savadur_pwd" />
-   </jabber>
-   <smtp>
-      <server value="smtp.example.com"/>
-      <sender value="savadur@here.com"/>
-      <user value="savadur@here.com"/>
-      <password value="secret_smtp_pwd"/>
-   </smtp>
-</notifications>
+   <notifications>
+     <jabber>
+       <server value="jabber.org" />
+       <jid value="savadur-bot" />
+       <password value="savadur_pwd" />
+     </jabber>
+     <smtp>
+       <server value="smtp.example.com"/>
+       <sender value="savadur@here.com"/>
+       <user value="savadur@here.com"/>
+       <password value="secret_smtp_pwd"/>
+     </smtp>
+   </notifications>
 
 For SMTP, user and password are optional.
 
