@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <environment_variables>
-  <project name="savadur" />
   <var name="PATH" value="/opt/gnat/2007/bin:/usr/bin" mode="append" />
 </environment_variables>

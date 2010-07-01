@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                                Savadur                                   --
 --                                                                          --
---                         Copyright (C) 2007-2008                          --
+--                         Copyright (C) 2007-2010                          --
 --                      Pascal Obry - Olivier Ramonat                       --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -37,7 +37,7 @@ package body Savadur.Config.Environment_Variables is
    use Ada.Strings.Unbounded;
    use Savadur.Utils;
 
-   type Node_Value is (Environment_Variables, Project, Var);
+   type Node_Value is (Environment_Variables, Var);
 
    type Attribute is (Name, Value, Mode);
 
@@ -47,8 +47,6 @@ package body Savadur.Config.Environment_Variables is
 
    Schema : constant XML_Schema
      := XML_Schema'(Environment_Variables => XML_Attribute'(others => False),
-                    Project               => XML_Attribute'(Name   => True,
-                                                            others => False),
                     Var                   => XML_Attribute'(Name   => True,
                                                             Value  => True,
                                                             Mode   => True));
@@ -182,7 +180,7 @@ package body Savadur.Config.Environment_Variables is
                   New_Item  => Var);
             end New_Var;
 
-         when Environment_Variables | Project =>
+         when Environment_Variables =>
             null;
       end case;
    end Start_Element;
