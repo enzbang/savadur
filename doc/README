@@ -209,6 +209,33 @@ This project file describes:
        * The "try_patch" scenario using a temporary directory and
          applying the patch file uploaded by the developer.
 
+Remote Servers
+--------------
+
+On the client side (found in client/server/*.xml), the remote server
+configuration is:
+
+<server>
+   <name value="builder"/>
+   <location urt="http://localhost:8181"/>
+   <log_path value="/home/savadur/logs"/>
+   <log_prefix value="builder_"/>
+   <send_log value="true"/>
+</server>
+
+Where:
+
+   - log_path is the directory where all client's logs will be written.
+
+   - log_prefix is the string prepended to the log filename. The filename
+     will be <log_path>/<action_id>-<log_prefix><action_name>
+
+   - send_log if true the log content is sent to the server. If false the
+     log file is kept on the client side but not sent to the server. It is
+     true by default.
+
+Note that on the server side the logs are only kept into the database.
+
 Environment
 -----------
 
