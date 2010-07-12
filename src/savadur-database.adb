@@ -119,14 +119,30 @@ package body Savadur.Database is
       E_Mail, XMPP : in String)
    is
       DBH : constant TLS_DBH_Access := TLS_DBH_Access (DBH_TLS.Reference);
+
+      function Not_Empty (Name, Value : in String) return String;
+
+      ---------------
+      -- Not_Empty --
+      ---------------
+
+      function Not_Empty (Name, Value : in String) return String is
+      begin
+         if Value = "" then
+            return "";
+         else
+            return "and " & Name & "=" & DB.Tools.Q (Value);
+         end if;
+      end Not_Empty;
+
    begin
       Connect (DBH);
 
       DBH.Handle.Execute
         ("delete from notify where"
          & " project=" & DB.Tools.Q (Project_Name)
-         & " and email=" & DB.Tools.Q (E_Mail)
-         & " and xmpp=" & DB.Tools.Q (XMPP));
+         & Not_Empty ("email", E_Mail)
+         & Not_Empty ("xmpp", XMPP));
    end Del_Notification;
 
    ------------------
