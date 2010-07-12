@@ -396,7 +396,8 @@ package body Savadur.Web_Services.Client is
                      & " on " & (-Report.Key)
                      & ASCII.LF
                      & "Job id " & Natural'Image (Report.Job_Id)
-                     & ASCII.LF);
+                     & ASCII.LF,
+                     Output         => -Report.Output);
 
                   --  Update RSS file
 

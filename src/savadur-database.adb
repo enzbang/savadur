@@ -788,8 +788,33 @@ package body Savadur.Database is
       Send_Mail_Hook : in Send_Mail;
       Send_XMPP_Hook : in Send_XMPP;
       Subject        : in String;
-      Content        : in String)
+      Content        : in String;
+      Output         : in String)
    is
+
+      function Full_Content
+        (Content : in String;
+         Output  : in String;
+         Log     : in Boolean) return String;
+      --  Add Log to the given content
+
+      ------------------
+      -- Full_Content --
+      ------------------
+
+      function Full_Content
+        (Content : in String;
+         Output  : in String;
+         Log     : in Boolean) return String is
+      begin
+         if Log then
+            return Content & ASCII.LF & ASCII.LF & "--- " & ASCII.LF
+              & "Log content:" & ASCII.LF & ASCII.LF & Output & ASCII.LF;
+         else
+            return Content;
+         end if;
+      end Full_Content;
+
       DBH  : constant TLS_DBH_Access := TLS_DBH_Access (DBH_TLS.Reference);
       Iter : DB.SQLite.Iterator;
       Line : DB.String_Vectors.Vector;
@@ -797,28 +822,36 @@ package body Savadur.Database is
       Connect (DBH);
 
       DBH.Handle.Prepare_Select
-        (Iter, "select email, xmpp"
+        (Iter, "select email, log_email, xmpp, log_xmpp"
          & " from notify where project = " & DB.Tools.Q (Project_Name));
 
       if Iter.More then
          Iter.Get_Line (Line);
 
          Run_Hooks : declare
-            Email : constant String := DB.String_Vectors.Element (Line, 1);
-            XMPP  : constant String := DB.String_Vectors.Element (Line, 2);
+            Email     : constant String := DB.String_Vectors.Element (Line, 1);
+            Log_Email : constant Boolean :=
+                          Boolean'Value (DB.String_Vectors.Element (Line, 2));
+            XMPP      : constant String := DB.String_Vectors.Element (Line, 3);
+            Log_XMPP  : constant Boolean :=
+                          Boolean'Value (DB.String_Vectors.Element (Line, 4));
          begin
             if Email /= "" then
                Logs.Handler.Write (Name    => Module,
                                    Content => "Send mail to " & Email,
                                    Kind    => Logs.Handler.Very_Verbose);
-               Send_Mail_Hook (Email, Subject, Content);
+               Send_Mail_Hook
+                 (Email, Subject,
+                  Full_Content (Content, Output, Log_Email));
             end if;
 
             if XMPP /= "" then
                Logs.Handler.Write (Name    => Module,
                                    Content => "Send jabber message to " & XMPP,
                                    Kind    => Logs.Handler.Very_Verbose);
-               Send_XMPP_Hook (XMPP, Subject, Content);
+                  Send_XMPP_Hook
+                    (XMPP, Subject,
+                     Full_Content (Content, Output, Log_XMPP));
             end if;
 
             Line.Clear;
