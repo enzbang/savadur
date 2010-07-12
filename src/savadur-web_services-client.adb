@@ -368,7 +368,6 @@ package body Savadur.Web_Services.Client is
                   Set_Final_Status : declare
                      Report_Status : Boolean;
                   begin
-
                      --  If result is skipped do to change the last built
                      --  status in database.
                      --  We do not want to set the status if the VCS version
