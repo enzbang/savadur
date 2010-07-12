@@ -23,13 +23,16 @@
     <div id="content">
       <form action="/notif?p=@_PROJECT_NAME_@&a=del" method="POST">
         <table>
-          <tr><td></td><td>e-mail</td><td>jabber</td></tr>
+          <tr><td></td><td>e-mail</td><td>log?</td>
+	    <td>jabber</td><td>log?</td></tr>
           @@TABLE@@
           <tr>
             <td><input type="checkbox" name="delid"
                        value="@_E_MAIL_@/@_JABBER_@"/></td>
             <td>@_E_MAIL_@</td>
+	    <td>@_YES_NO:LOG_EMAIL_@</td>
             <td>@_JABBER_@</td>
+	    <td>@_YES_NO:LOG_JABBER_@</td>
           </tr>
           @@END_TABLE@@
         </table>
@@ -41,10 +44,12 @@
         <p>
         <label for="email">E-Mail</label>
         <input type="text" width="30" id="email" name="email"/>
+	log? <input type="checkbox" id="log_email" name="log_email" checked/>
         </p>
         <p>
         <label for="xmpp">XMPP</label>
         <input type="text" width="30" id="xmpp" name="xmpp"/>
+	log? <input type="checkbox" id="log_xmpp" name="log_xmpp"/>
         </p>
         <p><input type="submit" value="Add"/></p>
       </form>

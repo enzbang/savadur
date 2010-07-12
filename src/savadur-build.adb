@@ -803,6 +803,7 @@ package body Savadur.Build is
       Status    : Scenarios.Run_Status := Scenarios.Success;
       Diff_Data : aliased Web_Services.Client.Diff_Data;
       Run_Vars  : Variables.Sets.Set;
+      Last_Log  : Unbounded_String;
 
       ----------
       -- Init --
@@ -889,6 +890,9 @@ package body Savadur.Build is
                                    & Servers.Log_Path (Server),
                                  Kind    => Logs.Handler.Warnings);
                   end if;
+
+               else
+                  L_Filename := +Log_File;
                end if;
 
                Client_Service.Client.Status
@@ -1044,6 +1048,8 @@ package body Savadur.Build is
                Return_Code : Integer;
                Result      : Boolean;
             begin
+               Last_Log := +Log_File;
+
                if not Is_Init or else not Exec_Action.Skip_On_Init then
                   if Savadur.Config.Client_Server then
                      --  Notify the server that the action is starting
@@ -1130,9 +1136,10 @@ package body Savadur.Build is
       end For_All_Ref_Actions;
 
       if Savadur.Config.Client_Server then
-         --  Final server notification
+         --  Final server notification, pass the last log to this routine. This
+         --  is important to be able to send log via e-mail for example.
 
-         Send_Status (Server, Actions.End_Action.Id);
+         Send_Status (Server, Actions.End_Action.Id, -Last_Log);
       end if;
 
       --  Execute notifications hooks

@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
---                                Savadur                                   --
+--                                 Savadur                                  --
 --                                                                          --
---                        Copyright (C) 2007-2009                           --
+--                         Copyright (C) 2007-2010                          --
 --                      Pascal Obry - Olivier Ramonat                       --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -84,8 +84,9 @@ package Savadur.Database is
    --  Get notifications for given project
 
    procedure Add_Notification
-     (Project_Name : in String;
-      E_Mail, XMPP : in String);
+     (Project_Name      : in String;
+      E_Mail, Log_Email : in String;
+      XMPP, Log_XMPP    : in String);
    --  Adds a notification into the database
 
    procedure Del_Notification
@@ -108,7 +109,8 @@ package Savadur.Database is
       Send_Mail_Hook : in Send_Mail;
       Send_XMPP_Hook : in Send_XMPP;
       Subject        : in String;
-      Content        : in String);
+      Content        : in String;
+      Output         : in String);
    --  Sends notifications using given hooks procedures
 
 end Savadur.Database;

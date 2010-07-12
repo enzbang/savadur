@@ -249,7 +249,9 @@ package body Savadur.Web.Server is
          Database.Add_Notification
            (Project_Name,
             Parameters.Get (P, "email"),
-            Parameters.Get (P, "xmpp"));
+            Parameters.Get (P, "log_email"),
+            Parameters.Get (P, "xmpp"),
+            Parameters.Get (P, "log_xmpp"));
 
       elsif Action = "del" then
          declare

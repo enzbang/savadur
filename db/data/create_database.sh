@@ -88,6 +88,8 @@ create trigger set_action_duration after update on logs
 create table notify (
    "project" varchar(50) not null,
    "email" varchar(255) unique,
-   "xmpp" varchar(255) unique
+   "log_email" boolean default true,
+   "xmpp" varchar(255) unique,
+   "log_xmpp" boolean default false
 );
 EOF
