@@ -84,8 +84,9 @@ package Savadur.Database is
    --  Get notifications for given project
 
    procedure Add_Notification
-     (Project_Name : in String;
-      E_Mail, XMPP : in String);
+     (Project_Name      : in String;
+      E_Mail, Log_Email : in String;
+      XMPP, Log_XMPP    : in String);
    --  Adds a notification into the database
 
    procedure Del_Notification

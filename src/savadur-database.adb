@@ -64,9 +64,26 @@ package body Savadur.Database is
    ----------------------
 
    procedure Add_Notification
-     (Project_Name : in String;
-      E_Mail, XMPP : in String)
+     (Project_Name      : in String;
+      E_Mail, Log_Email : in String;
+      XMPP, Log_XMPP    : in String)
    is
+      function TF (Str : in String) return Boolean;
+      --  Returns true/false for the checkboxes
+
+      --------
+      -- TF --
+      --------
+
+      function TF (Str : in String) return Boolean is
+      begin
+         if Str = "" then
+            return False;
+         else
+            return True;
+         end if;
+      end TF;
+
       DBH : constant TLS_DBH_Access := TLS_DBH_Access (DBH_TLS.Reference);
    begin
       Connect (DBH);
@@ -75,7 +92,9 @@ package body Savadur.Database is
         ("insert into notify values ("
          & DB.Tools.Q (Project_Name)
          & ", " & DB.Tools.Q (E_Mail)
-         & ", " & DB.Tools.Q (XMPP) & ")");
+         & ", " & DB.Tools.Q (TF (Log_Email))
+         & ", " & DB.Tools.Q (XMPP)
+         & ", " & DB.Tools.Q (TF (Log_XMPP)) & ")");
    end Add_Notification;
 
    -------------
@@ -587,29 +606,35 @@ package body Savadur.Database is
       Iter : DB.SQLite.Iterator;
       Line : DB.String_Vectors.Vector;
 
-      Set    : Templates.Translate_Set;
-      E_Mail : Templates.Tag;
-      Jabber : Templates.Tag;
+      Set        : Templates.Translate_Set;
+      E_Mail     : Templates.Tag;
+      Log_Email  : Templates.Tag;
+      Jabber     : Templates.Tag;
+      Log_Jabber : Templates.Tag;
    begin
       Connect (DBH);
 
       DBH.Handle.Prepare_Select
         (Iter,
-         "select email, xmpp from notify where project="
+         "select email, log_email, xmpp, log_xmpp from notify where project="
          & DB.Tools.Q (Project_Name));
 
       while Iter.More loop
          Iter.Get_Line (Line);
 
-         E_Mail := E_Mail & DB.String_Vectors.Element (Line, 1);
-         Jabber := Jabber & DB.String_Vectors.Element (Line, 2);
+         E_Mail    := E_Mail & DB.String_Vectors.Element (Line, 1);
+         Log_Email := Log_Email & DB.String_Vectors.Element (Line, 2);
+         Jabber := Jabber & DB.String_Vectors.Element (Line, 3);
+         Log_Jabber := Log_Jabber & DB.String_Vectors.Element (Line, 4);
          Line.Clear;
       end loop;
 
       Iter.End_Select;
 
       Templates.Insert (Set, Templates.Assoc ("E_MAIL", E_Mail));
+      Templates.Insert (Set, Templates.Assoc ("LOG_EMAIL", Log_Email));
       Templates.Insert (Set, Templates.Assoc ("JABBER", Jabber));
+      Templates.Insert (Set, Templates.Assoc ("LOG_JABBER", Log_Jabber));
 
       return Set;
    end Get_Notifications;
