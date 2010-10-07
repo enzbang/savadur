@@ -89,7 +89,9 @@ package body Savadur.Database is
       Connect (DBH);
 
       DBH.Handle.Execute
-        ("insert into notify values ("
+        ("insert into notify "
+         & "(project, email, log_email, xmpp, log_xmpp) "
+         & " values ("
          & DB.Tools.Q (Project_Name)
          & ", " & DB.Tools.Q (E_Mail)
          & ", " & DB.Tools.Q (TF (Log_Email))
