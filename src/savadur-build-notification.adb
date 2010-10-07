@@ -67,9 +67,10 @@ package body Savadur.Build.Notification is
                   Ref         : constant Actions.Ref_Action :=
                                   Project.Notifications.On_Failure.Element
                                     (Integer (K));
-                  Exec_Action : constant Actions.Action := Get_Action
-                    (Project    => Project.all,
-                     Ref_Action => Ref);
+                  Exec_Action : constant Actions.Action :=
+                                  Get_Action
+                                    (Project    => Project.all,
+                                     Ref_Action => Ref);
                   Log_File    : constant String :=
                                   Log_Filename
                                     (Project   => Project,
