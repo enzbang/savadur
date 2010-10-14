@@ -827,7 +827,7 @@ package body Savadur.Database is
         (Iter, "select email, log_email, xmpp, log_xmpp"
          & " from notify where project = " & DB.Tools.Q (Project_Name));
 
-      if Iter.More then
+      while Iter.More loop
          Iter.Get_Line (Line);
 
          Run_Hooks : declare
@@ -858,7 +858,7 @@ package body Savadur.Database is
 
             Line.Clear;
          end Run_Hooks;
-      end if;
+      end loop;
 
       Iter.End_Select;
    end Send_Notifications;
